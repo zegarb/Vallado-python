@@ -1,0 +1,84 @@
+Examples:
+
+1_1: Y
+2_1: Y
+2_2: Y
+2_3: Y
+2_4: Y
+2_5: Y
+2_6: Y
+3_1: Y
+3_2: Y
+3_3: Y
+3_4: Y
+3_5: Y
+3_6: Y
+3_7: Y
+3_8: Y
+3_9: Y
+3_10:Y
+3_11:Y
+3_12:Y
+3_13:Y
+3_14:Y
+3_15:Y
+
+4_1: Horizon tests commented out - rv2razel does not have the right outputs
+
+5_1: Y
+5_2: Y
+5_3: Y
+
+5_4: line 96:
+    el1 = obu.moonel(jd + jdfrac,latgd,lon)
+          ^^^^^^^^^^
+AttributeError: module 'orbit_utils' has no attribute 'moonel'. Did you mean: 'moon'?
+
+5_5: Y
+5_6: Y
+5_7: Y
+6_1: Y
+6_2: Y
+6_3: Y
+6_4: Y
+6_5: Y
+6_7: Y
+6_8: Y
+6_9: Y
+6_10:Y
+
+6_12: line 47, in <module>
+    deltav,tof = lowthrust(rinit,rfinal,iinit,ifinal,5000.0,- 2.48e-07,4e-06,0.001)
+                 ^^^^^^^^^
+NameError: name 'lowthrust' is not defined
+
+6_13:line 56, in <module>
+    deltav,tof = lowthrust(rinit,rfinal,iinit,ifinal,5000.0,- 2e-07,1e-05,- 0.54)
+                 ^^^^^^^^^
+NameError: name 'lowthrust' is not defined
+6_14:Y
+6_15:Y
+7_1: Y
+7_2: inconsistent input data ranges
+
+
+7_5: Think it's fixed, had to copy check for -y to before xold calculation
+     (line 851) to prevent imaginary dtold.
+
+
+7_34: Good
+10_1: Good (Tried out formatted string literals from pep 498)
+
+10_2: Extra code at the bottom with no print statements, and matlab output provided
+      has extra print outputs not in code
+
+10_3: Matlab example output is full of errors. Think the code is right.
+
+10_4: findatwaatwb() returned atwa and atwb values slightly off from book
+10_5: Same as 10_4
+
+11_1: Y
+11_2: Y
+11_3: nodalperiod slightly different; final answers slightly different
+11_4: Y
+11_5: Y

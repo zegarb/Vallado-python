@@ -1,0 +1,2861 @@
+import math
+import numpy as np
+from pprint import pprint as pp
+from space_constants import *
+import orbit_utils as obu
+
+#some debug stuff
+import sethelp as sh
+
+
+# * ------------------------------------------------------------------------------
+# *
+# *                           FUNCTION BINOMIAL
+# *
+# *  this function finds the value of a BINOMIAL coefficient
+# *
+# *  Author        : David Vallado                  719-573-2600    1 Mar 2001
+# *
+# *  Inputs          Description                    Range / Units
+# *    i           -
+# *    j           -
+# *
+# *  Outputs       :
+# *    FUNCTION    - answer
+# *
+# *  Locals        :
+# *    None.
+# *
+# *  Coupling      :
+# *    FACTORIAL   - Finds the FACTORIAL of a number
+# *
+# * ------------------------------------------------------------------------------
+
+def binomial(i, j):
+    bino = math.factorial(j) / (math.factorial(i)*math.factorial(j-i))
+    return bino
+
+
+# ------------------------------------------------------------------------------
+#
+#                                  rot1mat
+#
+#  this function sets up a rotation matrix for an input angle about the first
+#    axis.
+#
+#  author        : david vallado                  719-573-2600   10 jan 2003
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outmat      - matrix result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#
+#  coupling      :
+#    none.
+#
+# [outmat] = rot1mat (xval)
+# ----------------------------------------------------------------------------- }
+
+
+def rot1mat (xval):
+
+    c = math.cos(xval)
+    s = math.sin(xval)
+
+    outmat = np.zeros((3, 3))
+    outmat[0, 0] = 1.0
+    outmat[0, 1] = 0.0
+    outmat[0, 2] = 0.0
+    outmat[1, 0] = 0.0
+    outmat[1, 1] = c
+    outmat[1, 2] = s
+    outmat[2, 0] = 0.0
+    outmat[2, 1] = -s
+    outmat[2, 2] = c
+    return outmat
+
+
+# ------------------------------------------------------------------------------
+#
+#                                  rot2mat
+#
+#  this function sets up a rotation matrix for an input angle about the second
+#    axis.
+#
+#  author        : david vallado                  719-573-2600   10 jan 2003
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outmat      - matrix result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#
+#  coupling      :
+#    none.
+#
+# [outmat] = rot2mat (xval)
+# ----------------------------------------------------------------------------- }
+
+
+def rot2mat(xval):
+
+    c = math.cos(xval)
+    s = math.sin(xval)
+
+    outmat = np.zeros((3, 3))
+    outmat[0, 0] = c
+    outmat[0, 1] = 0.0
+    outmat[0, 2] = -s
+    outmat[1, 0] = 0.0
+    outmat[1, 1] = 1.0
+    outmat[1, 2] = 0.0
+    outmat[2, 0] = s
+    outmat[2, 1] = 0.0
+    outmat[2, 2] = c
+    return outmat
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                                  rot3mat
+#
+#  this function sets up a rotation matrix for an input angle about the third
+#    axis.
+#
+#  author        : david vallado                  719-573-2600   10 jan 2003
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outmat      - matrix result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#
+#  coupling      :
+#    none.
+#
+# [outmat] = rot3mat (xval)
+# ----------------------------------------------------------------------------- }
+
+
+def rot3mat(xval):
+
+    c = math.cos(xval)
+    s = math.sin(xval)
+
+    outmat = np.zeros((3, 3))
+    outmat[0, 0] = c
+    outmat[0, 1] = s
+    outmat[0, 2] = 0.0
+    outmat[1, 0] = -s
+    outmat[1, 1] = c
+    outmat[1, 2] = 0.0
+    outmat[2, 0] = 0.0
+    outmat[2, 1] = 0.0
+    outmat[2, 2] = 1.0
+    return outmat
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function rngaz
+#
+#  this function calculates the range and azimuth between two specified
+#    ground points on a spherical earth.  notice the range will always be
+#    within the range of values listed since you for not know the direction of
+#    firing, long or short.  the function will calculate rotating earth ranges
+#    if the tof is passed in other than 0.0 . range is calulated in rad and
+#    converted to er by s = ro, but the radius of the earth = 1 er, so it's
+#    s = o.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                - dav 31 may 06 add elliptical model
+#
+#  inputs          description                    range / units
+#    llat        - start geocentric latitude      -pi/2 to  pi/2 rad
+#    llon        - start longitude (west -)       0.0  to 2pi rad
+#    tlat        - end geocentric latitude        -pi/2 to  pi/2 rad
+#    tlon        - end longitude (west -)         0.0  to 2pi rad
+#    tof         - time of flight if icbm, or 0.0 min
+#
+#  outputs       :
+#    range       - range between points           km
+#    az          - azimuth                        0.0  to 2pi rad
+#
+#  locals        :
+#    none.
+#
+#  coupling      :
+#    site, rot3, binomial, cross, atan2, dot, unit
+#
+#  references    :
+#    vallado       2001, 774-775, eq 11-3, eq 11-4, eq 11-5
+#
+# [range, az] = rngaz (llat, llon, tlat, tlon, tof)
+# rad = 180/pi
+# [range, az] = rngaz(60.0/rad, -80.0/rad , 41.0/rad, 74.0/rad, 0)
+# ------------------------------------------------------------------------------
+
+def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
+    small = 1e-08
+    omegaearth = 0.05883359221938136
+    # fix units on tof and omegaearth
+
+    # -------------------------  implementation   -------------------------
+    range_ = np.arccos(np.sin(llat) * np.sin(tlat)
+                       + np.cos(llat) * np.cos(tlat) *
+                         np.cos(tlon - llon + omegaearth * tof))
+    # ------ check if the range is 0 or half the earth  ---------
+    if (np.abs(np.sin(range_) * np.cos(llat)) < small):
+        if (np.abs(range_ - np.pi) < small):
+            az = np.pi
+        else:
+            az = 0.0
+    else:
+        az = np.arccos((np.sin(tlat) - np.cos(range_) * np.sin(llat))
+                       / (np.sin(range_) * np.cos(llat)))
+
+    # ------ check if the azimuth is grt than pi (180deg) -------
+    if (np.sin(tlon - llon + omegaearth * tof) < 0.0):
+        az = twopi - az
+
+    ###looks like this was test code -jmb
+
+
+    print('spehrical range %11.7f km az %11.7f \n'
+          % (range_ * 6378.1363, az * 180 / np.pi))
+    # test ellipsoidal approach
+    alt = 0.0
+    rlch, vlch = obu.site(llat, llon, alt)
+    rtgt, vtgt = obu.site(tlat, tlon, alt)
+    print('U rlch %11.7f %11.7f  %11.7f \n' % (rlch[0], rlch[1], rlch[2]))
+    print('  rtgt %11.7f %11.7f  %11.7f \n' % (rtgt[0], rtgt[1], rtgt[2]))
+    rlu = unit(rlch)
+
+    rtu = unit(rtgt)
+    print('u rlu %11.7f %11.7f  %11.7f \n' % (rlu[0], rlu[1], rlu[2]))
+    print('  rtu %11.7f %11.7f  %11.7f \n' % (rtu[0], rtu[1], rtu[2]))
+    rp = 6356.0
+
+    delta = re * re / (rp ** 2) - 1.0
+    eps = delta * (rlu[2] ** 2 + rtu[2] ** 2)
+    w = np.cross(rlu, rtu)
+    print('w UxV %11.7f %11.7f  %11.7f \n' % (w[0], w[1], w[2]))
+    if (w[2] < 0.0):
+        w = np.cross(rtu, rlu)
+        print('w UxV %11.7f %11.7f  %11.7f \n' % (w[0], w[1], w[2]))
+
+    v = np.cross(rlu, w)
+    print('v uxw %11.7f %11.7f  %11.7f \n' % (v[0], v[1], v[2]))
+    phi = np.pi - 0.5 * math.atan2(- 2 * v[2] * rlu[2], v[2] ** 2 - rlu[2] ** 2)
+
+    print('phi %11.7f %11.7f \n' % (phi, phi * rad2deg))
+    #        phi = 0.5*math.atan2(-2*.47024*.86603, .47024^2-.86603^2)
+#        fprintf(1, 'phi #11.7f #11.7f \n', phi, phi * rad2deg)
+
+    temp = np.array([np.dot(rlch, rlu), np.dot(rlch, rtu), 0.0])
+    uprime = rot3(temp, phi) / 6378.137
+
+    print('uprime %11.7f %11.7f  %11.7f \n' % (uprime[0], uprime[1], uprime[2]))
+    phi1 = 2 * np.pi + math.atan2(uprime[1] * np.sqrt(1 + eps), uprime[0])
+    print('phi1 %11.7f %11.7f \n' % (phi1, phi1 * rad2deg))
+    temp = np.array([np.dot(rtgt, rlu), np.dot(rtgt, rtu), 0.0])
+    vprime = rot3(temp, phi) / 6378.137
+
+    print('vprime %11.7f %11.7f  %11.7f \n' % (vprime[0], vprime[1], vprime[2]))
+    phi2 = 2 * np.pi + math.atan2(vprime[1] * np.sqrt(1 + eps), vprime[0])
+    print('phi1 %11.7f %11.7f \n' % (phi2, phi2 * rad2deg))
+    e = 0.08181922
+    # do each half of integral evaluation
+    phi = phi2
+    m = 1
+    r = 0
+    s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
+          / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
+             * (math.factorial(m)) ** 2)
+          * (np.cos(phi) ** (2 * r + 1)))
+    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * s1
+    r = 0
+    m = 2
+    s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
+          / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
+             * (math.factorial(m)) ** 2)
+          * (np.cos(phi) ** (2 * r + 1)))
+    r = 1
+    s2 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
+          / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
+             * (math.factorial(m)) ** 2)
+          * (np.cos(phi) ** (2 * r + 1)))
+    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * (s1 + s2)
+    funct2 = (1.0 - e ** 2 / 2 * f1 - binomial(2 * m - 3, m - 2) * (e ** 2 * f2)
+              / (m * 2 ** (2 * m - 2)))
+    phi = phi1
+    m = 1
+    r = 0
+    s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
+          / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
+             * (math.factorial(m)) ** 2)
+          * (np.cos(phi) ** (2 * r + 1)))
+    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * s1
+    r = 0
+    m = 2
+    s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
+          / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
+             * (math.factorial(m)) ** 2)
+          * (np.cos(phi) ** (2 * r + 1)))
+    r = 1
+    s2 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
+          / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
+             * (math.factorial(m)) ** 2)
+          * (np.cos(phi) ** (2 * r + 1)))
+    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * (s1 + s2)
+    funct1 = (1.0 - e ** 2 / 2 * f1
+              - binomial(2 * m - 3, m - 2) * (e ** 2 * f2)
+              / (m * 2 ** (2 * m - 2)))
+    range_ = (funct2 - funct1) * re
+
+
+    return range_, az
+
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function recovqt
+#
+#  this function recovers the time and function values in quartic blending routines.
+#
+#  author        : david vallado                  719-573-2600    11 dec 2002
+#
+#  revisions
+#                - misc fixes                                      2 feb 2004
+#
+#  inputs          description                    range / units
+#    p1, p2, p3, p4, p5, p6
+#                - function values used for blending
+#    root        - root used as variable
+#
+#  outputs       :
+#    funvalue    - function value
+#
+#  locals        :
+#    none
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    vallado       2001, 900
+#
+# [funvalue] = recovqt (p1, p2, p3, p4, p5, p6, root)
+# ------------------------------------------------------------------------------
+
+
+def recovqt(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None, root=None):
+    # ------ set up function from C-45 --------
+#  aqit5*x**5 + aqit4*x**4 + etc
+    temp = 1.0 / 24.0
+    aqit0 = p3
+    aqit1 = (2 * p1 - 16 * p2 + 16 * p4 - 2 * p5) * temp
+    aqit2 = (- 1 * p1 + 16 * p2 - 30 * p3 + 16 * p4 - p5) * temp
+    aqit3 = (- 9 * p1 + 39 * p2 - 70 * p3 + 66 * p4 - 33 * p5 + 7 * p6) * temp
+    aqit4 = (13 * p1 - 64 * p2 + 126 * p3 - 124 * p4 + 61 * p5 - 12 * p6) * temp
+    aqit5 = (- 5 * p1 + 25 * p2 - 50 * p3 + 50 * p4 - 25 * p5 + 5 * p6) * temp
+    # ----- recover the variable value
+    funvalue = (aqit5 * root ** 5 + aqit4 * root ** 4
+                + aqit3 * root ** 3 + aqit2 * root ** 2 + aqit1 * root + aqit0)
+    return funvalue
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function recovqd
+#
+#  this function recovers the time and function values in parabolic blending routines.
+#
+#  author        : david vallado                  719-573-2600     3 jan 2003
+#
+#  revisions
+#                - misc fixes                                      2 feb 2004
+#
+#  inputs          description                    range / units
+#    p1, p2, p3    - function values used for blending
+#    root        - root used as variable
+#
+#  outputs       :
+#    funvalue    - function value
+#
+#  locals        :
+#    none
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    vallado       2013, 1032
+#
+# [funvalue] = recovqd (p1, p2, p3, root)
+# ------------------------------------------------------------------------------
+
+
+def recovqd(p1=None, p2=None, p3=None, root=None):
+    # ------ set up function from C-39 --------
+    aqd0 = p1
+    aqd1 = (- 3.0 * p1 + 4.0 * p2 - p3) * 0.5
+    aqd2 = (p1 - 2.0 * p2 + p3) * 0.5
+    # ----- recover the variable value
+    funvalue = aqd2 * root ** 2 + aqd1 * root + aqd0
+    return funvalue
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function recovpar
+#
+#  this function recovers the time and function values in parabolic blending routines.
+#
+#  author        : david vallado                  719-573-2600    11 dec 2002
+#
+#  revisions
+#                - fix for single parabbln                        19 sep 2003
+#                - misc fixes                                      2 feb 2004
+#
+#  inputs          description                    range / units
+#    p1, p2, p3, p4 - function values used for blending
+#    root        - root used as variable
+#
+#  outputs       :
+#    funvalue    - function value
+#
+#  locals        :
+#    none
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    vallado       2001, 897
+#
+# [funvalue] = recovpar (p1, p2, p3, p4, root)
+# ------------------------------------------------------------------------------
+
+
+def recovpar(p1=None, p2=None, p3=None, p4=None, root=None):
+    # ------ set up function from C-39 -------
+#  acut3*x**3 + acut2*x**2 + etc
+    acut0 = p2
+    acut1 = (- p1 + p3) * 0.5
+    acut2 = p1 - 2.5 * p2 + 2.0 * p3 - 0.5 * p4
+    acut3 = - 0.5 * p1 + 1.5 * p2 - 1.5 * p3 + 0.5 * p4
+    # ----- recover the variable value
+    funvalue = acut3 * root ** 3 + acut2 * root ** 2 + acut1 * root + acut0
+    return funvalue
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function parabbln
+#
+#  this function performs parabolic blending of an input zero crossing
+#  function in order to find event times.
+#
+#  author        : david vallado                  719-573-2600    18 dec 2002
+#
+#  revisions
+#                - fix eqt ref                                     3 jan 2003
+#                - misc fixes                                      2 feb 2004
+#
+#  inputs          description                    range / units
+#    p1, p2, p3    - function values used for blending
+#
+#  outputs       :
+#    minfound    - test of success
+#    rootf       - root for the function
+#    funrate     - function rate
+#
+#  locals        :
+#
+#  coupling      :
+#    quadric     - find roots of a quadric
+#
+#  references    :
+#    vallado       2007, 979
+#
+# [minfound, rootf, funrate] = parabbln(p1, p2, p3)
+# ------------------------------------------------------------------------------
+
+def parabbln(p1=None, p2=None, p3=None):
+    rootf = 0.0
+    funrate = 0.0
+    minfound = 'n'
+    # ------ set up function from C-37 --------
+    aqd0 = p1
+    aqd1 = (- 3.0 * p1 + 4.0 * p2 - p3) * 0.5
+    aqd2 = (p1 - 2.0 * p2 + p3) * 0.5
+    # --------------- solve roots of this function -------------
+    opt = 'U'
+    r1r, r1i, r2r, r2i = quadric(aqd2, aqd1, aqd0, opt)
+    # ---------- search through roots to locate answers --------
+    for indx2 in range(3):
+        if (indx2 == 0):
+            root = r1r
+        if (indx2 == 1):
+            root = r2r
+        if ((root >= 0.0) and (root <= 2.0)):
+            #               [time] = recovqd(t1, t2, t3, root) # should be 0.0!!!!!!
+            ans = recovqd(p1, p2, p3, root)
+            # ----- recover the function value derivative
+            funrate = 2.0 * aqd2 * root + aqd1
+
+    return minfound, rootf, funrate
+
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function quartbln
+#
+#  this function performs quartic blending of an input zero crossing
+#  function in order to find event times.
+#
+#  author        : david vallado                  719-573-2600   18 dec 2002
+#
+#  revisions
+#                - misc fixes                                      2 feb 2004
+#
+#  inputs          description                    range / units
+#    p1, p2, p3, p4, p5, p6
+#                - function values used for blending
+#
+#  outputs       :
+#    minfound    - test of success
+#    rootf       - root for the function
+#    funrate     - function rate
+#
+#  locals        :
+#
+#  coupling      :
+#    quintic     - find roots of a quintic
+#
+#  references    :
+#    vallado       2001, 899-901
+#
+# [minfound, rootf, funrate] = quartbln (p1, p2, p3, p4, p5, p6)
+# ------------------------------------------------------------------------------
+
+def quartbln(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None):
+    rootf = 0.0
+    funrate = 0.0
+    minfound = 'n'
+    # ------ set up function from C-45 --------
+#  aqit5*x**5 + aqit4*x**4 + etc
+    temp = 1.0 / 24.0
+    aqi0 = p3
+    aqi1 = (2 * p1 - 16 * p2 + 16 * p4 - 2 * p5) * temp
+    aqi2 = (- 1 * p1 + 16 * p2 - 30 * p3 + 16 * p4 - p5) * temp
+    aqi3 = (- 9 * p1 + 39 * p2 - 70 * p3 + 66 * p4 - 33 * p5 + 7 * p6) * temp
+    aqi4 = (13 * p1 - 64 * p2 + 126 * p3 - 124 * p4 + 61 * p5 - 12 * p6) * temp
+    aqi5 = (- 5 * p1 + 25 * p2 - 50 * p3 + 50 * p4 - 25 * p5 + 5 * p6) * temp
+    # --------------- solve roots of this function -------------
+    opt = 'U'
+    #       [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = ...
+#                   quintic(aqi5, aqi4, aqi3, aqi2, aqi1, aqi0, opt)
+    rt = np.roots(np.array([aqi5, aqi4, aqi3, aqi2, aqi1, aqi0]))
+    # ---------- search through roots to locate answers --------
+    for indx2 in range(5):
+        root = 99999.9
+        if (indx2 == 0):
+            root = rt[indx2]
+        if (indx2 == 1):
+            root = rt[indx2]
+        if (indx2 == 2):
+            root = rt[indx2]
+        if (indx2 == 3):
+            root = rt[indx2]
+        if (indx2 == 4):
+            root = rt[indx2]
+        if ((root >= 0.0) and (root <= 1.0)):
+            minfound = 'y'
+            rootf = root
+            #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
+            ans = recovqt(p1, p2, p3, p4, p5, p6, root)
+            print("recovqt:". ans)
+            # ----- recover the function value derivative
+            funrate = (5.0 * aqi5 * root ** 4
+                       + 4.0 * aqi4 * root ** 3
+                       + 3.0 * aqi3 * root ** 2
+                       + 2.0 * aqi2 * root + aqi1)
+
+    return minfound, rootf, funrate
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function quartic
+#
+#  this function solves for the four roots of a quartic equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax4 + bx3 + cx2 + dx + e.
+#
+#  author        : david vallado                  719-573-2600    1 mar 2001
+#
+#  revisions
+#    vallado     - convert to matlab              719-573-2600   18 dec 2002
+#
+#  inputs          description                    range / units
+#    a           - coeficient of x fourth term
+#    b           - coefficient of x cubed term
+#    c           - coefficient of x squared term
+#    d           - coefficient of x term
+#    e           - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#    r3r         - real portion of root 3
+#    r3i         - imaginary portion of root 3
+#    r4r         - real portion of root 4
+#    r4i         - imaginary portion of root 4
+#
+#  locals        :
+#    temp1       - temporary value
+#    temp2       - temporary value
+#    s           - alternate variable
+#    h           - temporary value
+#    hsqr        - h squared
+#    hcube       - h cubed
+#    p           - term in auxillary equation
+#    q           - term in auxillary equation
+#    r           - term in auxillary equation
+#    delta       - discriminator for use with cardans formula
+#    e0          - angle holder for trigonometric solution
+#    phi         - angle used in trigonometric solution
+#    cosphi      - cosine of phi
+#    sinphi      - sine of phi
+#    rprime      - values of roots before final work
+#    temp        - temporary variable in finding max rprime
+#    eta         - constant coefficient in quadric solutions
+#    beta        - constant coefficient in quadric solutions
+#
+#  coupling      :
+#    quadric     find roots of a quadric polynomial
+#
+#  references    :
+#    vallado       2007, 976
+#
+# [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i] = quartic(a, b, c, d, e, opt)
+# ------------------------------------------------------------------------------
+
+def quartic(a=None, b=None, c=None, d=None, e=None, opt=None):
+    # --------------------  implementation   ----------------------
+    onethird = 1.0 / 3.0
+    small = 1e-08
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
+    r3r = 0.0
+    r3i = 0.0
+    r4r = 0.0
+    r4i = 0.0
+    root1 = 0.0
+    root2 = 0.0
+    root3 = 0.0
+    if (np.abs(a) > small):
+        # ----------- force coefficients into std form ----------------
+        b = b / a
+        c = c / a
+        d = d / a
+        e = e / a
+        h = - b / 4
+        hsqr = h ** 2
+        hcube = hsqr * h
+        p = 6.0 * hsqr + 3.0 * b * h + c
+        q = 4.0 * hcube + 3.0 * b * hsqr + 2.0 * c * h + d
+        r = h * hcube + b * hcube + c * hsqr + d * h + e
+        a = onethird * (- p * p - 12.0 * r)
+        b = (1.0 / 27.0) * (- 2.0 * p * p * p + 72.0 * p * r - 27.0 * q * q)
+        s = - 2.0 * onethird * p
+        delta = (a * a * a / 27.0) + (b * b * 0.25)
+        if (np.abs(q) > small):
+            # ------------------ use cardans formula ------------------
+            if (delta > small):
+                temp1 = (- b * 0.5) + np.sqrt(delta)
+                temp2 = (- b * 0.5) - np.sqrt(delta)
+                temp1 = np.sign(temp1) * np.abs(temp1) ** onethird
+                temp2 = np.sign(temp2) * np.abs(temp2) ** onethird
+                root1 = temp1 + temp2
+                root2 = - 0.5 * (temp1 + temp2)
+                r2i = - 0.5 * np.sqrt(3.0) * (temp1 - temp2)
+                root3 = - 0.5 * (temp1 + temp2)
+                r3i = - r2i
+            else:
+                # --------------- evaluate zero point -----------------
+                if (np.abs(delta) < small):
+                    root1 = - 2.0 * np.sign(b) * np.abs(b * 0.5) ** onethird
+                    root2 = np.sign(b) * np.abs(b * 0.5) ** onethird
+                    root3 = root2
+                else:
+                    # ------------ use trigonometric identities -------
+                    e0 = 2.0 * np.sqrt(- a * onethird)
+                    cosphi = (- b / (2.0 * np.sqrt(- a * a * a / 27.0)))
+                    sinphi = np.sqrt(1.0 - cosphi * cosphi)
+                    phi = math.atan2(sinphi, cosphi)
+                    if (phi < 0.0):
+                        phi = phi + 2 * np.pi
+                    root1 = e0 * np.cos(phi * onethird)
+                    root2 = e0 * np.cos(phi * onethird + 120.0 * deg2rad)
+                    root3 = e0 * np.cos(phi * onethird + 240.0 * deg2rad)
+            # --------------- find largest value of root -------------
+            rprime = root1 + s
+            if ((rprime < root2 + s) and (np.abs(r2i) < 0.0001)):
+                rprime = root2 + s
+            if ((rprime < root3 + s) and (np.abs(r3i) < 0.0001)):
+                rprime = root3 + s
+            # -- evaluate coefficients of two resulting quadratics ---
+            if (rprime > small):
+                eta = 0.5 * (p + rprime - q / np.sqrt(rprime))
+                beta = 0.5 * (p + rprime + q / np.sqrt(rprime))
+            else:
+                eta = 0.5 * p
+                beta = 0.5 * p
+                if (rprime < 0.0):
+                    rprime = - rprime
+            r1r, r1i, r2r, r2i = quadric(1.0, np.sqrt(rprime), eta, opt)
+            r3r, r3i, r4r, r4i = quadric(1.0, - np.sqrt(rprime), beta, opt)
+        else:
+            # ------ case where solution reduces to a quadratic ------
+            r1r, r1i, r3r, r3i = quadric(1.0, p, r, opt)
+            r = np.sqrt(r1r * r1r + r1i * r1i)
+            phi = math.atan2(r1i, r1r)
+            if (phi < 0.0):
+                phi = phi + 2 * np.pi
+            r1r = np.sqrt(r) * np.cos(phi * 0.5)
+            r1i = np.sqrt(r) * np.sin(phi * 0.5)
+            if (r1i > 0.0):
+                r2r = r1r
+            else:
+                r2r = - r1r
+            r2i = - r1i
+            r = np.sqrt(r3r * r3r + r3i * r3i)
+            phi = math.atan2(r3i, r3r)
+            if (phi < 0.0):
+                phi = phi + 2 * np.pi
+            r3r = np.sqrt(r) * np.cos(phi * 0.5)
+            r3i = np.sqrt(r) * np.sin(phi * 0.5)
+            if (r3i > 0.0):
+                r4r = r3r
+            else:
+                r4r = - r3r
+            r4i = - r3i
+        r1r = r1r + h
+        r2r = r2r + h
+        r3r = r3r + h
+        r4r = r4r + h
+        if (opt == 'R'):
+            #            test
+            pass
+    else:
+        r1r, r1i, r2r, r2i, r3r, r3i = cubic(b, c, d, e, opt)
+        r4r = 99999.9
+        r4i = 99999.9
+
+    return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function quintic
+#
+#  this function solves for the five roots of a quintic equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax5 + bx4 + cx3 + dx2 +
+#    ex + f.
+#
+#     this routine uses a newton-raphson search to find
+#     the real roots (x) between 0 and 1 of the polynomial
+#        a*x**5+b*x**4+...
+#     the resulting 4th order equation is solved by calling root4,
+#     if needed. (repeated roots are ignored)
+#     taken from "numerical analysis" by maron, copyright 1982, pg 80
+#
+#  author        : david vallado                  719-573-2600   16 dec 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    a           - coefficient of x quintic term
+#    b           - coefficient of x quartic term
+#    c           - coefficient of x cubic term
+#    d           - coefficient of x squared term
+#    e           - coefficient of x term
+#    f           - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#    r3r         - real portion of root 3
+#    r3i         - imaginary portion of root 3
+#    r4r         - real portion of root 4
+#    r4i         - imaginary portion of root 4
+#    r5r         - real portion of root 5
+#    r5i         - imaginary portion of root 5
+#
+#  locals        :
+#    temp1       - temporary value
+#    temp2       - temporary value
+#    p           - coefficient of x squared term where x cubed term is 1.0
+#    q           - coefficient of x term where x cubed term is 1.0
+#    r           - coefficient of constant term where x cubed term is 1.0
+#    delta       - discriminator for use with cardans formula
+#    e0          - angle holder for trigonometric solution
+#    phi         - angle used in trigonometric solution
+#    cosphi      - cosine of phi
+#    sinphi      - sine of phi
+#     f        polynomial coefficients
+#     aa(5)       intermediate polynomial coefficients
+#     dz          change in intermediate variable
+#     f           value of polynomial function at root z
+#     flag        flag for printing error message
+#     fp          slope of polynomial function at root z
+#     i           counter
+#     maxdz       max step size for finding z
+#     n           polynomial order
+#     numrts      integer number of real roots
+#     olddz       previous value of dz
+#     small         tolerance
+#     p5        real roots
+#     xx(5)       intermediate real roots
+#     z           intermediate root
+#
+#  coupling      :
+#    none.
+#
+#  references    :
+#    vallado       2001,
+#
+# [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = quintic (a, b, c, d, e, f, opt)
+# ------------------------------------------------------------------------------
+
+def quintic(a=None, b=None, c=None, d=None, e=None, f=None, opt=None):
+    # --------------------  implementation   ----------------------
+    opt = 'U'
+    onethird = 1.0 / 3.0
+    small = 1e-08
+    temp = 1.0 / 24.0
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
+    r3r = 0.0
+    r3i = 0.0
+    r4r = 0.0
+    r4i = 0.0
+    r5r = 0.0
+    r5i = 0.0
+    # -----   test to see if there cannot be a crossing on the interval 0 to 1
+    aa = np.zeros(6)
+    aa[4] = e
+    aa[3] = aa[4] + d
+    aa[2] = aa[3] + c
+    aa[1] = aa[2] + b
+    aa[0] = aa[1] + a
+    if (((f > 0.0) and (np.amin(aa) > - f))):
+        return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+    if (((f < 0.0) and (np.amax(aa) < - f))):
+        return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+    # ---------- check to see if it really is fifth order ----------
+    if (np.abs(a) < small):
+        r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i = quartic(a, b, c, d, e, opt)
+        return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+    if (np.abs(f) < small):
+        r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i = quartic(b, c, d, e, f, opt)
+        return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+    # ----- find a good first guess for a real root between 0 and 1
+# ----- by assigning 5 evenly spaced points on the interval
+    p1 = f
+    z = 0.25
+    p2 = ((((a * z + b) * z + c) * z + d) * z + e) * z + f
+    z = 0.5
+    p3 = ((((a * z + b) * z + c) * z + d) * z + e) * z + f
+    z = 0.75
+    p4 = ((((a * z + b) * z + c) * z + d) * z + e) * z + f
+    p5 = a + b + c + d + e + f
+    # -----   find polynomial coefficients (assumes the interval 0 to 4)
+    aa = p1
+    ab = (- 50 * p1 + 96 * p2 - 72 * p3 + 32 * p4 - 6 * p5) * temp
+    ac = (35 * p1 - 104 * p2 + 114 * p3 - 56 * p4 + 11 * p5) * temp
+    ad = (- 10 * p1 + 36 * p2 - 48 * p3 + 28 * p4 - 6 * p5) * temp
+    ae = (p1 - 4 * p2 + 6 * p3 - 4 * p4 + p5) * temp
+    # -----   find the roots of the fourth order polynomial and bound them
+    r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i = quartic(aa, ab, ac, ad, ae, opt)
+    #       call bound4(xx, numrts, 0.0, 4.0)
+
+    numrts = 0
+    if ((np.abs(r1r) > small) and (np.abs(r1i) < small)):
+        numrts = numrts + 1
+
+    if ((np.abs(r2r) > small) and (np.abs(r2i) < small)):
+        numrts = numrts + 1
+
+    if ((np.abs(r3r) > small) and (np.abs(r3i) < small)):
+        numrts = numrts + 1
+
+    if ((np.abs(r4r) > small) and (np.abs(r4i) < small)):
+        numrts = numrts + 1
+
+    # -----   if no real roots found   return to main routine
+    if (numrts < 1):
+        return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+    # -----   initialize parameters using xx[0]/4 as a first guess for a real root
+# -----   (this rescales the root to the  interval 0 to 1)
+    maxdz = 0.1
+    olddz = maxdz
+    z = r1r * 0.25
+    for i in range(25):
+        25
+        f = ((((a * z + b) * z + c) * z + d) * z + e) * z + f
+        if (np.abs(f) < small):
+            # ----- find roots of resulting 4th order equation and return
+            a = a
+            b = b + z * aa[0]
+            c = c + z * aa[1]
+            d = d + z * aa[2]
+            e = e + z * aa[3]
+            r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i = quartic(a, b, c, d, e, opt)
+            return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+        # ----- find new dz and z
+        fp = (((5 * a * z + 4 * b) * z + 3 * c) * z + 2 * d) * z + e
+        if (np.abs(fp) > small):
+            dz = - f / fp
+        if (np.abs(dz) > maxdz):
+            dz = np.sign(maxdz) * dz
+            if (olddz * dz < 0.0):
+                maxdz = 0.8 * maxdz
+        olddz = dz
+        z = z + dz
+        # ----- test for z out of limits, if so there are no roots
+        if (((z > 1.0) or (z < 0.0))):
+            numrts = 0
+            return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+
+    # ---- once here, newton root search did not find an answer ----
+    print(' warning: no convergence in quintic ' % ())
+    return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
+
+
+# ----------------------------------------------------------------------------
+#
+#                           function printdiff
+#
+#  this function prints a covariance matrix difference
+#
+#  author        : david vallado                  719-573-2600   23 may 2003
+#
+#  revisions
+#
+#  inputs          description                    range / units
+#    strin       - title
+#    mat1        - 6x6 input matrix
+#    mat2        - 6x6 input matrix
+#
+#  outputs       :
+#
+#  locals        :
+#
+#  references    :
+#    none
+#
+#  printdiff(strin, cov1, cov2)
+# ----------------------------------------------------------------------------
+
+def printdiff(strin=None, mat1=None, mat2=None):
+    small = 1e-18
+    print('diff %s \n' % (strin))
+    print((np.transpose(mat1) - np.transpose(mat2)))
+    print('pctdiff %s pct over 1e-18  \n' % (strin))
+    #    fprintf(1, '#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f \n', 100.0*((mat1' - mat2')/mat1'))
+#    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
+#    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
+    tm1 = np.transpose(mat1)
+    tm2 = np.transpose(mat2)
+    diffmm = np.zeros((6, 6))
+    for i in range(6):
+        for j in range(6):
+            if (np.abs(tm1[i, j] - tm2[i, j]) < small) or (np.abs(tm1[i, j]) < small):
+                diffmm[i, j] = 0.0
+            else:
+                diffmm[i, j] = 100.0 * ((tm1[i, j] - tm2[i, j]) / tm1[i, j])
+
+    print('diffmm:\n', (diffmm))
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function matvecmult
+#
+#  this function multiplies a matrix by a vector.
+#
+#  author        : david vallado                  719-573-2600    4 jun 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    mat         - matrix (square)
+#    vec         - vector
+#    size        - dimension of matrix
+#
+#  outputs       :
+#    outvec      - unit vector
+#
+#  locals        :
+#    i, j         - index
+#
+#  coupling      :
+#    none
+#
+# [outvec] = matvecmult (mat, vec, sizeof)
+# ------------------------------------------------------------------------------
+
+def matvecmult(mat=None, vec=None, sizeof=None):
+    # -------------------------  implementation   -----------------
+    outvec = np.zeros((sizeof, sizeof))
+    for i in range(sizeof):
+        outvec[i] = 0.0
+        for j in range(sizeof):
+            outvec[i] = outvec[i] + mat[i, j] * vec[j]
+
+    return outvec
+
+
+# ------- two recursion algorithms needed by the lambertbattin routine
+
+def seebatt(v=None):
+    # -------------------------  implementation   -------------------------
+    c = np.zeros(21)
+    c[0] = 0.2
+    c[1] = 9.0 / 35.0
+    c[2] = 16.0 / 63.0
+    c[3] = 25.0 / 99.0
+    c[4] = 36.0 / 143.0
+    c[5] = 49.0 / 195.0
+    c[6] = 64.0 / 255.0
+    c[7] = 81.0 / 323.0
+    c[8] = 100.0 / 399.0
+    c[9] = 121.0 / 483.0
+    c[10] = 144.0 / 575.0
+    c[11] = 169.0 / 675.0
+    c[12] = 196.0 / 783.0
+    c[13] = 225.0 / 899.0
+    c[14] = 256.0 / 1023.0
+    c[15] = 289.0 / 1155.0
+    c[16] = 324.0 / 1295.0
+    c[17] = 361.0 / 1443.0
+    c[18] = 400.0 / 1599.0
+    c[19] = 441.0 / 1763.0
+    c[20] = 484.0 / 1935.0
+    sqrtopv = np.sqrt(1.0 + v)
+    eta = v / (1.0 + sqrtopv) ** 2
+    # ------------------- process forwards ----------------------
+    delold = 1.0
+    termold = c[0]
+
+    sum1 = termold
+    i = 1
+    while ((i <= 20) and (np.abs(termold) > 1e-08)):
+
+        del_ = 1.0 / (1.0 + c(i) * eta * delold)
+        term = termold * (del_ - 1.0)
+        sum1 = sum1 + term
+        i = i + 1
+        delold = del_
+        termold = term
+
+
+    seebatt = 1.0 / ((1.0 / (8.0 * (1.0 + sqrtopv)))
+                     * (3.0 + sum1 / (1.0 + eta * sum1)))
+    c[0] = 9.0 / 7.0
+    c[1] = 16.0 / 63.0
+    c[2] = 25.0 / 99.0
+    c[3] = 36.0 / 143.0
+    c[4] = 49.0 / 195.0
+    c[5] = 64.0 / 255.0
+    c[6] = 81.0 / 323.0
+    c[7] = 100.0 / 399.0
+    c[8] = 121.0 / 483.0
+    c[9] = 144.0 / 575.0
+    c[10] = 169.0 / 675.0
+    c[11] = 196.0 / 783.0
+    c[12] = 225.0 / 899.0
+    c[13] = 256.0 / 1023.0
+    c[14] = 289.0 / 1155.0
+    c[15] = 324.0 / 1295.0
+    c[16] = 361.0 / 1443.0
+    c[17] = 400.0 / 1599.0
+    c[18] = 441.0 / 1763.0
+    c[19] = 484.0 / 1935.0
+    ktr = 20
+    sum2 = 0.0
+    term2 = 1.0 + c[ktr-1] * eta
+    for i in range(ktr - 3):
+        sum2 = c(ktr - i) * eta / term2
+        term2 = 1.0 + sum2
+
+    seebatt = 8.0 * (1.0 + sqrtopv) / (3.0 +
+                                       (1.0 / (5.0 + eta
+                                               + ((9.0 / 7.0) * eta / term2))))
+    return seebatt
+
+
+
+# ------- two recursion algorithms needed by the lambertbattin routine
+
+def kbat(v=None):
+    d = np.zeros(21)
+    # -------------------------  implementation   -------------------------
+    d[0] = 1.0 / 3.0
+    d[1] = 4.0 / 27.0
+    d[2] = 8.0 / 27.0
+    d[3] = 2.0 / 9.0
+    d[4] = 22.0 / 81.0
+    d[5] = 208.0 / 891.0
+    d[6] = 340.0 / 1287.0
+    d[7] = 418.0 / 1755.0
+    d[8] = 598.0 / 2295.0
+    d[9] = 700.0 / 2907.0
+    d[10] = 928.0 / 3591.0
+    d[11] = 1054.0 / 4347.0
+    d[12] = 1330.0 / 5175.0
+    d[13] = 1480.0 / 6075.0
+    d[14] = 1804.0 / 7047.0
+    d[15] = 1978.0 / 8091.0
+    d[16] = 2350.0 / 9207.0
+    d[17] = 2548.0 / 10395.0
+    d[18] = 2968.0 / 11655.0
+    d[19] = 3190.0 / 12987.0
+    d[20] = 3658.0 / 14391.0
+    # ----------------- process forwards ------------------------
+    sum1 = d[0]
+    delold = 1.0
+    termold = d[0]
+    i = 2
+    ktr = 21
+    while ((i < ktr) and (np.abs(termold) > 1e-08)):
+
+        del_ = 1.0 / (1.0 + d[i] * v * delold)
+        term = termold * (del_ - 1.0)
+        sum1 = sum1 + term
+        i = i + 1
+        delold = del_
+        termold = term
+
+
+    sum2 = 0.0
+    term2 = 1.0 + d[ktr-1] * v
+    for i in range(ktr - 3):
+        sum2 = d[ktr - i - 1] * v / term2
+        term2 = 1.0 + sum2
+
+    kbatt = d[0] / term2
+    #            test = d[0] / ...
+#                   (1 + (d[1]*v / ...
+#                         (1 + (d(3)*v / ...
+#                               (1 + (d(4)*v / ...
+#                                     (1 + (d(5)*v / ...
+#                                           (1 + (d(6)*v / ...
+#                                                 (1 + (d(7)*v / ...
+#                                                       (1 + (d(8)*v / ...
+#                                                             (1 + (d(9)*v / ...
+#                                                                  (1 + (d(10)*v / ...
+#                                                                        (1 + (d(11)*v)))))))) ...
+#                                                                       ))))))))))))
+#kbatt = test
+    return kbatt
+
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function cubicspl1
+#
+#  this function performs cubic splining of an input zero crossing
+#  function in order to find event times.
+#
+#  author        : david vallado                  719-573-2600    18 dec 2002
+#
+#  revisions
+#                - fix for single cubicspl                         8 dec 2003
+#                - misc fixes                                      2 feb 2004
+#
+#  inputs          description                    range / units
+#    p1, p2, p3, p4 - function values used for blending
+#
+#  outputs       :
+#    minfound    - test of success
+#    rootf       - root for the function
+#    funrate     - function rate
+#
+#  locals        : none
+#
+#  coupling      :
+#    cubic       - find roots of a cubic
+#
+#  references    :
+#    vallado       2007, 981
+#
+# [minfound, rootf, funrate] = cubicspl1(p1, p2, p3, p4)
+# ------------------------------------------------------------------------------
+
+def cubicspl1(p1=None, p2=None, p3=None, p4=None):
+    rootf = 0.0
+    funrate = 0.0
+    minfound = 'n'
+    # ---- check for true condition on first two points
+#       if (indx == 1) & (sign(p1) ~= sign(p2))
+#           [evt1ctr, evt1, evt2ctr, evt2] = cubicbln (ev1n, ev2n, timearr, funarr, indx)
+#           event1ctr = event1ctr + evt1ctr
+#           event1 = [event1;evt1]
+#           event2ctr = event2ctr + evt2ctr
+#           event2 = [event2;evt2]
+#         end
+
+    # ------ set up function from C-39 --------
+    acu0 = p2
+    acu1 = (- p1 + p3) * 0.5
+    acu2 = p1 - 2.5 * p2 + 2.0 * p3 - 0.5 * p4
+    acu3 = - 0.5 * p1 + 1.5 * p2 - 1.5 * p3 + 0.5 * p4
+    # --------------- solve roots of this function -------------
+    opt = 'U'
+    r1r, r1i, r2r, r2i, r3r, r3i = cubic(acu3, acu2, acu1, acu0, opt)
+    # ---------- search through roots to locate answers --------
+    for indx2 in range(3):
+        if (indx2 == 0):
+            root = r1r
+        if (indx2 == 1):
+            root = r2r
+        if (indx2 == 2):
+            root = r3r
+        if (root >= 0.0) and (root <= 1.0):
+            minfound = 'y'
+            rootf = root
+            #               [time] = recovpar(t1, t2, t3, t4, root)
+            ans = recovpar(p1, p2, p3, p4, root)
+            # ----- recover the function value derivative
+            funrate = 3.0 * acu3 * root ** 2 + 2.0 * acu2 * root + acu1
+
+    # fprintf(1, ' roots #11.7f  #11.7f  #11.7f \n', r1r, r2r, r3r)
+# rt = roots([acu3 acu2 acu1 acu0])
+
+    # ---- check for true condition on last two points
+#       if (sign(p3) ~= sign(p4))
+#           [evt1ctr, evt1, evt2ctr, evt2] = cubicbln (ev1n, ev2n, timearr, funarr, indx)
+#           event1ctr = event1ctr + evt1ctr
+#           event1 = [event1;evt1]
+#           event2ctr = event2ctr + evt2ctr
+#           event2 = [event2;evt2]
+#         end
+
+    return minfound, rootf, funrate
+
+
+#
+# ------------------------------------------------------------------------------
+#
+#                           function cubicspl
+#
+#  this function performs cubic splining of an input zero crossing
+#  function in order to find function values.
+#
+#  author        : david vallado                  719-573-2600     2 feb 2004
+#
+#  revisions
+#                -
+#  inputs          description                    range / units
+#    p1, p2, p3, p4 - function values used for splining
+#    t1, t2, t3, t4 - time values used for splining
+#
+#  outputs       :
+#    acu0..acu3  - splined polynomial coefficients. acu3 t^3, etc
+#
+#  locals        : none
+#
+#  coupling      :
+#    cubic       - find roots of a cubic
+#
+#  references    :
+#    vallado       2013, 559, 1034
+#
+# [acu0, acu1, acu2, acu3] = cubicspl (p1, p2, p3, p4)
+# ------------------------------------------------------------------------------
+
+
+def cubicspl(p1=None, p2=None, p3=None, p4=None):
+    # ------ set up function from C-41 --------
+#       det = t1^3*t2^2 + t1^2*t2 + t1*t2^3 - t1^3*t2 - t1^2*t2^3 - t1*t2^2
+
+    #       acu0 = p1
+#       acu1 = ((t2^3-t2^2)*(p2-p1) + (t1^2-t1^3)*(p3-p1) + (t1^3*t2^2-t1^2*t2^3)*(p4-p1)) / det
+#       acu2 = ((t2-t2^3)*(p2-p1) + (t1^3-t1)*(p3-p1) + (t1*t2^3-t1^3*t2)*(p4-p1)) / det
+#       acu3 = ((t2^2-t2)*(p2-p1) + (t1-t1^2)*(p3-p1) + (t1^2*t2-t1*t2^2)*(p4-p1)) / det
+
+    acu0 = p2
+    acu1 = - p1 / 3.0 - 0.5 * p2 + p3 - p4 / 6.0
+    acu2 = 0.5 * p1 - p2 + 0.5 * p3
+    acu3 = - p1 / 6.0 + 0.5 * p2 - 0.5 * p3 + p4 / 6.0
+    return acu0, acu1, acu2, acu3
+
+
+# -----------------------------------------------------------------------------
+#
+#                           function cubicinterp
+#
+#  this function performs a cubic spline. four points are needed.
+#
+#  author        : david vallado                  719-573-2600   1 dec  2005
+#
+#  revisions
+#
+#  inputs          description                    range / units
+#    valuein     - kp
+#
+#  outputs       :
+#    out         - ap
+#
+#  locals        :
+#                -
+#
+#  coupling      :
+#    cubicspl
+#
+#  references    :
+#    vallado       2013, 1027
+# --------------------------------------------------------------------------- */
+
+
+def cubicinterp(p1a=None, p1b=None, p1c=None, p1d=None, p2a=None,
+                p2b=None, p2c=None, p2d=None, valuein=None):
+    # double kc0, kc1, kc2, kc3, ac0, ac1, ac2, ac3,
+#        r1r, r1i, r2r, r2i, r3r, r3i, value
+
+    # -------- assign function points ---------
+    ac0, ac1, ac2, ac3 = cubicspl(p1a, p1b, p1c, p1d)
+    kc0, kc1, kc2, kc3 = cubicspl(p2a, p2b, p2c, p2d)
+    # recover the original function values
+# use the normalized time first, but at an arbitrary interval
+    r1r, r1i, r2r, r2i, r3r, r3i = cubic(kc3, kc2, kc1, kc0 - valuein, 'R')
+    #fprintf(1, 'cubic #11.7f  #11.7f  #11.7f  #11.7f  #11.7f \n', ac0, ac1, kc0, r1r, r2r)
+    if ((r1r >= - 1e-06) and (r1r <= 1.001)):
+        value = r1r
+    else:
+        if ((r2r >= - 1e-06) and (r2r <= 1.001)):
+            value = r2r
+        else:
+            if ((r3r >= - 1e-06) and (r3r <= 1.001)):
+                value = r3r
+            else:
+                value = 0.0
+                print('error in cubicinterp root {0} {1} {2} {3} \n'
+                      % (valuein, r1r, r2r, r3r))
+
+    answer = ac3 * value ** 3 + ac2 * value * value + ac1 * value + ac0
+    # cubicinterp
+    return answer
+
+
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function unit
+#
+#  this function calculates a unit vector given the original vector.  if a
+#    zero vector is input, the vector is set to zero.
+#
+#  author        : david vallado                  719-573-2600    4 jun 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - vector
+#
+#  outputs       :
+#    outvec      - unit vector
+#
+#  locals        :
+#    i           - index
+#
+#  coupling      :
+#    mag           magnitude of a vector
+#
+# [outvec] = norm (vec)
+# ------------------------------------------------------------------------------
+
+
+def unit(vec=None):
+    # -------------------------  implementation   -----------------
+    small = 1e-06
+    magv = mag(vec)
+    outvec = np.zeros(3)
+    if (magv > small):
+        for i in range(3):
+            outvec[i] = vec[i] / magv
+    else:
+        for i in range(3):
+            outvec[i] = 0.0
+
+    return outvec
+
+
+
+#
+#  this rountine accomplishes the iteration work for the double-r angles
+#  only routine
+#
+#
+# dav 12-23-03
+#
+
+def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
+            magr1in=None, magr2in=None, los1=None, los2=None,
+            los3=None, rsite1=None, rsite2=None, rsite3=None,
+            t1=None, t3=None, direct=None, re=None, mu=None):
+
+    rho1 = (- cc1 + np.sqrt(cc1 ** 2 - 4.0
+                            * (magrsite1 ** 2 - magr1in ** 2))) / 2.0
+    rho2 = (- cc2 + np.sqrt(cc2 ** 2 - 4.0
+                            * (magrsite2 ** 2 - magr2in ** 2))) / 2.0
+    #rsite1
+#rsite2
+    r1 = rho1 * los1 + rsite1
+    r2 = rho2 * los2 + rsite2
+    #rho1
+#r1
+
+    print('start of loop  %11.7f  %11.7f  \n' % (magr1in, magr2in))
+    magr1 = mag(r1)
+    magr2 = mag(r2)
+    print("r1:")
+    print(r1)
+    print("r2:")
+    print(r2)
+
+    if direct == 'y':
+        w = np.cross(r1, r2) / (magr1 * magr2)
+    else:
+        w = - np.cross(r1, r2) / (magr1 * magr2)
+
+    # change to negative sign
+    rho3 = - np.dot(rsite3, w) / np.dot(los3, w)
+    #rho1
+#rho2
+#rho3
+#los1
+#los2
+#los3
+#pause
+    r3 = np.multiply(rho3, los3) + rsite3
+    print('r3')
+    print(r3)
+    magr3 = mag(r3)
+    print('after 1st mag  %11.7f  %11.7f  %11.7f \n' % (magr1, magr2, magr3))
+    cosdv21 = np.dot(r2, r1) / (magr2 * magr1)
+    if math.isclose(magr2 * magr1, 0.0):
+      print("Dont know what to do when we divide by zero here -jmb")
+      return None, None, None, None, None, None, None, None, None
+    else:
+      sindv21 = mag(np.cross(r2, r1)) / (magr2 * magr1)
+    dv21 = math.atan2(sindv21, cosdv21)
+    cosdv31 = np.dot(r3, r1) / (magr3 * magr1)
+    #    sindv31 = mag(np.cross(r3, r1))/(magr3*magr1)
+    sindv31 = np.sqrt(1.0 - cosdv31 ** 2)
+    dv31 = math.atan2(sindv31, cosdv31)
+    cosdv32 = np.dot(r3, r2) / (magr3 * magr2)
+    sindv32 = mag(np.cross(r3, r2)) / (magr3 * magr2)
+    dv32 = math.atan2(sindv32, cosdv32)
+    if dv31 > np.pi:
+        c1 = (magr2 * sindv32) / (magr1 * sindv31)
+        c3 = (magr2 * sindv21) / (magr3 * sindv31)
+        p = (c1 * magr1 + c3 * magr3 - magr2) / (c1 + c3 - 1)
+    else:
+        c1 = (magr1 * sindv31) / (magr2 * sindv32)
+        c3 = (magr1 * sindv21) / (magr3 * sindv32)
+        p = (c3 * magr3 - c1 * magr2 + magr1) / (- c1 + c3 + 1)
+
+    ecosv1 = p / magr1 - 1
+    ecosv2 = p / magr2 - 1
+    ecosv3 = p / magr3 - 1
+    if dv21 != np.pi:
+        esinv2 = (- cosdv21 * ecosv2 + ecosv1) / sindv21
+    else:
+        esinv2 = (cosdv32 * ecosv2 - ecosv3) / sindv32
+
+    e = np.sqrt(ecosv2 ** 2 + esinv2 ** 2)
+    a = p / (1 - e ** 2)
+    if e * e < 0.99:
+        n = np.sqrt(mu / a ** 3)
+        s = magr2 / p * np.sqrt(1 - e ** 2) * esinv2
+        c = magr2 / p * (e ** 2 + ecosv2)
+        sinde32 = magr3 / np.sqrt(a * p) * sindv32 - magr3 / p * (1 - cosdv32) * s
+        cosde32 = 1 - magr2 * magr3 / (a * p) * (1 - cosdv32)
+        deltae32 = math.atan2(sinde32, cosde32)
+        sinde21 = magr1 / np.sqrt(a * p) * sindv21 + magr1 / p * (1 - cosdv21) * s
+        cosde21 = 1 - magr2 * magr1 / (a * p) * (1 - cosdv21)
+        deltae21 = math.atan2(sinde21, cosde21)
+        deltam32 = (deltae32 + 2 * s * (np.sin(deltae32 / 2)) ** 2
+                    - c * np.sin(deltae32))
+        deltam12 = (- deltae21 + 2 * s * (np.sin(deltae21 / 2)) ** 2
+                    + c * np.sin(deltae21))
+    else:
+        print('hyperbolic, e1 is greater than 0.99 %11.7f \n' % (e))
+        n = np.sqrt(mu / - a ** 3)
+        s = magr2 / p * np.sqrt(e ** 2 - 1) * esinv2
+        c = magr2 / p * (e ** 2 + ecosv2)
+        sindh32 = (magr3 / np.sqrt(- a * p) * sindv32
+                   - magr3 / p * (1 - cosdv32) * s)
+        sindh21 = (magr1 / np.sqrt(- a * p) * sindv21
+                   + magr1 / p * (1 - cosdv21) * s)
+        deltah32 = np.log(sindh32 + np.sqrt(sindh32 ** 2 + 1))
+        deltah21 = np.log(sindh21 + np.sqrt(sindh21 ** 2 + 1))
+        deltam32 = (- deltah32 + 2 * s * (np.sinh(deltah32 / 2)) ** 2
+                    + c * np.sinh(deltah32))
+        deltam12 = (deltah21 + 2 * s * (np.sinh(deltah21 / 2)) ** 2
+                    - c * np.sinh(deltah21))
+        # what if ends on hperbolic solution.
+# how to pass back deltae32?
+        deltae32 = deltah32
+
+    print('dm32 %11.7f  dm12 %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n'
+          % (deltam32, deltam12, c1, c3, p, a, e, s, c))
+    print('%11.7f %11.7f %11.7f \n' % (dv21, dv31, dv32))
+    f1 = t1 - deltam12 / n
+    f2 = t3 - deltam32 / n
+    q1 = np.sqrt(f1 ** 2 + f2 ** 2)
+    return r2, r3, f1, f2, q1, magr1, magr2, a, deltae32
+
+
+
+###
+def cot(arg):
+    return  1.0/math.tan(arg)
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function findc2c3
+#
+#  this function calculates the c2 and c3 functions for use in the universal
+#    variable calculation of z.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    znew        - z variable                     rad2
+#
+#  outputs       :
+#    c2new       - c2 function value
+#    c3new       - c3 function value
+#
+#  locals        :
+#    sqrtz       - square root of znew
+#
+#  coupling      :
+#    sinh        - hyperbolic sine
+#    cosh        - hyperbolic cosine
+#
+#  references    :
+#    vallado       2001, 70-71, alg 1
+#
+# [c2new, c3new] = findc2c3 (znew)
+# ------------------------------------------------------------------------------
+
+
+def findc2c3(znew):
+
+        # -------------------------  implementation   -----------------
+        if (znew > small):
+            sqrtz = math.sqrt(znew)
+            c2new = (1.0 -math.cos(sqrtz)) / znew
+            c3new = (sqrtz-math.sin(sqrtz)) / (sqrtz**3)
+        else:
+            if (znew < -small):
+                sqrtz = math.sqrt(-znew)
+                c2new = (1.0 -math.cosh(sqrtz)) / znew
+                c3new = (math.sinh(sqrtz) - sqrtz) / (sqrtz**3)
+            else:
+                c2new = 0.5
+                c3new = 1.0 /6.0
+        return c2new, c3new
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function newtonm
+#
+#  this function performs the newton rhapson iteration to find the
+#    eccentric anomaly given the mean anomaly.  the true anomaly is also
+#    calculated.
+#
+#  author        : david vallado                  719-573-2600    9 jun 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    ecc         - eccentricity                   0.0  to
+#    m           - mean anomaly                   -2pi to 2pi rad
+#
+#  outputs       :
+#    e0          - eccentric anomaly              0.0  to 2pi rad
+#    nu          - true anomaly                   0.0  to 2pi rad
+#
+#  locals        :
+#    e1          - eccentric anomaly, next value  rad
+#    sinv        - sine of nu
+#    cosv        - cosine of nu
+#    ktr         - index
+#    r1r         - cubic roots - 1 to 3
+#    r1i         - imaginary component
+#    r2r         -
+#    r2i         -
+#    r3r         -
+#    r3i         -
+#    s           - variables for parabolic solution
+#    w           - variables for parabolic solution
+#
+#  coupling      :
+#    cubic       - solves a cubic polynomial
+#
+#  references    :
+#    vallado       2001, 72-75, alg 2, ex 2-1
+#
+# [e0, nu] = newtonm (ecc, m)
+# ------------------------------------------------------------------------------
+
+
+def newtonm (ecc, m):
+
+  # -------------------------  implementation   -----------------
+  numiter = 50
+
+  # -------------------------- hyperbolic  ----------------------
+  if ((ecc-1.0) > small):
+      # -------------------  initial guess -----------------------
+      if (ecc < 1.6):
+          if (((m<0.0) and (m>-math.pi)) or (m>math.pi)):
+              e0= m - ecc
+          else:
+              e0= m + ecc
+      else:
+          if ((ecc < 3.6) and (abs(m) > math.pi)):
+              e0= m - np.sign(m)*ecc
+          else:
+              e0= m/(ecc-1.0)
+      ktr = 1
+      e1 = e0 + ((m-ecc*math.sinh(e0)+e0) / (ecc*math.cosh(e0) - 1.0))
+      while ((abs(e1-e0)>small) and (ktr<= numiter)):
+          e0= e1
+          e1 = e0 + ((m - ecc*math.sinh(e0) + e0) / (ecc*math.cosh(e0) - 1.0))
+          ktr = ktr + 1
+      # ----------------  find true anomaly  --------------------
+      sinv = -(math.sqrt(ecc*ecc-1.0) * math.sinh(e1)) / (1.0 - ecc*math.cosh(e1))
+      cosv = (math.cosh(e1) - ecc) / (1.0 - ecc*math.cosh(e1))
+      nu = math.atan2(sinv, cosv)
+  else:
+      # --------------------- parabolic -------------------------
+      if (abs(ecc-1.0) < small):
+          #                c = [ 1.0/3.0 0.0; 1.0; -m]
+          #                [r1r] = roots (c)
+          #                e0= r1r
+          s = 0.5  * (halfpi - math.atan(1.5 * m))
+          w = math.atan(math.tan(s)**(1.0 / 3.0))
+          e0 = 2.0 *cot(2.0 * w)
+          ktr = 1
+          nu = 2.0 * math.atan(e0)
+      else:
+          # -------------------- elliptical ----------------------
+          if (ecc > small):
+              # -----------  initial guess -------------
+              if (((m < 0.0) and (m > -math.pi)) or (m > math.pi)):
+                  e0 = m - ecc
+              else:
+                  e0 = m + ecc
+              #e0
+              ktr = 1
+              e1 = e0 + (m - e0 + ecc*math.sin(e0)) / (1.0 - ecc*math.cos(e0))
+              while ((abs(e1-e0) > small) and (ktr <= numiter)):
+                  ktr = ktr + 1
+                  e0 = e1
+                  e1 = e0 + (m - e0 + ecc*math.sin(e0)) / (1.0 - ecc*math.cos(e0))
+              e0 = e1
+              # -------------  find true anomaly  ---------------
+              sinv = ((math.sqrt(1.0 -ecc*ecc) * math.sin(e1))
+                      / (1.0 -ecc*math.cos(e1)))
+              cosv = (math.cos(e1)-ecc) / (1.0 - ecc*math.cos(e1))
+              nu = math.atan2(sinv, cosv)
+          else:
+              # -------------------- circular -------------------
+              ktr = 0
+              nu = m
+              e0= m
+
+  return e0 , nu
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function cubic
+#
+#  this function solves for the three roots of a cubic equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax3 + bx2 + cx + d0.  note
+#    that r1i will always be zero since there is always at least one real root.
+#
+#  author        : david vallado                  719-573-2600    1 mar 2001
+#
+#  revisions
+#    vallado     - convert to matlab              719-573-2600   18 dec 2002
+#
+#  inputs          description                    range / units
+#    a3          - coefficient of x cubed term
+#    b2          - coefficient of x squared term
+#    c1          - coefficient of x term
+#    d0          - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#    r3r         - real portion of root 3
+#    r3i         - imaginary portion of root 3
+#
+#  locals        :
+#    temp1       - temporary value
+#    temp2       - temporary value
+#    p           - coefficient of x squared term where x cubed term is 1.0
+#    q           - coefficient of x term where x cubed term is 1.0
+#    r           - coefficient of constant term where x cubed term is 1.0
+#    delta       - discriminator for use with cardans formula
+#    e0          - angle holder for trigonometric solution
+#    phi         - angle used in trigonometric solution
+#    cosphi      - cosine of phi
+#    sinphi      - sine of phi
+#
+#  coupling      :
+#    quadric     - roots of second order polynomial
+#
+#  references    :
+#    vallado       2007, 975
+#
+# [r1r, r1i, r2r, r2i, r3r, r3i] = cubic (a3, b2, c1, d0, opt)
+# ------------------------------------------------------------------------------
+
+def cubic (a3, b2, c1, d0, opt):
+        # --------------------  implementation   ----------------------
+        onethird = 1.0 /3.0
+        r1r = 0.0
+        r1i = 0.0
+        r2r = 0.0
+        r2i = 0.0
+        r3r = 0.0
+        r3i = 0.0
+
+        if (abs(a3) > small):
+            # ----------- force coefficients into std form ----------------
+            p = b2/a3
+            q = c1/a3
+            r = d0/a3
+
+            a3 = onethird*(3.0 *q - p*p)
+            b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
+
+            delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
+
+            # ------------------ use cardans formula ----------------------
+            if (delta > small):
+                temp1 = (-b2*0.5)+math.sqrt(delta)
+                temp2 = (-b2*0.5)-math.sqrt(delta)
+                temp1 = np.sign(temp1)*abs(temp1)**onethird
+                temp2 = np.sign(temp2)*abs(temp2)**onethird
+                r1r = temp1 + temp2 - p*onethird
+
+                if (opt =='I'):
+                    r2r = -0.5 *(temp1 + temp2) - p*onethird
+                    r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
+                    r3r = -0.5 *(temp1 + temp2) - p*onethird
+                    r3i = -r2i
+                else:
+                    r2r = 99999.9
+                    r3r = 99999.9
+            else:
+                # --------------- evaluate zero point ---------------------
+                if (abs(delta) < small):
+                    r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                    r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+    #                if (opt =='U')
+    #                    r3r = 99999.9
+    #                  else
+                    r3r = r2r
+    #                  end
+                else:
+                    # ------------ use trigonometric identities -----------
+                    e0 = 2.0 *math.sqrt(-a3*onethird)
+                    cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
+                    sinphi = math.sqrt(1.0 -cosphi*cosphi)
+                    phi = math.atan2(sinphi, cosphi)
+                    if (phi < 0.0):
+                        phi = phi + 2.0*math.pi
+                    r1r = e0*math.cos(phi*onethird) - p*onethird
+                    r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
+                    r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
+        else:
+            r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
+            r3r = 99999.9
+            r3i = 99999.9
+        return r1r, r1i, r2r, r2i, r3r, r3i
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function quadric
+#
+#  this function solves for the two roots of a quadric equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax2 + bx + c.
+#
+#  author        : david vallado                  719-573-2600    1 mar 2001
+#
+#  revisions
+#    vallado     - convert to matlab              719-573-2600    3 dec 2002
+#
+#  inputs          description                    range / units
+#    a           - coefficient of x squared term
+#    b           - coefficient of x term
+#    c           - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#
+#  locals        :
+#    discrim     - discriminate b2 - 4ac
+#
+#  coupling      :
+#    none.
+#
+#  references    :
+#    vallado       2007, 974
+#
+# [r1r, r1i, r2r, r2i] = quadric   (a, b, c, opt)
+# ------------------------------------------------------------------------------
+
+
+def quadric(a, b, c, opt):
+
+        # --------------------  implementation   ----------------------
+        small = 0.00000001
+        r1r = 0.0
+        r1i = 0.0
+        r2r = 0.0
+        r2i = 0.0
+
+        discrim = b*b - 4.0 *a*c
+        # ---------------------  real roots  --------------------------
+        if (abs(discrim) < small):
+            r1r = -b / (2.0 *a)
+            r2r = r1r
+#            if (opt =='U')
+#                r2r = 99999.9
+#              end
+        else:
+            if abs(a) < small:
+                r1r = -c/b
+            else:
+                if (discrim > 0.0):
+                    r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
+                    r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
+                else:
+                    # ------------------ complex roots --------------------
+                    if (opt =='I'):
+                        r1r = -b / (2.0 *a)
+                        r2r = r1r
+                        r1i = math.sqrt(-discrim) / (2.0 *a)
+                        r2i = -math.sqrt(-discrim) / (2.0 *a)
+                    else:
+                        r1r = 99999.9
+                        r2r = 99999.9
+        return r1r, r1i, r2r, r2i
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function newtonnu
+#
+#  this function solves keplers equation when the true anomaly is known.
+#    the mean and eccentric, parabolic, or hyperbolic anomaly is also found.
+#    the parabolic limit at 168 is arbitrary. the hyperbolic anomaly is also
+#    limited. the hyperbolic sine is used because it's not double valued.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#    vallado     - fix small                                     24 sep 2002
+#
+#  inputs          description                    range / units
+#    ecc         - eccentricity                   0.0  to
+#    nu          - true anomaly                   -2pi to 2pi rad
+#
+#  outputs       :
+#    e0          - eccentric anomaly              0.0  to 2pi rad       153.02 deg
+#    m           - mean anomaly                   0.0  to 2pi rad       151.7425 deg
+#
+#  locals        :
+#    e1          - eccentric anomaly, next value  rad
+#    sine        - sine of e
+#    cose        - cosine of e
+#    ktr         - index
+#
+#  coupling      :
+#    arcsinh     - arc hyperbolic sine
+#    sinh        - hyperbolic sine
+#
+#  references    :
+#    vallado       2007, 85, alg 5
+#
+# [e0, m] = newtonnu (ecc, nu)
+# ------------------------------------------------------------------------------
+
+
+def newtonnu (ecc, nu):
+
+
+
+        # ---------------------  implementation   ---------------------
+        e0 = None
+        m = None
+        small = 0.00000001
+        # --------------------------- circular ------------------------
+        if (abs(ecc) < small):
+            m = -0.0
+            e0 = -0.0
+            #print("m is ", m)
+        else:
+            # ---------------------- elliptical -----------------------
+            if (ecc < 1.0 - small):
+                sine = ((math.sqrt(1.0 -ecc*ecc) * math.sin(nu))
+                       / (1.0 +ecc*math.cos(nu)))
+                cose = (ecc + math.cos(nu)) / (1.0  + ecc*math.cos(nu))
+                e0 = math.atan2(sine, cose)
+                m = e0 - ecc*math.sin(e0)
+                #print("m here is ", m)
+
+            else:
+                # -------------------- hyperbolic  --------------------
+                if (ecc > 1.0 + small):
+
+                    if ((ecc > 1.0) and
+                        (abs(nu)+0.00001 < math.pi-math.acos(1.0 /ecc))):
+                        #print("here?")
+                        sine = ((math.sqrt(ecc*ecc-1.0) * math.sin(nu))
+                               / (1.0  + ecc*math.cos(nu)))
+                        e0 = math.asinh(sine)
+                        m = ecc*math.sinh(e0) - e0
+                        #print("m now is ", m)
+                else:
+                    # ----------------- parabolic ---------------------
+                    if (abs(nu) < 168.0*math.pi/180.0):
+                        e0= math.tan(nu*0.5)
+                        m = e0 + (e0*e0*e0)/3.0
+                        #print("m fin is ", m)
+
+        if (ecc < 1.0):
+            m = np.fmod(m, 2.0 *math.pi)
+            if (m < 0.0):
+                m = m + 2.0 *math.pi
+            e0 = np.fmod(e0, 4.0 *math.pi)
+        return e0, m
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function newtone
+#
+#  this function solves keplers equation when the eccentric, paraboic, or
+#    hyperbolic anomalies are known. the mean anomaly and true anomaly are
+#    calculated.
+#
+#  author        : david vallado                  719-573-2600    9 jun 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    ecc         - eccentricity                   0.0  to
+#    e0          - eccentric anomaly              -2pi to 2pi rad
+#
+#  outputs       :
+#    m           - mean anomaly                   0.0  to 2pi rad
+#    nu          - true anomaly                   0.0  to 2pi rad
+#
+#  locals        :
+#    sinv        - sine of nu
+#    cosv        - cosine of nu
+#
+#  coupling      :
+#    sinh        - hyperbolic sine
+#    cosh        - hyperbolic cosine
+#
+#  references    :
+#    vallado       2001, 85, alg 6
+#
+# [m, nu] = newtone (ecc, e0)
+# ------------------------------------------------------------------------------
+
+
+def newtone (ecc, e0):
+
+        # -------------------------  implementation   -----------------
+        small = 0.00000001
+
+        # ------------------------- circular --------------------------
+        if (abs(ecc) < small):
+            m = e0
+            nu = e0
+        else:
+
+            # ----------------------- elliptical ----------------------
+            if (ecc < 0.999):
+                m = e0 - ecc*math.sin(e0)
+                sinv = ((math.sqrt(1.0 -ecc*ecc) * math.sin(e0))
+                       / (1.0 -ecc*math.cos(e0)))
+                cosv = (math.cos(e0)-ecc) / (1.0  - ecc*math.cos(e0))
+                nu = math.atan2(sinv, cosv)
+            else:
+
+                # ---------------------- hyperbolic  ------------------
+                if (ecc > 1.0001):
+                    m = ecc*math.sinh(e0) - e0
+                    sinv = ((math.sqrt(ecc*ecc-1.0) * math.sinh(e0))
+                           / (1.0  - ecc*math.cosh(e0)))
+                    cosv = (math.cosh(e0)-ecc) / (1.0  - ecc*math.cosh(e0))
+                    nu = math.atan2(sinv, cosv)
+                else:
+                    # -------------------- parabolic ------------------
+                    m = e0 + (1.0 /3.0)*e0*e0*e0
+                    #nu = 2.0 *datan(e0)  ###what is this? -todo
+                    nu = 2.0 *math.atan(e0)  ###what is this? -todo
+
+        return m, nu
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                            function angl
+#
+#  this function calculates the angle between two vectors.  the output is
+#    set to 999999.1 to indicate an undefined value.  be sure to check for
+#    this at the output phase.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#    vallado     - fix tolerances                                 5 sep 2002
+#
+#  inputs          description                    range / units
+#    vec1        - vector number 1
+#    vec2        - vector number 2
+#
+#  outputs       :
+#    theta       - angle between the two vectors  -pi to pi
+#
+#  locals        :
+#    temp        - temporary real variable
+#
+#  coupling      :
+#
+# [theta] = angl (vec1, vec2)
+# ----------------------------------------------------------------------------- }
+
+
+def angl (vec1, vec2):
+
+        small = 0.00000001
+        magv1 = mag(vec1)
+        magv2 = mag(vec2)
+
+        if magv1*magv2 > small**2:
+            temp = np.dot(vec1, vec2) / (magv1*magv2)
+            if abs(temp) > 1.0:
+                temp = np.sign(temp) * 1.0
+            #end
+            theta = math.acos(temp)
+        else:
+            theta=None
+        #end
+        return theta
+
+
+# ------------------------------------------------------------------------------
+#
+#                                  rot1
+#
+#  this function performs a rotation about the 1st axis.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - input vector
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outvec      - vector result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#    temp        - temporary extended value
+#
+#  coupling      :
+#    none.
+#
+# [outvec] = rot1 (vec, xval)
+# ----------------------------------------------------------------------------- }
+
+
+def rot1 (vec, xval):
+
+        temp = vec[2]
+        c = math.cos(xval)
+        s = math.sin(xval)
+
+        outvec = np.zeros(3)
+        outvec[2] = c*vec[2] - s*vec[1]
+        outvec[1] = c*vec[1] + s*temp
+        outvec[0] = vec[0]
+        return outvec
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                            function rot2
+#
+#  this function performs a rotation about the 2nd axis.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - input vector
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outvec      - vector result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#    temp        - temporary extended value
+#
+#  coupling      :
+#    none.
+#
+# [outvec] = rot2 (vec, xval)
+# ----------------------------------------------------------------------------- }
+
+
+def rot2 (vec, xval):
+
+        temp = vec[2]
+        c = math.cos(xval)
+        s = math.sin(xval)
+
+        outvec = np.zeros(3)
+        outvec[2] = c*vec[2] + s*vec[0]
+        outvec[0] = c*vec[0] - s*temp
+        outvec[1] = vec[1]
+        return outvec
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                            function rot3
+#
+#  this function performs a rotation about the 3rd axis.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - input vector
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outvec      - vector result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#    temp        - temporary extended value
+#
+#  coupling      :
+#    none.
+#
+# [outvec] = rot3 (vec, xval)
+# ----------------------------------------------------------------------------- }
+
+
+def rot3 (vec, xval):
+
+        temp = vec[1]
+        c = math.cos(xval)
+        s = math.sin(xval)
+
+        outvec = np.zeros(3)
+        outvec[1] = c*vec[1] - s*vec[0]
+        outvec[0] = c*vec[0] + s*temp
+        outvec[2] = vec[2]
+        return outvec
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                            function mag
+#
+#  this function finds the magnitude of a vector.  the tolerance is set to
+#    0.000001, thus the 1.0e-12 for the squared test of underflows.
+#
+#  author        : david vallado                  719-573-2600   30 may 2002
+#
+#  revisions
+#    vallado     - fix tolerance to match coe, eq, etc            3 sep 2002
+#
+#  inputs          description                    range / units
+#    vec         - vector
+#
+#  outputs       :
+#    mag         - magnitude
+#
+#  locals        :
+#    none.
+#
+#  coupling      :
+#    none.
+#
+# mag = (vec)
+# ----------------------------------------------------------------------------- }
+
+
+def mag (vec):
+
+        temp = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]
+
+        if abs(temp) >= 1.0e-16:
+            mag = math.sqrt(temp)
+        else:
+            mag = 0.0
+        return mag
+
+
+# ----------------------------------------------------------------------------
+#
+#                           function polarm
+#
+#  this function calulates the transformation matrix that accounts for polar
+#    motion. both the 1980 and 2000 theories are handled. note that the rotation
+#    order is different between 1980 and 2000 .
+#
+#  author        : david vallado                  719-573-2600   25 jun 2002
+#
+#  revisions
+#    vallado     - consolidate with iau 2000                     14 feb 2005
+#
+#  inputs          description                    range / units
+#    xp          - polar motion coefficient       rad
+#    yp          - polar motion coefficient       rad
+#    ttt         - julian centuries of tt (00 theory only)
+#    opt         - method option                  '01', '02', '80'
+#
+#  outputs       :
+#    pm          - transformation matrix for ecef - pef
+#
+#  locals        :
+#    convrt      - conversion from arcsec to rad
+#    sp          - s prime value
+#
+#  coupling      :
+#    none.
+#
+#  references    :
+#    vallado       2004, 207-209, 211, 223-224
+#
+# [pm] = polarm (xp, yp, ttt, opt)
+# ----------------------------------------------------------------------------
+
+
+def polarm (xp, yp, ttt, opt):
+
+        cosxp = math.cos(xp)
+        sinxp = math.sin(xp)
+        cosyp = math.cos(yp)
+        sinyp = math.sin(yp)
+
+        pm = np.zeros((3, 3))
+        if (opt == "80"):
+            pm[0, 0] = cosxp
+            pm[0, 1] = 0.0
+            pm[0, 2] = -sinxp
+            pm[1, 0] = sinxp * sinyp
+            pm[1, 1] = cosyp
+            pm[1, 2] = cosxp * sinyp
+            pm[2, 0] = sinxp * cosyp
+            pm[2, 1] = -sinyp
+            pm[2, 2] = cosxp * cosyp
+
+            # a1 = rot2mat(xp)
+            # a2 = rot1mat(yp)
+            # pm = a2*a1
+            # Approximate matrix using small angle approximations
+            #pm(1, 1) = 1.0
+            #pm(2, 1) = 0.0
+            #pm(3, 1) = xp
+            #pm(1, 2) = 0.0
+            #pm(2, 2) = 1.0
+            #pm(3, 2) = -yp
+            #pm(1, 3) = -xp
+            #pm(2, 3) = yp
+            #pm(3, 3) = 1.0
+        else:
+            convrt = math.pi / (3600.0*180.0)
+            # approximate sp value in rad
+            sp = -47.0e-6 * ttt * convrt
+            print('xp %16.14f, %16.14f sp %16.14g \n' % (xp, yp, sp))
+            cossp = math.cos(sp)
+            sinsp = math.sin(sp)
+
+            #fprintf(1, ' sp  %14.11f mas \n', sp/convrt)
+
+            # form the matrix
+            pm[0, 0] = cosxp * cossp
+            pm[0, 1] = -cosyp * sinsp + sinyp * sinxp * cossp
+            pm[0, 2] = -sinyp * sinsp - cosyp * sinxp * cossp
+            pm[1, 0] = cosxp * sinsp
+            pm[1, 1] = cosyp * cossp + sinyp * sinxp * sinsp
+            pm[1, 2] = sinyp * cossp - cosyp * sinxp * sinsp
+            pm[2, 0] = sinxp
+            pm[2, 1] = -sinyp * cosxp
+            pm[2, 2] = cosyp * cosxp
+
+            # a1 = rot1mat(yp)
+            # a2 = rot2mat(xp)
+            # a3 = rot3mat(-sp)
+            # pm = a3*a2*a1
+        return pm
+
+
+
+
+# ----------------------------------------------------------------------------
+#
+#                           function fundarg
+#
+#  this function calulates the delauany variables and planetary values for
+#  several theories.
+#
+#  author        : david vallado                  719-573-2600   16 jul 2004
+#
+#  revisions
+#    vallado     - consolidate with iau 2000                     14 feb 2005
+#
+#  inputs          description                    range / units
+#    ttt         - julian centuries of tt
+#    opt         - method option                  '06', '02', '96', '80'
+#
+#  outputs       :
+#    l           - delaunay element               rad
+#    ll          - delaunay element               rad
+#    f           - delaunay element               rad
+#    d           - delaunay element               rad
+#    omega       - delaunay element               rad
+#    planetary longitudes                         rad
+#
+#  locals        :
+#    ttt2, ttt3,  - powers of ttt
+#
+#  coupling      :
+#    none        -
+#
+#  references    :
+#    vallado       2004, 212-214
+#
+# [ l, l1, f, d, omega, ...
+#   lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate ...
+# ] = fundarg(ttt, opt)
+# ----------------------------------------------------------------------------
+
+
+def fundarg(ttt, opt):
+
+        # ---- determine coefficients for iau 2000 nutation theory ----
+        ttt2 = ttt*ttt
+        ttt3 = ttt2*ttt
+        ttt4 = ttt2*ttt2
+
+        # ---- iau 2006 theory
+        if opt == '06':
+            # ------ form the delaunay fundamental arguments in deg
+            l = 134.96340251  + (1717915923.2178 *ttt + \
+                     31.8792 *ttt2 + 0.051635 *ttt3 - 0.00024470 *ttt4) / 3600.0
+            l1 = 357.52910918  + (129596581.0481 *ttt - \
+                      0.5532 *ttt2 + 0.000136 *ttt3 - 0.00001149*ttt4)  / 3600.0
+            f = 93.27209062  + (1739527262.8478 *ttt - \
+                     12.7512 *ttt2 - 0.001037 *ttt3 + 0.00000417*ttt4)  / 3600.0
+            d = 297.85019547  + (1602961601.2090 *ttt - \
+                      6.3706 *ttt2 + 0.006593 *ttt3 - 0.00003169*ttt4)  / 3600.0
+            omega = 125.04455501  + (-6962890.5431 *ttt + \
+                      7.4722 *ttt2 + 0.007702 *ttt3 - 0.00005939*ttt4)  / 3600.0
+
+            # ------ form the planetary arguments in deg
+            lonmer = 252.250905494  + 149472.6746358  *ttt
+            lonven = 181.979800853  +  58517.8156748  *ttt
+            lonear = 100.466448494  +  35999.3728521  *ttt
+            lonmar = 355.433274605  +  19140.299314   *ttt
+            lonjup = 34.351483900  +   3034.90567464 *ttt
+            lonsat = 50.0774713998 +   1222.11379404 *ttt
+            lonurn = 314.055005137  +    428.466998313*ttt
+            lonnep = 304.348665499  +    218.486200208*ttt
+            precrate = 1.39697137214*ttt + 0.0003086*ttt2
+
+        # ---- iau 2000b theory
+        elif opt == '02':
+            # ------ form the delaunay fundamental arguments in deg
+            l = 134.96340251  + (1717915923.2178 *ttt) / 3600.0
+            l1 = 357.52910918  + (129596581.0481 *ttt) / 3600.0
+            f = 93.27209062  + (1739527262.8478 *ttt) / 3600.0
+            d = 297.85019547  + (1602961601.2090 *ttt) / 3600.0
+            omega = 125.04455501  + ( -6962890.5431 *ttt) / 3600.0
+
+            # ------ form the planetary arguments in deg
+            lonmer = 0.0
+            lonven = 0.0
+            lonear = 0.0
+            lonmar = 0.0
+            lonjup = 0.0
+            lonsat = 0.0
+            lonurn = 0.0
+            lonnep = 0.0
+            precrate = 0.0
+
+        # ---- iau 1996 theory
+        elif opt == '96':
+            l = 134.96340251  + (1717915923.2178 *ttt + \
+                     31.8792 *ttt2 + 0.051635 *ttt3 - 0.00024470 *ttt4) / 3600.0
+            l1 = 357.52910918  + (129596581.0481 *ttt - \
+                      0.5532 *ttt2 - 0.000136 *ttt3 - 0.00001149*ttt4)  / 3600.0
+            f = 93.27209062  + (1739527262.8478 *ttt - \
+                     12.7512 *ttt2 + 0.001037 *ttt3 + 0.00000417*ttt4)  / 3600.0
+            d = 297.85019547  + (1602961601.2090 *ttt - \
+                      6.3706 *ttt2 + 0.006593 *ttt3 - 0.00003169*ttt4)  / 3600.0
+            omega = 125.04455501  + ( -6962890.2665 *ttt + \
+                      7.4722 *ttt2 + 0.007702 *ttt3 - 0.00005939*ttt4)  / 3600.0
+            # ------ form the planetary arguments in deg
+            lonmer = 0.0
+            lonven = 181.979800853  +  58517.8156748  *ttt   # deg
+            lonear = 100.466448494  +  35999.3728521  *ttt
+            lonmar = 355.433274605  +  19140.299314   *ttt
+            lonjup = 34.351483900  +   3034.90567464 *ttt
+            lonsat = 50.0774713998 +   1222.11379404 *ttt
+            lonurn = 0.0
+            lonnep = 0.0
+            precrate = 1.39697137214*ttt + 0.0003086*ttt2
+
+         # ---- iau 1980 theory
+        elif opt == '80':
+            l = ((((0.064) * ttt + 31.310) * ttt
+                  + 1717915922.6330) * ttt) / 3600.0 + 134.96298139
+            l1 = ((((-0.012) * ttt - 0.577) * ttt
+                   + 129596581.2240) * ttt) / 3600.0 + 357.52772333
+            f = ((((0.011) * ttt - 13.257) * ttt
+                  + 1739527263.1370) * ttt) / 3600.0 + 93.27191028
+            d = ((((0.019) * ttt - 6.891) * ttt
+                  + 1602961601.3280) * ttt) / 3600.0 + 297.85036306
+            omega = ((((0.008) * ttt + 7.455) * ttt
+                      - 6962890.5390) * ttt) / 3600.0 + 125.04452222
+
+            # ------ form the planetary arguments in deg
+            lonmer = 252.3 + 149472.0 *ttt
+            lonven = 179.9 +  58517.8 *ttt   # deg
+            lonear = 98.4 +  35999.4 *ttt
+            lonmar = 353.3 +  19140.3 *ttt
+            lonjup = 32.3 +   3034.9 *ttt
+            lonsat = 48.0 +   1222.1 *ttt
+            lonurn = 0.0
+            lonnep = 0.0
+            precrate = 0.0
+
+        # ---- convert units to rad
+        l = np.fmod(l, 360.0)     * deg2rad # rad
+        l1 = np.fmod(l1, 360.0)    * deg2rad
+        f = np.fmod(f, 360.0)     * deg2rad
+        d = np.fmod(d, 360.0)     * deg2rad
+        omega = np.fmod(omega, 360.0) * deg2rad
+
+        lonmer = np.fmod(lonmer, 360.0) * deg2rad  # rad
+        lonven = np.fmod(lonven, 360.0) * deg2rad
+        lonear = np.fmod(lonear, 360.0) * deg2rad
+        lonmar = np.fmod(lonmar, 360.0) * deg2rad
+        lonjup = np.fmod(lonjup, 360.0) * deg2rad
+        lonsat = np.fmod(lonsat, 360.0) * deg2rad
+        lonurn = np.fmod(lonurn, 360.0) * deg2rad
+        lonnep = np.fmod(lonnep, 360.0) * deg2rad
+        precrate = np.fmod(precrate, 360.0) * deg2rad
+
+        if sh.iauhelp == 'y':
+            print('fa %11.7f  %11.7f  %11.7f  %11.7f  %11.7f deg \n'
+                  % (l*180/math.pi, l1*180/math.pi, f*180/math.pi,
+                     d*180/math.pi, omega*180/math.pi))
+            print('fa %11.7f  %11.7f  %11.7f  %11.7f deg \n'
+                  % (lonmer*180/math.pi, lonven*180/math.pi,
+                     lonear*180/math.pi, lonmar*180/math.pi))
+            print('fa %11.7f  %11.7f  %11.7f  %11.7f deg \n'
+                  % (lonjup*180/math.pi, lonsat*180/math.pi,
+                     lonurn*180/math.pi, lonnep*180/math.pi))
+            print('fa %11.7f  \n' % (precrate*180/math.pi))
+
+
+       # test if they are equivalent
+       # most around 1e-10, but some at 1e-6
+
+#         oo3600 = 1.0 / 3600.0
+#         deg2rad = math.pi / 180.0
+#         ttt = 0.34698738576
+#         twopi = 2.0 * math.pi
+#         lonmer = mod((908103.259872 + 538101628.688982 * ttt) * oo3600, 360)*deg2rad
+#         lonven = mod((655127.283060 + 210664136.433548 * ttt) * oo3600, 360)*deg2rad
+#         lonear = mod((361679.244588 + 129597742.283429 * ttt) * oo3600, 360)*deg2rad
+#         lonmar = mod((1279558.798488 + 68905077.493988 * ttt) * oo3600, 360)*deg2rad
+#         lonjup = mod((123665.467464 + 10925660.377991 * ttt) * oo3600, 360)*deg2rad
+#         lonsat = mod((180278.799480 + 4399609.855732 * ttt) * oo3600, 360)*deg2rad
+#         lonurn = mod((1130598.018396 + 1542481.193933 * ttt) * oo3600, 360)*deg2rad
+#         lonnep = mod((1095655.195728 + 786550.320744 * ttt) * oo3600, 360)*deg2rad
+#         precrate = ((1.112022 * ttt + 5028.8200) * ttt) * oo3600*deg2rad
+#
+#         lonmer1 = mod (4.402608842 + 2608.7903141574 * ttt , twopi)
+#         lonven1 = mod (3.176146697 + 1021.3285546211 * ttt , twopi)
+#         lonear1 = mod(1.753470314 + 628.3075849991 * ttt , twopi)
+#         lonmar1 = mod(6.203480913 + 334.0612426700 * ttt , twopi)
+#         lonjup1 = mod(0.599546497 + 52.9690962641 * ttt , twopi)
+#         lonsat1 = mod(0.874016757 + 21.3299104960 * ttt , twopi)
+#         lonurn1 = mod(5.481293872 + 7.4781598567 * ttt , twopi)
+#         lonnep1 = mod(5.311886287 + 3.8133035638 * ttt , twopi)
+#         precrate1 = (0.024381750 + 0.00000538691 * ttt) *ttt
+#
+#         lonmer-lonmer1
+#         lonven-lonven1
+#         lonear-lonear1
+#         lonmar-lonmar1
+#         lonjup-lonjup1
+#         lonsat-lonsat1
+#         lonurn-lonurn1
+#         lonnep-lonnep1
+#         precrate-precrate1
+#
+#
+
+
+        return l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
+            lonsat, lonurn, lonnep, precrate
+
+# -----------------------------------------------------------------------------
+#
+#                           procedure finitediff
+#
+# this procedure perturbs the components of the state vector for processing
+# with the finite differencing for the a matrix.
+#
+#  author        : david vallado                  719-573-2600   15 jan 2008
+#
+#  inputs          description                    range / units
+#    whichconst  - parameter for sgp4 constants   wgs72, wgs721, wgs84
+#    pertelem    - which element to perturb
+#    percentchg  - amount to modify the vectors   0.001
+#                  by in finite differencing
+#    deltaamtchg - tolerance for small value in
+#                  finite differencing            0.0000001
+#    statetype   - type of elements (equinoctial, etc)  'e', 't'
+#    xnom        - state vector                   varied
+#    scalef      - scale factor for state         all set to 1.0 now
+#
+#  outputs       :
+#    deltaamt    - amount each elemnt is perturbed
+#    satrec      - satellite record
+#
+#  locals        :
+#    jj          - index
+#
+#  coupling      :
+#    getgravconst- get the constants for a gravity field for sgp4
+#    state2satrec- conversion between state and satellite structure
+#    sgp4init    - intiialize sgp4 constants
+#
+#  references    :
+#    vallado       2007, 753-765
+# --------------------------------------------------------------------------- */
+
+def finitediff(pertelem=None, percentchg=None, deltaamtchg=None, xnom=None):
+
+    #  getgravconst(whichconst, tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2)
+
+    # chk if perturbing amt is too small. if so, up the percentchg and try again
+# this will execute 5 times, but leaves percentchg the same after each run
+    jj = 1
+    deltaamt = 0.0
+    xnomp = np.copy(xnom)
+    while ((np.abs(deltaamt) < deltaamtchg) and (jj < 5)):
+
+        if (jj > 1):
+            print('too large\n')
+        deltaamt = xnom[pertelem] * percentchg
+        xnomp[pertelem, 0] = xnom[pertelem, 0] + deltaamt
+        #          state2satrec(xnom, scalef, statetype, statesize, eTo, satrec)
+        if (np.abs(deltaamt) < deltaamtchg):
+            percentchg = percentchg * 1.4
+            print(' %i percentchg chgd %11.8f \n' % (jj, percentchg))
+        jj = jj + 1
+
+
+    # printf(" \n")
+    return deltaamt, xnomp
+
+
+def legPoly(x=None, i=None):
+    # LEGPOLY calculates the legendre polynomial of i-th order in x
+# x can be a scalar, a vector or a matrix
+
+    # pn : nth legendre polynomial
+# pn_1 : n-1 legendre polynomial
+# pn_p1 : n+1 legendre polynomial
+
+    # Konstantinos G.
+# Modified version of the C code in "Numerical recipes in C"
+
+    pn_p1 = 1
+    pn = np.ones((x.shape[1-1], x.shape[2-1]))
+    if (i > 0):
+        pn_1 = np.multiply(x, pn)
+        if (i == 1):
+            pn = pn_1
+        else:
+            for i in range(1, i+1):
+                pn_p1 = (np.multiply(np.multiply(x, (2 * i - 1)), pn_1)
+                         - (i - 1) * pn) / i
+                pn = pn_1
+                pn_1 = pn_p1
+            pn = pn_p1
+
+    return pn
+
+
+
+
+##############################################################################################################
+##############################################################################################################
+##############################################################################################################
+
+if __name__ == '__main__':
+
+
+  c2new, c3new = findc2c3(math.pi/7.0)
+  print("findc2c3 returned: ", c2new, c3new)
+
+
+  m, nu = newtone(0.4, 334.566986 * deg2rad)
+  print("newtone returned: ", m, nu)
+
+  e0, nu = newtonm(0.1, math.pi/2.0)
+  print("newtonm returned: ", e0, nu)
+
+  e0, ma = newtonnu(0.1, math.pi/2.0)
+  print("newtonnu returned: ", e0, ma)
+
+  jd = 60206
+
+  r1r, r1i, r2r, r2i, r3r, r3i = cubic(1, 2, 3, 4, 'I')
+  print("cubic returned: ", r1r, r1i, r2r, r2i, r3r, r3i)
+
+  r1r, r1i, r2r, r2i = quadric(1, 2, 3, 'I')
+  print("quadric returned: ", r1r, r1i, r2r, r2i)
+
+
+  ttt = (jd - 2451545.0)/ 36525.0  #0.34698738576
+  print("ttt is ", ttt)
+  opt = "80"
+
+  l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
+    lonsat, lonurn, lonnep, precrate = fundarg(ttt, opt)
+  print("fundarg returned ", l, l1, f, d, omega, lonmer, lonven,
+         lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate)
+
+  xp = math.pi
+  yp = math.pi
+
+  pm = polarm (xp, yp, ttt, opt)
+  print("polarm returned ", pm)
+
+
+  vec = np.array([1, 2, 3])
+  print("ORIG: ", vec)
+
+  print("ANGL---")
+  vecx = angl(vec, vec)
+  print("ZERO: ", vecx)
+
+  print("ROT1---")
+  vecx = rot1(vec, 0.0)
+  print("ZERO: ", vecx)
+  vecx = rot1(vec, math.pi/2.0)
+  print("PIO2: ", vecx)
+  vecx = rot1(vec, math.pi)
+  print("PI  : ", vecx)
+  vecx = rot1(vec, 2.0*math.pi)
+  print("2PI : ", vecx)
+
+  print("ROT2---")
+  vecx = rot2(vec, 0.0)
+  print("ZERO: ", vecx)
+  vecx = rot2(vec, math.pi/2.0)
+  print("PIO2: ", vecx)
+  vecx = rot2(vec, math.pi)
+  print("PI  : ", vecx)
+  vecx = rot2(vec, 2.0*math.pi)
+  print("2PI : ", vecx)
+
+  print("ROT3---")
+  vecx = rot3(vec, 0.0)
+  print("ZERO: ", vecx)
+  vecx = rot3(vec, math.pi/2.0)
+  print("PIO2: ", vecx)
+  vecx = rot3(vec, math.pi)
+  print("PI  : ", vecx)
+  vecx = rot3(vec, 2.0*math.pi)
+  print("2PI : ", vecx)
+
+
+  print("MAG---")
+  vec = np.array([math.sqrt(1.1e-16), math.sqrt(1.1e-16), math.sqrt(1.1e-16)])
+  vecx = mag(vec)
+  print("MAG : ", vecx)
+  vec = np.array([math.sqrt(1.0e-16/3.0), math.sqrt(1.0e-16/3.0),
+                  math.sqrt(1.0e-16/3.0)])
+  vecx = mag(vec)
+  print("MAG : ", vecx)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
