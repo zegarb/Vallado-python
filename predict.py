@@ -13,23 +13,31 @@ import spacemath_utils as smu
 
 testnum = 3
 if testnum == 3:
-    p = 8634.2349
-    ecc = 0.002
-    incl = 50.0 * deg2rad
-    omega = 115.0 * deg2rad
-    argp = 90.0 * deg2rad
-    nu = 0.0 * deg2rad
+    a = 6768.3568 
+    #p = 8634.2349
+    #ecc = 0.002
+    ecc = 0.0005770
+    p = a * (1 - ecc**2)
+    #incl = 50.0 * deg2rad
+    incl = 51.6190 *deg2rad
+    #omega = 115.0 * deg2rad
+    omega = 13.334 *deg2rad
+    #argp = 90.0 * deg2rad
+    argp = 102.5680 * deg2rad
+    #nu = 0.0 * deg2rad
+    m = 257.5950 * deg2rad
+    e0, nu = smu.newtonm(ecc,m)
     arglat = 0.0 * deg2rad
     truelon = 0.0 * deg2rad
     lonper = 0.0 * deg2rad
     reci,veci = sc.coe2rv(p,ecc,incl,omega,argp,nu,arglat,truelon,lonper)
-    reci = np.array([6585.038266,1568.184321,9.116355])
-    veci = np.array([- 1.1157766,4.6316816,6.0149576])
-    aeci = np.array([0.001,0.002,0.003])
+    #reci = np.array([6585.038266,1568.184321,9.116355])
+    #veci = np.array([- 1.1157766,4.6316816,6.0149576])
+    #aeci = np.array([0.001,0.002,0.003])
     year = 1997
     mon = 4
     day = 1
-    hr = 21
+    hr = 21 #UTC (EST = 16)
     min = 36
     sec = 0.0
     dut1 = - 0.2913774
@@ -58,72 +66,88 @@ print(' lod %8.6f s\n' % (lod))
 #            fprintf(1,'tdb #8.6f ttdb #16.12f jdtdb #18.11f\n',tdb,ttdb,jdtdb );
 
 # ---- perform prediction
-jdepoch,jdepochf = stu.jday(year,mon,day,hr,min,sec)
-dtsec = 120.0
 latgd = 42.38 * deg2rad
 lon = - 71.13 * deg2rad
-alt = 0.024
+alt = 0.024 #km (24m)
+dtsec = 120.0
+# timezone = 0 Assumming Epoch time (UTC)
+jdepoch,jdepochf = stu.jday(year,mon,day,hr,min,sec)
 
-rsecef,vsecef = obu.site(latgd,lon,alt)
-print('site ecef :\n',rsecef,vsecef)
-ndot = 0.0
-nddot = 0.0
-rho = 0.0
-az = 0.0
-el = 0.0
-vis = 'radar sun'
-for i in range(0,120):
-    #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
-#                reci = reci';
-#                veci = veci';
-    reci1,veci1 = obu.pkepler(reci,veci,ndot,nddot,i * dtsec)
-    if i == 106:
-        print(f'reci1 {i} x {reci1} {veci1} \n')
-    ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
-    # -------------------- convert eci to ecef --------------------
-    a = np.array([[0],[0],[0]])
-    #          reci1 = reci1';
-#          veci1 = veci1';
-    recef,vecef,aecef = sc.eci2ecef(reci1,veci1,a,ttt,jdut1 + jdut1frac,lod,xp,yp,terms,0.0,0.0)
-    if i == 106:
-        print(f'reci1 {i} x {recef} {vecef} \n')
-    # ------- find ecef range vector from site to satellite -------
-    rhoecef = recef - rsecef
-    # ------------- convert to sez for calculations ---------------
-    tempvec = smu.rot3(rhoecef,lon)
-    rhosez = smu.rot2(tempvec,halfpi - latgd)
-    if i == 106:
-        print(f'rhosez {i} x {rhosez} \n')
-    rho,az,el,drho,daz,del_ = sc.rv2razel(reci1,veci1,latgd,lon,alt,ttt,jdut1 + jdut1frac,lod,xp,yp,terms,0.0,0.0)
-    #                fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n',rho,az * rad2deg,el * rad2deg,drho,daz * rad2deg,del * rad2deg );
-    if az < 0.0:
-        az = az + twopi
-    if rhosez[2] > 0.0:
-        rsun,rtasc,decl = obu.sun(jdtt + jdttfrac)
+def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp, yp, lod, terms=0, timezone=0):
+    ndot = 0.0
+    nddot = 0.0
+    rho = 0.0
+    az = 0.0
+    el = 0.0
+    vis = 'radar sun'
+    
+
+    rsecef,vsecef = obu.site(latgd,lon,alt)
+    print('site ecef :\n',rsecef,vsecef)
+
+    year, mon, day, hr, min, sec = stu.invjday(jdepoch,jdepochf)
+    
+    for i in range(0,120):
+        #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
+    #                reci = reci';
+    #                veci = veci';
+        reci1,veci1 = obu.pkepler(reci,veci,ndot,nddot,i * dtsec)
+        ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac \
+            = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
+         # -------------------- convert eci to ecef --------------------
+        a = np.array([[0],[0],[0]])
+        recef,vecef,aecef = sc.eci2ecef(reci1,veci1,a,ttt,jdut1 + jdut1frac,lod,xp,yp,terms,0.0,0.0)
+        # ------- find ecef range vector from site to satellite -------
+        rhoecef = recef - rsecef
+          # ------------- convert to sez for calculations ---------------
+        tempvec = smu.rot3(rhoecef,lon)
+        rhosez = smu.rot2(tempvec,halfpi - latgd)
+
         if i == 106:
-            print(f'rsun{i} {rsun} \n')
-            print(f'rsun{i} {rsun*149597870.0} \n')
-        rsun = rsun * 149597870.0
-        rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + jdut1frac,lod,xp,yp,2)
+            print(f'reci1 {i} x {reci1} {veci1} \n')
+            y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+       
         if i == 106:
-            print(f'rseci {i} x {rseci} {vseci} \n')
-        if np.dot(rsun,rseci) > 0.0:
-            vis = 'radar sun'
-        else:
-            rxr = np.cross(rsun,reci1)
-            magrxr = math.mag(rxr)
-            magr = math.mag(reci1)
-            magrsun = math.mag(rsun)
-            zet = np.arcsin(magrxr / (magrsun * magr))
-            dist = math.mag(reci1) * np.cos(zet - halfpi)
+            print(f'recef {i} x {recef} {vecef} \n')
+        
+      
+        if i == 106:
+            print(f'rhosez {i} x {rhosez} \n')
+
+        rho,az,el,drho,daz,del_ = sc.rv2razel(reci1,veci1,latgd,lon,alt,ttt,jdut1 + jdut1frac,lod,xp,yp,terms,0.0,0.0)
+        # fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n',rho,az * rad2deg,el * rad2deg,drho,daz * rad2deg,del * rad2deg );
+        if az < 0.0:
+            az = az + twopi
+        if rhosez[2] > 0.0:
+            rsun,rtasc,decl = obu.sun(jdtt + jdttfrac)
             if i == 106:
-                print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
-            if dist > re:
-                vis = 'visible'
+                print(f'rsun{i} {rsun} \n')
+                print(f'rsun{i} {rsun*au} \n')
+            rsun = rsun * au
+            rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + jdut1frac,lod,xp,yp,2)
+            if i == 106:
+                print(f'rseci {i} x {rseci} {vseci} \n')
+            if np.dot(rsun,rseci) > 0.0:
+                vis = 'radar sun'
             else:
-                vis = 'radar night'
-    else:
-        vis = 'not visible'
+                rxr = np.cross(rsun,reci1)
+                magrxr = math.mag(rxr)
+                magr = math.mag(reci1)
+                magrsun = math.mag(rsun)
+                zet = np.arcsin(magrxr / (magrsun * magr))
+                dist = math.mag(reci1) * np.cos(zet - halfpi)
+                if i == 106:
+                    print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
+                if dist > re:
+                    vis = 'visible'
+                else:
+                    vis = 'radar night'
+        else:
+            vis = 'not visible'
+    
     y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
     print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
 
+    return jdut1, jdut1frac, rho, az, el, vis
+
+predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp, yp, terms, timezone=0)
