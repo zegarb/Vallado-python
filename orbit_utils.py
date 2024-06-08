@@ -2996,11 +2996,11 @@ def kepler(ro, vo, dtseco):
 def pkepler(ro, vo, dtsec, ndot, nddot):
 
     p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper = sc.rv2coe(ro, vo)
-    print(p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper)
-    print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg\n')
-    print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % \
-            (p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
-    print("arglat, truelon, lonper: ", arglat, truelon, lonper)
+    #print(p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper)
+    #print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg\n')
+    #print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % \
+    #        (p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
+    #print("arglat, truelon, lonper: ", arglat, truelon, lonper)
 
     n = math.sqrt(mu/(a*a*a))
 
@@ -9202,7 +9202,7 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
 #
 #  inputs          description                              range / units
 #    reci        - sat ijk position vector                   km
-#    rsun        - sun ijk inertial position vector          au
+#    rsun        - sun ijk inertial position vector          km
 #    angumb      - umbra angle                               rad
 #    angpen      - penumbra angle                            rad
 #   

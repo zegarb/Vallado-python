@@ -3952,7 +3952,7 @@ def rv2coe (r, v):
         #end
 
 
-        print("Orbit type in rv2coe is ", typeorbit)
+        #print("Orbit type in rv2coe is ", typeorbit)
 
 
         # ----------  find right ascension of ascending node ------------
@@ -3982,10 +3982,10 @@ def rv2coe (r, v):
         # ------------  find true anomaly at epoch    -------------
         if typeorbit.startswith('e'):
             nu = smu.angl(ebar, r)
-            print("nu init is ", nu)
+        #    print("nu init is ", nu)
             if (rdotv < 0.0):
                 nu = twopi - nu
-                print("nu now is ", nu)
+        #        print("nu now is ", nu)
             #end
         # "True anomaly is not defined for circular orbits because
         # they have no periapsis. We can overcome this limitation by selecting a
@@ -4047,8 +4047,8 @@ def rv2coe (r, v):
 
         # ------------ find mean anomaly for all orbits -----------
        # if (typeorbit(1:1) == 'e')
-        print("ecc =", ecc)
-        print("nu =", nu)
+       # print("ecc =", ecc)
+       # print("nu =", nu)
         e, m = smu.newtonnu(ecc, nu)
        # end
 
@@ -4354,7 +4354,7 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
             argp = lonper
             omega = 0.0
 
-    print("here, argp =%.3f, omega =%.3f, nu =%.3f" % (argp, omega, nu))
+    #print("here, argp =%.3f, omega =%.3f, nu =%.3f" % (argp, omega, nu))
     # ----------  form pqw position and velocity vectors ----------
     cosnu = math.cos(nu)
     sinnu = math.sin(nu)
@@ -5885,11 +5885,11 @@ def rv2razel (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms,
               ddpsi, ddeps):
     # --------------------- implementation ------------------------
     # ----------------- get site vector in ecef -------------------
-    rsecef, vsecef = obu.site (latgd, lon, alt)
+    rsecef, vsecef = obu.site(latgd, lon, alt)
     #print('rsecef    %14.7f %14.7f %14.7f \n', rsecef)
 
     # -------------------- convert eci to ecef --------------------
-    a = np.zeros((3, 1))
+    a = np.array([[0],[0],[0]])
     recef, vecef, aecef = eci2ecef(reci, veci, a, ttt, jdut1, lod, xp, yp, terms,
                                  ddpsi, ddeps)
 

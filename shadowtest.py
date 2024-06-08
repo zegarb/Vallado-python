@@ -27,9 +27,9 @@ sec = 0.0
 jd,jdfrac = stu.jday(year,mon,day,hr,min,sec)
 rsun,rtasc,decl = obu.sun(jd + jdfrac)
 
-
+# Changed rsun to units of km (doesn't effect math)
 # now for algorithm 34
-pen,umb = obu.shadow(reci, rsun, angumb, angpen)
+pen,umb = obu.shadow(reci, rsun*au, angumb, angpen)
 
 print('U %r, P %r' % (pen,umb))
 #s = 2.0 * smu.mag(reci) * ang1
