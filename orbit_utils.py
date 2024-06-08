@@ -9191,6 +9191,60 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
     return atwa, atwb, atw, b, drng2, daz2, del2
 
 
+# ------------------------------------------------------------------------------
+#
+#                           function shadow
+#
+#  this function detemines whether a satellite falls in the umbral or penumbral
+#  regions if it is ecclipsed by the earth 
+#
+#  author        : david vallado                  719-573-2600    date?
+#
+#  inputs          description                              range / units
+#    reci        - sat ijk position vector                   km
+#    rsun        - sun ijk inertial position vector          au
+#    angumb      - umbra angle                               rad
+#    angpen      - penumbra angle                            rad
+#   
+#
+#  outputs       :
+#    umb         - umbral region                             true/false
+#    pen         - penumbral region                          true/false
+#
+#  locals        :
+#
+#  references    :
+#    vallado       2013, 301-302 alg 34
+#
+# ------------------------------------------------------------------------------
+
+
+def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
+
+    umbvert = 0.0
+    penvert = 0.0
+    umb = False
+    pen = False
+
+    if np.dot(reci,rsun) < 0.0:
+        ang1 = smu.angl(- rsun,reci)
+        sathoriz = smu.mag(reci) * np.cos(ang1)
+        satvert = smu.mag(reci) * np.sin(ang1)
+        x = re / np.sin(angpen)
+        penvert = np.tan(angpen) * (x + sathoriz)
+
+        if satvert <= penvert:
+            pen = True
+            y = re / np.sin(angumb)
+            umbvert = np.tan(angumb) * (y - sathoriz)
+            if satvert <= umbvert:
+                umb = True
+
+    print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi,sathoriz,satvert,penvert,umbvert,umb,pen))
+    
+    return pen, umb
+
+
 
 
 ##############################################################################################################

@@ -142,6 +142,11 @@ massmoon = 7.3483e22
 musun = 1.32712428e11
 mumoon = 4902.799
 
+#Umbra and penumbra angle using mean sun-earth distance
+angumbearth = 0.004695073367587701 #rad
+angpenearth = 0.004609804797371252 #rad
+
+
 '''
 % ------------------------------------------------------------------------------
 %
