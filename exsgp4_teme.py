@@ -6,7 +6,6 @@ from space_constants import *
 import space_conversions as sc
 import spacemath_utils as smu
 import spacetime_utils as stu
-from sgp4 import sgp4
 
 
 #
@@ -116,7 +115,7 @@ startmfe,stopmfe,deltamin,satrec = sc.twoline2rv(longstr1,longstr2,typerun,'e',o
 print('%11.7f %11.7f %11.7f \n' % (startmfe,stopmfe,deltamin))
 print(' %d\n' % (satrec['satnum']))
 #      // call the propagator to get the initial state vector value
-satrec,ro,vo = sgp4(satrec,0.0)
+satrec,ro,vo = obu.sgp4(satrec,0.0)
 print(' %16.8f %16.8f %16.8f %16.8f %12.9f %12.9f %12.9f\n' % (satrec['t'],ro[0],ro[1],ro[2],vo[0],vo[1],vo[2]))
 tsince = startmfe
 #  // check so the first value isn't written twice
@@ -170,7 +169,7 @@ while ((tsince < stopmfe)):
     tsince = tsince + deltamin
     if (tsince > stopmfe):
         tsince = stopmfe
-    satrec,ro,vo = sgp4(satrec,tsince)
+    satrec,ro,vo = obu.sgp4(satrec,tsince)
     if (satrec['error'] == 0):
         if ((typerun != 'e') and (typerun != 'd')):
             jd = satrec['jdsatepoch']

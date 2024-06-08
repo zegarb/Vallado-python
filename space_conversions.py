@@ -7,7 +7,6 @@ import spacemath_utils as smu
 import spacetime_utils as stu
 import orbit_utils as obu
 from space_constants import sethelp as sh
-from sgp4init import sgp4init
 
 
 
@@ -7580,7 +7579,7 @@ def twoline2rv(longstr1, longstr2, typerun, typeinput, opsmode, whichconst):
 
     #     // ------------- initialize the orbit at sgp4epoch --------------
     sgp4epoch = satrec['jdsatepoch'] + satrec['jdsatepochf'] - 2433281.5 # days since 0 Jan 1950
-    satrec = sgp4init(whichconst, opsmode, satrec,
+    satrec = obu.sgp4init(whichconst, opsmode, satrec,
                         satrec['jdsatepoch'] + satrec['jdsatepochf'] - 2433281.5,
                         satrec['bstar'], satrec['ndot'], satrec['nddot'],
                         satrec['ecco'], satrec['argpo'], satrec['inclo'],
