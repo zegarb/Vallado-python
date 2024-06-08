@@ -58,6 +58,16 @@ print('np: %11.7f rad/s    cot2s: %11.7f    s: %11.6f deg' \
       '       w: %11.6f  deg\n\nb: %11.6f rad \n\n' \
       %(np, cot2s, s * rad2deg, w * rad2deg, b))
 
+# Function Check (All math above is accounted for within function)
+# --- newtonm - Finds eccentric and true anomaly given ecc and mean anomaly.
+print('Ex 2-2 Equivalent Function Test:\n')
+b, nu = newtonm(ecc,np*dt)
+print('               m               e           nu           b   \n')
+print('newm  %14.8f %14.8f %14.8f %14.8f  rad \n'
+      % ((np*dt), ecc, nu, b))
+print('newm  %14.8f %14.8f %14.8f %14.8f  deg \n'
+      % ((np*dt) * rad2deg, ecc, nu * rad2deg, b * rad2deg ))
+
 
 # -------------------- Related Tests --------------------
 print('Related tests:\n')

@@ -9240,7 +9240,7 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
             if satvert <= umbvert:
                 umb = True
 
-    print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi,sathoriz,satvert,penvert,umbvert,umb,pen))
+    #print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi,sathoriz,satvert,penvert,umbvert,umb,pen))
     
     return pen, umb
 
