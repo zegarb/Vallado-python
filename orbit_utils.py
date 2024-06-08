@@ -158,14 +158,13 @@ def findtof (ro, r, p):
 def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
     # -------------------------  implementation   -------------------------
     error = 'ok'
+
     if (kind == 'k'):
-        outfile = open('makeorbrvKep.out', 'wt')
-    else:
-        if (kind == 'p'):
-            outfile = open('makeorbrvJ2.out', 'wt')
-        else:
-            if (kind == 'j'):
-                outfile = open('makeorbrvJ4.out', 'wt')
+        outfile = open(os.path.join(os.path.dirname(__file__), "data", 'makeorbrvKep.out'), 'wt')
+    elif (kind == 'p'):
+        outfile = open(os.path.join(os.path.dirname(__file__), "data", 'makeorbrvJ2.out'), 'wt')
+    elif (kind == 'j'):
+        outfile = open(os.path.join(os.path.dirname(__file__), "data", 'makeorbrvJ4.out'), 'wt')
 
     # --------------- approximate ast with gst for this simple demo --------------
 #    gmst = gstime(jd)
@@ -201,10 +200,10 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
         jdut1 = jd + dtsec / 86400.0
         # ----------- propogate satellite forward by time ----------------
         if (kind == 'k'):
-            reci1, veci1 = kepler(reci, veci, dtsec)
-        if (kind == 'p'):
+            reci1, veci1, errk = kepler(reci, veci, dtsec)
+        elif (kind == 'p'):
             reci1, veci1 = pkepler(reci, veci, dtsec, ndot, nddot)
-        if (kind == 'j'):
+        elif (kind == 'j'):
             reci1, veci1 = pkeplerj4(reci, veci, dtsec, ndot, nddot)
         #        fprintf(1, 'reci1 #4i x #11.7f  #11.7f  #11.7f  #11.7f  #11.7f  #11.7f \n', i, reci1, veci1)
 #        gmst = gstime(jd+dtsec/86400.0)
@@ -8221,7 +8220,7 @@ if __name__ == '__main__':
   raan = 80.0
   rp = 1.0
 
-  x, y, z = makeorbitrv(2455545.0, 'j',
+  x, y, z = makeorbitrv(2455545.0, 'k',
                       [5003.400903511, -3817.812007872, 4720.200666830],
                       [5.489294908, 3.005055561, -3.39013016])
   print("makeorbitrv returned ", x, y, z)
