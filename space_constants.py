@@ -142,3 +142,30 @@ massmoon = 7.3483e22
 musun = 1.32712428e11
 mumoon = 4902.799
 
+'''
+% ------------------------------------------------------------------------------
+%
+%                           function sethelp
+%
+%  this function sets help flags to control intermediate output during
+%  debugging
+%
+%  author        : david vallado                  719-573-2600   16 jul 2002
+%
+%  revisions
+%
+%  inputs        : description                    range / units
+%    none
+%
+%  outputs       :
+%    iauhelp
+%
+%
+% sethelp;
+% ------------------------------------------------------------------------------
+'''
+class sethelp():
+  iauhelp = 'n';
+  iaupnhelp = 'y';
+  show = 'n';
+

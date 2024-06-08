@@ -2,8 +2,8 @@ import math, os
 import numpy as np
 from pprint import pprint as pp
 from space_constants import *
+from space_constants import sethelp as sh
 import spacetime_utils as stu
-import sethelp as sh
 import spacemath_utils as smu
 import space_conversions as sc
 

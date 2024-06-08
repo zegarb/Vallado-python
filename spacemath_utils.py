@@ -5,7 +5,7 @@ from space_constants import *
 import orbit_utils as obu
 
 #some debug stuff
-import sethelp as sh
+from space_constants import sethelp as sh
 
 
 # * ------------------------------------------------------------------------------

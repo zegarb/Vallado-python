@@ -6,7 +6,7 @@ import orbit_utils
 import spacemath_utils as smu
 import spacetime_utils as stu
 import orbit_utils as obu
-import sethelp as sh
+from space_constants import sethelp as sh
 from sgp4init import sgp4init
 
 
