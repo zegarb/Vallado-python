@@ -22,8 +22,8 @@
 |  20  |  pg 198 (225)  | RADtoHMS                                     | rad2hms()                            | ex3_9.py                        | pg 199 (226)               |   Y   |
 |  21  |  pg 199 (226)  | TimeToHMS                                    | sec2hms()                            | ex3_10.py                       | pg 199 (226)               |   Y   |
 |  22  |  pg 202 (229)  | JDtoGregorianDate                            | invjday()                            | ex3_13.py                       | pg 203 (230)               |   Y   |
-|  23  |  pg 219 (246)  | IAU-200, CIO-Based                           | N/A                                  | ex3_14.py                       | pg 220 (247)               |   -   |
-|  24  |  pg 228 (255)  | IAU-76/FK5 Reduction                         | N/A                                  | ex3_15.py                       | pg 230 (257)               |   -   |
+|  23  |  pg 219 (246)  | IAU-2000, CIO-Based                          | ecef2eci() (IAU-2006)                | ex3_14.py                       | pg 220 (247)               |   -   |
+|  24  |  pg 228 (255)  | IAU-76/FK5 Reduction                         | eci2ecef()                           | ex3_15.py                       | pg 230 (257)               |   -   |
 |  25  |  pg 259 (286)  | Geocentric RaDec                             | rv2radec()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  26  |  pg 260 (287)  | Topocentric                                  | rv2tradec()                          | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  27  |  pg 265 (292)  | RAZEL                                        | rv2razel()                           | ex4_1.py                        | pg 273 (300)               |   N   |
