@@ -2949,9 +2949,9 @@ def kepler(ro, vo, dtseco):
 #  inputs          description                    range / units
 #    ro          - original position vector       km
 #    vo          - original velocity vector       km/sec
+#    dtsec       - change in time                 sec
 #    ndot        - time rate of change of n       rad/sec
 #    nddot       - time accel of change of n      rad/sec2
-#    dtsec       - change in time                 sec
 #
 #  outputs       :
 #    r           - updated position vector        km
@@ -9196,7 +9196,7 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
 #                           function shadow
 #
 #  this function detemines whether a satellite falls in the umbral or penumbral
-#  regions if it is ecclipsed by the earth 
+#  regions if it is ecclipsed by the earth
 #
 #  author        : david vallado                  719-573-2600    date?
 #
@@ -9205,7 +9205,7 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
 #    rsun        - sun ijk inertial position vector          km
 #    angumb      - umbra angle                               rad
 #    angpen      - penumbra angle                            rad
-#   
+#
 #
 #  outputs       :
 #    umb         - umbral region                             true/false
@@ -9241,7 +9241,7 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
                 umb = True
 
     #print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi,sathoriz,satvert,penvert,umbvert,umb,pen))
-    
+
     return pen, umb
 
 

@@ -13,7 +13,7 @@ import spacemath_utils as smu
 
 testnum = 3
 if testnum == 3:
-    a = 6768.3568 
+    a = 6768.3568
     #p = 8634.2349
     #ecc = 0.002
     ecc = 0.0005770
@@ -80,18 +80,19 @@ def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp
     az = 0.0
     el = 0.0
     vis = 'radar sun'
-    
+
 
     rsecef,vsecef = obu.site(latgd,lon,alt)
     print('site ecef :\n',rsecef,vsecef)
+    print()
 
     year, mon, day, hr, min, sec = stu.invjday(jdepoch,jdepochf)
-    
+
     for i in range(0,120):
         #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
     #                reci = reci';
     #                veci = veci';
-        reci1,veci1 = obu.pkepler(reci,veci,ndot,nddot,i * dtsec)
+        reci1,veci1 = obu.pkepler(reci,veci,i * dtsec,ndot,nddot)
         ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac \
             = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
          # -------------------- convert eci to ecef --------------------
@@ -104,13 +105,14 @@ def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp
         rhosez = smu.rot2(tempvec,halfpi - latgd)
 
         if i == 106:
-            print(f'reci1 {i} x {reci1} {veci1} \n')
+            print(f'reci1 {i} x {reci1} {veci1}')
             y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
-       
+            print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
+
         if i == 106:
             print(f'recef {i} x {recef} {vecef} \n')
-        
-      
+
+
         if i == 106:
             print(f'rhosez {i} x {rhosez} \n')
 
@@ -144,7 +146,7 @@ def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp
                     vis = 'radar night'
         else:
             vis = 'not visible'
-    
+
     y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
     print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
 
