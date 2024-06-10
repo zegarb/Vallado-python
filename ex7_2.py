@@ -60,7 +60,7 @@ if casenum == 0:
                       "Sat11Access.dat")
 else:
     fn = os.path.join(os.path.dirname(__file__), "data",
-                      "Sat11Ex" + str(casenum + 1) + ".dat")
+                      "Sat11Ex" + str(casenum) + ".dat")
 filedat = np.loadtxt(fn)
 print(filedat)
 if casenum == 0:

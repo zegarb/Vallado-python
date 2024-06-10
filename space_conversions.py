@@ -21,10 +21,10 @@ from space_constants import sethelp as sh
 #  revisions
 #
 #  inputs          description                    range / units
-#    kpin        - kp
+#    apin        - ap
 #
 #  outputs       :
-#    apout       - ap
+#    kpout       - kp
 #
 #  locals        :
 #                -
@@ -4175,7 +4175,7 @@ def rv2coeh(r=None, v=None, re=None, mu=None):
             # - elliptical, parabolic, hyperbolic equatorial --
             if (incl < small) or (np.abs(incl - np.pi) < small):
                 typeorbit = 'ee'
-        
+
         print("tyeporbit is ",typeorbit)
         # ----------  find right ascension of ascending node ------------
         if (magn > small):
