@@ -1350,9 +1350,9 @@ def cubicspl(p1=None, p2=None, p3=None, p4=None):
 #       acu3 = ((t2^2-t2)*(p2-p1) + (t1-t1^2)*(p3-p1) + (t1^2*t2-t1*t2^2)*(p4-p1)) / det
 
     acu0 = p2
-    acu1 = - p1 / 3.0 - 0.5 * p2 + p3 - p4 / 6.0
+    acu1 = -p1 / 3.0 - 0.5 * p2 + p3 - p4 / 6.0
     acu2 = 0.5 * p1 - p2 + 0.5 * p3
-    acu3 = - p1 / 6.0 + 0.5 * p2 - 0.5 * p3 + p4 / 6.0
+    acu3 = -p1 / 6.0 + 0.5 * p2 - 0.5 * p3 + p4 / 6.0
     return acu0, acu1, acu2, acu3
 
 

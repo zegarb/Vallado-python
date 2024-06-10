@@ -1,329 +1,331 @@
 from space_conversions import *
 from pprint import pprint as pp
 
-if __name__ == '__main__':
+latgc = math.pi*0.20
+latgd = gc2gd(latgc)
+print(latgd, latgc)
+latgc = gd2gc(latgd)
+print(latgd, latgc)
+
+apin = 250
+print(apin)
+kpout = ap2kp(apin)
+print(kpout)
+apout = kp2ap(kpout)
+print(apout)
+
+# LEO test
+recef = np.array([[-1033.4793830],  [7901.2952754],  [6380.3565958]])
+vecef = np.array([[-3.225636520],  [-2.872451450],   [5.531924446]])
+aecef = np.array([[0.001],[0.002],[0.003]])
+
+conv = math.pi / (180.0*3600.0)
+
+year=2004
+mon = 4
+day = 6
+hr =  7
+min= 51
+sec= 28.386009
+
+dut1 = -0.4399619  # sec
+dat  = 32         # sec
+xp   = -0.140682 * conv  # " to rad
+yp   =  0.333309 * conv
+lod  =  0.0015563
+ddpsi = -0.052195 * conv  # " to rad
+ddeps = -0.003875 * conv
+ddx = -0.000205 * conv  # " to rad
+ddy = -0.000136 * conv
+order = 106
+eqeterms = 2
+timezone=0
+opt = 'c' # specify the iau00 cio approach
+
+print('input data \n\n')
+print(' year %5i '% year)
+print(' mon %4i '% mon)
+print(' day %3i '% day)
+print(' %3i:%2i:%8.6f\n'% (hr, min, sec))
+print(' dut1 %8.6f s'% dut1)
+print(' dat %3i s'% dat)
+print(' xp %8.6f "'% (xp / conv))
+print(' yp %8.6f "'% (yp / conv))
+print(' lod %8.6f s\n'% lod)
+print(' ddpsi %8.6f " ddeps  %8.6f\n'% (ddpsi/conv, ddeps/conv))
+print(' ddx   %8.6f " ddy    %8.6f\n'% (ddx/conv, ddy/conv))
+print(' order %3i  eqeterms %3i  opt %3s \n'% (order, eqeterms, opt))
+print('units are km and km/s and km/s2\n')
+
+# -------- convtime    - convert time from utc to all the others
+print('convtime results\n')
+ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, tdb, \
+    ttdb, jdtdb, jdtdbfrac \
+    = stu.convtime(year, mon, day, hr, min, sec, timezone, dut1, dat)
+print('ut1 %8.6f tut1 %16.12f jdut1 %18.11f '% (ut1, tut1, jdut1+jdut1frac))
+
+print('hms2rad, rad2hms')
+hms = hms2rad(hr, min, sec)
+print(hms)
+hr, min, sec = rad2hms(hms)
+print('%f hr, %f min, %f sec\n' % (hr, min, sec))
 
 
-    #i dont think these are accurate!!!-jmb
-    latgc = math.pi*0.20
-    latgd = gc2gd(latgc)
-    print(latgd, latgc)
-    latgc = gd2gc(latgd)
-    print(latgd, latgc)
-
-
-    # LEO test
-    recef = np.array([[-1033.4793830],  [7901.2952754],  [6380.3565958]])
-    vecef = np.array([[-3.225636520],  [-2.872451450],   [5.531924446]])
-    aecef = np.array([[0.001],[0.002],[0.003]])
-
-    conv = math.pi / (180.0*3600.0)
-
-    year=2004
-    mon = 4
-    day = 6
-    hr =  7
-    min= 51
-    sec= 28.386009
-
-    dut1 = -0.4399619  # sec
-    dat  = 32         # sec
-    xp   = -0.140682 * conv  # " to rad
-    yp   =  0.333309 * conv
-    lod  =  0.0015563
-    ddpsi = -0.052195 * conv  # " to rad
-    ddeps = -0.003875 * conv
-    ddx = -0.000205 * conv  # " to rad
-    ddy = -0.000136 * conv
-    order = 106
-    eqeterms = 2
-    timezone=0
-    opt = 'c' # specify the iau00 cio approach
-
-    print('input data \n\n')
-    print(' year %5i '% year)
-    print(' mon %4i '% mon)
-    print(' day %3i '% day)
-    print(' %3i:%2i:%8.6f\n'% (hr, min, sec))
-    print(' dut1 %8.6f s'% dut1)
-    print(' dat %3i s'% dat)
-    print(' xp %8.6f "'% (xp / conv))
-    print(' yp %8.6f "'% (yp / conv))
-    print(' lod %8.6f s\n'% lod)
-    print(' ddpsi %8.6f " ddeps  %8.6f\n'% (ddpsi/conv, ddeps/conv))
-    print(' ddx   %8.6f " ddy    %8.6f\n'% (ddx/conv, ddy/conv))
-    print(' order %3i  eqeterms %3i  opt %3s \n'% (order, eqeterms, opt))
-    print('units are km and km/s and km/s2\n')
-
-    # -------- convtime    - convert time from utc to all the others
-    print('convtime results\n')
-    ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, tdb, \
-        ttdb, jdtdb, jdtdbfrac \
-        = stu.convtime(year, mon, day, hr, min, sec, timezone, dut1, dat)
-    print('ut1 %8.6f tut1 %16.12f jdut1 %18.11f '% (ut1, tut1, jdut1+jdut1frac))
-
-    print('hms2rad, rad2hms')
-    hms = hms2rad(hr, min, sec)
-    print(hms)
-    hr, min, sec = rad2hms(hms)
-    print('%f hr, %f min, %f sec\n' % (hr, min, sec))
-
-
-    print('input vectors:')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
+print('input vectors:')
+pp(recef)
+pp(vecef)
+pp(aecef)
 
 
 #jdut1 2453101.82740678312
 
 
-    nu = lon2nu (jdut1, 7.020438698 * deg2rad, 0.070273056 * deg2rad, 19.90450011 * deg2rad,
-                 352.5056022 * deg2rad)
-    print("nu is ", nu)
-    lon = nu2lon(jdut1,nu,0.070273056 * deg2rad, 19.90450011 * deg2rad, 352.5056022 * deg2rad)
-    print("lon is ", lon)
+nu = lon2nu (jdut1, 7.020438698 * deg2rad, 0.070273056 * deg2rad, 19.90450011 * deg2rad,
+                352.5056022 * deg2rad)
+print("nu is ", nu)
+lon = nu2lon(jdut1,nu,0.070273056 * deg2rad, 19.90450011 * deg2rad, 352.5056022 * deg2rad)
+print("lon is ", lon)
 
-    #--------------------------------ecef2--------------------------------------------------------------
-    rpef, vpef, apef = ecef2pef(recef, vecef, aecef, '80', xp, yp, ttt)
-    print('ecef2pef returned: ')
-    pp(rpef)
-    pp(vpef)
-    pp(apef)
+#--------------------------------ecef2--------------------------------------------------------------
+rpef, vpef, apef = ecef2pef(recef, vecef, aecef, '80', xp, yp, ttt)
+print('ecef2pef returned: ')
+pp(rpef)
+pp(vpef)
+pp(apef)
 
-    reci,veci,aeci = pef2eci(rpef,vpef,apef,ttt,jdut1,lod,eqeterms,ddpsi,ddeps)
-    print('pef2eci returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-
-    rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6a", ttt,jdut1,lod,
-                               eqeterms,ddpsi,ddeps)
-    print('eci2pef 6a returned: ')
-    pp(rpef)
-    pp(vpef)
-    pp(apef)
-
-    rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6b", ttt,jdut1,lod,
-                               eqeterms,ddpsi,ddeps)
-    print('eci2pef 6b returned: ')
-    pp(rpef)
-    pp(vpef)
-    pp(apef)
-
-    rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6c", ttt,jdut1,lod,
-                               eqeterms,ddpsi,ddeps,ddx,ddy)
-    print('eci2pef 6c returned: ')
-    pp(rpef)
-    pp(vpef)
-    pp(apef)
-
-    rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'b')
-    print('ecef2cirsiau06 returned: ')
-    pp(rcirs)
-    pp(vcirs)
-    pp(acirs)
-
-    rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'a', ddx, ddy)
-    print('eci2cirsiau06 a returned: ')
-    pp(rcirs)
-    pp(vcirs)
-    pp(acirs)
-
-    reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'a', ddx, ddy)
-    print('cirs2eciiau06 a returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-    rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'b', ddx, ddy)
-    print('eci2cirsiau06 b returned: ')
-    pp(rcirs)
-    pp(vcirs)
-    pp(acirs)
-
-    reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'b', ddx, ddy)
-    print('cirs2eciiau06 b returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-    rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'c', ddx, ddy)
-    print('eci2cirsiau06 c returned: ')
-    pp(rcirs)
-    pp(vcirs)
-    pp(acirs)
-
-    reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'c', ddx, ddy)
-    print('cirs2eciiau06 c returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-    recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'a')
-    print('cirs2ecefiau06 returned: ')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'b')
-    print('cirs2ecefiau06 returned: ')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
-                                   lod,xp,yp,'a', ddx, ddy)
-    print('ecef2eciiau06 a returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-    recef,vecef,aecef = eci2ecefiau06(reci,veci,aeci,ttt,jdut1,
-                                      lod,xp,yp,'a', ddx, ddy)
-    print('eci2ecefiau06 a returned: ')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
-                                   lod,xp,yp,'b', ddx, ddy)
-    print('ecef2eciiau06 b returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-    recef,vecef,aecef = eci2ecefiau06(reci,veci,aeci,ttt,jdut1,
-                                      lod,xp,yp,'b', ddx, ddy)
-    print('eci2ecefiau06 b returned: ')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
-                                   lod,xp,yp,'c', ddx, ddy)
-    print('ecef2eciiau06 c returned: ')
-    pp(reci)
-    pp(veci)
-    pp(aeci)
-
-    recef,vecef,aecef = eci2ecefiau06(reci,veci,aeci,ttt,jdut1,
-                                      lod,xp,yp,'c', ddx, ddy)
-    print('eci2ecefiau06 c returned: ')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    rteme, vteme, ateme = ecef2teme(recef, vecef, aecef, ttt,
-                                    jdut1+jdut1frac, lod, xp, yp, eqeterms)
-    print('ecef2teme returned: ')
-    pp(rteme)
-    pp(vteme)
-    pp(ateme)
-
-    recef, vecef, aecef = teme2ecef(rteme, vteme, ateme, ttt,
-                                    jdut1+jdut1frac, lod, xp, yp, eqeterms)
-    print('teme2ecef returned: ')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    rtod, vtod, atod = ecef2tod(recef, vecef, aecef, ttt,
-                                jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
-    print('ecef2tod returned: ')
-    pp(rtod)
-    pp(vtod)
-    pp(atod)
-
-    # recef, vecef, aecef = tod2ecef()
-
-    rmod, vmod, amod = ecef2mod(recef, vecef, aecef, ttt,
-                                jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
-    print('ecef2mod returned: ')
-    pp(rmod)
-    pp(vmod)
-    pp(amod)
-
-    # recef, vecef, aecef = mod2ecef()
-
-    recig, vecig, aecig = ecef2eci(recef, vecef, aecef, ttt,
-                                   jdut1+jdut1frac, lod, xp, yp, 2,
-                                   ddpsi, ddeps)
-    print('ecef2eci returned: ')
-    pp(recig)
-    pp(vecig)
-    pp(aecig)
-
-    recef, vecef, aecef = eci2ecef(recig, vecig, aecig, ttt,
-                                   jdut1+jdut1frac, lod, xp, yp, 2,
-                                   ddpsi, ddeps)
-    print('eci2ecef returned:')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    #--------------------------------eci2--------------------------------------------------------------
-    rteme, vteme, ateme = eci2teme(recig, vecig, aecig, ttt, ddpsi, ddeps)
-    print('eci2teme returned:')
-    pp(rteme)
-    pp(vteme)
-    pp(ateme)
-
-    recig, vecig, aecig, teme2eci(rteme, vteme, ateme,
-                                  tt, ddpsi, ddeps)
-    print('teme2eci returned:')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    rtod, vtod, atod = eci2tod(recig, vecig, aecig, '80',
-                               ttt, ddpsi, ddeps, ddx, ddy)
-    print('eci2tod returned:')
-    pp(rtod)
-    pp(vtod)
-    pp(atod)
-
-    recig, vecig, aecig = tod2eci(rtod, vtod, atod, ttt, ddpsi, ddeps)
-    print('tod2eci returned:')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    rmod, vmod, amod = eci2mod(recig, vecig, aecig, ttt)
-    print('eci2mod returned:')
-    pp(rmod)
-    pp(vmod)
-    pp(amod)
-
-    recig, vecig, aecig = mod2eci(rmod, vmod, amod, ttt)
-    print('mod2eci returned:')
-    pp(recef)
-    pp(vecef)
-    pp(aecef)
-
-    print("----------------------------------------")
+reci,veci,aeci = pef2eci(rpef,vpef,apef,ttt,jdut1,lod,eqeterms,ddpsi,ddeps)
+print('pef2eci returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
 
 
+rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6a", ttt,jdut1,lod,
+                            eqeterms,ddpsi,ddeps)
+print('eci2pef 6a returned: ')
+pp(rpef)
+pp(vpef)
+pp(apef)
+
+rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6b", ttt,jdut1,lod,
+                            eqeterms,ddpsi,ddeps)
+print('eci2pef 6b returned: ')
+pp(rpef)
+pp(vpef)
+pp(apef)
+
+rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6c", ttt,jdut1,lod,
+                            eqeterms,ddpsi,ddeps,ddx,ddy)
+print('eci2pef 6c returned: ')
+pp(rpef)
+pp(vpef)
+pp(apef)
+
+rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'b')
+print('ecef2cirsiau06 returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'a', ddx, ddy)
+print('eci2cirsiau06 a returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'a', ddx, ddy)
+print('cirs2eciiau06 a returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'b', ddx, ddy)
+print('eci2cirsiau06 b returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'b', ddx, ddy)
+print('cirs2eciiau06 b returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'c', ddx, ddy)
+print('eci2cirsiau06 c returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'c', ddx, ddy)
+print('cirs2eciiau06 c returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'a')
+print('cirs2ecefiau06 returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'b')
+print('cirs2ecefiau06 returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
+                                lod,xp,yp,'a', ddx, ddy)
+print('ecef2eciiau06 a returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+recef,vecef,aecef = eci2ecefiau06(reci,veci,aeci,ttt,jdut1,
+                                    lod,xp,yp,'a', ddx, ddy)
+print('eci2ecefiau06 a returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
+                                lod,xp,yp,'b', ddx, ddy)
+print('ecef2eciiau06 b returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+recef,vecef,aecef = eci2ecefiau06(reci,veci,aeci,ttt,jdut1,
+                                    lod,xp,yp,'b', ddx, ddy)
+print('eci2ecefiau06 b returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
+                                lod,xp,yp,'c', ddx, ddy)
+print('ecef2eciiau06 c returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+recef,vecef,aecef = eci2ecefiau06(reci,veci,aeci,ttt,jdut1,
+                                    lod,xp,yp,'c', ddx, ddy)
+print('eci2ecefiau06 c returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+rteme, vteme, ateme = ecef2teme(recef, vecef, aecef, ttt,
+                                jdut1+jdut1frac, lod, xp, yp, eqeterms)
+print('ecef2teme returned: ')
+pp(rteme)
+pp(vteme)
+pp(ateme)
+
+recef, vecef, aecef = teme2ecef(rteme, vteme, ateme, ttt,
+                                jdut1+jdut1frac, lod, xp, yp, eqeterms)
+print('teme2ecef returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+rtod, vtod, atod = ecef2tod(recef, vecef, aecef, ttt,
+                            jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
+print('ecef2tod returned: ')
+pp(rtod)
+pp(vtod)
+pp(atod)
+
+# recef, vecef, aecef = tod2ecef()
+
+rmod, vmod, amod = ecef2mod(recef, vecef, aecef, ttt,
+                            jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
+print('ecef2mod returned: ')
+pp(rmod)
+pp(vmod)
+pp(amod)
+
+# recef, vecef, aecef = mod2ecef()
+
+recig, vecig, aecig = ecef2eci(recef, vecef, aecef, ttt,
+                                jdut1+jdut1frac, lod, xp, yp, 2,
+                                ddpsi, ddeps)
+print('ecef2eci returned: ')
+pp(recig)
+pp(vecig)
+pp(aecig)
+
+recef, vecef, aecef = eci2ecef(recig, vecig, aecig, ttt,
+                                jdut1+jdut1frac, lod, xp, yp, 2,
+                                ddpsi, ddeps)
+print('eci2ecef returned:')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+#--------------------------------eci2--------------------------------------------------------------
+rteme, vteme, ateme = eci2teme(recig, vecig, aecig, ttt, ddpsi, ddeps)
+print('eci2teme returned:')
+pp(rteme)
+pp(vteme)
+pp(ateme)
+
+recig, vecig, aecig, teme2eci(rteme, vteme, ateme,
+                                tt, ddpsi, ddeps)
+print('teme2eci returned:')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+rtod, vtod, atod = eci2tod(recig, vecig, aecig, '80',
+                            ttt, ddpsi, ddeps, ddx, ddy)
+print('eci2tod returned:')
+pp(rtod)
+pp(vtod)
+pp(atod)
+
+recig, vecig, aecig = tod2eci(rtod, vtod, atod, ttt, ddpsi, ddeps)
+print('tod2eci returned:')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+rmod, vmod, amod = eci2mod(recig, vecig, aecig, ttt)
+print('eci2mod returned:')
+pp(rmod)
+pp(vmod)
+pp(amod)
+
+recig, vecig, aecig = mod2eci(rmod, vmod, amod, ttt)
+print('mod2eci returned:')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+print("----------------------------------------")
 
 
-    a = 6860.7631
-    ecc = 0.75
-    p = a*(1.0 - ecc**2)
-    incl = 15 * deg2rad #97.65184/rad
-    omega = 79.54701 * deg2rad
-    argp = 83.86041 * deg2rad
-    nu = 65.21303 * deg2rad
-    arglat = 0.0
-    truelon = 0.0
-    lonper = 0.0
 
-    print('p km=%f  a km=%f  ecc=%f  incl deg=%f  raan deg=%f argp deg=%f  nu deg=%f'% \
-            (p,a,ecc,incl * rad2deg,omega * rad2deg,argp * rad2deg,nu * rad2deg))
-    print('incl rad=%f  raan rad=%f  argp rad=%f  nu rad=%f'% \
-            (incl, omega, argp, nu))
-    reci,veci = coe2rv(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
-    print("coe2rv returned: ", reci, veci)
+
+a = 6860.7631
+ecc = 0.75
+p = a*(1.0 - ecc**2)
+incl = 15 * deg2rad #97.65184/rad
+omega = 79.54701 * deg2rad
+argp = 83.86041 * deg2rad
+nu = 65.21303 * deg2rad
+arglat = 0.0
+truelon = 0.0
+lonper = 0.0
+
+print('p km=%f  a km=%f  ecc=%f  incl deg=%f  raan deg=%f argp deg=%f  nu deg=%f'% \
+        (p,a,ecc,incl * rad2deg,omega * rad2deg,argp * rad2deg,nu * rad2deg))
+print('incl rad=%f  raan rad=%f  argp rad=%f  nu rad=%f'% \
+        (incl, omega, argp, nu))
+reci,veci = coe2rv(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
+print("coe2rv returned: ", reci, veci)
 
 
 
@@ -333,158 +335,158 @@ if __name__ == '__main__':
 #    veci = np.array([-2.940822436, 0.9007122363, 0.002036330819])
 #    reci = np.array([6524.834000000,  6862.875000000, 6448.296000000])
 #    veci = np.array([4.9013270000,    5.5337560000,   -1.9763410000])
-    p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-        rv2coe(reci, veci)
-    print('p km=%f  a km=%f  ecc=%f  incl =%f  raan=%f  argp=%f  nu=%f  m=%f '% \
-            (p,a,ecc,incl,omega,argp,nu,m))
-    print('p km=%f  a km=%f  ecc=%f  incl deg=%f  raan deg=%f  argp deg=%f  nu deg=%f  m deg=%f '% \
-            (p,a,ecc,incl * rad2deg,omega*rad2deg,argp*rad2deg,nu*rad2deg,m*rad2deg))
-    print('     arglat   truelon    lonper ',\
-            arglat,truelon,lonper)
+p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
+    rv2coe(reci, veci)
+print('p km=%f  a km=%f  ecc=%f  incl =%f  raan=%f  argp=%f  nu=%f  m=%f '% \
+        (p,a,ecc,incl,omega,argp,nu,m))
+print('p km=%f  a km=%f  ecc=%f  incl deg=%f  raan deg=%f  argp deg=%f  nu deg=%f  m deg=%f '% \
+        (p,a,ecc,incl * rad2deg,omega*rad2deg,argp*rad2deg,nu*rad2deg,m*rad2deg))
+print('     arglat   truelon    lonper ',\
+        arglat,truelon,lonper)
 #            arglat * rad2deg,truelon * rad2deg,lonper * rad2deg)
 
 #---------------------------rv2-----------------------------------------------
 
-    #alt, terms needs init
-    alt = 0.0
-    terms = 2
-    rho, trtasc, tdecl, drho, dtrtasc, dtdecl = rv2tradc(reci, veci, latgd, lon,
-                                                         alt, ttt, jdut1, lod,
-                                                         xp, yp, terms, ddpsi,
-                                                         ddeps)
-    print("rv2tradc")
-    print('rho %f trtasc %f tdecl %f drho %f dtrtasc %f dtdecl %f' %
-           (rho, trtasc, tdecl, drho, dtrtasc, dtdecl))
+#alt, terms needs init
+alt = 0.0
+terms = 2
+rho, trtasc, tdecl, drho, dtrtasc, dtdecl = rv2tradc(reci, veci, latgd, lon,
+                                                        alt, ttt, jdut1, lod,
+                                                        xp, yp, terms, ddpsi,
+                                                        ddeps)
+print("rv2tradc")
+print('rho %f trtasc %f tdecl %f drho %f dtrtasc %f dtdecl %f' %
+        (rho, trtasc, tdecl, drho, dtrtasc, dtdecl))
 
 #   tradc2rv()
 
-    rrsw, vrsw, transmat = rv2rsw(reci, veci)
-    print('rv2rsw:')
-    print(rrsw)
-    print(vrsw)
-    print(transmat)
+rrsw, vrsw, transmat = rv2rsw(reci, veci)
+print('rv2rsw:')
+print(rrsw)
+print(vrsw)
+print(transmat)
 
-    #rsw2rv()
+#rsw2rv()
 
-    rntw, vntw, transmat = rv2ntw(reci, veci)
-    print('rv2ntw:')
-    print(rntw)
-    print(vntw)
-    print(transmat)
+rntw, vntw, transmat = rv2ntw(reci, veci)
+print('rv2ntw:')
+print(rntw)
+print(vntw)
+print(transmat)
 
-    #ntw2rv()
+#ntw2rv()
 
-    lon,latgc,rtasc,decl,fpa,az,magr,magv = rv2flt(reci, veci, ttt, jdut1, lod,
-                                                   xp, yp, terms, ddpsi, ddeps,)
-    print('rv2flt')
-    print('lon %f, latgc %f, rtasc %f, decl %f, fpa %f, az %f, magr %f,\
-          magv %f' % (lon, latgc, rtasc, decl, fpa, az, magr, magv))
+lon,latgc,rtasc,decl,fpa,az,magr,magv = rv2flt(reci, veci, ttt, jdut1, lod,
+                                                xp, yp, terms, ddpsi, ddeps,)
+print('rv2flt')
+print('lon %f, latgc %f, rtasc %f, decl %f, fpa %f, az %f, magr %f,\
+        magv %f' % (lon, latgc, rtasc, decl, fpa, az, magr, magv))
 
-    reci,veci = flt2rv(magr, magv, latgc, lon, fpa, az, ttt, jdut1, lod, xp,
-                       yp, terms, ddpsi, ddeps)
+reci,veci = flt2rv(magr, magv, latgc, lon, fpa, az, ttt, jdut1, lod, xp,
+                    yp, terms, ddpsi, ddeps)
 
-    print('flt2rv:')
-    print(reci)
-    print(veci)
+print('flt2rv:')
+print(reci)
+print(veci)
 
-    a,n,af,ag,chi,psi,meanlonM,meanlonNu,fr = rv2eq(reci, veci)
-    print('rv2eq:')
-    print('a %f, n %f, af %f, ag %f, chi %f, psi %f, meanlonM %f, meanlonNu\
-          %f, fr %f' % (a,n,af,ag,chi,psi,meanlonM,meanlonNu,fr))
+a,n,af,ag,chi,psi,meanlonM,meanlonNu,fr = rv2eq(reci, veci)
+print('rv2eq:')
+print('a %f, n %f, af %f, ag %f, chi %f, psi %f, meanlonM %f, meanlonNu\
+        %f, fr %f' % (a,n,af,ag,chi,psi,meanlonM,meanlonNu,fr))
 
-    #r = reci, v = veci?
-    r, v = eq2rv(a, af, ag, chi, psi, meanlonM, fr)
-    print('eq2rv:')
-    print(r)
-    print(v)
+#r = reci, v = veci?
+r, v = eq2rv(a, af, ag, chi, psi, meanlonM, fr)
+print('eq2rv:')
+print(r)
+print(v)
 
-    rmag,vmag,rtasc,decl,fpav,az = rv2adbar(r, v)
-    print('rv2adbar:')
-    print('rmag %f, vmag %f, rtasc %f, decl %f, fpav %f, az %f' % \
-          (rmag, vmag, rtasc, decl, fpav, az))
+rmag,vmag,rtasc,decl,fpav,az = rv2adbar(r, v)
+print('rv2adbar:')
+print('rmag %f, vmag %f, rtasc %f, decl %f, fpav %f, az %f' % \
+        (rmag, vmag, rtasc, decl, fpav, az))
 
-    r, v = adbar2rv(rmag, vmag, rtasc, decl, fpav, az)
-    print('adbar2rv:')
-    print(r)
-    print(v)
+r, v = adbar2rv(rmag, vmag, rtasc, decl, fpav, az)
+print('adbar2rv:')
+print(r)
+print(v)
 
-    p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper = rv2coeS(r, v)
-    print('rv2coeS:')
-    print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
-          truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
+p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper = rv2coeS(r, v)
+print('rv2coeS:')
+print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
+        truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
 
-    r, v = coe2rvS(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
-    print('coe2rvS:')
-    print(r)
-    print(v)
+r, v = coe2rvS(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
+print('coe2rvS:')
+print(r)
+print(v)
 
-    p,a,ecc,incl,raan,argp,nu,m,arglat,truelon,lonper = rv2coeh(r, v, re, mu)
-    print('rv2coeh:')
-    print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
-          truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
+p,a,ecc,incl,raan,argp,nu,m,arglat,truelon,lonper = rv2coeh(r, v, re, mu)
+print('rv2coeh:')
+print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
+        truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
 
-    r, v = coe2rvh(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper, mu)
-    print('coe2rvh:')
-    print(r)
-    print(v)
+r, v = coe2rvh(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper, mu)
+print('coe2rvh:')
+print(r)
+print(v)
 
-    rr,rtasc,decl,drr,drtasc,ddecl = rv2radec(r, v)
-    print('rv2radec:')
-    print ('rr %f, rtasc %f, decl %f, drr %f, drtasc %f, ddecl %f' \
-           % (rr,rtasc,decl,drr,drtasc,ddecl))
+rr,rtasc,decl,drr,drtasc,ddecl = rv2radec(r, v)
+print('rv2radec:')
+print ('rr %f, rtasc %f, decl %f, drr %f, drtasc %f, ddecl %f' \
+        % (rr,rtasc,decl,drr,drtasc,ddecl))
 
-    r, v = radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
-    print('radec2rv')
-    print(r)
-    print(v)
+r, v = radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
+print('radec2rv')
+print(r)
+print(v)
 
-    rho, trtasc, tdecl, drho, dtrtasc, dtdecl = rv2tradec(reci, veci, latgd,
-                                                          lon, alt, ttt, jdut1,
-                                                          lod, xp, yp, terms,
-                                                          ddpsi, ddeps)
-    print('rv2tradec:')
-    print('rho %f, trtasc %f, tdecl %f, drho %f, dtrtasc %f, dtdecl %f' %\
-          (rho, trtasc, tdecl, drho, dtrtasc, dtdecl))
+rho, trtasc, tdecl, drho, dtrtasc, dtdecl = rv2tradec(reci, veci, latgd,
+                                                        lon, alt, ttt, jdut1,
+                                                        lod, xp, yp, terms,
+                                                        ddpsi, ddeps)
+print('rv2tradec:')
+print('rho %f, trtasc %f, tdecl %f, drho %f, dtrtasc %f, dtdecl %f' %\
+        (rho, trtasc, tdecl, drho, dtrtasc, dtdecl))
 
-    #rseci, vseci needs init
-    #reci, veci = tradec2rv(rho, trtasc, tdecl, drho, dtrtasc, dtdecl, rseci,
-    #                       vseci, lod)
-    #print('tradec2rv:')
-    #print(reci)
-    #print(veci)
+#rseci, vseci needs init
+#reci, veci = tradec2rv(rho, trtasc, tdecl, drho, dtrtasc, dtdecl, rseci,
+#                       vseci, lod)
+#print('tradec2rv:')
+#print(reci)
+#print(veci)
 
-    rho, az, el, drho, daz, delx = rv2razel(reci, veci, latgd, lon, alt, ttt,
-                                            jdut1, lod, xp, yp, terms, ddpsi,
-                                            ddeps)
-    print('rv2razel:')
-    print(f'rho {rho}, az {az}, drho {drho}, daz {daz}, delx {delx}')
+rho, az, el, drho, daz, delx = rv2razel(reci, veci, latgd, lon, alt, ttt,
+                                        jdut1, lod, xp, yp, terms, ddpsi,
+                                        ddeps)
+print('rv2razel:')
+print(f'rho {rho}, az {az}, drho {drho}, daz {daz}, delx {delx}')
 
-    delv = 0.17 * deg2rad
-    reci, veci = razel2rv(rho, az, el, drho, daz, delv, latgd, lon, alt, ttt,
-                          jdut1, lod, xp, yp, terms, ddpsi, ddeps)
-    print('razel2rv:')
-    print(reci)
-    print(veci)
+delv = 0.17 * deg2rad
+reci, veci = razel2rv(rho, az, el, drho, daz, delv, latgd, lon, alt, ttt,
+                        jdut1, lod, xp, yp, terms, ddpsi, ddeps)
+print('razel2rv:')
+print(reci)
+print(veci)
 
-    rr, ecllon, ecllat, drr, decllon, decllat = rv2ell(reci, veci)
-    print('rv2ell')
-    print('rr %f, ecllon %f, ecllat %f, drr %f, decllon %f, decllat %f' %\
-          (rr, ecllon, ecllat, drr, decllon, decllat))
+rr, ecllon, ecllat, drr, decllon, decllat = rv2ell(reci, veci)
+print('rv2ell')
+print('rr %f, ecllon %f, ecllat %f, drr %f, decllon %f, decllat %f' %\
+        (rr, ecllon, ecllat, drr, decllon, decllat))
 
-    rijk, vijk = ell2rv(rr, ecllon, ecllat, drr, decllon, decllat)
-    print('ell2rv:')
-    print(rijk)
-    print(vijk)
+rijk, vijk = ell2rv(rr, ecllon, ecllat, drr, decllon, decllat)
+print('ell2rv:')
+print(rijk)
+print(vijk)
 
-    rhosez, drhosez = raz2rvs(rho, az, el, drho, daz, delv)
-    print('raz2rvs:')
-    print(rhosez)
-    print(drhosez)
+rhosez, drhosez = raz2rvs(rho, az, el, drho, daz, delv)
+print('raz2rvs:')
+print(rhosez)
+print(drhosez)
 
-    rho, az, el, drho, daz, delv = rvs2raz(rhosez, drhosez)
-    print('rvs2raz:')
-    print('rho %f, az %f, el %f, drho %f, daz %f, delv %f' %\
-          (rho, az, el, drho, daz, delv))
+rho, az, el, drho, daz, delv = rvs2raz(rhosez, drhosez)
+print('rvs2raz:')
+print('rho %f, az %f, el %f, drho %f, daz %f, delv %f' %\
+        (rho, az, el, drho, daz, delv))
 
 
 

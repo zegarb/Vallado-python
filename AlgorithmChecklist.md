@@ -63,6 +63,7 @@
 |  61  |  pg 503 (530)  | Target                                       | target()                             |                -                |           -                |   N   |
 |  62  |  pg 525 (552)  | ENCKE                                        | N/A                                  |                -                |           -                |   -   |
 |  63  |  pg 558 (585)  | Ap2Kp                                        | ap2kp()                              |                -                |           -                |   N   |
+|  63  |  pg 558 (585)  | Ap2Kp                                        | kp2ap()                              |                -                |           -                |   N   |
 |  64  |  pg 591 (618)  | Numerical Integration                        | N/A                                  |                -                |           -                |   -   |
 |  65  |  pg 691 (718)  | PKepler                                      | pkepler()                            | ex10_4.py & ex10_5.py           | pg 769 (796) & 775 (802)   |  Y/N  |
 |  66  |  pg 766 (793)  | Nominal State                                | N/A                                  | ex10_4.py?                      | pg 769 (796)               |   -   |
