@@ -213,6 +213,7 @@ def kp2ap(kpin: float):
 #    chi         - component of node vector in eqw
 #    psi         - component of node vector in eqw
 #    meanlonM    - mean longitude                 rad
+#    fr          - retrograde factor              +1 or -1
 #
 #  outputs       :
 #    r           - position vector                km
@@ -240,7 +241,35 @@ def kp2ap(kpin: float):
 # [r, v] = eq2rv(a, af, ag, chi, psi, meanlonM, fr)
 # ------------------------------------------------------------------------------
 
-def eq2rv(a=None, af=None, ag=None, chi=None, psi=None, meanlonM= None, fr=None):
+def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
+          meanlonM: float, fr: float):
+    """this function finds the classical orbital elements given the equinoctial
+    elements.
+
+    Parameters
+    ----------
+    a : float
+        semimajor axis
+    af : float
+        component of ecc vector
+    ag : float
+        component of ecc vector
+    chi : float
+        component of node vector in eqw
+    psi : float
+        component of node vector in eqw
+    meanlonM : float
+        mean longitude
+    fr : float
+        retrograde factor (+1 for regular orbits, -1 for retrograde)
+
+    Returns
+    -------
+    r: vector array
+        position vector
+    v: vector array
+        velocity vector
+    """
     # -------------------------  implementation   -----------------
     arglat = undefined
     lonper = undefined
