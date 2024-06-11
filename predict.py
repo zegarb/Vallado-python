@@ -87,8 +87,6 @@ def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp
     el = 0.0
     vis = 'radar sun'
 
-    conv = math.pi / (180.0*3600.0)
-
     rsecef,vsecef = obu.site(latgd,lon,alt)
     print('site ecef :\n',rsecef,vsecef)
     print()
@@ -100,6 +98,11 @@ def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp
     #                reci = reci';
     #                veci = veci';
         reci1,veci1 = obu.pkepler(reci,veci,i * dtsec,ndot,nddot)
+        if i == 0:
+            print(rsecef)
+            print(vsecef)
+            print(reci1)
+            print(veci1)
         ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac \
             = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
          # -------------------- convert eci to ecef --------------------
@@ -109,7 +112,7 @@ def predict(reci, veci, latgd, lon, alt, dtsec, jdepoch, jdepochf, dut1, dat, xp
         #    reci1 = [-2811.27691,3486.2632,5069.5763]
         #    veci1 = [-6.859691, -2.964792, -1.764721]
 
-        recef,vecef,aecef = sc.eci2ecef(reci1,veci1,a,ttt,jdut1 + jdut1frac,lod,xp,yp,terms,0.000014*conv,-0.000181*conv)
+        recef,vecef,aecef = sc.eci2ecef(reci1,veci1,a,ttt,jdut1 + jdut1frac,lod,xp,yp,terms,0.000014*rad2arcsec,-0.000181*rad2arcsec)
         print(f'Julian Time: {jdut1 + jdut1frac}')
         print(f'reci1 {i} x {reci1} {veci1}')
         print(f'recef {i} x {recef} {vecef} \n')

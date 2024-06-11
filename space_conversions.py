@@ -5278,7 +5278,7 @@ def ecef2pef  (recef, vecef, aecef, opt, xp, yp, ttt):
 
 
 def eci2ecef  (reci, veci, aeci, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps):
-        prec, psia, wa, ea, xa = obu.precess (ttt, '80')
+        prec, psia, wa, ea, xa = obu.precess(ttt, '80')
 
         deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
 
@@ -5439,10 +5439,9 @@ def eci2tod  (reci, veci, aeci, opt, ttt, ddpsi, ddeps, ddx, ddy):
         nut = pnb
 
     if sh.show == 'y':
-        conv = math.pi / (180.0*3600.0)
         print('dpsi %11.7f trueeps %11.7f mean eps %11.7f deltaeps %11.7f \n'
-              %(deltapsi/conv, trueeps/conv, meaneps/conv,
-                (trueeps-meaneps)/conv))
+              %(deltapsi * rad2arcsec, trueeps * rad2arcsec, meaneps * rad2arcsec,
+                (trueeps-meaneps) * rad2arcsec))
         print('nut iau 76 \n')
         print('%20.14f %20.14f %20.14f \n'% (nut[0], nut[1], nut[2]))
 
@@ -7714,8 +7713,6 @@ if __name__ == '__main__':
     vecef = np.array([[-3.225636520],  [-2.872451450],   [5.531924446]])
     aecef = np.array([[0.001], [0.002], [0.003]])
 
-    conv = math.pi / (180.0*3600.0)
-
     year = 2004
     mon = 4
     day = 6
@@ -7725,13 +7722,13 @@ if __name__ == '__main__':
 
     dut1 = -0.4399619  # sec
     dat = 32         # sec
-    xp = -0.140682 * conv  # " to rad
-    yp = 0.333309 * conv
+    xp = -0.140682 * arcsec2rad  # " to rad
+    yp = 0.333309 * arcsec2rad
     lod = 0.0015563
-    ddpsi = -0.052195 * conv  # " to rad
-    ddeps = -0.003875 * conv
-    ddx = -0.000205 * conv  # " to rad
-    ddy = -0.000136 * conv
+    ddpsi = -0.052195 * arcsec2rad  # " to rad
+    ddeps = -0.003875 * arcsec2rad
+    ddx = -0.000205 * arcsec2rad  # " to rad
+    ddy = -0.000136 * arcsec2rad
     order = 106
     eqeterms = 2
     timezone =0
@@ -7744,11 +7741,11 @@ if __name__ == '__main__':
     print(' %3i:%2i:%8.6f\n'% (hr, min, sec))
     print(' dut1 %8.6f s'% dut1)
     print(' dat %3i s'% dat)
-    print(' xp %8.6f "'% (xp / conv))
-    print(' yp %8.6f "'% (yp / conv))
+    print(' xp %8.6f "'% (xp * rad2arcsec))
+    print(' yp %8.6f "'% (yp * rad2arcsec))
     print(' lod %8.6f s\n'% lod)
-    print(' ddpsi %8.6f " ddeps  %8.6f\n'% (ddpsi/conv, ddeps/conv))
-    print(' ddx   %8.6f " ddy    %8.6f\n'% (ddx/conv, ddy/conv))
+    print(' ddpsi %8.6f " ddeps  %8.6f\n'% (ddpsi * rad2arcsec, ddeps * rad2arcsec))
+    print(' ddx   %8.6f " ddy    %8.6f\n'% (ddx * rad2arcsec, ddy * rad2arcsec))
     print(' order %3i  eqeterms %3i  opt %3s \n'% (order, eqeterms, opt))
     print('units are km and km/s and km/s2\n')
 

@@ -1246,12 +1246,12 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
 #
 #  inputs          description                    range / units
 #    none
-#    iau00x.dat  - file for x coefficient
-#    iau00y.dat  - file for y coefficient
-#    iau00s.dat  - file for s coefficient
-#    iau00n.dat  - file for nutation coefficients
-#    iau00pl.dat notused - file for planetary nutation coefficients
-#    iau00gs.dat - file for gmst coefficients
+#    iau06x.dat  - file for x coefficient
+#    iau06y.dat  - file for y coefficient
+#    iau06s.dat  - file for s coefficient
+#    iau03n.dat  - file for nutation coefficients
+#    iau03pl.dat notused - file for planetary nutation coefficients
+#    iau06gs.dat - file for gmst coefficients
 #
 #  outputs       :
 #    axs0        - real coefficients for x        rad
@@ -1268,7 +1268,7 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
 #    agsti       - integer coefficients for gst
 #
 #  locals        :
-#    convrt      - conversion factor to radians
+#    arcsec2rad  - conversion arcsec to radians
 #    i           - index
 #
 #  coupling      :
@@ -1285,11 +1285,7 @@ def iau06in():
 
 
     # ------------------------  implementation   -------------------
-# " to rad
-    convrtu = (1e-06 * np.pi) / (180.0 * 3600.0)
-
-    convrtm = (0.001 * np.pi) / (180.0 * 3600.0)
-
+# " Note: File reads in as micro-arcseconds
     # ------------------------------
 #  note that since all these coefficients have only a single
 #  decimal place, one could store them as integres, and then simply
@@ -1308,7 +1304,7 @@ def iau06in():
         if line.startswith("#"): continue
         f1 = float(line[5:20].strip())
         f2 = float(line[20:35].strip())
-        axs0.append([f1*convrtu, f2*convrtu])
+        axs0.append([f1*uarcsec2rad, f2*uarcsec2rad])
         ints = clean_fwf(line[35:], 4)
         #print(ints, len(ints))
         a0xi.append(ints)
@@ -1326,7 +1322,7 @@ def iau06in():
         if line.startswith("#"): continue
         f1 = float(line[5:20].strip())
         f2 = float(line[20:35].strip())
-        ays0.append([f1*convrtu, f2*convrtu])
+        ays0.append([f1*uarcsec2rad, f2*uarcsec2rad])
         ints = clean_fwf(line[35:], 4)
         #print(ints, len(ints))
         a0yi.append(ints)
@@ -1344,7 +1340,7 @@ def iau06in():
         if line.startswith("#"): continue
         f1 = float(line[5:20].strip())
         f2 = float(line[20:35].strip())
-        ass0.append([f1*convrtu, f2*convrtu])
+        ass0.append([f1*uarcsec2rad, f2*uarcsec2rad])
         ints = clean_fwf(line[35:], 4)
         #print(ints, len(ints))
         a0si.append(ints)
@@ -1364,7 +1360,7 @@ def iau06in():
         #print(ints, len(ints))
         apni.append(ints)
         flts = clean_fwf(line[29:], 6, isfloat = True, isint = False)
-        flts = [fff*convrtm for fff in flts]
+        flts = [fff*marcsec2rad for fff in flts]
         #print(flts, len(flts))
         apn.append(flts)
     apn = np.array(apn)
@@ -1384,7 +1380,7 @@ def iau06in():
         #print(ints, len(ints))
         appli.append(ints)
         flts = clean_fwf(line[72:], 6, isfloat = True, isint = False)
-        flts = [fff*convrtm for fff in flts]
+        flts = [fff*marcsec2rad for fff in flts]
         #print(flts, len(flts))
         appl.append(flts)
     appl = np.array(appl)
@@ -1397,16 +1393,16 @@ def iau06in():
 #       apn = iau00n(:, 2:3)
 #       apni = iau00n(:, 4:17)
 #       for i =1:size(apn)
-#           apn[i, 0] = apn[i, 0] * convrtu
-#           apn[i, 1] = apn[i, 1] * convrtu
+#           apn[i, 0] = apn[i, 0] * uarcsec2rad
+#           apn[i, 1] = apn[i, 1] * uarcsec2rad
 #       end
 
     #       load iau00e.dat  # planetary
 #       ape = iau00n(:, 2:3)
 #       apei = iau00n(:, 4:17)
 #       for i =1:size(ape)
-#           ape[i, 0] = ape[i, 0] * convrtu
-#           ape[i, 1] = ape[i, 1] * convrtu
+#           ape[i, 0] = ape[i, 0] * uarcsec2rad
+#           ape[i, 1] = ape[i, 1] * uarcsec2rad
 #       end
 
     # gmst values
@@ -1421,7 +1417,7 @@ def iau06in():
         if line.startswith("#"): continue
         f1 = float(line[5:20].strip())
         f2 = float(line[20:34].strip())
-        agst.append([f1*convrtu, f2*convrtu])
+        agst.append([f1*uarcsec2rad, f2*uarcsec2rad])
         ints = clean_fwf(line[34:], 4)
         #print(ints, len(ints))
         agsti.append(ints)
@@ -5461,8 +5457,6 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
     l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
         lonsat, lonurn, lonnep, precrate = smu.fundarg(ttt, opt)
 
-    # " to rad
-    convrt = np.pi / (180.0 * 3600.0)
     axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
@@ -5509,7 +5503,7 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
     #  greenwich mean sidereal time, iau 2000.
     gmst2000 = era + (0.014506 + 4612.156534 * ttt + 1.3915817 * ttt2
                       - 4.4e-07 * ttt3 + 2.9956e-05 * ttt4
-                      + 3.68e-08 * ttt5) * convrt
+                      + 3.68e-08 * ttt5) * arcsec2rad
 
     gst = gmst2000 + ee2000
 
@@ -5591,8 +5585,6 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
 
 def iau06pna(ttt=None):
     showit = 'y'
-    # " to rad
-    convrt = np.pi / (180.0 * 3600.0)
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
     ttt4 = ttt2 * ttt2
@@ -5638,7 +5630,7 @@ def iau06pna(ttt=None):
 
     deltaeps = ensum + eplnsum
     if showit == 'y':
-        print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi / convrt, deltaeps / convrt))
+        print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     # iau2006 approach - does not seem to be correct, close though
 # looks like they still use the iau2000a method and adjust
@@ -5672,21 +5664,21 @@ def iau06pna(ttt=None):
 #        deltaeps = ensum
 
     # iau2006 corrections to the iau2000a
-    j2d = - 2.7774e-06 * ttt * convrt
+    j2d = - 2.7774e-06 * ttt * arcsec2rad
 
     deltapsi = deltapsi + deltapsi * (4.697e-07 + j2d)
 
     deltaeps = deltaeps + deltaeps * j2d
     if showit == 'y':
         print('dpsi %11.7f deltaeps %11.7f \n'
-              % (deltapsi / convrt, deltaeps / convrt))
+              % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     prec, psia, wa, ea, xa = precess(ttt, '06')
     if showit == 'y':
         print('prec iau 06 \n' % ())
         print((prec))
 
-    oblo = 84381.406 * convrt
+    oblo = 84381.406 * arcsec2rad
 
     # ----------------- find nutation matrix ----------------------
 # mean to true
@@ -5699,10 +5691,10 @@ def iau06pna(ttt=None):
     a6 = smu.rot3mat(psia)
     a7 = smu.rot1mat(- oblo)
     # icrs to j2000
-    a8 = smu.rot1mat(- 0.0068192 * convrt)
-    a9 = smu.rot2mat(0.041775 * np.sin(oblo) * convrt)
-    #      a9 = smu.rot2mat(0.0166170*convrt)
-    a10 = smu.rot3mat(0.0146 * convrt)
+    a8 = smu.rot1mat(- 0.0068192 * arcsec2rad)
+    a9 = smu.rot2mat(0.041775 * np.sin(oblo) * arcsec2rad)
+    #      a9 = smu.rot2mat(0.0166170*arcsec2rad)
+    a10 = smu.rot3mat(0.0146 * arcsec2rad)
     if sh.iauhelp == 'y':
         print('p e %11.7f  %11.7f  \n'
               % (pnsum * 180 / np.pi, ensum * 180 / np.pi))
@@ -5803,7 +5795,6 @@ def iau06pna(ttt=None):
 
 def iau06pnb(ttt=None):
     # " to rad
-    convrt = np.pi / (180.0 * 3600.0)
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
     ttt4 = ttt2 * ttt2
@@ -5860,14 +5851,14 @@ def iau06pnb(ttt=None):
 #        deltaeps = ensum
 
     # ------ form the planetary arguments
-    pplnsum = - 0.000135 * convrt
+    pplnsum = - 0.000135 * arcsec2rad
 
-    eplnsum = 0.000388 * convrt
+    eplnsum = 0.000388 * arcsec2rad
     #  add planetary and luni-solar components.
     deltapsi = pnsum + pplnsum
     deltaeps = ensum + eplnsum
     prec, psia, wa, ea, xa = precess(ttt, '06')
-    oblo = 84381.406 * convrt
+    oblo = 84381.406 * arcsec2rad
 
     # or 84381.406????
 
@@ -5882,10 +5873,10 @@ def iau06pnb(ttt=None):
     a6 = smu.rot3mat(psia)
     a7 = smu.rot1mat(- oblo)
     # icrs to j2000
-    a8 = smu.rot1mat(- 0.0068192 * convrt)
-    a9 = smu.rot2mat(0.041775 * np.sin(oblo) * convrt)
-    #      a9 = smu.rot2mat(0.0166170*convrt)
-    a10 = smu.rot3mat(0.0146 * convrt)
+    a8 = smu.rot1mat(- 0.0068192 * arcsec2rad)
+    a9 = smu.rot2mat(0.041775 * np.sin(oblo) * arcsec2rad)
+    #      a9 = smu.rot2mat(0.0166170*arcsec2rad)
+    a10 = smu.rot3mat(0.0146 * arcsec2rad)
     pnb = a10 * a9 * a8 * a7 * a6 * a5 * a4 * a3 * a2 * a1
     prec = a10 * a9 * a8 * a7 * a6 * a5 * a4
     nut = a3 * a2 * a1
@@ -5904,9 +5895,9 @@ def iau06pnb(ttt=None):
         w = wa + deltapsi * np.sin(ea) * np.sin(xa) + deltaeps * np.cos(xa)
         xbar = np.sin(w) * np.sin(p)
         ybar = - np.sin(oblo) * np.cos(w) + np.cos(oblo) * np.sin(w) * np.cos(p)
-        x = xbar + (- 0.016617 + 0.0146 * ybar) * convrt
-        #            x = xbar + (-0.0417750 + 0.01460*ybar)*convrt  # rad
-        y = ybar + (- 0.0068192 - 0.0146 * xbar) * convrt
+        x = xbar + (- 0.016617 + 0.0146 * ybar) * arcsec2rad
+        #            x = xbar + (-0.0417750 + 0.01460*ybar)*arcsec2rad  # rad
+        y = ybar + (- 0.0068192 - 0.0146 * xbar) * arcsec2rad
         # -------- now find a
         a = 0.5 + 0.125 * (x * x + y * y)
         # -------- now find s
@@ -5945,7 +5936,7 @@ def iau06pnb(ttt=None):
                      + ass0[i, 1] * np.cos(tempval))
         s = (9.4e-05 + 0.00380835 * ttt - 0.00011994 * ttt2
              - 0.07257409 * ttt3 + 2.77e-05 * ttt4 + 1.561e-05 * ttt5)
-        s = (- x * y * 0.5 + s * convrt + ssum0 + ssum1 * ttt + ssum2 * ttt2
+        s = (- x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2
              + ssum3 * ttt3 + ssum4 * ttt4)
         if sh.iauhelp == 'y':
             print('00pnb  x  %14.12f" y  %14.12f" s %14.12f" a %14.12fdeg \n'
@@ -6011,8 +6002,7 @@ def iau06pnb(ttt=None):
 # ----------------------------------------------------------------------------
 
 def iau06xys(ttt=None, ddx=None, ddy=None):
-    # " to rad
-    convrt = np.pi / (180.0 * 3600.0)
+
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
     ttt4 = ttt2 * ttt2
@@ -6089,7 +6079,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
 
     x = - 0.016617 + 2004.191898 * ttt - 0.4297829 * ttt2 - 0.19861834 * ttt3 - 7.578e-06 * ttt4 + 5.9285e-06 * ttt5
 
-    x = x * convrt + xsum0 + xsum1 * ttt + xsum2 * ttt2 + xsum3 * ttt3 + xsum4 * ttt4
+    x = x * arcsec2rad + xsum0 + xsum1 * ttt + xsum2 * ttt2 + xsum3 * ttt3 + xsum4 * ttt4
 
     if sh.iauhelp == 'y':
         print('xys x %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n' % (xsum0 / deg2rad, xsum1 / deg2rad, xsum2 / deg2rad, xsum3 / deg2rad, xsum4 / deg2rad))
@@ -6156,7 +6146,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
 
     y = (- 0.006951 - 0.025896 * ttt - 22.4072747 * ttt2
          + 0.00190059 * ttt3 + 0.001112526 * ttt4 + 1.358e-07 * ttt5)
-    y = (y * convrt + ysum0 + ysum1 * ttt + ysum2 * ttt2
+    y = (y * arcsec2rad + ysum0 + ysum1 * ttt + ysum2 * ttt2
          + ysum3 * ttt3 + ysum4 * ttt4)
 
     if sh.iauhelp == 'y':
@@ -6229,7 +6219,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     #            + 0.00000171*ttt*sin(omega) + 0.00000357*ttt*cos(2.0*omega) ...
 #            + 0.00074353*ttt2*sin(omega) + 0.00005691*ttt2*sin(2.0*(f-d+omega)) ...
 #            + 0.00000984*ttt2*sin(2.0*(f+omega)) - 0.00000885*ttt2*sin(2.0*omega)
-    s = - x * y * 0.5 + s * convrt + ssum0 + ssum1 * ttt + ssum2 * ttt2 + ssum3 * ttt3 + ssum4 * ttt4
+    s = - x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2 + ssum3 * ttt3 + ssum4 * ttt4
 
     if sh.iauhelp == 'y':
         print('06xys before x  %14.12f y  %14.12f s %14.12f a %14.12f rad \n'
@@ -6443,8 +6433,6 @@ def nutation (ttt, ddpsi, ddeps):
 
 def precess(ttt, opt):
 
-    # " to rad
-    convrt = math.pi / (180.0*3600.0)
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
 
@@ -6548,14 +6536,14 @@ def precess(ttt, opt):
                       * ttt + 1.0927348) * ttt + 2306.077181) * ttt - 2.650545
 
     # convert units to rad
-    psia = psia  * convrt # rad
-    wa = wa    * convrt
-    ea = ea    * convrt
-    xa = xa    * convrt
+    psia = psia * arcsec2rad # rad
+    wa = wa * arcsec2rad
+    ea = ea * arcsec2rad
+    xa = xa * arcsec2rad
 
-    zeta = zeta  * convrt
-    theta = theta * convrt
-    z = z     * convrt
+    zeta = zeta  * arcsec2rad
+    theta = theta * arcsec2rad
+    z = z     * arcsec2rad
     if (sh.iauhelp == 'y'):
         print('pr %11.7f  %11.7f  %11.7f %11.7fdeg \n'
               % (psia*180/math.pi, wa*180/math.pi, ea*180/math.pi,
@@ -6601,7 +6589,7 @@ def precess(ttt, opt):
         %             a7 = rot1mat(-ea)
         %             prec2 = a7*a6*a5*a4
     else  #if %(strcmp(opt, '50') ~= 1)
-        %             oblo = oblo * convrt % " to rad
+        %             oblo = oblo * arcsec2rad % " to rad
         %             a4 = rot3mat(-xa)
         %             a5 = rot1mat(wa)
         %             a6 = rot3mat(psia)

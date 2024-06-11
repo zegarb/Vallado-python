@@ -35,7 +35,6 @@ from space_constants import *
 #     *****************************************************************
 
 print('------- example 5-1 ---------')
-conv = math.pi / (180*3600)
 timezone = 0
 
 year = 2006  # need UTC that will give TDT on the 2 Apr 0 hr

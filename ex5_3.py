@@ -29,9 +29,8 @@ import spacetime_utils as stu
 from orbit_utils import moon
 from space_constants import *
 
-conv = math.pi / (180.0*3600.0)
-ddpsi = -0.052195 * conv  # " to rad
-ddeps = -0.003875 * conv
+ddpsi = -0.052195 * arcsec2rad  # " to rad
+ddeps = -0.003875 * arcsec2rad
 
 # --------  moon -------------- analytical moon ephemeris
 year = 1994
@@ -54,7 +53,7 @@ print(' day %3i ' % (day))
 print(' %3i:%2i:%8.6f\n ' % (hr, minute, second))
 print(' dut1 %8.6f s' % (dut1))
 print(' dat %3i s' % (dat))
-print(' ddpsi %8.6f " ddeps  %8.6f\n' % (ddpsi / conv, ddeps / conv))
+print(' ddpsi %8.6f " ddeps  %8.6f\n' % (ddpsi * rad2arcsec, ddeps * rad2arcsec))
 print('tt  %8.6f ttt  %16.12f jdtt  %18.11f \n' % (tt, ttt, jdtt + jdttfrac))
 print('tut1  %8.6f tut1  %16.12f jdut1  %18.11f \n'
       % (tut1, tut1, jdut1 + jdut1frac))

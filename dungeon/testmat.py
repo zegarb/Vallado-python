@@ -122,8 +122,6 @@ while longstr2[-1] == '\n':
     #                // check so the first value isn't written twice
     if (np.abs(tsince) > 1e-08):
         tsince = tsince - deltamin
-    # set some EOP parameter that stay constant
-    conv = np.pi / (180.0 * 3600.0)
     eqeterms = 2
     # // loop to perform the propagation
     while ((tsince < stopmfe) and (satrec['error'] == 0)):
@@ -148,8 +146,8 @@ while longstr2[-1] == '\n':
 # set the EOP parameters. normally this would be at each time instant in the loop, but
 # we'll keep it constant here for illustration
                 lod = 0.0015563
-                xp = - 0.140682 * conv
-                yp = 0.333309 * conv
+                xp = - 0.140682 * arcsec2rad
+                yp = 0.333309 * arcsec2rad
                 dut1 = - 0.4399619
                 jdut1 = jdutc
                 jdut1frac = jdutcfrac + dut1 / 86400.0
@@ -173,8 +171,8 @@ while longstr2[-1] == '\n':
 # set some EOP parameters. normally this would be at each time instant in the loop, but
 # we'll keep it constant here for illustration
                 lod = 0.0015563
-                xp = - 0.140682 * conv
-                yp = 0.333309 * conv
+                xp = - 0.140682 * arcsec2rad
+                yp = 0.333309 * arcsec2rad
                 dut1 = - 0.4399619
                 jdut1 = jdutc
                 jdut1frac = jdutcfrac + dut1 / 86400.0

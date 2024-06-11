@@ -82,3 +82,5 @@ NameError: name 'lowthrust' is not defined
 11_3: nodalperiod slightly different; final answers slightly different
 11_4: Y
 11_5: Y
+
+11_6 (predict.py): N
