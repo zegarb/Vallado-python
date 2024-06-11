@@ -29,7 +29,7 @@ import spacemath_utils as smu
 
 # Helio for Neptune from the Sun
 paral1 = np.arcsin(1.0 / 29.664361)
-print('paralax  %11.9f %11.9f arcsec \n' % (paral1 * rad2deg, paral1 * rad2deg * 3600.0))
+print('paralax  %11.9f %11.9f arcsec \n' % (paral1 * rad2deg, paral1 * rad2arcsec))
 # try exact method (neptune to earth)
 
 rnep = np.array([-1757460712.2509, 3757470099.1416, 1576777174.1537])
@@ -38,11 +38,11 @@ rnep = np.array([-1757460712.2509, 3757470099.1416, 1576777174.1537])
 rearth = np.array([-1666604612.0985, 3868340828.5807, 1624846829.1305])
 
 paral2 = np.arccos(np.dot(rearth, rnep) / (smu.mag(rearth) * smu.mag(rnep)))
-print('paralax  %11.9f %11.9f arcsec \n' % (paral2 * rad2deg, paral2 * rad2deg * 3600.0))
+print('paralax  %11.9f %11.9f arcsec \n' % (paral2 * rad2deg, paral2 * rad2arcsec))
 paral1 / paral2 * 100
 # for Neptune to Earth
 paral1 = np.arcsin(6378.0 / (149597870 * 29.664361))
-print('paralax  %11.9f %11.9f arcsec \n' % (paral1 * rad2deg, paral1 * rad2deg * 3600.0))
+print('paralax  %11.9f %11.9f arcsec \n' % (paral1 * rad2deg, paral1 * rad2arcsec))
 # try exact method
 # neptune to Earth
 rnep = np.array([- 1757460712.2509, 3757470099.1416, 1576777174.1537])
@@ -51,5 +51,5 @@ rnep = np.array([- 1757460712.2509, 3757470099.1416, 1576777174.1537])
 rsite = np.array([6378.137, 0.0, 0.0])
 rearth = rnep + rsite
 paral2 = np.arccos(np.dot(rnep, rearth) / (smu.mag(rnep) * smu.mag(rearth)))
-print('paralax  %11.9f %11.9f arcsec \n' % (paral2 * rad2deg, paral2 * rad2deg * 3600.0))
+print('paralax  %11.9f %11.9f arcsec \n' % (paral2 * rad2deg, paral2 * rad2arcsec))
 paral1 / paral2 * 100
