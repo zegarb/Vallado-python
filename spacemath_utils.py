@@ -1069,7 +1069,7 @@ def printdiff(strin=None, mat1=None, mat2=None):
 
 def matvecmult(mat=None, vec=None, sizeof=None):
     # -------------------------  implementation   -----------------
-    outvec = np.zeros((sizeof, sizeof))
+    outvec = np.zeros(sizeof)
     for i in range(sizeof):
         outvec[i] = 0.0
         for j in range(sizeof):
@@ -2334,15 +2334,15 @@ def rot3 (vec, xval):
 # ----------------------------------------------------------------------------- }
 
 
-def mag (vec):
+def mag(vec):
 
-        temp = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]
+    temp = vec[0]**2 + vec[1]**2 + vec[2]**2
 
-        if abs(temp) >= 1.0e-16:
-            mag = math.sqrt(temp)
-        else:
-            mag = 0.0
-        return mag
+    if abs(temp) >= 1.0e-16:
+        mag = math.sqrt(temp)
+    else:
+        mag = 0.0
+    return mag
 
 
 # ----------------------------------------------------------------------------
