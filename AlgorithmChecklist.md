@@ -27,7 +27,7 @@
 |  25  |  pg 259 (286)  | Geocentric RaDec                             | rv2radec()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  26  |  pg 260 (287)  | Topocentric                                  | rv2tradec()                          | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  27  |  pg 265 (292)  | RAZEL                                        | rv2razel()                           | ex4_1.py                        | pg 273 (300)               |   N   |
-|  28  |  pg 268 (295)  | AzELToRaDec                                  | N/A                                  |                -                |           -                |   -   |
+|  28  |  pg 268 (295)  | AzELToRaDec                                  | azel2radec()                           |                -                |           -                |   -   |
 |  29  |  pg 279 (306)  | Sun                                          | sun(), sunalmanac()                  | ex5_1.py                        | pg 280 (307)               |   Y   |
 |  30  |  pg 283 (310)  | SunriseSet                                   | sunriset()                           | ex5_2.py                        | pg 284 (311)               |   Y   |
 |  31  |  pg 288 (315)  | Moon                                         | moon()                               | ex5_3.py                        | pg 288 (315)               |   Y   |
