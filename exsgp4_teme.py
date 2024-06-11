@@ -26,17 +26,17 @@ min = 51
 sec = 28.386009
 dut1 = - 0.4399619
 dat = 32
-xp = - 0.140682 * convrt
+xp = - 0.140682 * arcsec2rad
 
-yp = 0.333309 * convrt
+yp = 0.333309 * arcsec2rad
 lod = 0.0015563
 
-ddpsi = - 0.052195 * convrt
+ddpsi = - 0.052195 * arcsec2rad
 
-ddeps = - 0.003875 * convrt
-ddx = - 0.000205 * convrt
+ddeps = - 0.003875 * arcsec2rad
+ddx = - 0.000205 * arcsec2rad
 
-ddy = - 0.000136 * convrt
+ddy = - 0.000136 * arcsec2rad
 timezone = 0
 order = 106
 eqeterms = 2
@@ -49,11 +49,11 @@ print(' day %3i ' % (day))
 print('%3i:%2i:%8.6f\n ' % (hr,min,sec))
 print('dut1 %8.6f s' % (dut1))
 print(' dat %3i s' % (dat))
-print(' xp %8.6f "' % (xp / convrt))
-print(' yp %8.6f "' % (yp / convrt))
+print(' xp %8.6f "' % (xp * rad2arcsec))
+print(' yp %8.6f "' % (yp * rad2arcsec))
 print(' lod %8.6f s\n' % (lod))
-print(' ddpsi %8.6f " ddeps  %8.6f\n' % (ddpsi / convrt,ddeps / convrt))
-print(' ddx %8.6f " ddy  %8.6f\n' % (ddx / convrt,ddy / convrt))
+print(' ddpsi %8.6f " ddeps  %8.6f\n' % (ddpsi * rad2arcsec,ddeps * rad2arcsec))
+print(' ddx %8.6f " ddy  %8.6f\n' % (ddx * rad2arcsec,ddy * rad2arcsec))
 print('order %3i  eqeterms %3i  \n' % (order,eqeterms))
 print('units are km and km/s \n')
 timezone = 0
@@ -128,17 +128,17 @@ if (np.abs(tsince) > 1e-08):
 year,mon,day,hr,min,sec = stu.invjday(satrec['jdsatepoch'],satrec['jdsatepochf'])
 dut1 = 0.2052872
 dat = 32
-xp = 0.109021 * convrt
+xp = 0.109021 * arcsec2rad
 
-yp = 0.285481 * convrt
+yp = 0.285481 * arcsec2rad
 lod = 0.0004465
 
-ddpsi = - 0.053678 * convrt
+ddpsi = - 0.053678 * arcsec2rad
 
-ddeps = - 0.00632 * convrt
-ddx = - 2.5e-05 * convrt
+ddeps = - 0.00632 * arcsec2rad
+ddx = - 2.5e-05 * arcsec2rad
 
-ddy = 2.8e-05 * convrt
+ddy = 2.8e-05 * arcsec2rad
 #, tcg, jdtcg,jdtcgfrac, tcb, jdtcb,jdtcbfrac
 ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
 print('year %5i ' % (year))
@@ -190,17 +190,17 @@ print(' vteme \n', (vteme))
 #2000 06 30 51725  0.110329  0.281805  0.2042651  0.0001678 -0.054522 -0.006209  0.000002  0.000016  32
 dut1 = 0.2042651
 dat = 32
-xp = 0.110329 * convrt
+xp = 0.110329 * arcsec2rad
 
-yp = 0.281805 * convrt
+yp = 0.281805 * arcsec2rad
 lod = 0.0001678
 
-ddpsi = - 0.054522 * convrt
+ddpsi = - 0.054522 * arcsec2rad
 
-ddeps = - 0.006209 * convrt
-ddx = 2e-06 * convrt
+ddeps = - 0.006209 * arcsec2rad
+ddx = 2e-06 * arcsec2rad
 
-ddy = 1.6e-05 * convrt
+ddy = 1.6e-05 * arcsec2rad
 #, tcg, jdtcg,jdtcgfrac, tcb, jdtcb,jdtcbfrac
 ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
 # ------ teme of date

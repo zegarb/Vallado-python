@@ -57,9 +57,9 @@ deg2rad = math.pi / 180.0
 auer = 149597870.0 /6378.1363
 j2 = 0.001826267
 
-# Needs a better name
-# degrees/second to radians/hour?
-convrt = math.pi / (3600.0 * 180)
+# 1" to rad
+arcsec2rad = math.pi / (3600.0 * 180)
+rad2arcsec = 1/arcsec2rad
 
 # Redundant with eccearthsqrd?
 # eesqrd = 0.006694385000     # eccentricity of earth sqrd

@@ -52,7 +52,6 @@ azarr = filedat[:, 10] * deg2rad
 
 elarr = filedat[:, 11] * deg2rad
 
-convrt = np.pi / (3600.0 * 180.0)
 latgd = 21.572056 * deg2rad
 
 lon = -158.266578 * deg2rad
@@ -63,9 +62,9 @@ dat = 29
 dut1 = 0.3261068
 
 lod = 0.0
-xp = -0.11554 * convrt
+xp = -0.11554 * arcsec2rad
 
-yp = 0.48187 * convrt
+yp = 0.48187 * arcsec2rad
 rs, vs = site(latgd, lon, alt)
 obsrecarr = []
 for j in range(numobs):

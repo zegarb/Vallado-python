@@ -169,8 +169,6 @@ for i in range(1, 3):
 
 
 # additional tests
-# 1" to rad
-convrt = math.pi / (3600.0*180.0)
 
 latgd = 20.7071 * deg2rad
 lon = -156.257 * deg2rad
@@ -192,14 +190,14 @@ jd, jdfrac = stu.jday(year, mon, day, hr, min, sec)
 
 dut1 = -0.1056985  # s
 dat  =  37
-xp   =  0.202929 * convrt  # " to rad
-yp   =  0.265318 * convrt
+xp   =  0.202929 * arcsec2rad  # " to rad
+yp   =  0.265318 * arcsec2rad
 lod  = -0.0003003
 timezone = 0
-ddpsi = -0.116696 * convrt
-ddeps = -0.008264 * convrt
-dx  =  0.000206 * convrt
-dy  = -0.000037 * convrt
+ddpsi = -0.116696 * arcsec2rad
+ddeps = -0.008264 * arcsec2rad
+dx  =  0.000206 * arcsec2rad
+dy  = -0.000037 * arcsec2rad
 order = 106
 terms = 2
 # , tcg, jdtcg, jdtcgfrac, tcb, jdtcb, jdtcbfrac

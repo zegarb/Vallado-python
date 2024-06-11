@@ -68,8 +68,8 @@ if casenum == 0:
     v2ans = np.array([-4.393910234, 4.576816355, 1.482423676])
     dut1 = - 0.609641
     dat = 35
-    xp = 0.137495 * convrt
-    yp = 0.342416 * convrt
+    xp = 0.137495 * arcsec2rad
+    yp = 0.342416 * arcsec2rad
     lod = 0.0
     timezone = 0
     terms = 0
@@ -82,8 +82,8 @@ if casenum == 1:
     v2ans = np.array([-4.393910234, 4.576816355, 1.482423676])
     dut1 = - 0.1639883
     dat = 33
-    xp = 0.210428 * convrt
-    yp = 0.286899 * convrt
+    xp = 0.210428 * arcsec2rad
+    yp = 0.286899 * arcsec2rad
     lod = 0.0
     timezone = 0
     terms = 0
@@ -100,8 +100,8 @@ if casenum == 2:
 #             sec   =  28.0000;
     dut1 = - 0.6096413
     dat = 35
-    xp = 0.137495 * convrt
-    yp = 0.342416 * convrt
+    xp = 0.137495 * arcsec2rad
+    yp = 0.342416 * arcsec2rad
     lod = 0.0
     timezone = 0
     terms = 0
@@ -126,8 +126,8 @@ if casenum == 3:
 if casenum == 4:
     dut1 = - 0.1069721
     dat = 37
-    xp = 0.14847 * convrt
-    yp = 0.246564 * convrt
+    xp = 0.14847 * arcsec2rad
+    yp = 0.246564 * arcsec2rad
     lod = 0.0
     timezone = 0
     terms = 0

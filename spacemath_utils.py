@@ -2368,7 +2368,7 @@ def mag (vec):
 #    pm          - transformation matrix for ecef - pef
 #
 #  locals        :
-#    convrt      - conversion from arcsec to rad
+#    arcsec2rad  - conversion from arcsec to rad
 #    sp          - s prime value
 #
 #  coupling      :
@@ -2414,14 +2414,13 @@ def polarm (xp, yp, ttt, opt):
             #pm(2, 3) = yp
             #pm(3, 3) = 1.0
         else:
-            convrt = math.pi / (3600.0*180.0)
             # approximate sp value in rad
-            sp = -47.0e-6 * ttt * convrt
+            sp = -47.0e-6 * ttt * arcsec2rad
             print('xp %16.14f, %16.14f sp %16.14g \n' % (xp, yp, sp))
             cossp = math.cos(sp)
             sinsp = math.sin(sp)
 
-            #fprintf(1, ' sp  %14.11f mas \n', sp/convrt)
+            #fprintf(1, ' sp  %14.11f mas \n', sp/arcsec2rad)
 
             # form the matrix
             pm[0, 0] = cosxp * cossp
