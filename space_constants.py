@@ -61,6 +61,12 @@ j2 = 0.001826267
 arcsec2rad = math.pi / (3600.0 * 180)
 rad2arcsec = 1/arcsec2rad
 
+#milli-arcseconds to rad
+marcsec2rad = 1e-06 * arcsec2rad
+
+#micro-arcseconds to rad
+uarcsec2rad = 1e-03 * arcsec2rad
+
 # Redundant with eccearthsqrd?
 # eesqrd = 0.006694385000     # eccentricity of earth sqrd
 
