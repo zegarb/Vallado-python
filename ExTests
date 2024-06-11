@@ -83,4 +83,5 @@ NameError: name 'lowthrust' is not defined
 11_4: Y
 11_5: Y
 
-11_6 (predict.py): N
+11_6 (predict.py): Like 10_4 answers are slighlty off from the book.
+I suspect it has something to do with the pkepler function

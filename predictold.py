@@ -34,8 +34,8 @@ if testnum == 3:
     sec = 0.0
     dut1 = - 0.2913774
     dat = 32
-    xp = - 0.19108
-    yp = 0.329624
+    xp = - 0.19108 *arcsec2rad
+    yp = 0.329624 *arcsec2rad
     lod = 0.0
     terms = 0
     timezone = 0
@@ -76,7 +76,7 @@ for i in range(0,120):
     #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
 #                reci = reci';
 #                veci = veci';
-    reci1,veci1 = obu.pkepler(reci,veci,ndot,nddot,i * dtsec)
+    reci1,veci1 = obu.pkepler(reci,veci,i*dtsec, ndot,nddot)
     if i == 106:
         print(f'reci1 {i} x {reci1} {veci1} \n')
     ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
@@ -104,18 +104,18 @@ for i in range(0,120):
             print(f'rsun{i} {rsun} \n')
             print(f'rsun{i} {rsun*149597870.0} \n')
         rsun = rsun * 149597870.0
-        rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + jdut1frac,lod,xp,yp,2)
+        rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + jdut1frac,lod,xp,yp,2,0,0)
         if i == 106:
             print(f'rseci {i} x {rseci} {vseci} \n')
         if np.dot(rsun,rseci) > 0.0:
             vis = 'radar sun'
         else:
             rxr = np.cross(rsun,reci1)
-            magrxr = math.mag(rxr)
-            magr = math.mag(reci1)
-            magrsun = math.mag(rsun)
+            magrxr = smu.mag(rxr)
+            magr = smu.mag(reci1)
+            magrsun = smu.mag(rsun)
             zet = np.arcsin(magrxr / (magrsun * magr))
-            dist = math.mag(reci1) * np.cos(zet - halfpi)
+            dist = smu.mag(reci1) * np.cos(zet - halfpi)
             if i == 106:
                 print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
             if dist > re:

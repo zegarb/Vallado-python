@@ -1917,7 +1917,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
 
 def rv2tradc(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
              alt: float, ttt: float, jdut1: float, lod: float, xp: float,
-             yp: float, terms: int, ddpsi: float, ddeps: float) ->:
+             yp: float, terms: int, ddpsi: float, ddeps: float) :
     """this function converts geocentric equatorial (eci) position and velocity
     vectors into range, topcentric right acension, declination, and rates.
     notice the value of small as it can affect the rate term calculations.
@@ -4195,7 +4195,7 @@ def rv2coeS (r, v):
 
 
 def rv2coe (r, v):
-
+    m = None
     muin = mu # this is the km version
     small = 1.0e-12
     # -------------------------  implementation   -----------------
@@ -4220,12 +4220,12 @@ def rv2coe (r, v):
 
         # ------------  find a e and semi-latus rectum   ----------
         sme = (magv*magv*0.5) - (muin /magr)
-        if (abs(sme) > small):
+        if (abs(sme) > small and ecc != 1.0):
             a = -muin  / (2.0 *sme)
+            p = a * (1 - ecc*ecc)
         else:
             a = infinite
-        #end
-        p = magh*magh/muin
+            p = magh*magh/muin
 
         # -----------------  find inclination   -------------------
 
@@ -4348,6 +4348,7 @@ def rv2coe (r, v):
        # if (typeorbit(1:1) == 'e')
        # print("ecc =", ecc)
        # print("nu =", nu)
+
         e, m = smu.newtonnu(ecc, nu)
        # end
 

@@ -3030,7 +3030,7 @@ def pkepler(ro, vo, dtsec, ndot, nddot):
         lonperdot = raandot + argpdot
         lonper = lonper + lonperdot * dtsec
         lonper = math.fmod(lonper, twopi)
-        m = m + mdot*dtsec + ndot*dtsec*dtsec + nddot*dtsec*dtsec*dtsec
+        m = m + mdot*dtsec + 0.5*ndot*dtsec*dtsec + (1/6)*nddot*dtsec*dtsec*dtsec
         m = math.fmod(m, twopi)
         e0, nu = smu.newtonm(ecc, m)
     else:
@@ -3039,16 +3039,20 @@ def pkepler(ro, vo, dtsec, ndot, nddot):
         raan = math.fmod(raan, twopi)
         argp = argp  + argpdot  * dtsec
         argp = math.fmod(argp, twopi)
-        m = m + mdot*dtsec + ndot*dtsec*dtsec + nddot*dtsec*dtsec*dtsec
+        m = m + mdot*dtsec + 0.5*ndot*dtsec*dtsec + (1/6)*nddot*dtsec*dtsec*dtsec
         m = np.remainder(m, twopi)
         e0, nu = smu.newtonm(ecc, m)
 
-     # ------------- use coe2rv to find new vectors ---------------
+    # ------------- use coe2rv to find new vectors ---------------
+    #Ex 11_6 test
+    #print(f'raan is {raan}')
+    #print(f'argp is {argp}')
+    #print(f'nu is {nu}')
     r, v = sc.coe2rv(p, ecc, incl, raan, argp, nu, arglat, truelon, lonper)
     r = r.T
     v = v.T
-#        print('r    %15.9f%15.9f%15.9f' % (r[0], r[1], r[2]))
-#        print(' v %15.10f%15.10f%15.10f\n' % ([0], v[1], v[2]))
+    # print('r    %15.9f%15.9f%15.9f' % (r[0], r[1], r[2]))
+    # print(' v %15.10f%15.10f%15.10f\n' % ([0], v[1], v[2]))
 
     return r, v
 
@@ -6239,7 +6243,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
           % (x, y, s, a))
       print('06xys  x  %14.12f y  %14.12f s %14.12f a %14.12f deg \n'
           % (x * rad2deg, y * rad2deg, s * rad2deg, a * rad2deg))
-      # " = arcsecs
+
       print('06xys  x  %14.12f" y  %14.12f" s %14.12f" a %14.12fdeg \n'
           % (x * rad2arcsec, y * rad2arcsec, s * rad2arcsec,
              a * rad2deg))
@@ -9185,7 +9189,7 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
 #                           function shadow
 #
 #  this function detemines whether a satellite falls in the umbral or penumbral
-#  regions if it is ecclipsed by the earth
+#  regions if it is ecclipsed by the earth.
 #
 #  author        : david vallado                  719-573-2600    date?
 #
@@ -9200,10 +9204,9 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
 #    umb         - umbral region                             true/false
 #    pen         - penumbral region                          true/false
 #
-#  locals        :
 #
 #  references    :
-#    vallado       2013, 301-302 alg 34
+#    vallado
 #
 # ------------------------------------------------------------------------------
 
@@ -9233,6 +9236,146 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 
     return pen, umb
 
+
+# ------------------------------------------------------------------------------
+#
+#                           function predict
+#
+#  this function predicts look angles from site to satellite over a given
+#  time period.
+#
+#  author        : david vallado                  719-573-2600    date?
+#
+#  inputs          description                              range / units
+#    reci        - original ijk position vector             km
+#    veci        - original ijk velocity vector             km/s
+#    jdepoch     - Julian date start
+#    jdeochf     - Julian date frac start
+#    latgd       - geodetic latitude of site                -pi/2 to pi/2 rad
+#    lon         - longitude of site                        -2pi to 2pi rad
+#    alt         - altitude of site                         km
+#    dtsec       - delta time between predictions           sec
+#    dti         - num ber of delta time iterations
+#    dut1        - delta of ut1 - utc                       sec
+#    dat         - delta of tai - utc                       sec
+#    xp          - polar motion coefficient                 rad
+#    yp          - polar motion coefficient                 rad
+#    ddpsi       - delta psi correction to gcrf             rad
+#    ddeps       - delta eps correction to gcrf             rad
+#    lod         - excess length of day                     sec
+#    terms       - number of terms for ast calculation      0, 2
+#    timezone    - offset to utc from local site            0 .. 23 hr
+#
+#  outputs       :
+#    jdut1        - Julian date end
+#    jdut1frac    - Julian date frac end
+#    rho          - range from site to sat                  km
+#    az           - azimuth                                 deg
+#    el           - elevation                               deg
+#    vis          - visual indicator                        visible, not visible
+#                                                           radar sun, radar night
+#
+#  references    :
+#    vallado
+#
+# ------------------------------------------------------------------------------
+
+
+def predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, dti, dut1, \
+            dat, xp, yp, ddpsi=0, ddeps=0, lod=0, terms=0, timezone=0):
+    ndot = 0.0
+    nddot = 0.0
+    rho = 0.0
+    az = 0.0
+    el = 0.0
+    vis = 'radar sun'
+
+    rsecef,vsecef = site(latgd,lon,alt)
+    print('site ecef :\n',rsecef,vsecef)
+    print()
+
+    year, mon, day, hr, min, sec = stu.invjday(jdepoch,jdepochf)
+
+    for i in range(0,dti):
+        #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
+    #                reci = reci';
+    #                veci = veci';
+        # i *dtsec input in wrong area on matlab code
+        reci1,veci1 = pkepler(reci,veci,i * dtsec,ndot,nddot)
+        print(reci1)
+        print(veci1)
+        ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac \
+            = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
+         # -------------------- convert eci to ecef --------------------
+        a = np.array([[0],[0],[0]])
+        # What are ddpsi and ddeps supposed to be? ttt? lod?
+        #if i == 106:
+        #    reci1 = [-2811.27691,3486.2632,5069.5763]
+        #    veci1 = [-6.859691, -2.964792, -1.764721]
+
+        recef,vecef,aecef = sc.eci2ecef(reci1,veci1,a,ttt,jdut1 + jdut1frac,\
+                                        lod,xp,yp,terms,ddpsi,ddeps)
+        #print(f'Julian Time: {jdut1 + jdut1frac}')
+        #print(f'reci1 {i} x {reci1} {veci1}')
+        #print(f'recef {i} x {recef} {vecef} \n')
+        # ------- find ecef range vector from site to satellite -------
+        rhoecef = recef - rsecef
+          # ------------- convert to sez for calculations ---------------
+        tempvec = smu.rot3(rhoecef,lon)
+        rhosez = smu.rot2(tempvec,halfpi - latgd)
+
+        if i == 106:
+            print(jdut1 + jdut1frac)
+            print(f'reci1 {i} x {reci1} {veci1}')
+            y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+            print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
+
+        if i == 106:
+            print(f'recef {i} x {recef} {vecef} \n')
+
+
+        if i == 106:
+            print(f'rhosez {i} x {rhosez} \n')
+
+        rho,az,el,drho,daz,del_ = sc.rv2razel(reci1,veci1,latgd,lon,alt,ttt,\
+                                    jdut1 + jdut1frac,lod,xp,yp,terms,ddpsi,ddeps)
+        # fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n',rho,az * \
+        # rad2deg,el * rad2deg,drho,daz * rad2deg,del * rad2deg );
+        if az < 0.0:
+            az = az + twopi
+        if rhosez[2] > 0.0:
+            rsun,rtasc,decl = sun(jdtt + jdttfrac)
+            if i == 106:
+                print(f'rsun{i} {rsun} \n')
+                print(f'rsun{i} {rsun*au} \n')
+            rsun = rsun * au
+            rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + \
+                                           jdut1frac,lod,xp,yp,terms,ddpsi, ddeps)
+            if i == 106:
+                print(f'rseci {i} x {rseci} {vseci} \n')
+            if np.dot(rsun,rseci) > 0.0:
+                vis = 'radar sun'
+            else:
+                rxr = np.cross(rsun,reci1)
+                magrxr = smu.mag(rxr)
+                magr = smu.mag(reci1)
+                magrsun = smu.mag(rsun)
+                zet = np.arcsin(magrxr / (magrsun * magr))
+                dist = smu.mag(reci1) * np.cos(zet - halfpi)
+                if i == 106:
+                    print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
+                if dist > re:
+                    vis = 'visible'
+                else:
+                    vis = 'radar night'
+        else:
+            vis = 'not visible'
+        y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+        print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
+              (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
+
+
+    return jdut1, jdut1frac, rho, az, el, vis
 
 
 
