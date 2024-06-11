@@ -4548,7 +4548,7 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
 # ----------------------------------------------------------------------------
 
 
-def ecef2eci  (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps):
+def ecef2eci(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps):
     # ---- find matrices
     prec, psia, wa, ea, xa = obu.precess (ttt, '80')
 
@@ -4563,7 +4563,7 @@ def ecef2eci  (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, dd
     #        omegaearth = np.array([[0], [0], [thetasa]])
     #omegaearth = np.array([[0.0], [0.0], [thetasa]])
     omegaearth = np.array([0.0, 0.0, thetasa]).T
-    print("in ecef2eci:")
+    #print("in ecef2eci:")
 
     tmpmat = np.matmul(np.matmul(prec, nut), st)
     rpef = np.matmul(pm, recef)
@@ -4571,7 +4571,7 @@ def ecef2eci  (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, dd
     #prec*nut*st*pm
     vpef = np.matmul(pm, vecef)
     oresh = np.reshape(omegaearth, (3, 1))
-    print(oresh)
+    #print(oresh)
     temp = np.cross(omegaearth, rpef.T) #turn from column to row vectors for cross product
     veci = np.dot(tmpmat, (vpef + temp.T))
 
@@ -5129,8 +5129,8 @@ def ecef2teme(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms):
         # after 1997, kinematic terms apply
         if (jdut1 > 2450449.5) and (eqeterms > 0):
             gmstg = gmst \
-                   + 0.00264*math.pi /(3600*180)*math.sin(omega) \
-                   + 0.000063*math.pi /(3600*180)*math.sin(2.0 *omega)
+                   + 0.00264 * arcsec2rad * math.sin(omega) \
+                   + 0.000063 * arcsec2rad * math.sin(2.0 *omega)
         else:
             gmstg = gmst
 
@@ -6750,8 +6750,8 @@ def teme2ecef(rteme=None, vteme=None, ateme=None, ttt=None, jdut1=None,
 # teme does not include the geometric terms here
 # after 1997, kinematic terms apply
     if (jdut1 > 2450449.5) and (eqeterms > 0):
-        gmstg = (gmst + 0.00264 * np.pi / (3600 * 180) * np.sin(omega)
-                 + 6.3e-05 * np.pi / (3600 * 180) * np.sin(2.0 * omega))
+        gmstg = (gmst + 0.00264 * arcsec2rad * np.sin(omega)
+                 + 6.3e-05 * arcsec2rad * np.sin(2.0 * omega))
     else:
         gmstg = gmst
 

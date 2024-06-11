@@ -37,12 +37,8 @@ infinite = 999999.9
 undefined = 999999.1
 
 # -------------------------  mathematical  --------------------
-rad2deg = 180.0 / math.pi
 twopi = 2.0 * math.pi
 halfpi = math.pi * 0.5
-
-
-
 # -------------------------  conversions  ---------------------
 ft2m = 0.3048
 mile2m = 1609.344
@@ -51,7 +47,7 @@ mile2ft = 5280
 mileph2kmph = 0.44704
 nmph2kmph = 0.5144444
 
-
+rad2deg = 180.0 / math.pi
 ###added
 deg2rad = math.pi / 180.0
 auer = 149597870.0 /6378.1363

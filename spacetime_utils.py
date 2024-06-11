@@ -846,8 +846,8 @@ def sidereal (jdut1, deltapsi, meaneps, omega, lod, eqeterms):
         # after 1997, kinematic terms apply as well as gemoetric in eqe
         if (jdut1 > 2450449.5) and (eqeterms > 0):
             ast = gmst + deltapsi* math.cos(meaneps) \
-                + 0.00264*math.pi /(3600*180)*math.sin(omega) \
-                + 0.000063*math.pi /(3600*180)*math.sin(2.0 *omega)
+                + 0.00264 * arcsec2rad * math.sin(omega) \
+                + 0.000063 * arcsec2rad * math.sin(2.0 *omega)
         else:
             ast = gmst + deltapsi* math.cos(meaneps)
 

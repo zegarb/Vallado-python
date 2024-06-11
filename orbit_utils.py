@@ -5697,24 +5697,24 @@ def iau06pna(ttt=None):
     a10 = smu.rot3mat(0.0146 * arcsec2rad)
     if sh.iauhelp == 'y':
         print('p e %11.7f  %11.7f  \n'
-              % (pnsum * 180 / np.pi, ensum * 180 / np.pi))
+              % (pnsum * deg2rad, ensum * deg2rad))
         print('p e %11.7f  %11.7f  \n'
-              % (pnsum * 3600 * 180 / np.pi, ensum * 3600 * 180 / np.pi))
+              % (pnsum * rad2arcsec, ensum * rad2arcsec))
         print('p e %11.7f  %11.7f  \n'
-              % (pplnsum * 180 / np.pi, eplnsum * 180 / np.pi))
+              % (pplnsum * deg2rad, eplnsum * deg2rad))
         print('p e %11.7f  %11.7f  \n'
-              % (pplnsum * 3600 * 180 / np.pi, eplnsum * 3600 * 180 / np.pi))
+              % (pplnsum * rad2arcsec, eplnsum * rad2arcsec))
         print('dpsi %11.7f deps %11.7f  \n'
-              % (deltapsi * 180 / np.pi, deltaeps * 180 / np.pi))
+              % (deltapsi * deg2rad, deltaeps * deg2rad))
         print('dpsi %11.7f deps %11.7f  \n'
-              % (deltapsi * 3600 * 180 / np.pi, deltaeps * 3600 * 180 / np.pi))
+              % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
         print('psia %11.7f wa %11.7f ea %11.7f xa %11.7f  \n'
-              % (psia * 180 / np.pi, wa * 180 / np.pi,
-                 ea * 180 / np.pi, xa * 180 / np.pi))
+              % (psia * deg2rad, wa * deg2rad,
+                 ea * deg2rad, xa * deg2rad))
         print('psia %11.7f wa %11.7f ea %11.7f xa %11.7f  \n'
-              % (psia * 3600 * 180 / np.pi,
-                 wa * 3600 * 180 / np.pi, ea * 3600 * 180 / np.pi,
-                 xa * 3600 * 180 / np.pi))
+              % (psia * rad2arcsec,
+                 wa * rad2arcsec, ea * rad2arcsec,
+                 xa * rad2arcsec))
         # temp1 = a7*a6*a5*a4
 # temp2 = a3*a2*a1
 # temp3 = a10*a9*a8
@@ -5940,8 +5940,8 @@ def iau06pnb(ttt=None):
              + ssum3 * ttt3 + ssum4 * ttt4)
         if sh.iauhelp == 'y':
             print('00pnb  x  %14.12f" y  %14.12f" s %14.12f" a %14.12fdeg \n'
-                  % (x / deg2rad * 3600, y / deg2rad * 3600,
-                     s / deg2rad * 3600, a / deg2rad))
+                  % (x * rad2arcsec, y * rad2arcsec,
+                     s * rad2arcsec, a * rad2deg))
             #                fprintf(1, 'p #11.7f w #11.7f xbar #11.7f ybar #11.7f deg \n', p*180/pi, w*180/pi, xbar*180/pi, ybar*180/pi)
 
 
@@ -6238,10 +6238,11 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
       print('06xys  x  %14.12f y  %14.12f s %14.12f a %14.12f rad \n'
           % (x, y, s, a))
       print('06xys  x  %14.12f y  %14.12f s %14.12f a %14.12f deg \n'
-          % (x / deg2rad, y / deg2rad, s / deg2rad, a / deg2rad))
+          % (x * rad2deg, y * rad2deg, s * rad2deg, a * rad2deg))
+      # " = arcsecs
       print('06xys  x  %14.12f" y  %14.12f" s %14.12f" a %14.12fdeg \n'
-          % (x / deg2rad * 3600, y / deg2rad * 3600, s / deg2rad * 3600,
-             a / deg2rad))
+          % (x * rad2arcsec, y * rad2arcsec, s * rad2arcsec,
+             a * rad2deg))
 
 
     # ----------------- find nutation matrix ----------------------
