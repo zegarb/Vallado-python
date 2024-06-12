@@ -81,6 +81,12 @@ alt = 0.024 #km (24m)
 dtsec = 120.0
 # timezone = 0 Assumming Epoch time (UTC)
 jdepoch,jdepochf = stu.jday(year,mon,day,hr,min,sec)
-print(jdepoch+jdepochf)
 
-obu.predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, 120, dut1, dat, xp, yp)
+# Was 119 iterations (106 gets example problem in book - Table 11-4)
+jdutend, rho, az, el, vis = obu.predict(reci, veci, jdepoch+jdepochf, \
+                                latgd, lon, alt, dtsec, 106, dut1, dat, xp, yp)
+
+
+y,m,d,h,mn,s = stu.invjday(jdutend - (dut1 / 86400.0))
+print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
+              (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))

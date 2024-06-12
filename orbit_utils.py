@@ -9249,13 +9249,12 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 #  inputs          description                              range / units
 #    reci        - original ijk position vector             km
 #    veci        - original ijk velocity vector             km/s
-#    jdepoch     - Julian date start
-#    jdeochf     - Julian date frac start
+#    jdepoch     - Julian date start                        days
 #    latgd       - geodetic latitude of site                -pi/2 to pi/2 rad
 #    lon         - longitude of site                        -2pi to 2pi rad
 #    alt         - altitude of site                         km
 #    dtsec       - delta time between predictions           sec
-#    dti         - num ber of delta time iterations
+#    dti         - number of delta time iterations
 #    dut1        - delta of ut1 - utc                       sec
 #    dat         - delta of tai - utc                       sec
 #    xp          - polar motion coefficient                 rad
@@ -9267,8 +9266,7 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 #    timezone    - offset to utc from local site            0 .. 23 hr
 #
 #  outputs       :
-#    jdut1        - Julian date end
-#    jdut1frac    - Julian date frac end
+#    jdutend      - Julian end date                         days
 #    rho          - range from site to sat                  km
 #    az           - azimuth                                 deg
 #    el           - elevation                               deg
@@ -9281,7 +9279,7 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 # ------------------------------------------------------------------------------
 
 
-def predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, dti, dut1, \
+def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
             dat, xp, yp, ddpsi=0, ddeps=0, lod=0, terms=0, timezone=0):
     ndot = 0.0
     nddot = 0.0
@@ -9291,19 +9289,20 @@ def predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, dti, dut1, \
     vis = 'radar sun'
 
     rsecef,vsecef = site(latgd,lon,alt)
-    print('site ecef :\n',rsecef,vsecef)
-    print()
+    #print('site ecef :\n',rsecef,vsecef)
+    #print()
 
-    year, mon, day, hr, min, sec = stu.invjday(jdepoch,jdepochf)
+    year, mon, day, hr, min, sec = stu.invjday(jdepoch)
 
-    for i in range(0,dti):
+    for i in range(0,dti+1):
         #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
     #                reci = reci';
     #                veci = veci';
         # i *dtsec input in wrong area on matlab code
         reci1,veci1 = pkepler(reci,veci,i * dtsec,ndot,nddot)
-        print(reci1)
-        print(veci1)
+        # These values are slightly off from the book
+        #print(reci1)
+        #print(veci1)
         ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac \
             = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
          # -------------------- convert eci to ecef --------------------
@@ -9324,18 +9323,18 @@ def predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, dti, dut1, \
         tempvec = smu.rot3(rhoecef,lon)
         rhosez = smu.rot2(tempvec,halfpi - latgd)
 
-        if i == 106:
-            print(jdut1 + jdut1frac)
-            print(f'reci1 {i} x {reci1} {veci1}')
-            y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
-            print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
+        # if i == 106:
+        #     print(jdut1 + jdut1frac)
+        #     print(f'reci1 {i} x {reci1} {veci1}')
+        #     y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+        #     print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
 
-        if i == 106:
-            print(f'recef {i} x {recef} {vecef} \n')
+        # if i == 106:
+        #     print(f'recef {i} x {recef} {vecef} \n')
 
 
-        if i == 106:
-            print(f'rhosez {i} x {rhosez} \n')
+        # if i == 106:
+        #     print(f'rhosez {i} x {rhosez} \n')
 
         rho,az,el,drho,daz,del_ = sc.rv2razel(reci1,veci1,latgd,lon,alt,ttt,\
                                     jdut1 + jdut1frac,lod,xp,yp,terms,ddpsi,ddeps)
@@ -9345,14 +9344,14 @@ def predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, dti, dut1, \
             az = az + twopi
         if rhosez[2] > 0.0:
             rsun,rtasc,decl = sun(jdtt + jdttfrac)
-            if i == 106:
-                print(f'rsun{i} {rsun} \n')
-                print(f'rsun{i} {rsun*au} \n')
+            # if i == 106:
+            #     print(f'rsun{i} {rsun} \n')
+            #     print(f'rsun{i} {rsun*au} \n')
             rsun = rsun * au
             rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + \
                                            jdut1frac,lod,xp,yp,terms,ddpsi, ddeps)
-            if i == 106:
-                print(f'rseci {i} x {rseci} {vseci} \n')
+            # if i == 106:
+            #     print(f'rseci {i} x {rseci} {vseci} \n')
             if np.dot(rsun,rseci) > 0.0:
                 vis = 'radar sun'
             else:
@@ -9362,20 +9361,22 @@ def predict(reci, veci, jdepoch, jdepochf, latgd, lon, alt, dtsec, dti, dut1, \
                 magrsun = smu.mag(rsun)
                 zet = np.arcsin(magrxr / (magrsun * magr))
                 dist = smu.mag(reci1) * np.cos(zet - halfpi)
-                if i == 106:
-                    print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
+                # if i == 106:
+                #     print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
                 if dist > re:
                     vis = 'visible'
                 else:
                     vis = 'radar night'
         else:
             vis = 'not visible'
-        y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
-        print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
-              (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
 
+        # Example 11_6 (table check)
+        # y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+        #print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
+        #      (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
 
-    return jdut1, jdut1frac, rho, az, el, vis
+    jdutend = jdut1 + jdut1frac
+    return jdutend, rho, az, el, vis
 
 
 
