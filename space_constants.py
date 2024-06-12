@@ -33,7 +33,7 @@ smalle12 = 1.0e-12
 smalle18 = 1.0e-18
 
 
-infinite = 999999.9
+infinite = math.inf
 undefined = 999999.1
 
 # -------------------------  mathematical  --------------------
