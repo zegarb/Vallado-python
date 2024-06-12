@@ -325,8 +325,6 @@ print('incl rad=%f  raan rad=%f  argp rad=%f  nu rad=%f'% \
 reci,veci = coe2rv(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
 print("coe2rv returned: ", reci, veci)
 
-
-
 #    reci = np.array([[11074.95274], [40629.74421], [-32.1123199]])
 #    veci = np.array([[-2.940822436], [0.9007122363], [0.002036330819]])
 #    reci = np.array([11074.95274, 40629.74421, -32.1123199])
@@ -453,14 +451,13 @@ print('rho %f, trtasc %f, tdecl %f, drho %f, dtrtasc %f, dtdecl %f' %\
 #print(reci)
 #print(veci)
 
-rho, az, el, drho, daz, delx = rv2razel(reci, veci, latgd, lon, alt, ttt,
+rho, az, el, drho, daz, del_ = rv2razel(reci, veci, latgd, lon, alt, ttt,
                                         jdut1, lod, xp, yp, terms, ddpsi,
                                         ddeps)
 print('rv2razel:')
-print(f'rho {rho}, az {az}, drho {drho}, daz {daz}, delx {delx}')
+print(f'rho {rho}, az {az}, drho {drho}, daz {daz}, del {del_}')
 
-delv = 0.17 * deg2rad
-reci, veci = razel2rv(rho, az, el, drho, daz, delv, latgd, lon, alt, ttt,
+reci, veci = razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt, ttt,
                         jdut1, lod, xp, yp, terms, ddpsi, ddeps)
 print('razel2rv:')
 print(reci)
@@ -476,15 +473,15 @@ print('ell2rv:')
 print(rijk)
 print(vijk)
 
-rhosez, drhosez = raz2rvs(rho, az, el, drho, daz, delv)
+rhosez, drhosez = raz2rvs(rho, az, el, drho, daz, del_)
 print('raz2rvs:')
 print(rhosez)
 print(drhosez)
 
-rho, az, el, drho, daz, delv = rvs2raz(rhosez, drhosez)
+rho, az, el, drho, daz, del_ = rvs2raz(rhosez, drhosez)
 print('rvs2raz:')
-print('rho %f, az %f, el %f, drho %f, daz %f, delv %f' %\
-        (rho, az, el, drho, daz, delv))
+print('rho %f, az %f, el %f, drho %f, daz %f, del_ %f' %\
+        (rho, az, el, drho, daz, del_))
 
 
 

@@ -140,13 +140,13 @@ for i in range(1, 3):
     ###skipping rv2razel
     '''
     print("SKIPPING rv2razel")
-    rho, az, el, drho, daz, delx = sc.rv2razel(reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
+    rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
     if az < 0.0:
         az = az + twopi
     print('rvraz   %14.7f %14.7f %14.7f'%(rho, az * rad2deg, el * rad2deg))
-    print(' %14.7f %14.12f %14.12f\n'%(drho, daz * rad2deg, delx * rad2deg))
+    print(' %14.7f %14.12f %14.12f\n'%(drho, daz * rad2deg, del_ * rad2deg))
 
-    reci, veci = sc.razel2rv(rho, az, el, drho, daz, delx, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
+    reci, veci = sc.razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
     print('r    %14.7f %14.7f %14.7f'%(reci[0], reci[1], reci[2] ))
     print(' v %14.9f %14.9f %14.9f\n'%(veci[0], veci[1], veci[2] ))
     '''
@@ -233,11 +233,11 @@ print(' v %14.9f %14.9f %14.9f\n' % (veci[0], veci[1], veci[2]))
 print("SKIPPING rv2razel")
 '''
 
-rho, az, el, drho, daz, delx = sc.rv2razel ( reci, veci, latgd, lon, alt, ttt, jdut1+jdut1frac, lod, xp, yp, terms, ddpsi, ddeps )
+rho, az, el, drho, daz, del_ = sc.rv2razel ( reci, veci, latgd, lon, alt, ttt, jdut1+jdut1frac, lod, xp, yp, terms, ddpsi, ddeps )
 if az < 0.0:
     az = az + twopi
 print('rvraz   %14.7f %14.7f %14.7f'%(rho, az * rad2deg, el * rad2deg ))
-print(' %14.7f %14.12f %14.12f\n'%(drho, daz * rad2deg, delx * rad2deg ))
+print(' %14.7f %14.12f %14.12f\n'%(drho, daz * rad2deg, del_ * rad2deg ))
 print('STK 12 Oct 2021 04:09:07.155          159.523              5.000    2788.517174 \n')
 print('STK 12 Oct 2021 04:10:07.000          158.339              9.710    2393.490995 \n')
 '''

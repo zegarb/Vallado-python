@@ -2155,22 +2155,20 @@ def newtone (ecc, e0):
 # ----------------------------------------------------------------------------- }
 
 
-def angl (vec1, vec2):
+def angl(vec1, vec2):
 
-        small = 0.00000001
-        magv1 = mag(vec1)
-        magv2 = mag(vec2)
+    small = 0.00000001
+    magv1 = mag(vec1)
+    magv2 = mag(vec2)
 
-        if magv1*magv2 > small**2:
-            temp = np.dot(vec1, vec2) / (magv1*magv2)
-            if abs(temp) > 1.0:
-                temp = np.sign(temp) * 1.0
-            #end
-            theta = math.acos(temp)
-        else:
-            theta=None
-        #end
-        return theta
+    if magv1*magv2 > small**2:
+        temp = np.dot(vec1, vec2) / (magv1*magv2)
+        if abs(temp) > 1.0:
+            temp = np.sign(temp) * 1.0
+        theta = math.acos(temp)
+    else:
+        theta=None
+    return theta
 
 
 # ------------------------------------------------------------------------------
@@ -2205,15 +2203,15 @@ def angl (vec1, vec2):
 
 def rot1 (vec, xval):
 
-        temp = vec[2]
-        c = math.cos(xval)
-        s = math.sin(xval)
+    temp = vec[2]
+    c = math.cos(xval)
+    s = math.sin(xval)
 
-        outvec = np.zeros(3)
-        outvec[2] = c*vec[2] - s*vec[1]
-        outvec[1] = c*vec[1] + s*temp
-        outvec[0] = vec[0]
-        return outvec
+    outvec = np.zeros(3)
+    outvec[2] = c*vec[2] - s*vec[1]
+    outvec[1] = c*vec[1] + s*temp
+    outvec[0] = vec[0]
+    return outvec
 
 
 
@@ -2249,15 +2247,15 @@ def rot1 (vec, xval):
 
 def rot2 (vec, xval):
 
-        temp = vec[2]
-        c = math.cos(xval)
-        s = math.sin(xval)
+    temp = vec[2]
+    c = math.cos(xval)
+    s = math.sin(xval)
 
-        outvec = np.zeros(3)
-        outvec[2] = c*vec[2] + s*vec[0]
-        outvec[0] = c*vec[0] - s*temp
-        outvec[1] = vec[1]
-        return outvec
+    outvec = np.zeros(3)
+    outvec[2] = c*vec[2] + s*vec[0]
+    outvec[0] = c*vec[0] - s*temp
+    outvec[1] = vec[1]
+    return outvec
 
 
 
@@ -2293,15 +2291,15 @@ def rot2 (vec, xval):
 
 def rot3 (vec, xval):
 
-        temp = vec[1]
-        c = math.cos(xval)
-        s = math.sin(xval)
+    temp = vec[1]
+    c = math.cos(xval)
+    s = math.sin(xval)
 
-        outvec = np.zeros(3)
-        outvec[1] = c*vec[1] - s*vec[0]
-        outvec[0] = c*vec[0] + s*temp
-        outvec[2] = vec[2]
-        return outvec
+    outvec = np.zeros(3)
+    outvec[1] = c*vec[1] - s*vec[0]
+    outvec[0] = c*vec[0] + s*temp
+    outvec[2] = vec[2]
+    return outvec
 
 
 
@@ -2383,61 +2381,61 @@ def mag(vec):
 
 def polarm (xp, yp, ttt, opt):
 
-        cosxp = math.cos(xp)
-        sinxp = math.sin(xp)
-        cosyp = math.cos(yp)
-        sinyp = math.sin(yp)
+    cosxp = math.cos(xp)
+    sinxp = math.sin(xp)
+    cosyp = math.cos(yp)
+    sinyp = math.sin(yp)
 
-        pm = np.zeros((3, 3))
-        if (opt == "80"):
-            pm[0, 0] = cosxp
-            pm[0, 1] = 0.0
-            pm[0, 2] = -sinxp
-            pm[1, 0] = sinxp * sinyp
-            pm[1, 1] = cosyp
-            pm[1, 2] = cosxp * sinyp
-            pm[2, 0] = sinxp * cosyp
-            pm[2, 1] = -sinyp
-            pm[2, 2] = cosxp * cosyp
+    pm = np.zeros((3, 3))
+    if (opt == "80"):
+        pm[0, 0] = cosxp
+        pm[0, 1] = 0.0
+        pm[0, 2] = -sinxp
+        pm[1, 0] = sinxp * sinyp
+        pm[1, 1] = cosyp
+        pm[1, 2] = cosxp * sinyp
+        pm[2, 0] = sinxp * cosyp
+        pm[2, 1] = -sinyp
+        pm[2, 2] = cosxp * cosyp
 
-            # a1 = rot2mat(xp)
-            # a2 = rot1mat(yp)
-            # pm = a2*a1
-            # Approximate matrix using small angle approximations
-            #pm(1, 1) = 1.0
-            #pm(2, 1) = 0.0
-            #pm(3, 1) = xp
-            #pm(1, 2) = 0.0
-            #pm(2, 2) = 1.0
-            #pm(3, 2) = -yp
-            #pm(1, 3) = -xp
-            #pm(2, 3) = yp
-            #pm(3, 3) = 1.0
-        else:
-            # approximate sp value in rad
-            sp = -47.0e-6 * ttt * arcsec2rad
-            print('xp %16.14f, %16.14f sp %16.14g \n' % (xp, yp, sp))
-            cossp = math.cos(sp)
-            sinsp = math.sin(sp)
+        # a1 = rot2mat(xp)
+        # a2 = rot1mat(yp)
+        # pm = a2*a1
+        # Approximate matrix using small angle approximations
+        #pm(1, 1) = 1.0
+        #pm(2, 1) = 0.0
+        #pm(3, 1) = xp
+        #pm(1, 2) = 0.0
+        #pm(2, 2) = 1.0
+        #pm(3, 2) = -yp
+        #pm(1, 3) = -xp
+        #pm(2, 3) = yp
+        #pm(3, 3) = 1.0
+    else:
+        # approximate sp value in rad
+        sp = -47.0e-6 * ttt * arcsec2rad
+        print('xp %16.14f, %16.14f sp %16.14g \n' % (xp, yp, sp))
+        cossp = math.cos(sp)
+        sinsp = math.sin(sp)
 
-            #fprintf(1, ' sp  %14.11f mas \n', sp/arcsec2rad)
+        #fprintf(1, ' sp  %14.11f mas \n', sp/arcsec2rad)
 
-            # form the matrix
-            pm[0, 0] = cosxp * cossp
-            pm[0, 1] = -cosyp * sinsp + sinyp * sinxp * cossp
-            pm[0, 2] = -sinyp * sinsp - cosyp * sinxp * cossp
-            pm[1, 0] = cosxp * sinsp
-            pm[1, 1] = cosyp * cossp + sinyp * sinxp * sinsp
-            pm[1, 2] = sinyp * cossp - cosyp * sinxp * sinsp
-            pm[2, 0] = sinxp
-            pm[2, 1] = -sinyp * cosxp
-            pm[2, 2] = cosyp * cosxp
+        # form the matrix
+        pm[0, 0] = cosxp * cossp
+        pm[0, 1] = -cosyp * sinsp + sinyp * sinxp * cossp
+        pm[0, 2] = -sinyp * sinsp - cosyp * sinxp * cossp
+        pm[1, 0] = cosxp * sinsp
+        pm[1, 1] = cosyp * cossp + sinyp * sinxp * sinsp
+        pm[1, 2] = sinyp * cossp - cosyp * sinxp * sinsp
+        pm[2, 0] = sinxp
+        pm[2, 1] = -sinyp * cosxp
+        pm[2, 2] = cosyp * cosxp
 
-            # a1 = rot1mat(yp)
-            # a2 = rot2mat(xp)
-            # a3 = rot3mat(-sp)
-            # pm = a3*a2*a1
-        return pm
+        # a1 = rot1mat(yp)
+        # a2 = rot2mat(xp)
+        # a3 = rot3mat(-sp)
+        # pm = a3*a2*a1
+    return pm
 
 
 

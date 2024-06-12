@@ -43,11 +43,11 @@ lonper = 0.0
 a = p / (1 - ecc * ecc)
 
 print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg      arglat   truelon    lonper')
-print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f%11.5f%11.5f\n' % \
+print('coes %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f\n' %
     (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg,
     arglat * rad2deg, truelon * rad2deg, lonper * rad2deg ))
 
-# --------  coe2rv       - classical elements to posisiotn and velocity
+# --------  coe2rv       - classical elements to position and velocity
 
 ### coe2rvS.m is incomplete and only just replaces || with |. -jmb
 #r, v = coe2rvS(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
