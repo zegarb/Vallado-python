@@ -3551,9 +3551,9 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
 
     Returns
     -------
-    rtasc: float
+    rtasc : float
         right ascension: rad
-    decl: float
+    decl : float
         declination: rad
     """
     decl = math.asin(math.sin(el) * math.sin(lat)
@@ -3617,22 +3617,51 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
 # [rhosez, drhosez] = raz2rvs (rho, az, el, drho, daz, del)
 # ------------------------------------------------------------------------------
 
-def raz2rvs(rho=None, az=None, el=None, drho=None, daz=None, del_=None):
+def raz2rvs(rho: float, az: float, el: float, drho: float, daz: float,
+            del_: float):
+    """this function converts range, azimuth, and elevation values with slant
+    range and velocity vectors for a satellite from a radar site in the
+    topocentric horizon (sez) system.
+
+    Parameters
+    ----------
+    rho : float
+        satellite range from site: km
+    az : float
+        azimuth: 0 to 2pi rads
+    el : float
+        elevation: -pi/2 to pi/2 rads
+    drho : float
+        range rate: km/s
+    daz : float
+        azimuth rate: km/s
+    del_ : float
+        elevation rate: km/s
+
+    Returns
+    -------
+    rhosez : ndarray
+        sez satellite range vector: km
+    drhosez : ndarray
+        sez satellite velocity vector: km/s
+    """
     # ----------------------- initialize values -------------------
-    sinel = np.sin(el)
-    cosel = np.cos(el)
-    sinaz = np.sin(az)
-    cosaz = np.cos(az)
+    sinel = math.sin(el)
+    cosel = math.cos(el)
+    sinaz = math.sin(az)
+    cosaz = math.cos(az)
     # ------------------- form sez range vector -------------------
     rhosez = np.zeros(3)
-    rhosez[0] = - rho * cosel * cosaz
+    rhosez[0] = -rho * cosel * cosaz
     rhosez[1] = rho * cosel * sinaz
     rhosez[2] = rho * sinel
     # ----------------- form sez velocity vector ------------------
     drhosez = np.zeros(3)
-    drhosez[0] = - drho * cosel * cosaz + rhosez[2] * del_ * cosaz + rhosez[1] * daz
-    drhosez[1] = drho * cosel * sinaz - rhosez[2] * del_ * sinaz - rhosez[0] * daz
-    drhosez[2] = drho * sinel + rho * del_ * cosel
+    drhosez[0] = (-drho * cosel * cosaz + rhosez[2] * cosaz * del_
+                  + rhosez[1] * daz)
+    drhosez[1] = (drho * cosel * sinaz - rhosez[2] * sinaz * del_
+                  - rhosez[0] * daz)
+    drhosez[2] = drho * sinel + rho * cosel * del_
     return rhosez, drhosez
 
 
@@ -3663,9 +3692,11 @@ def raz2rvs(rho=None, az=None, el=None, drho=None, daz=None, del_=None):
 #    ttt         - julian centuries of tt         centuries
 #    jdut1       - julian date of ut1             days from 4713 bc
 #    lod         - excess length of day           sec
-#    xp          - polar motion coefficient       arc sec
-#    yp          - polar motion coefficient       arc sec
+#    xp          - polar motion coefficient       rad
+#    yp          - polar motion coefficient       rad
 #    terms       - number of terms for ast calculation 0, 2
+#    ddpsi       - delta psi correction to gcrf   rad
+#    ddeps       - delta eps correction to gcrf   rad
 #
 #  outputs       :
 #    reci        - eci position vector            km
@@ -3687,22 +3718,81 @@ def raz2rvs(rho=None, az=None, el=None, drho=None, daz=None, del_=None):
 # [reci, veci] = razel2rv (rho, az, el, drho, daz, del, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
 # ------------------------------------------------------------------------------
 
-def razel2rv(rho=None, az=None, el=None, drho=None, daz=None,
-             del_=None, latgd=None, lon=None, alt=None, ttt=None,
-             jdut1=None, lod=None, xp=None, yp=None, terms=None,
-             ddpsi=None, ddeps=None):
+def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
+             del_: float, latgd: float, lon: float, alt: float, ttt: float,
+             jdut1: float, lod: float, xp: float, yp: float, terms: int,
+             ddpsi: float, ddeps: float):
+    """this function converts range, azimuth, and elevation and their rates to
+    the geocentric equatorial (eci) position and velocity vectors.
+
+    Parameters
+    ----------
+    rho : float
+        satellite range from site: km
+    az : float
+        azimuth: 0 to 2pi rad
+    el : float
+        elevation: -pi/2 to pi/2 rad
+    drho : float
+        range rate: km/s
+    daz : float
+        azimuth rate: rad/s
+    del_ : float
+        elevation rate: rad/s
+    latgd : float
+        geodetic latitude of site: -pi/2 to pi2 rad
+    lon : float
+        longitute of site: -2pi to 2pi rad
+    alt : float
+        altitude of site: km
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        # of terms for ast calculation: 0,2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    reci: ndarray
+        eci position vector of satellite: km
+    veci: ndarray
+        eci velocity vecotr of satellite: km/s
+    """
+
     # -------------------------  implementation   -----------------
     # -----------  find sez range and velocity vectors ------------
     rhosez, drhosez = raz2rvs(rho, az, el, drho, daz, del_)
     # -----------  perform sez to ijk (ecef) transformation -------
-    tempvec = smu.rot2(rhosez, latgd - halfpi)
-    rhoecef = smu.rot3(tempvec, -lon)
-    rhoecef = np.transpose(rhoecef)
-    tempvec = smu.rot2(drhosez, latgd - halfpi)
-    drhoecef = smu.rot3(tempvec, -lon)
-    drhoecef = np.transpose(drhoecef)
+    # tempvec = smu.rot2(rhosez, latgd - halfpi)
+    # rhoecef = smu.rot3(tempvec, -lon)
+    # tempvec = smu.rot2(drhosez, latgd - halfpi)
+    # drhoecef = smu.rot3(tempvec, -lon)
+
+    # alternate sez to ecef transformation; faster?
+    sinlat = math.sin(latgd)
+    coslat = math.cos(latgd)
+    sinlon = math.sin(lon)
+    coslon = math.cos(lon)
+    sez2ecef = np.array([[sinlat*coslon, -sinlon, coslat*coslon],
+                         [sinlat*sinlon, coslon, coslat*sinlon],
+                         [-coslat, 0, sinlat]])
+    rhoecef = sez2ecef @ rhosez
+    drhoecef = sez2ecef @ drhosez
+
+
     # ----------  find ecef range and velocity vectors -------------
-    rs, vs = obu.site(latgd, lon, alt)
+    rs, _ = obu.site(latgd, lon, alt)
     recef = rhoecef + rs
     vecef = drhoecef
     # -------- convert ecef to eci
@@ -3714,11 +3804,140 @@ def razel2rv(rho=None, az=None, el=None, drho=None, daz=None,
     print("vecef")
     print(vecef)
     a = np.zeros((3, 1))
-    reci, veci, aeci = ecef2eci(recef, vecef, a, ttt, jdut1,
+    reci, veci, _ = ecef2eci(recef, vecef, a, ttt, jdut1,
                               lod, xp, yp, terms, ddpsi, ddeps)
     return reci, veci
 
+# ------------------------------------------------------------------------------
 #
+#                           function coe2rv
+#
+#  this function finds the position and velocity vectors in geocentric
+#    equatorial (ijk) system given the classical orbit elements.
+#
+#  author        : david vallado                  719-573-2600    9 jun 2002
+#
+#  revisions
+#    vallado     - add constant file use                         29 jun 2003
+#
+#  inputs          description                    range / units
+#    p           - semilatus rectum               km
+#    ecc         - eccentricity
+#    incl        - inclination                    0.0  to pi rad
+#    omega       - longitude of ascending node    0.0  to 2pi rad
+#    argp        - argument of perigee            0.0  to 2pi rad
+#    nu          - true anomaly                   0.0  to 2pi rad
+#    arglat      - argument of latitude      (ci) 0.0  to 2pi rad
+#    truelon     - true longitude            (ce) 0.0  to 2pi rad
+#    lonper      - longitude of periapsis    (ee) 0.0  to 2pi rad
+#
+#  outputs       :
+#    r           - ijk position vector            km
+#    v           - ijk velocity vector            km / s
+#
+#  locals        :
+#    temp        - temporary real*8 value
+#    rpqw        - pqw position vector            km
+#    vpqw        - pqw velocity vector            km / s
+#    sinnu       - sine of nu
+#    cosnu       - cosine of nu
+#    tempvec     - pqw velocity vector
+#
+#  coupling      :
+#    mag         - magnitude of a vector
+#    rot3        - rotation about the 3rd axis
+#    rot1        - rotation about the 1st axis
+#
+#  references    :
+#    vallado       2007, 126, alg 10, ex 2-5
+#
+# [r, v] = coe2rv (p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
+# ------------------------------------------------------------------------------
+
+
+def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
+           nu: float, arglat: float, truelon: float, lonper: float):
+    """This function finds the position and velocity vectors in geocentric
+    equatorial (ijk) system given the classical orbit elements.
+
+    Parameters
+    ----------
+    p : float
+        semilatus rectum
+    ecc : float
+        eccentricity
+    incl : float
+        inclination
+    omega : float
+        longitude of ascending node
+    argp : float
+        argument of pedigree
+    nu : float
+        true anomaly
+    arglat : float
+        argument of latitude
+    truelon : float
+        true longitude
+    lonper : float
+        longitude of periapsis
+
+    Returns
+    -------
+    r : ndarray
+        ijk position vector
+    v : ndarray
+        ijk velocity vector
+    """
+
+    # -------------------------------------------------------------
+    #       determine what type of orbit is involved and set up the
+    #       set up angles for the special cases.
+    # -------------------------------------------------------------
+    if (ecc < small):
+        # ----------------  circular equatorial  ------------------
+        if (incl<small) or (abs(incl-math.pi)< small):
+            argp = 0.0
+            omega = 0.0
+            nu = truelon
+        else:
+            # --------------  circular inclined  ------------------
+            argp = 0.0
+            nu = arglat
+    else:
+            # ---------------  elliptical equatorial  -----------------
+        if ((incl<small) or (abs(incl-math.pi)<small)):
+            argp = lonper
+            omega = 0.0
+
+    #print("here, argp =%.3f, omega =%.3f, nu =%.3f" % (argp, omega, nu))
+    # ----------  form pqw position and velocity vectors ----------
+    cosnu = math.cos(nu)
+    sinnu = math.sin(nu)
+    temp = p / (1.0  + ecc*cosnu)
+    rpqw = np.zeros((3))
+    rpqw[0] = temp*cosnu
+    rpqw[1] = temp*sinnu
+    rpqw[2] = 0.0
+    if (abs(p) < 0.0001):
+        p = 0.0001
+    vpqw = np.zeros((3))
+    vpqw[0] = -sinnu*np.sqrt(mu)  / np.sqrt(p)
+    vpqw[1] = (ecc + cosnu)*np.sqrt(mu) / np.sqrt(p)
+    vpqw[2] = 0.0
+
+    # ----------------  perform transformation to ijk  ------------
+    tempvec = smu.rot3(rpqw   , -argp)
+    tempvec = smu.rot1(tempvec, -incl)
+    r = smu.rot3(tempvec, -omega)
+
+    tempvec = smu.rot3(vpqw   , -argp)
+    tempvec = smu.rot1(tempvec, -incl)
+    v = smu.rot3(tempvec, -omega)
+
+    r = r.T #r = r'
+    v = v.T #v = v'
+    return r, v
+
 # ------------------------------------------------------------------------------
 #
 #                           function coe2rv
@@ -3913,7 +4132,254 @@ def coe2rvh(p=None, ecc=None, incl=None, omega=None, argp=None, nu=None,
     v = np.transpose(v)
     return r, v
 
+# ------------------------------------------------------------------------------
+#
+#                           function rv2coe
+#
+#  this function finds the classical orbital elements given the geocentric
+#    equatorial position and velocity vectors.
+#
+#  author        : david vallado                  719-573-2600   21 jun 2002
+#
+#  revisions
+#    vallado     - fix special cases                              5 sep 2002
+#    vallado     - delete extra check in inclination code        16 oct 2002
+#    vallado     - add constant file use                         29 jun 2003
+#    vallado     - add mu                                         2 apr 2007
+#
+#  inputs          description                    range / units
+#    r           - ijk position vector            km
+#    v           - ijk velocity vector            km / s
+#    mu          - gravitational parameter        km3 / s2
+#
+#  outputs       :
+#    p           - semilatus rectum               km
+#    a           - semimajor axis                 km
+#    ecc         - eccentricity
+#    incl        - inclination                    0.0  to pi rad
+#    raan        - longitude of ascending node    0.0  to 2pi rad
+#    argp        - argument of perigee            0.0  to 2pi rad
+#    nu          - true anomaly                   0.0  to 2pi rad
+#    m           - mean anomaly                   0.0  to 2pi rad
+#    arglat      - argument of latitude      (ci) 0.0  to 2pi rad
+#    truelon     - true longitude            (ce) 0.0  to 2pi rad
+#    lonper      - longitude of periapsis    (ee) 0.0  to 2pi rad
+#
+#  locals        :
+#    hbar        - angular momentum h vector      km2 / s
+#    ebar        - eccentricity     e vector
+#    nbar        - line of nodes    n vector
+#    c1          - v**2 - u/r
+#    rdotv       - r dot v
+#    hk          - hk unit vector
+#    sme         - specfic mechanical energy      km2 / s2
+#    i           - index
+#    e           - eccentric, parabolic,
+#                  hyperbolic anomaly             rad
+#    temp        - temporary variable
+#    typeorbit   - type of orbit                  ee, ei, ce, ci
+#
+#  coupling      :
+#    mag         - magnitude of a vector
+#    angl        - find the angl between two vectors
+#    newtonnu    - find the mean anomaly
+#
+#  references    :
+#    vallado       2007, 121, alg 9, ex 2-5
+#
+# [p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r, v)
+# ------------------------------------------------------------------------------
 
+
+def rv2coe(r: np.ndarray, v: np.ndarray):
+    """this function finds the classical orbital elements given the geocentric
+    equatorial position and velocity vectors.
+
+    Parameters
+    ----------
+    r : ndarray
+        ijk position vector
+    v : ndarray
+        ijk velocity vector
+
+    Returns
+    -------
+    p
+        semilatus rectum: km
+    a
+        semimajor axis: km
+    ecc
+        eccentricity
+    incl
+        inclination: 0.0  to pi rad
+    raan
+        longitude of ascending node: 0.0  to 2pi rad
+    argp
+        argument of perigee: 0.0  to 2pi rad
+    nu
+        true anomaly: 0.0  to 2pi rad
+    m
+        mean anomaly: 0.0  to 2pi rad
+    arglat
+        argument of latitude: Circular Inclined: 0.0  to 2pi rad, else None
+    truelon
+        true longitude: Circular Equatorial: 0.0  to 2pi rad, else None
+    lonper
+        longitude of periapsis: Elliptical equatorial: 0.0  to 2pi rad, else None
+    """
+
+    m = None
+    small = 1.0e-12
+    # -------------------------  implementation   -----------------
+    magr = smu.mag(r)
+    magv = smu.mag(v)
+    # ------------------  find h n and e vectors   ----------------
+    hbar = np.cross(r, v)
+    magh = smu.mag(hbar)
+    if (magh >= 0.0):
+        nbar = np.zeros((3))
+        nbar[0] = -hbar[1]
+        nbar[1] = hbar[0]
+        nbar[2] = 0.0
+        magn = smu.mag(nbar)
+        c1 = (magv * magv) - (mu / magr)
+        rdotv = np.dot(r, v)
+        ebar = np.zeros(3)
+        for i in range(3):
+            ebar[i] = (c1 * r[i] - rdotv * v[i]) / mu
+        ecc = smu.mag(ebar)
+
+        # ------------  find a e and semi-latus rectum   ----------
+        sme = (magv * magv * 0.5) - (mu / magr)
+        if (abs(sme) > small and ecc != 1.0):
+            a = -mu / (2.0 * sme)
+            p = a * (1 - ecc * ecc)
+        else:
+            a = infinite
+            p = magh * magh / mu
+
+        # -----------------  find inclination   -------------------
+
+        hk = hbar[2]/magh
+        incl = math.acos(hk)
+
+        # --------  determine type of orbit for later use  --------
+        # ------ elliptical, parabolic, hyperbolic inclined -------
+        typeorbit = 'ei'
+        if (ecc < small):
+            # ----------------  circular equatorial ---------------
+            if  (incl<small) or (abs(incl-math.pi)<small):
+                typeorbit = 'ce'
+            else:
+                # --------------  circular inclined ---------------
+                typeorbit = 'ci'
+        else:
+            # - elliptical, parabolic, hyperbolic equatorial --
+            if  (incl<small) or (abs(incl-math.pi)<small):
+                typeorbit = 'ee'
+
+
+        #print("Orbit type in rv2coe is ", typeorbit)
+
+
+        # ----------  find right ascension of ascending node ------------
+        if (magn > small):
+            temp = nbar[0] / magn
+            if (abs(temp > 1.0)):
+                temp = np.sign(temp)
+
+            raan = math.acos(temp)
+            if (nbar[1] < 0.0):
+                raan = twopi - raan
+
+        else:
+            raan = None
+
+
+        # ---------------- find argument of perigee ---------------
+        if (typeorbit == 'ei'):
+            argp = smu.angl(nbar, ebar)
+            if (argp and (ebar[2] < 0.0)):
+                argp = twopi - argp
+        else:
+            argp = None
+
+        # ------------  find true anomaly at epoch    -------------
+        if typeorbit.startswith('e'):
+            nu = smu.angl(ebar, r)
+            # print("nu init is ", nu)
+            if (rdotv < 0.0):
+                nu = twopi - nu
+                # print("nu now is ", nu)
+        # "True anomaly is not defined for circular orbits because
+        # they have no periapsis. We can overcome this limitation by selecting a
+        # direction in the orbit to replace periapsis as the location for the
+        # initial measurement. Computer-software routines must account for this
+        # special case." (pg 18)
+        else:
+            nu = None ####in some cases matlab was counting on this value!!!!-jmb
+
+        # ----  find argument of latitude - circular inclined -----
+        # -- find in general cases too
+        if (typeorbit == 'ci') or (typeorbit == 'ei'):
+            arglat = smu.angl(nbar, r)
+            if (r[2] < 0.0):
+                arglat = twopi - arglat
+            m = arglat
+        else:
+            arglat = None
+
+        # -- find longitude of perigee - elliptical equatorial ----
+        if  (ecc>small) and (typeorbit == 'ee'):
+            temp = ebar[0]/ecc
+            if (abs(temp) > 1.0):
+                temp = np.sign(temp)
+
+            lonper = math.acos(temp)
+            if (ebar[1] < 0.0):
+                lonper = twopi - lonper
+
+            if (incl > halfpi):
+                lonper = twopi - lonper
+
+        else:
+            lonper = None
+
+        # -------- find true longitude - circular equatorial ------
+        if  (magr>small) and (typeorbit == 'ce'):
+            temp = r[0]/magr
+            if (abs(temp) > 1.0):
+                temp = np.sign(temp)
+            truelon = math.acos(temp)
+            if (r[1] < 0.0):
+                truelon = twopi - truelon
+            if (incl > halfpi):
+                truelon = twopi - truelon
+            m = truelon
+        else:
+            truelon = None
+
+        # ------------ find mean anomaly for all orbits -----------
+       # if (typeorbit(1:1) == 'e')
+       # print("ecc =", ecc)
+       # print("nu =", nu)
+
+        _, m = smu.newtonnu(ecc, nu)
+
+    else:
+       p=None
+       a=None
+       ecc=None
+       incl=None
+       raan=None
+       argp=None
+       nu=None
+       m=None
+       arglat=None
+       truelon=None
+       lonper=None
+
+    return p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper
 
 # ------------------------------------------------------------------------------
 #
@@ -4133,243 +4599,6 @@ def rv2coeS (r, v):
     return p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper
 
 
-
-
-# ------------------------------------------------------------------------------
-#
-#                           function rv2coe
-#
-#  this function finds the classical orbital elements given the geocentric
-#    equatorial position and velocity vectors.
-#
-#  author        : david vallado                  719-573-2600   21 jun 2002
-#
-#  revisions
-#    vallado     - fix special cases                              5 sep 2002
-#    vallado     - delete extra check in inclination code        16 oct 2002
-#    vallado     - add constant file use                         29 jun 2003
-#    vallado     - add mu                                         2 apr 2007
-#
-#  inputs          description                    range / units
-#    r           - ijk position vector            km
-#    v           - ijk velocity vector            km / s
-#    mu          - gravitational parameter        km3 / s2
-#
-#  outputs       :
-#    p           - semilatus rectum               km
-#    a           - semimajor axis                 km
-#    ecc         - eccentricity
-#    incl        - inclination                    0.0  to pi rad
-#    raan       - longitude of ascending node    0.0  to 2pi rad
-#    argp        - argument of perigee            0.0  to 2pi rad
-#    nu          - true anomaly                   0.0  to 2pi rad
-#    m           - mean anomaly                   0.0  to 2pi rad
-#    arglat      - argument of latitude      (ci) 0.0  to 2pi rad
-#    truelon     - true longitude            (ce) 0.0  to 2pi rad
-#    lonper      - longitude of periapsis    (ee) 0.0  to 2pi rad
-#
-#  locals        :
-#    hbar        - angular momentum h vector      km2 / s
-#    ebar        - eccentricity     e vector
-#    nbar        - line of nodes    n vector
-#    c1          - v**2 - u/r
-#    rdotv       - r dot v
-#    hk          - hk unit vector
-#    sme         - specfic mechanical energy      km2 / s2
-#    i           - index
-#    e           - eccentric, parabolic,
-#                  hyperbolic anomaly             rad
-#    temp        - temporary variable
-#    typeorbit   - type of orbit                  ee, ei, ce, ci
-#
-#  coupling      :
-#    mag         - magnitude of a vector
-#    angl        - find the angl between two vectors
-#    newtonnu    - find the mean anomaly
-#
-#  references    :
-#    vallado       2007, 121, alg 9, ex 2-5
-#
-# [p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r, v)
-# ------------------------------------------------------------------------------
-
-
-def rv2coe (r, v):
-    m = None
-    muin = mu # this is the km version
-    small = 1.0e-12
-    # -------------------------  implementation   -----------------
-    magr = smu.mag(r)
-    magv = smu.mag(v)
-    # ------------------  find h n and e vectors   ----------------
-    hbar = np.cross(r, v)
-    magh = smu.mag(hbar)
-    if (magh >= 0.0):
-        nbar = np.zeros((3))
-        nbar[0] = -hbar[1]
-        nbar[1] = hbar[0]
-        nbar[2] = 0.0
-        magn = smu.mag(nbar)
-        c1 = (magv*magv) - (muin /magr)
-        rdotv = np.dot(r, v)
-        ebar = np.zeros((3))
-        for i in range(3):
-            ebar[i] = (c1*r[i] - rdotv*v[i])/muin
-        #end
-        ecc = smu.mag(ebar)
-
-        # ------------  find a e and semi-latus rectum   ----------
-        sme = (magv*magv*0.5) - (muin /magr)
-        if (abs(sme) > small and ecc != 1.0):
-            a = -muin  / (2.0 *sme)
-            p = a * (1 - ecc*ecc)
-        else:
-            a = infinite
-            p = magh*magh/muin
-
-        # -----------------  find inclination   -------------------
-
-        hk = hbar[2]/magh
-        incl = math.acos(hk)
-
-        # --------  determine type of orbit for later use  --------
-        # ------ elliptical, parabolic, hyperbolic inclined -------
-        typeorbit = 'ei'
-        if (ecc < small):
-            # ----------------  circular equatorial ---------------
-            if  (incl<small) or (abs(incl-math.pi)<small):
-                typeorbit = 'ce'
-            else:
-                # --------------  circular inclined ---------------
-                typeorbit = 'ci'
-            #end
-        else:
-            # - elliptical, parabolic, hyperbolic equatorial --
-            if  (incl<small) or (abs(incl-math.pi)<small):
-                typeorbit = 'ee'
-            #end
-        #end
-
-
-        #print("Orbit type in rv2coe is ", typeorbit)
-
-
-        # ----------  find right ascension of ascending node ------------
-        if (magn > small):
-            temp = nbar[0] / magn
-            if (abs(temp) > 1.0):
-                temp = math.sign(temp)
-            #end
-            raan = math.acos(temp)
-            if (nbar[1] < 0.0):
-                raan = twopi - raan
-            #end
-        else:
-            raan=None
-        #end
-
-        # ---------------- find argument of perigee ---------------
-        if (typeorbit == 'ei'):
-            argp = smu.angl(nbar, ebar)
-            if (argp and (ebar[2] < 0.0)):
-                argp = twopi - argp
-            #end
-        else:
-            argp=None
-        #end
-
-        # ------------  find true anomaly at epoch    -------------
-        if typeorbit.startswith('e'):
-            nu = smu.angl(ebar, r)
-        #    print("nu init is ", nu)
-            if (rdotv < 0.0):
-                nu = twopi - nu
-        #        print("nu now is ", nu)
-            #end
-        # "True anomaly is not defined for circular orbits because
-        # they have no periapsis. We can overcome this limitation by selecting a
-        # direction in the orbit to replace periapsis as the location for the
-        # initial measurement. Computer-software routines must account for this
-        # special case." (pg 18)
-        else:
-            nu = None ####in some cases matlab was counting on this value!!!!-jmb
-
-
-        #end
-
-        # ----  find argument of latitude - circular inclined -----
-        # -- find in general cases too
-        if (typeorbit == 'ci') or (typeorbit == 'ei'):
-            arglat = smu.angl(nbar, r)
-            if (r[2] < 0.0):
-                arglat = twopi - arglat
-            #end
-            m = arglat
-        else:
-            arglat=None
-        #end
-
-        # -- find longitude of perigee - elliptical equatorial ----
-        if  (ecc>small) and (typeorbit == 'ee'):
-            temp = ebar[0]/ecc
-            if (abs(temp) > 1.0):
-                temp = math.sign(temp)
-            #end
-            lonper = math.acos(temp)
-            if (ebar[1] < 0.0):
-                lonper = twopi - lonper
-            #end
-            if (incl > halfpi):
-                lonper = twopi - lonper
-            #end
-        else:
-            lonper=None
-        #end
-
-        # -------- find true longitude - circular equatorial ------
-        if  (magr>small) and (typeorbit == 'ce'):
-            temp = r[0]/magr
-            if (abs(temp) > 1.0):
-                temp = math.sign(temp)
-            #end
-            truelon = math.acos(temp)
-            if (r[1] < 0.0):
-                truelon = twopi - truelon
-            #end
-            if (incl > halfpi):
-                truelon = twopi - truelon
-            #end
-            m = truelon
-        else:
-            truelon=None
-        #end
-
-        # ------------ find mean anomaly for all orbits -----------
-       # if (typeorbit(1:1) == 'e')
-       # print("ecc =", ecc)
-       # print("nu =", nu)
-
-        e, m = smu.newtonnu(ecc, nu)
-       # end
-
-    else:
-       p=None
-       a=None
-       ecc=None
-       incl=None
-       raan=None
-       argp=None
-       nu=None
-       m=None
-       arglat=None
-       truelon=None
-       lonper=None
-    #end
-    return p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper
-
-
-
-
 #
 # ------------------------------------------------------------------------------
 #
@@ -4556,134 +4785,6 @@ def rv2coeh(r=None, v=None, re=None, mu=None):
 
 
 
-# ------------------------------------------------------------------------------
-#
-#                           function coe2rv
-#
-#  this function finds the position and velocity vectors in geocentric
-#    equatorial (ijk) system given the classical orbit elements.
-#
-#  author        : david vallado                  719-573-2600    9 jun 2002
-#
-#  revisions
-#    vallado     - add constant file use                         29 jun 2003
-#
-#  inputs          description                    range / units
-#    p           - semilatus rectum               km
-#    ecc         - eccentricity
-#    incl        - inclination                    0.0  to pi rad
-#    omega       - longitude of ascending node    0.0  to 2pi rad
-#    argp        - argument of perigee            0.0  to 2pi rad
-#    nu          - true anomaly                   0.0  to 2pi rad
-#    arglat      - argument of latitude      (ci) 0.0  to 2pi rad
-#    truelon     - true longitude            (ce) 0.0  to 2pi rad
-#    lonper      - longitude of periapsis    (ee) 0.0  to 2pi rad
-#
-#  outputs       :
-#    r           - ijk position vector            km
-#    v           - ijk velocity vector            km / s
-#
-#  locals        :
-#    temp        - temporary real*8 value
-#    rpqw        - pqw position vector            km
-#    vpqw        - pqw velocity vector            km / s
-#    sinnu       - sine of nu
-#    cosnu       - cosine of nu
-#    tempvec     - pqw velocity vector
-#
-#  coupling      :
-#    mag         - magnitude of a vector
-#    rot3        - rotation about the 3rd axis
-#    rot1        - rotation about the 1st axis
-#
-#  references    :
-#    vallado       2007, 126, alg 10, ex 2-5
-#
-# [r, v] = coe2rv (p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
-# ------------------------------------------------------------------------------
-
-
-def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
-           nu: float, arglat: float, truelon: float, lonper: float):
-    """This function finds the position and velocity vectors in geocentric
-    equatorial (ijk) system given the classical orbit elements.
-
-    Parameters
-    ----------
-    p: float
-        semilatus rectum
-    ecc: float
-        eccentricity
-    incl: float
-        inclination
-    omega: float
-        longitude of ascending node
-    argp: float
-        argument of pedigree
-    nu: float
-        true anomaly
-    arglat: float
-        argument of latitude
-    truelon: float
-        true longitude
-    lonper: float
-        longitude of periapsis
-
-    Returns
-    -------
-        ijk position vector, ijk velocity vector
-    """
-
-    # -------------------------------------------------------------
-    #       determine what type of orbit is involved and set up the
-    #       set up angles for the special cases.
-    # -------------------------------------------------------------
-    if (ecc < small):
-        # ----------------  circular equatorial  ------------------
-        if (incl<small) or (abs(incl-math.pi)< small):
-            argp = 0.0
-            omega = 0.0
-            nu = truelon
-        else:
-            # --------------  circular inclined  ------------------
-            argp = 0.0
-            nu = arglat
-    else:
-            # ---------------  elliptical equatorial  -----------------
-        if ((incl<small) or (abs(incl-math.pi)<small)):
-            argp = lonper
-            omega = 0.0
-
-    #print("here, argp =%.3f, omega =%.3f, nu =%.3f" % (argp, omega, nu))
-    # ----------  form pqw position and velocity vectors ----------
-    cosnu = math.cos(nu)
-    sinnu = math.sin(nu)
-    temp = p / (1.0  + ecc*cosnu)
-    rpqw = np.zeros((3))
-    rpqw[0] = temp*cosnu
-    rpqw[1] = temp*sinnu
-    rpqw[2] = 0.0
-    if (abs(p) < 0.0001):
-        p = 0.0001
-    vpqw = np.zeros((3))
-    vpqw[0] = -sinnu*np.sqrt(mu)  / np.sqrt(p)
-    vpqw[1] = (ecc + cosnu)*np.sqrt(mu) / np.sqrt(p)
-    vpqw[2] = 0.0
-
-    # ----------------  perform transformation to ijk  ------------
-    tempvec = smu.rot3(rpqw   , -argp)
-    tempvec = smu.rot1(tempvec, -incl)
-    r = smu.rot3(tempvec, -omega)
-
-    tempvec = smu.rot3(vpqw   , -argp)
-    tempvec = smu.rot1(tempvec, -incl)
-    v = smu.rot3(tempvec, -omega)
-
-    r = r.T #r = r'
-    v = v.T #v = v'
-    return r, v
-
-
 
 # ----------------------------------------------------------------------------
 #
@@ -4740,13 +4841,53 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
 # ----------------------------------------------------------------------------
 
 
-def ecef2eci(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps):
+def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
+             ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+             eqeterms: int, ddpsi: float, ddeps: float):
+    """ this function transforms a vector from the earth fixed (itrf) frame, to
+    the eci mean equator mean equinox (j2000).
+
+    Parameters
+    ----------
+    recef : np.ndarray
+        position vector earth fixed: km
+    vecef : np.ndarray
+        velocity vector earth fixed: km/s
+    aecef : np.ndarray
+        acceleration vector earth fixed: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    reci : ndarray
+        position vector eci: km
+    veci : ndarray
+        velocity vector eci: km/s
+    aeci : ndarray
+        acceleration vector eci: km/s2
+    """
+
     # ---- find matrices
-    prec, psia, wa, ea, xa = obu.precess (ttt, '80')
+    prec, _, _, _, _ = obu.precess(ttt, '80')
 
-    deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+    deltapsi, _, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
 
-    st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
 
     pm = smu.polarm(xp, yp, ttt, '80')
 
@@ -4754,18 +4895,16 @@ def ecef2eci(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddep
     thetasa = earthrot * (1.0  - lod/86400.0)
     #        omegaearth = np.array([[0], [0], [thetasa]])
     #omegaearth = np.array([[0.0], [0.0], [thetasa]])
-    omegaearth = np.array([0.0, 0.0, thetasa]).T
+    omegaearth = np.array([0.0, 0.0, thetasa])
     #print("in ecef2eci:")
 
-    tmpmat = np.matmul(np.matmul(prec, nut), st)
-    rpef = np.matmul(pm, recef)
-    reci = np.matmul(tmpmat, rpef)
-    #prec*nut*st*pm
-    vpef = np.matmul(pm, vecef)
-    oresh = np.reshape(omegaearth, (3, 1))
-    #print(oresh)
+    tmpmat = prec @ nut @ st
+    rpef = pm @ recef
+    reci = tmpmat @ rpef
+
+    vpef = pm @ vecef
     temp = np.cross(omegaearth, rpef.T) #turn from column to row vectors for cross product
-    veci = np.dot(tmpmat, (vpef + temp.T))
+    veci = tmpmat @ (vpef + temp.T)
 
     # veci1 = prec*nut * (stdot*recef + st*pm*vecef)  % alt approach using sidereal rate
 
@@ -4773,46 +4912,11 @@ def ecef2eci(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddep
     # of the Earth
     c1 = np.cross(omegaearth, temp)
     c2 = 2.0*np.cross(omegaearth.T, vpef.T)
-    aeci = np.matmul(tmpmat, np.matmul(pm, aecef))
+    aeci = tmpmat @ pm @ aecef
     #print("aeci: ", aeci)
 
     aeci = aeci + c1.T + c2.T
     return reci, veci, aeci
-
-
-
-#  this function converts range, azimuth, and elevation values with slant
-#    range and velocity vectors for a satellite from a radar site in the
-#    topocentric horizon (sez) system.
-#
-#  author        : david vallado                  719-573-2600   10 jun 2002
-#
-#  inputs          description                    range / units
-#    rho         - satellite range from site      km
-#    az          - azimuth                        0.0 to 2pi rad
-#    el          - elevation                      -pi/2 to pi/2 rad
-#
-#  outputs       :
-#    rhovec      - sez satellite range vector     km
-
-
-
-def raz2rv(rho, az_deg, el_deg):
-  az = az_deg/360.0*math.tau
-  el = el_deg/90.0*math.pi/2.0
-
-  # ----------------------- initialize values -------------------
-  sinel = math.sin(el)
-  cosel = math.cos(el)
-  sinaz = math.sin(az)
-  cosaz = math.cos(az)
-
-  # ------------------- form sez range vector -------------------
-  rhosez = [0.0, 0.0, 0.0]
-  rhosez[0] = -rho*cosel*cosaz
-  rhosez[1] = rho*cosel*sinaz
-  rhosez[2] = rho*sinel
-  return rhosez
 
 
 
@@ -6237,10 +6341,10 @@ def rv2razel (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms,
         daz = 0.0
 
     if (abs(temp) > small):
-        delx = (drhosez[2] - drho*np.sin(el)) / temp
+        del_ = (drhosez[2] - drho*np.sin(el)) / temp
     else:
-        delx = 0.0
-    return rho, az, el, drho, daz, delx
+        del_ = 0.0
+    return rho, az, el, drho, daz, del_
 
 
 
@@ -6587,11 +6691,11 @@ def rvs2raz(rhosez=None, drhosez=None):
         daz = 0.0
 
     if (np.abs(temp) > small):
-        delv = (drhosez[2] - drho * np.sin(el)) / temp
+        del_ = (drhosez[2] - drho * np.sin(el)) / temp
     else:
-        delv = 0.0
+        del_ = 0.0
 
-    return rho, az, el, drho, daz, delv
+    return rho, az, el, drho, daz, del_
 
 
 #
