@@ -342,36 +342,39 @@ def jday(yr, mon, day, hr, min, sec):
 # [year, mon, day, hr, min, sec] = invjday (jd, jdfrac)
 # -----------------------------------------------------------------------------
 
-def invjday (jd, jdfrac):
+def invjday (jd, jdfrac=None):
+    if (jdfrac == None):
+        jdfrac = jd - math.floor(jd)
+        jd = math.floor(jd)
 
-     # check jdfrac for multiple days
-     if (abs(jdfrac) >= 1.0):
-         jd = jd + math.floor(jdfrac)
-         jdfrac = jdfrac - math.floor(jdfrac)
+    # check jdfrac for multiple days
+    if (abs(jdfrac) >= 1.0):
+        jd = jd + math.floor(jdfrac)
+        jdfrac = jdfrac - math.floor(jdfrac)
 
-     # check for fraction of a day included in the jd
-     dt = jd - math.floor(jd) - 0.5
-     if (abs(dt) > 0.00000001):
-         jd = jd - dt
-         jdfrac = jdfrac + dt
+    # check for fraction of a day included in the jd
+    dt = jd - math.floor(jd) - 0.5
+    if (abs(dt) > 0.00000001):
+       jd = jd - dt
+       jdfrac = jdfrac + dt
 
-     # ----------------- find year and days of the year ---------------
-     temp = jd - 2415019.5
-     tu = temp / 365.25
-     year = 1900 + math.floor(tu)
-     leapyrs = math.floor((year-1901)*0.25)
-     days = math.floor(temp - ((year-1900)*365.0 + leapyrs))
+    # ----------------- find year and days of the year ---------------
+    temp = jd - 2415019.5
+    tu = temp / 365.25
+    year = 1900 + math.floor(tu)
+    leapyrs = math.floor((year-1901)*0.25)
+    days = math.floor(temp - ((year-1900)*365.0 + leapyrs))
 
-     # ------------ check for case of beginning of a year -------------
-     if (days + jdfrac < 1.0):
-         year = year - 1
-         leapyrs = math.floor((year-1901)*0.25)
-         days = math.floor(temp - ((year-1900)*365.0 + leapyrs))
+    # ------------ check for case of beginning of a year -------------
+    if (days + jdfrac < 1.0):
+        year = year - 1
+        leapyrs = math.floor((year-1901)*0.25)
+        days = math.floor(temp - ((year-1900)*365.0 + leapyrs))
 
-     # ------------------- find remaining data  -----------------------
-     # now add the daily time in to preserve accuracy
-     mon, day, hr, min, sec = days2mdh(year, days + jdfrac)
-     return year, mon, day, hr, min, sec
+    # ------------------- find remaining data  -----------------------
+    # now add the daily time in to preserve accuracy
+    mon, day, hr, min, sec = days2mdh(year, days + jdfrac)
+    return year, mon, day, hr, min, sec
 
 
 # ------------------------------------------------------------------------------
@@ -442,6 +445,11 @@ def days2mdh (year, days):
         temp = (temp-hr) * 60.0
         minute = np.fix(temp)
         sec = (temp-minute) * 60.0
+        sec = round(sec, 3)
+        if (sec == 60.0):
+            sec = 0.0
+            minute = minute + 1
+
 
         return mon, day, hr, minute, sec
 
