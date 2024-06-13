@@ -7504,20 +7504,56 @@ def nu2lon(jdut1=None, nu=None, incl=None, raan=None, argp=None):
 # [reci, veci, aeci] = pef2eci  (rpef, vpef, apef, ttt, jdut1, lod, eqeterms, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def pef2eci(rpef=None, vpef=None, apef=None, ttt=None, jdut1=None,
-            lod=None, eqeterms=None, ddpsi=None, ddeps=None):
-    prec, psia, wa, ea, xa = obu.precess(ttt, '80')
-    deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
-    st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+def pef2eci(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray, ttt: float,
+            jdut1: float, lod: float, eqeterms: int, ddpsi: float,
+            ddeps: float):
+    """this function trsnforms a vector from the pseudo earth fixed frame (pef),
+    to the mean equator mean equinox (j2000) frame.
+
+    Parameters
+    ----------
+    rpef : np.ndarray
+        position vector pef: km
+    vpef : np.ndarray
+        velocity vector pef: km/s
+    apef : np.ndarray
+        acceleration vector pef: km/s2
+    ttt : float
+        julian centuries from tt: centuries
+    jdut1 : float
+        julian date from ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    eqeterms : int
+        number of terms for ast calculation: 0 or 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    reci: ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    aeci: ndarray
+        acceleration vector eci: km/s2
+    """
+
+    prec, _, _, _, _ = obu.precess(ttt, '80')
+    deltapsi, _, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
     thetasa = earthrot * (1.0 - lod / 86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
     reci = prec @ nut @ st @ rpef
     veci = prec @ nut @ st @ (vpef + np.cross(omegaearth, rpef.T))
     temp = np.cross(omegaearth, rpef.T)
-    aeci = prec @ nut @ st @ (apef + np.cross(omegaearth, temp) + 2.0 * np.cross(omegaearth, vpef.T))
+    aeci = prec @ nut @ st @ (apef + np.cross(omegaearth, temp) + 2.0
+                              * np.cross(omegaearth, vpef.T))
     return reci, veci, aeci
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #
 #                           function tradec2rv
 #
@@ -7536,6 +7572,7 @@ def pef2eci(rpef=None, vpef=None, apef=None, ttt=None, jdut1=None,
 #    dtrtasc     - topocentric rtasc rate                   rad / s
 #    dtdecl      - topocentric decl rate                    rad / s
 #    rseci       - eci site position vector                 km
+#    vseci       - eci site velocity vector                 km/s
 #    lod         - excess length of day                     sec
 #
 #  outputs       :
@@ -7560,29 +7597,65 @@ def pef2eci(rpef=None, vpef=None, apef=None, ttt=None, jdut1=None,
 # [reci, veci] = tradec2rv (rho, trtasc, tdecl, drho, dtrtasc, dtdecl, rseci, lod)
 # ------------------------------------------------------------------------------
 
-def tradec2rv(rho=None, trtasc=None, tdecl=None, drho=None, dtrtasc=None,
-              dtdecl=None, rseci=None, vseci=None, lod=None):
-    # --------------------- implementation ------------------------
-    latgc = np.arcsin(rseci(3) / smu.mag(rseci))
+def tradec2rv(rho: float, trtasc: float, tdecl: float, drho: float,
+              dtrtasc: float, dtdecl: float, rseci: np.ndarray,
+              vseci: np.ndarray, lod: float):
+    """this function converts range, topcentric right acension, declination,
+    and rates into geocentric equatorial (eci) position and velocity vectors.
+
+    Parameters
+    ----------
+    rho : float
+        satellite range from site: km
+    trtasc : float
+        topocentric right angle of ascension: rad
+    tdecl : float
+        topocentric declination: rad
+    drho : float
+        satellite range rate: km/s
+    dtrtasc : float
+        topocentric right angle of ascension rate: rad/s
+    dtdecl : float
+        topocentric declination rate: rad/s
+    rseci : np.ndarray
+        eci position vector of site: km
+    vseci : np.ndarray
+        eci velocity vector of site: km
+    lod : float
+        excess length of day: sec
+
+    Returns
+    -------
+    reci: ndarray
+        position vector of satellite eci: km
+    veci: ndarray
+        velocity vector of satellite eci: km/s
+    """
+
+    latgc = math.asin(rseci(3) / smu.mag(rseci))
     thetasa = earthrot * (1.0 - lod / 86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
     np.cross(omegaearth, rseci, vseci)
+
     # --------  calculate topocentric slant range vectors ------------------
     rhov = np.zeros(3)
     drhov = np.zeros(3)
-    rhov[0] = rho * np.cos(tdecl) * np.cos(trtasc)
-    rhov[1] = rho * np.cos(tdecl) * np.sin(trtasc)
-    rhov[2] = rho * np.sin(tdecl)
-    drhov[0] = (drho * np.cos(tdecl) * np.cos(trtasc) - rho * np.sin(tdecl)
-                * np.cos(trtasc) * dtdecl
-                - rho * np.cos(tdecl) * np.sin(trtasc) * dtrtasc)
-    drhov[1] = (drho * np.cos(tdecl) * np.sin(trtasc)
-                - rho * np.sin(tdecl) * np.sin(trtasc) * dtdecl
-                + rho * np.cos(tdecl) * np.cos(trtasc) * dtrtasc)
-    drhov[2] = drho * np.sin(tdecl) + rho * np.cos(tdecl) * dtdecl
+
+    rhov[0] = rho * math.cos(tdecl) * math.cos(trtasc)
+    rhov[1] = rho * math.cos(tdecl) * math.sin(trtasc)
+    rhov[2] = rho * math.sin(tdecl)
+
+    drhov[0] = (drho * math.cos(tdecl) * math.cos(trtasc) - rho * math.sin(tdecl)
+                * math.cos(trtasc) * dtdecl
+                - rho * math.cos(tdecl) * math.sin(trtasc) * dtrtasc)
+    drhov[1] = (drho * math.cos(tdecl) * math.sin(trtasc)
+                - rho * math.sin(tdecl) * math.sin(trtasc) * dtdecl
+                + rho * math.cos(tdecl) * math.cos(trtasc) * dtrtasc)
+    drhov[2] = drho * math.sin(tdecl) + rho * math.cos(tdecl) * dtdecl
+
     # ------ find eci range vector from site to satellite ------
     reci = rhov + rseci
-    veci = drhov + np.cos(latgc) * vseci
+    veci = drhov + math.cos(latgc) * vseci
     return reci, veci
 
 # ----------------------------------------------------------------------------
