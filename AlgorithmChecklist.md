@@ -74,7 +74,7 @@
 |  71  |  pg 873 (900)  | Repeat Ground Track                          | repeatgt.py                          |           -                     |       -                    |   N   |
 |  72  |  pg 879 (906)  | Main Repeat Groundtrack                      | N/A                                  | ex11_4.py                       | pg 893 (920)               |   -   |
 |  73  |  pg 885 (912)  | Minimum Altitude Variation                   | N/A                                  | ex11_5.py                       | pg 895 (922)               |   -   |
-|  74  |  pg 911 (938)  | Predict                                      | predict.py                           | ex11_6.py (DNE)                 | pg 912 (939)               |   N   |
+|  74  |  pg 911 (938)  | Predict                                      | predict()                            | ex11_6.py                       | pg 912 (939)               |   N   |
 |  75  |  pg 916 (943)  | Rise/Set                                     | N/A                                  | ex11_7.py (DNE)                 | pg 918 (945)               |   -   |
 |  76  |  pg 935 (962)  | Close Approach                               | N/A                                  |                -                |           -                |   -   |
 |  77  |  pg 953 (980)  | Patched Conic                                | N/A                                  |                -                |           -                |   -   |
