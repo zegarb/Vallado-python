@@ -7078,17 +7078,45 @@ def mod2eci(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray, ttt: float):
 # [reci, veci, aeci] = tod2eci  (rtod, vtod, atod, ttt, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def tod2eci (rtod, vtod, atod, ttt, ddpsi, ddeps):
+def tod2eci(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray, ttt: float,
+            ddpsi: float, ddeps: float):
+    """this function transforms a vector from the true equator true equinox frame
+    of date (tod), to the mean equator mean equinox (j2000) frame.
 
-    prec, psia, wa, ea, xa = obu.precess(ttt, '80')
+    Parameters
+    ----------
+    rtod : ndarray
+        position vector tod: km
+    vtod : ndarray
+        velocity vector tod: km/s
+    atod : ndarray
+        acceleration vector tod: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
 
-    deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+    Returns
+    -------
+    reci : ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    aeci: ndarray
+        acceleration vector eci: km/s2
+    """
 
-    reci = prec@nut@rtod
+    prec, _, _, _, _ = obu.precess(ttt, '80')
 
-    veci = prec@nut@vtod
+    _, _, _, _, nut = obu.nutation(ttt, ddpsi, ddeps)
 
-    aeci = prec@nut@atod
+    reci = prec @ nut @ rtod
+
+    veci = prec @ nut @ vtod
+
+    aeci = prec @ nut @ atod
 
     return reci, veci, aeci
 
@@ -7106,8 +7134,8 @@ def tod2eci (rtod, vtod, atod, ttt, ddpsi, ddeps):
 #    vallado     - fix extra terms in rtasc calc                  8 oct 2002
 #
 #  inputs          description                    range / units
-#    rmag        - eci position vector magnitude  km
-#    vmag        - eci velocity vector magnitude  km/sec
+#    magr        - eci position vector magnitude  km
+#    magv        - eci velocity vector magnitude  km/sec
 #    latgc       - geocentric latitude            rad
 #    lon         - longitude                      rad
 #    fpa         - sat flight path angle          rad
@@ -7115,8 +7143,8 @@ def tod2eci (rtod, vtod, atod, ttt, ddpsi, ddeps):
 #    ttt         - julian centuries of tt         centuries
 #    jdut1       - julian date of ut1             days from 4713 bc
 #    lod         - excess length of day           sec
-#    xp          - polar motion coefficient       arc sec
-#    yp          - polar motion coefficient       arc sec
+#    xp          - polar motion coefficient       rad
+#    yp          - polar motion coefficient       rad
 #    terms       - number of terms for ast calculation 0, 2
 #    ddpsi, ddeps - corrections for fk5 to gcrf    rad
 #
@@ -7135,49 +7163,90 @@ def tod2eci (rtod, vtod, atod, ttt, ddpsi, ddeps):
 #    escobal            397
 #    chobotov            67
 #
-# [reci, veci] = flt2rv (rmag, vmag, latgc, lon, fpa, az, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
+# [reci, veci] = flt2rv (magr, magv, latgc, lon, fpa, az, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def flt2rv(rmag=None, vmag=None, latgc=None, lon=None, fpa=None,
-           az=None, ttt=None, jdut1=None, lod=None, xp=None,
-           yp=None, terms=None, ddpsi=None, ddeps=None):
+def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
+           az: float, ttt: float, jdut1: float, lod: float, xp: float,
+           yp: float, terms: int, ddpsi: float, ddeps: float):
+    """_this function transforms  the flight elements - latgc, lon, fpav, az,
+    position and velocity magnitude into an eci position and velocity vector.
+
+    Parameters
+    ----------
+    magr : float
+        position magnitude: km
+    magv : float
+        velocity magnitude: km/s
+    latgc : float
+        geocentric latitude: rad
+    lon : float
+        longidute: rad
+    fpa : float
+        satellite flight path angle: rad
+    az : float
+        satellite azimuth: rad
+    ttt : float
+        julian centuries of tt: rad
+    jdut1 : float
+        julian date of ut1: days from 4712 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        # of terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi corrections for fk5 to gcrf
+    ddeps : float
+        delta eps corrections for fk5 to gcrf
+
+    Returns
+    -------
+    r: ndarray
+        eci position vector: km
+    v: ndarray
+        eci velocity vector: km/s
+    """
+
     small = 1e-08
     # -------- form position vector
     recef = np.zeros(3)
-    recef[0] = rmag * np.cos(latgc) * np.cos(lon)
-    recef[1] = rmag * np.cos(latgc) * np.sin(lon)
-    recef[2] = rmag * np.sin(latgc)
+    recef[0] = magr * math.cos(latgc) * math.cos(lon)
+    recef[1] = magr * math.cos(latgc) * math.sin(lon)
+    recef[2] = magr * math.sin(latgc)
     recef = np.transpose(recef)
     # -------- convert r to eci
     vecef = np.array([[0], [0], [0]])
-
     aecef = np.array([[0], [0], [0]])
-    reci, veci, aeci = ecef2eci(recef, vecef, aecef, ttt,
+    reci, veci, _ = ecef2eci(recef, vecef, aecef, ttt,
                               jdut1, lod, xp, yp, terms, ddpsi, ddeps)
     # ------------- calculate rtasc and decl ------------------
-    temp = np.sqrt(reci[0] * reci[0] + reci[1] * reci[1])
+    temp = math.sqrt(reci[0] * reci[0] + reci[1] * reci[1])
     if (temp < small):
         # v needs to be defined herexxxxxxxxx
         rtasc = math.atan2(veci[1], veci[0])
     else:
         rtasc = math.atan2(reci[1], reci[0])
 
-    decl = np.arcsin(reci[2] / rmag)
+    decl = math.asin(reci[2] / magr)
     # -------- form velocity vector
-    fpav = np.pi * 0.5 - fpa
+    fpav = math.pi * 0.5 - fpa
     veci = np.zeros(3)
-    veci[0] = vmag * (- np.cos(rtasc) * np.sin(decl)
-                      * (np.cos(az) * np.cos(fpav) - np.sin(rtasc)
-                         * np.sin(az) * np.cos(fpav))
-                      + np.cos(rtasc) * np.sin(decl) * np.sin(fpav))
-    veci[1] = vmag * (- np.sin(rtasc) * np.sin(decl)
-                      * (np.cos(az) * np.cos(fpav) + np.cos(rtasc)
-                         * np.sin(az) * np.cos(fpav))
-                      + np.sin(rtasc) * np.cos(decl) * np.sin(fpav))
-    veci[2] = vmag * (np.sin(decl) * np.sin(fpav)
-                      + np.cos(decl) * np.cos(az) * np.cos(fpav))
-    reci = np.transpose(reci)
-    veci = np.transpose(veci)
+    veci[0] = magv * (-math.cos(rtasc) * math.sin(decl)
+                      * (math.cos(az) * math.cos(fpav) - math.sin(rtasc)
+                         * math.sin(az) * math.cos(fpav))
+                      + math.cos(rtasc) * math.sin(decl) * math.sin(fpav))
+    veci[1] = magv * (-math.sin(rtasc) * math.sin(decl)
+                      * (math.cos(az) * math.cos(fpav) + math.cos(rtasc)
+                         * math.sin(az) * math.cos(fpav))
+                      + math.sin(rtasc) * math.cos(decl) * math.sin(fpav))
+    veci[2] = magv * (math.sin(decl) * math.sin(fpav)
+                      + math.cos(decl) * math.cos(az) * math.cos(fpav))
+    reci = reci.T
+    veci = veci.T
     return reci, veci
 
 # ------------------------------------------------------------------------------
@@ -7222,21 +7291,47 @@ def flt2rv(rmag=None, vmag=None, latgc=None, lon=None, fpa=None,
 # [rho, az, el, drho, daz, del] = rvs2raz (rhosez, drhosez)
 # ------------------------------------------------------------------------------
 
-def rvs2raz(rhosez=None, drhosez=None):
-    # -------------------------  implementation   -----------------
+def rvs2raz(rhosez: np.ndarray, drhosez: np.ndarray):
+    """this function converts range, azimuth, and elevation values with slant
+    range and velocity vectors for a satellite from a radar site in the
+    topocentric horizon (sez) system.
+
+    Parameters
+    ----------
+    rhosez : np.ndarray
+        position vector sez: km
+    drhosez : np.ndarray
+        velocity vector sez: km/s
+
+    Returns
+    -------
+
+    rho : float
+        satellite range from site: km
+    az : float
+        azimuth: 0.0 to 2pi rad
+    el : float
+        elevation: -pi/2 to pi/2 rad
+    drho : float
+        range rate: km / s
+    daz : float
+        azimuth rate: rad / s
+    del_ : float
+        elevation rate: rad / s
+    """
+
     small = 1e-08
     # ------------- calculate azimuth and elevation ---------------
-    temp = np.sqrt(rhosez[0] * rhosez[0] + rhosez[1] * rhosez[1])
-    if (np.abs(rhosez[1]) < small):
+    temp = math.sqrt(rhosez[0] * rhosez[0] + rhosez[1] * rhosez[1])
+    if (abs(rhosez[1]) < small):
         if (temp < small):
-            az = math.atan2(drhosez[1], - drhosez[0])
+            az = math.atan2(drhosez[1], -drhosez[0])
+        elif (rhosez[0] > 0.0):
+            az = math.pi
         else:
-            if (rhosez[0] > 0.0):
-                az = np.pi
-            else:
-                az = 0.0
+            az = 0.0
     else:
-        az = math.atan2(rhosez[1], - rhosez[0])
+        az = math.atan2(rhosez[1], -rhosez[0])
 
     rho = smu.mag(rhosez)
 
@@ -7244,17 +7339,17 @@ def rvs2raz(rhosez=None, drhosez=None):
     if ((temp < small)):
         el = np.sign(rhosez[2]) * halfpi
     else:
-        el = np.arcsin(rhosez[2] / rho)
+        el = math.asin(rhosez[2] / rho)
 
     # -------  calculate range, azimuth and elevation rates -------
     drho = np.dot(rhosez, drhosez.T) / rho
-    if (np.abs(temp * temp) > small):
+    if (abs(temp * temp) > small):
         daz = (drhosez[0] * rhosez[1] - drhosez[1] * rhosez[0]) / (temp * temp)
     else:
         daz = 0.0
 
-    if (np.abs(temp) > small):
-        del_ = (drhosez[2] - drho * np.sin(el)) / temp
+    if (abs(temp) > small):
+        del_ = (drhosez[2] - drho * math.sin(el)) / temp
     else:
         del_ = 0.0
 
@@ -7278,8 +7373,8 @@ def rvs2raz(rhosez=None, drhosez=None):
 #
 
 def lon2nu(jdut1=None, lon=None, incl=None, raan=None, argp=None):
-    #    fprintf(' jd #16.8f lon #11.5f  incl #11.5f raan #11.5f argp #11.5f \n', jdut1, lon * rad2deg, incl * rad2deg, raan * rad2deg, argp * rad2deg)
-#    need to use their GMST calculation
+    # fprintf(' jd #16.8f lon #11.5f  incl #11.5f raan #11.5f argp #11.5f \n', jdut1, lon * rad2deg, incl * rad2deg, raan * rad2deg, argp * rad2deg)
+    # need to use their GMST calculation
     ed = jdut1 + 0.0 - 2451544.5
 
     gmst = 99.96779469 + 360.985647366286 * ed + 2.9079e-13 * ed * ed
