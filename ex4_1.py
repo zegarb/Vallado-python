@@ -37,12 +37,12 @@ latgd = 39.007 * deg2rad
 lon = -104.883 * deg2rad
 alt = 2.19456 # km
 
-year = 2004
-mon  = 5
-day  = 14
-hr   = 12
-min  = 0
-sec  = 0.00
+# year = 2004
+# mon  = 5
+# day  = 14
+# hr   = 12
+# min  = 0
+# sec  = 0.00
 
 year = 1994
 mon  = 5
@@ -85,10 +85,10 @@ for i in range(1, 3):
         rtasc =  294.98914583 * deg2rad
         decl  = -20.8234944 * deg2rad
         # old book value                drr   = (149598023.0*(29.649616 - 29.664361))/86400.0
-        drr   = (149597870.0 * (29.649616 - 29.664361)) / 86400.0
-        drtasc= -0.00000012244 * deg2rad
-        ddecl = -0.00000001794 * deg2rad
-        reci, veci = sc.radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
+        # drr   = (149597870.0 * (29.649616 - 29.664361)) / 86400.0
+        # drtasc= -0.00000012244 * deg2rad
+        # ddecl = -0.00000001794 * deg2rad
+        # reci, veci = sc.radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
     if i == 2:
         print('\n-------- closer test baseline test \n' )
         rr    =  12756.0
@@ -99,8 +99,8 @@ for i in range(1, 3):
         ddecl = -0.00000001794 * deg2rad
         reci, veci = sc.radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
     # geoc
-    print('r    %14.7f%14.7f%14.7f' % (reci[0], reci[1], reci[2]))
-    print(' v %14.9f%14.9f%14.9f\n' % (veci[0], veci[1], veci[2]))
+    print('r %14.7f %14.7f %14.7f' % (reci[0], reci[1], reci[2]))
+    print('v %14.9f %14.9f %14.9f\n' % (veci[0], veci[1], veci[2]))
 
     rr, rtasc, decl, drr, drtasc, ddecl = sc.rv2radec(reci, veci)
     print('            rho km           rtasc deg     decl deg      drho km/s '
@@ -118,8 +118,8 @@ for i in range(1, 3):
     ddpsi = 0.0
     ddeps = 0.0
     trr, trtasc, tdecl, tdrr, tdrtasc, tddecl = \
-        sc.rv2tradec(reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp,
-                     terms, ddpsi, ddeps)
+        sc.rv2tradec(reci, veci, latgd, lon, alt, ttt, jdut1 + jdut1frac,
+                     lod, xp, yp, terms, ddpsi, ddeps)
     print('           trho km      trtasc deg    tdecl deg     tdrho km/s     '
           'tdrtasc deg/s  tddecl deg/s \n')
     if trtasc < 0.0:
@@ -138,18 +138,21 @@ for i in range(1, 3):
 
 
     ###skipping rv2razel
-    '''
-    print("SKIPPING rv2razel")
-    rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
+    # print("SKIPPING rv2razel")
+    rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt,
+                                               ttt, jdut1 + jdut1frac, lod, xp,
+                                               yp, terms, ddpsi, ddeps)
     if az < 0.0:
         az = az + twopi
-    print('rvraz   %14.7f %14.7f %14.7f'%(rho, az * rad2deg, el * rad2deg))
-    print(' %14.7f %14.12f %14.12f\n'%(drho, daz * rad2deg, del_ * rad2deg))
+    print('rvraz   %14.7f %14.7f %14.7f' % (rho, az * rad2deg, el * rad2deg))
+    print(' %14.7f %14.12f %14.12f\n' % (drho, daz * rad2deg, del_ * rad2deg))
 
-    reci, veci = sc.razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
-    print('r    %14.7f %14.7f %14.7f'%(reci[0], reci[1], reci[2] ))
-    print(' v %14.9f %14.9f %14.9f\n'%(veci[0], veci[1], veci[2] ))
-    '''
+    reci, veci = sc.razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt,
+                             ttt, jdut1 + jdut1frac, lod, xp, yp, terms,
+                             ddpsi, ddeps)
+    print('r %14.7f %14.7f %14.7f' % (reci[0], reci[1], reci[2] ))
+    print('v %14.9f %14.9f %14.9f\n' % (veci[0], veci[1], veci[2] ))
+
 
     # ecl lat lon
     rr, elon, elat, drr, delon, delat = sc.rv2ell(reci, veci)
@@ -230,17 +233,17 @@ print(' v %14.9f %14.9f %14.9f\n' % (veci[0], veci[1], veci[2]))
 
 
 ###skipping rv2razel
-print("SKIPPING rv2razel")
-'''
+# print("SKIPPING rv2razel")
 
-rho, az, el, drho, daz, del_ = sc.rv2razel ( reci, veci, latgd, lon, alt, ttt, jdut1+jdut1frac, lod, xp, yp, terms, ddpsi, ddeps )
+rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt, ttt,
+                                           jdut1 + jdut1frac, lod, xp, yp,
+                                           terms, ddpsi, ddeps)
 if az < 0.0:
     az = az + twopi
 print('rvraz   %14.7f %14.7f %14.7f'%(rho, az * rad2deg, el * rad2deg ))
 print(' %14.7f %14.12f %14.12f\n'%(drho, daz * rad2deg, del_ * rad2deg ))
 print('STK 12 Oct 2021 04:09:07.155          159.523              5.000    2788.517174 \n')
 print('STK 12 Oct 2021 04:10:07.000          158.339              9.710    2393.490995 \n')
-'''
 
 #  rtascdecl report
 #             147.238               57.942    12 Oct 2021 04:09:00.000
