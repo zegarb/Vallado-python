@@ -71,7 +71,7 @@
 |  68  |  pg 785 (812)  | Kalman Filter - Linear System                | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
 |  69  |  pg 791 (818)  | Linearized                                   | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
 |  70  |  pg 793 (820)  | Extended Kalman Filter                       | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
-|  71  |  pg 873 (900)  | Repeat Ground Track                          | repeatgt.py                          |           -                     |       -                    |   N   |
+|  71  |  pg 873 (900)  | Repeat Ground Track                          | repeatgt.py                          | ex11_3.py                       |       -                    |   N   |
 |  72  |  pg 879 (906)  | Main Repeat Groundtrack                      | N/A                                  | ex11_4.py                       | pg 893 (920)               |   -   |
 |  73  |  pg 885 (912)  | Minimum Altitude Variation                   | N/A                                  | ex11_5.py                       | pg 895 (922)               |   -   |
 |  74  |  pg 911 (938)  | Predict                                      | predict()                            | ex11_6.py                       | pg 912 (939)               |   N   |
