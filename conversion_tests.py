@@ -273,9 +273,9 @@ pp(ateme)
 recig, vecig, aecig, teme2eci(rteme, vteme, ateme,
                                 tt, ddpsi, ddeps)
 print('teme2eci returned:')
-pp(recef)
-pp(vecef)
-pp(aecef)
+pp(recig)
+pp(vecig)
+pp(aecig)
 
 rtod, vtod, atod = eci2tod(recig, vecig, aecig, '80',
                             ttt, ddpsi, ddeps, ddx, ddy)
@@ -286,9 +286,9 @@ pp(atod)
 
 recig, vecig, aecig = tod2eci(rtod, vtod, atod, ttt, ddpsi, ddeps)
 print('tod2eci returned:')
-pp(recef)
-pp(vecef)
-pp(aecef)
+pp(recig)
+pp(vecig)
+pp(aecig)
 
 rmod, vmod, amod = eci2mod(recig, vecig, aecig, ttt)
 print('eci2mod returned:')
@@ -298,9 +298,9 @@ pp(amod)
 
 recig, vecig, aecig = mod2eci(rmod, vmod, amod, ttt)
 print('mod2eci returned:')
-pp(recef)
-pp(vecef)
-pp(aecef)
+pp(recig)
+pp(vecig)
+pp(aecig)
 
 print("----------------------------------------")
 

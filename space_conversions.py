@@ -5228,8 +5228,8 @@ def ecef2llb (r):
 #    ttt         - julian centuries of tt         centuries
 #    jdut1       - julian date of ut1             days from 4713 bc
 #    lod         - excess length of day           sec
-#    xp          - polar motion coefficient       arc sec
-#    yp          - polar motion coefficient       arc sec
+#    xp          - polar motion coefficient       rad
+#    yp          - polar motion coefficient       rad
 #    eqeterms    - terms for ast calculation      0, 2
 #    ddpsi       - delta psi correction to gcrf   rad
 #    ddeps       - delta eps correction to gcrf   rad
@@ -5261,33 +5261,73 @@ def ecef2llb (r):
 # ----------------------------------------------------------------------------
 
 
-def ecef2mod  (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps):
-        # ---- find matrices
-        deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
+             ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+             eqeterms: int, ddpsi: float, ddeps: float):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the mean of date (mod) frame.
 
-        st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+    Parameters
+    ----------
+    recef : np.ndarray
+        position vector earth fixed: km
+    vecef : np.ndarray
+        velocity vector earth fixed: km/s
+    aecef : np.ndarray
+        acceleration vector earth fixed: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to grcf: rad
+    ddeps : float
+        delta psi correction to grcf: rad
 
-        pm = smu.polarm(xp, yp, ttt, '80')
+    Returns
+    -------
+    rmod : ndarray
+        position vector mod: km
+    vmod : ndarray
+        velocity vector mod: km/s
+    amod : ndarray
+        acceleration vector mod: km/s2
+    """
 
-        # ---- perform transformations
-        thetasa = earthrot * (1.0  - lod/86400.0)
+    # ---- find matrices
+    deltapsi, _, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
 
-        omegaearth = np.array([0.0, 0.0, thetasa])
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
 
-#trueeps-meaneps
-#deltapsi
-#nut
-        rpef = pm@recef
-        rmod = nut@st@rpef
+    pm = smu.polarm(xp, yp, ttt, '80')
 
-        vpef = pm@vecef
-        vmod = nut@st@(vpef + np.cross(omegaearth, rpef.T).T)
+    # ---- perform transformations
+    thetasa = earthrot * (1.0  - lod/86400.0)
 
-        temp = np.cross(omegaearth, rpef.T)
-        amod = nut@st@(pm@aecef + np.cross(omegaearth, temp).T \
-               + 2.0*np.cross(omegaearth, vpef.T).T)
+    omegaearth = np.array([0.0, 0.0, thetasa])
 
-        return rmod, vmod, amod
+    # trueeps-meaneps
+    # deltapsi
+    # nut
+    rpef = pm@recef
+    rmod = nut@st@rpef
+
+    vpef = pm@vecef
+    vmod = nut@st@(vpef + np.cross(omegaearth, rpef.T).T)
+
+    temp = np.cross(omegaearth, rpef.T)
+    amod = nut@st@(pm@aecef + np.cross(omegaearth, temp).T \
+            + 2.0*np.cross(omegaearth, vpef.T).T)
+
+    return rmod, vmod, amod
 
 
 # ----------------------------------------------------------------------------
@@ -5341,30 +5381,68 @@ def ecef2mod  (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, dd
 # ----------------------------------------------------------------------------
 
 
-def ecef2tod(recef, vecef, aecef, ttt, jdut1,
-             lod, xp, yp, eqeterms, ddpsi, ddeps):
-        # ---- find matrices - note nut is only needed for st argument inputs
-        deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
+             ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+             eqeterms: int, ddpsi: float, ddeps: float):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the mean of date (mod) frame.
 
-        st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+    Parameters
+    ----------
+    recef : np.ndarray
+        position vector earth fixed: km
+    vecef : np.ndarray
+        velocity vector earth fixed: km/s
+    aecef : np.ndarray
+        acceleration vector earth fixed: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to grcf: rad
+    ddeps : float
+        delta psi correction to grcf: rad
 
-        pm = smu.polarm(xp, yp, ttt, '80')
+    Returns
+    -------
+    rtod : ndarray
+        position vector tod: km
+    vtod : ndarray
+        velocity vector tod: km/s
+    atod : ndarray
+        acceleration vector tod: km/s2
+    """
+    # ---- find matrices - note nut is only needed for st argument inputs
+    deltapsi, _, meaneps, omega, _ = obu.nutation(ttt, ddpsi, ddeps)
 
-        # ---- perform transformations
-        thetasa = earthrot * (1.0  - lod/86400.0)
-        omegaearth = np.array([0.0, 0.0, thetasa])
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
 
-        rpef = pm@recef
-        rtod = st@rpef
+    pm = smu.polarm(xp, yp, ttt, '80')
 
-        vpef = pm@vecef
-        vtod = st@(vpef + np.cross(omegaearth, rpef.T).T)
+    # ---- perform transformations
+    thetasa = earthrot * (1.0  - lod/86400.0)
+    omegaearth = np.array([0.0, 0.0, thetasa])
 
-        temp = np.cross(omegaearth, rpef.T)
-        atod = st@(pm@aecef + np.cross(omegaearth, temp).T \
-               + 2.0*np.cross(omegaearth, vpef.T).T)
+    rpef = pm@recef
+    rtod = st@rpef
 
-        return rtod, vtod, atod
+    vpef = pm@vecef
+    vtod = st@(vpef + np.cross(omegaearth, rpef.T).T)
+
+    temp = np.cross(omegaearth, rpef.T)
+    atod = st@(pm@aecef + np.cross(omegaearth, temp).T \
+            + 2.0*np.cross(omegaearth, vpef.T).T)
+
+    return rtod, vtod, atod
 
 
 
@@ -5411,59 +5489,92 @@ def ecef2tod(recef, vecef, aecef, ttt, jdut1,
 # ----------------------------------------------------------------------------
 
 
-def ecef2teme(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms):
+def ecef2teme(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
+              ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+              eqeterms: int):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the mean of date (mod) frame.
 
-        # ------------------------ find gmst --------------------------
-        gmst = stu.gstime(jdut1)
+    Parameters
+    ----------
+    recef : np.ndarray
+        position vector earth fixed: km
+    vecef : np.ndarray
+        velocity vector earth fixed: km/s
+    aecef : np.ndarray
+        acceleration vector earth fixed: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        terms for ast calculation: 0, 2
 
-        # find omeage from nutation theory
-        omega = 125.04452222  + (-6962890.5390 *ttt + \
-                7.455 *ttt*ttt + 0.008 *ttt*ttt*ttt)  / 3600.0
-        omega = np.fmod(omega, 360.0) * deg2rad
+    Returns
+    -------
+    rteme : ndarray
+        position vector teme: km
+    vteme : ndarray
+        velocity vector teme: km/s
+    ateme : ndarray
+        acceleration vector teme: km/s2
+    """
 
-        # teme does not include the geometric terms here
-        # after 1997, kinematic terms apply
-        if (jdut1 > 2450449.5) and (eqeterms > 0):
-            gmstg = gmst \
-                   + 0.00264 * arcsec2rad * math.sin(omega) \
-                   + 0.000063 * arcsec2rad * math.sin(2.0 *omega)
-        else:
-            gmstg = gmst
+    # ------------------------ find gmst --------------------------
+    gmst = stu.gstime(jdut1)
 
-        gmstg = np.fmod (gmstg, 2.0*math.pi)
+    # find omeage from nutation theory
+    omega = 125.04452222  + (-6962890.5390 *ttt + \
+            7.455 *ttt*ttt + 0.008 *ttt*ttt*ttt) / 3600.0
+    omega = np.fmod(omega, 360.0) * deg2rad
 
-        st = np.zeros((3, 3))
-        st[0, 0] = math.cos(gmstg)
-        st[0, 1] = -math.sin(gmstg)
-        st[0, 2] = 0.0
-        st[1, 0] = math.sin(gmstg)
-        st[1, 1] = math.cos(gmstg)
-        st[1, 2] = 0.0
-        st[2, 0] = 0.0
-        st[2, 1] = 0.0
-        st[2, 2] = 1.0
+    # teme does not include the geometric terms here
+    # after 1997, kinematic terms apply
+    if (jdut1 > 2450449.5) and (eqeterms > 0):
+        gmstg = gmst + 0.00264 * arcsec2rad * math.sin(omega) \
+                + 0.000063 * arcsec2rad * math.sin(2.0 *omega)
+    else:
+        gmstg = gmst
 
-        pm = smu.polarm(xp, yp, ttt, '80')
+    gmstg = np.fmod (gmstg, 2.0*math.pi)
 
-        rpef = pm@recef
-        rteme = st@rpef
+    st = np.zeros((3, 3))
+    st[0, 0] = math.cos(gmstg)
+    st[0, 1] = -math.sin(gmstg)
+    st[0, 2] = 0.0
+    st[1, 0] = math.sin(gmstg)
+    st[1, 1] = math.cos(gmstg)
+    st[1, 2] = 0.0
+    st[2, 0] = 0.0
+    st[2, 1] = 0.0
+    st[2, 2] = 1.0
 
-        thetasa = earthrot * (1.0  - lod/86400.0)
-        omegaearth = np.array([0.0, 0.0, thetasa])
+    pm = smu.polarm(xp, yp, ttt, '80')
 
-        vpef = pm@vecef
-        temp = np.cross(omegaearth, rpef.T)
-        vteme = st@(vpef + temp.T)
+    rpef = pm@recef
+    rteme = st@rpef
 
-        tt1 = np.cross(omegaearth, temp).T
-        print(tt1)
-        tt2 = np.cross(omegaearth, vpef.T).T
-        print(tt2)
+    thetasa = earthrot * (1.0  - lod/86400.0)
+    omegaearth = np.array([0.0, 0.0, thetasa])
 
-        ateme = st@(pm@aecef + tt1 \
-               + 2.0*tt2)
+    vpef = pm@vecef
+    temp = np.cross(omegaearth, rpef.T)
+    vteme = st@(vpef + temp.T)
 
-        return rteme, vteme, ateme
+    tt1 = np.cross(omegaearth, temp).T
+    print(tt1)
+    tt2 = np.cross(omegaearth, vpef.T).T
+    print(tt2)
+
+    ateme = st@(pm@aecef + tt1 + 2.0*tt2)
+
+    return rteme, vteme, ateme
 
 
 # ----------------------------------------------------------------------------
@@ -5503,17 +5614,47 @@ def ecef2teme(recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms):
 # ----------------------------------------------------------------------------
 
 
-def ecef2pef  (recef, vecef, aecef, opt, xp, yp, ttt):
+def ecef2pef(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
+             opt: str, xp: float, yp: float, ttt: float):
+    """this function transforms a vector from the earth fixed itrf frame
+    (itrf), to the pseudo earth fixed frame (pef).
 
-        pm = smu.polarm(xp, yp, ttt, opt)
+    Parameters
+    ----------
+    recef : np.ndarray
+        position vector earth fixed: km
+    vecef : np.ndarray
+        velocity vector earth fixed: km/s
+    aecef : np.ndarray
+        acceleration vector earth fixed: km/s2
+    opt : str
+        polarm method option: '01', '02', '80'
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    ttt : float
+        julian centuries of tt: centuries
 
-        rpef = pm@recef
+    Returns
+    -------
+    rpef : ndarray
+        position vector pef: km
+    vpef : ndarray
+        velocity vector pef: km/s
+    apef : ndarray
+        acceleration vector pef: km/s2
+    """
 
-        vpef = pm@vecef
+    pm = smu.polarm(xp, yp, ttt, opt)
 
-        apef = pm@aecef
+    rpef = pm@recef
 
-        return rpef, vpef, apef
+    vpef = pm@vecef
+
+    apef = pm@aecef
+
+    return rpef, vpef, apef
 
 
 
@@ -5573,35 +5714,82 @@ def ecef2pef  (recef, vecef, aecef, opt, xp, yp, ttt):
 # ----------------------------------------------------------------------------
 
 
-def eci2ecef  (reci, veci, aeci, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps):
-        prec, psia, wa, ea, xa = obu.precess(ttt, '80')
+def eci2ecef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float,
+             jdut1: float, lod: float, xp: float, yp: float, eqeterms: int,
+             ddpsi: float, ddeps: float):
+    """this function trsnforms a vector from the mean equator mean equniox frame
+    (j2000), to an earth fixed (ITRF) frame.  the results take into account
+    the effects of precession, nutation, sidereal time, and polar motion.
 
-        deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+    Parameters
+    ----------
+    reci : np.ndarray
+        eci position vector: km
+    veci : np.ndarray
+        eci velocity vector: km/s
+    aeci : np.ndarray
+        eci acceleration vector: km/s2
+    latgd : float
+        geodetic latitude of site: rad
+    lon : float
+        longituge of site: rad
+    alt : float
+        altitude of site: km
+    ttt : float
+        julian centuries: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess lenght of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        number of terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
 
-        st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+    Returns
+    -------
+    recef: ndarray
+        position vector earth fixed: km
+    vecef: ndarray
+        velocity vector earth fixed: km/s
+    aecef: ndarray
+        acceleration vector earth fixed: km/s2
+    """
+    prec, _, _, _, _ = obu.precess(ttt, '80')
 
-        pm = smu.polarm(xp, yp, ttt, '80')
+    deltapsi, _, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
 
-        thetasa = earthrot * (1.0  - lod/86400.0)
-#        omegaearth = np.array([[0], [0], [thetasa]])
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
 
-        omegaearth = np.array([0.0, 0.0, thetasa])
+    pm = smu.polarm(xp, yp, ttt, '80')
 
-        tmpmat = st.T@nut.T@prec.T
+    thetasa = earthrot * (1.0  - lod/86400.0)
+    # omegaearth = np.array([[0], [0], [thetasa]])
 
-        rpef = tmpmat@reci
-        recef = pm.T@rpef
+    omegaearth = np.array([0.0, 0.0, thetasa])
 
-        temp = np.cross(omegaearth, rpef.T) #turn from column to row vectors for cross product
-        vpef = tmpmat@veci - temp.T
-        vecef = pm.T@vpef
+    # [r]T[n]T[p]T
+    tmpmat = st.T@nut.T@prec.T
 
-        # two additional terms not needed if satellite is not on surface
-        # of the Earth
-        c1 = np.cross(omegaearth, temp)
-        c2 = 2.0*np.cross(omegaearth, vpef.T)
-        aecef = np.matmul(pm.T, np.matmul(tmpmat, aeci)) - c1.T - c2.T
-        return recef, vecef, aecef
+    rpef = tmpmat@reci
+    recef = pm.T@rpef
+
+    temp = np.cross(omegaearth, rpef.T) #turn from column to row vectors for cross product
+    vpef = tmpmat@veci - temp.T
+    vecef = pm.T@vpef
+
+    # two additional terms not needed if satellite is not on surface
+    # of the Earth
+    c1 = np.cross(omegaearth, temp)
+    c2 = 2.0*np.cross(omegaearth, vpef.T)
+    aecef = np.matmul(pm.T, np.matmul(tmpmat, aeci)) - c1.T - c2.T
+    return recef, vecef, aecef
 
 
 # ----------------------------------------------------------------------------
@@ -5617,9 +5805,9 @@ def eci2ecef  (reci, veci, aeci, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps
 #    vallado     - consolidate with iau 2000                     14 feb 2005
 #
 #  inputs          description                    range / units
-#    reci      - position vector eci          km
-#    veci      - velocity vector eci          km/s
-#    aeci      - acceleration vector eci      km/s2
+#    reci        - position vector eci          km
+#    veci        - velocity vector eci          km/s
+#    aeci        - acceleration vector eci      km/s2
 #    ttt         - julian centuries of tt         centuries
 #
 #  outputs       :
@@ -5643,17 +5831,40 @@ def eci2ecef  (reci, veci, aeci, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps
 # ----------------------------------------------------------------------------
 
 
-def eci2mod  (reci, veci, aeci, ttt):
+def eci2mod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float):
+    """this function transfroms a vector from the mean equator, mean equinox
+    frame (j2000), to the mean equator mean equinox of date (mod).
 
-        prec, psia, wa, ea, xa = obu.precess (ttt, '80')
+    Parameters
+    ----------
+    reci : np.ndarray
+        position vector eci: km
+    veci : np.ndarray
+        velocity vector eci: km
+    aeci : np.ndarray
+        acceleration vector eci: km
+    ttt : float
+        julian centuries of tt
 
-        rmod = prec.T@reci
+    Returns
+    -------
+    rmod : ndarray
+        position vector mod: km
+    vmod : ndarray
+        velocity vector mod: km/s
+    amod : ndarray
+        acceleration vector mod: km/s2
+    """
 
-        vmod = prec.T@veci
+    prec, _, _, _, _ = obu.precess (ttt, '80')
 
-        amod = prec.T@aeci
+    rmod = prec.T@reci
 
-        return rmod, vmod, amod
+    vmod = prec.T@veci
+
+    amod = prec.T@aeci
+
+    return rmod, vmod, amod
 
 
 
@@ -5673,6 +5884,7 @@ def eci2mod  (reci, veci, aeci, ttt):
 #    reci        - position vector eci            km
 #    veci        - velocity vector eci            km/s
 #    aeci        - acceleration vector eci        km/s2
+#    opt         - calculation option             '80, '6a', '6b', '6c'
 #    ttt         - julian centuries of tt         centuries
 #    ddpsi       - correction for iau2000         rad
 #    ddeps       - correction for iau2000         rad
@@ -5706,31 +5918,61 @@ def eci2mod  (reci, veci, aeci, ttt):
 # ----------------------------------------------------------------------------
 
 
-def eci2tod  (reci, veci, aeci, opt, ttt, ddpsi, ddeps, ddx, ddy):
+def eci2tod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt: str,
+            ttt: float, ddpsi: float, ddeps: float, ddx: float, ddy: float):
+    """this function transforms a vector from the mean equator mean equinox frame
+    (j2000) to the true equator true equinox of date (tod).
+
+    Parameters
+    ----------
+    reci : np.ndarray
+        position vector eci: km
+    veci : np.ndarray
+        velocity vector eci: km/s
+    aeci : np.ndarray
+        acceleration vector eci: km/s2
+    opt : str
+        calculation option: '80, '6a', '6b', '6c'
+    ttt : float
+        julian centuries of tt: centuries
+    ddpsi : float
+        correction for iau2000: rad
+    ddeps : float
+        correction for iau2000: rad
+    ddx : float
+        ???
+    ddy : float
+        ???
+
+    Returns
+    -------
+    rtod : ndarray
+        position vector tod: km
+    vtod : ndarray
+        velocity vector tod: km/s
+    atod : ndarray
+        acceleration vector tod: km/s2
+    """
 
 
-    prec, psia, wa, ea, xa = obu.precess (ttt, opt)
+    prec, _, _, _, _ = obu.precess (ttt, opt)
 
     if opt == '80':
-        deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+        deltapsi, trueeps, meaneps, _, nut = obu.nutation(ttt, ddpsi, ddeps)
     else:
         # ---- ceo based, iau2006
         if opt == '6c':
-            x, y, s, pnb = obu.iau06xys (ttt, ddx, ddy)
+            _, _, _, pnb = obu.iau06xys (ttt, ddx, ddy)
 
         # ---- class equinox based, 2000a
-        if opt == '6a':
-             deltapsi, pnb, prec, nut, l, l1, f, d, omega, \
-                lonmer, lonven, lonear, lonmar, lonjup, lonsat, \
-                    lonurn, lonnep, precrate \
-                            = obu.iau06pna (ttt)
+        elif opt == '6a':
+             deltapsi, pnb, prec, nut, _, _, _, _, _, _, _, _, _, _, _, _, _, \
+                _ = obu.iau06pna (ttt)
 
         # ---- class equinox based, 2000b
-        if opt == '6b':
-            deltapsi, pnb, prec, nut, l, l1, f, d, omega, \
-                lonmer, lonven, lonear, lonmar, lonjup, lonsat, \
-                    lonurn, lonnep, precrate \
-                        = obu.iau06pnb (ttt)
+        elif opt == '6b':
+            deltapsi, pnb, prec, nut, _, _, _, _, _, _, _, _, _, _, _, _, _,\
+            _ = obu.iau06pnb (ttt)
         prec = np.eye(3)
         nut = pnb
 
@@ -5741,11 +5983,11 @@ def eci2tod  (reci, veci, aeci, opt, ttt, ddpsi, ddeps, ddx, ddy):
         print('nut iau 76 \n')
         print('%20.14f %20.14f %20.14f \n'% (nut[0], nut[1], nut[2]))
 
-    rtod = nut.T@prec.T@reci
+    rtod = nut.T @ prec.T @ reci
 
-    vtod = nut.T@prec.T@veci
+    vtod = nut.T @ prec.T @ veci
 
-    atod = nut.T@prec.T@aeci
+    atod = nut.T @ prec.T @ aeci
 
     if sh.show == 'y':
         print('pn iau 76 \n')
@@ -5797,11 +6039,39 @@ def eci2tod  (reci, veci, aeci, opt, ttt, ddpsi, ddeps, ddx, ddy):
 # ----------------------------------------------------------------------------
 
 
-def eci2teme  (reci, veci, aeci, ttt, ddpsi, ddeps):
+def eci2teme(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
+             ttt: float, ddpsi: float, ddeps: float):
+    """this function transforms a vector from the mean equator mean equinox frame
+    (j2000) to the to the true equator mean equinox (teme) system.
 
-    prec, psia, wa, ea, xa = obu.precess (ttt, '80')
+    Parameters
+    ----------
+    reci : np.ndarray
+        position vector eci: km
+    veci : np.ndarray
+        velocity vector eci: km/s
+    aeci : np.ndarray
+        acceleration vector eci: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    ddpsi : float
+        correction for iau2000: rad
+    ddeps : float
+        correction for iau2000: rad
 
-    deltapsi, trueeps, meaneps, omega, nut = obu.nutation  (ttt, ddpsi, ddeps)
+    Returns
+    -------
+    rteme : ndarray
+        position vector teme: km
+    vteme : ndarray
+        velocity vector teme: km/s
+    ateme : ndarray
+        acceleration vector teme: km/s2
+    """
+
+    prec, _, _, _, _ = obu.precess (ttt, '80')
+
+    deltapsi, _, meaneps, _, nut = obu.nutation  (ttt, ddpsi, ddeps)
 
     # ------------------------ find eqeg ----------------------
     # rotate teme through just geometric terms
@@ -5827,8 +6097,6 @@ def eci2teme  (reci, veci, aeci, ttt, ddpsi, ddeps):
     ateme = tm @ aeci
 
     return rteme, vteme, ateme
-
-
 
 # ------------------------------------------------------------------------------
 #
@@ -5860,10 +6128,21 @@ def eci2teme  (reci, veci, aeci, ttt, ddpsi, ddeps):
 # [latgc] = gd2gc (latgd)
 # ------------------------------------------------------------------------------
 
+def gd2gc (latgd: float):
+    """this function converts from geodetic to geocentric latitude for positions
+    on the surface of the earth.  notice that (1-f) squared = 1-esqrd.
 
-def gd2gc (latgd):
-    # -------------------------  implementation   -----------------
-    latgc = math.atan((1.0  - eccearthsqrd)*math.tan(latgd))
+    Parameters
+    ----------
+    latgd : float
+        geodetic latitude: -pi to pi rad
+
+    Returns
+    -------
+    latgc: float
+        geocentric latitude: -pi to pi rad
+    """
+    latgc = math.atan((1.0  - eccearthsqrd) * math.tan(latgd))
     return latgc
 
 
@@ -5897,9 +6176,20 @@ def gd2gc (latgd):
 # [latgd] = gc2gd (latgc)
 # ------------------------------------------------------------------------------
 
+def gc2gd(latgc: float):
+    """this function converts from geodetic to geocentric latitude for positions
+    on the surface of the earth.  notice that (1-f) squared = 1-esqrd.
 
-def gc2gd (latgc):
-        # -------------------------  implementation   -----------------
+    Parameters
+    ----------
+    latgc : float
+        geocentric latitude
+
+    Returns
+    -------
+    latgd: float
+        geodetic latitude
+    """
     latgd = math.atan(math.tan(latgc)/(1.0  - eccearthsqrd))
 
     return latgd
@@ -5936,10 +6226,25 @@ def gc2gd (latgc):
 # [dms] = dms2rad(deg, min, sec)
 # -----------------------------------------------------------------------------
 
-def dms2rad(deg, min, sec):
-        # ------------------------  implementation   ------------------
-        dms = (deg + min/60.0 + sec/3600.0) * deg2rad
-        return dms
+def dms2rad(deg: float, min: float, sec: float):
+    """this function converts degrees, minutes and seconds into radians.
+
+    Parameters
+    ----------
+    deg : float
+        degrees: 0 - 360
+    min : float
+        minutes: 0 - 59
+    sec : float
+        seconds: 0 - 59.99
+
+    Returns
+    -------
+    dms: float
+        result: rad
+    """
+    dms = (deg + min/60.0 + sec/3600.0) * deg2rad
+    return dms
 
 
 # -----------------------------------------------------------------------------
@@ -5973,17 +6278,28 @@ def dms2rad(deg, min, sec):
 # [deg, min, sec] = rad2dms(dms)
 # -----------------------------------------------------------------------------
 
-def rad2dms(dms):
-        # ------------------------  implementation   ------------------
-        temp = dms * rad2deg
-        deg = np.fix(temp)
-        min = np.fix((temp - deg)*60.0)
-        sec = (temp - deg - min/60.0) * 3600.0
-        return deg, min, sec
+def rad2dms(dms: float):
+    """this function converts radians to degrees, minutes and seconds.
 
+    Parameters
+    ----------
+    dms : float
+        radians
 
-
-
+    Returns
+    -------
+    deg: float
+        degrees: 0-360
+    min: float
+        minutes: 0-59
+    sec: float
+        seconds: 0-59.99
+    """
+    temp = dms * rad2deg
+    deg = np.fix(temp)
+    min = np.fix((temp - deg)*60.0)
+    sec = (temp - deg - min/60.0) * 3600.0
+    return deg, min, sec
 
 # ------------------------------------------------------------------------------
 #
@@ -6023,26 +6339,65 @@ def rad2dms(dms):
 # [r, v] = radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
 # ------------------------------------------------------------------------------
 
-def radec2rv(rr, rtasc, decl, drr, drtasc, ddecl):
+def radec2rv(rr: float, rtasc: float, decl: float, drr: float, drtasc: float,
+             ddecl: float):
+    """this function converts the right ascension and declination values with
+    position and velocity vectors of a satellite. uses velocity vector to
+    find the solution of singular cases.
 
-        # -------------------------  implementation   -----------------
-        r = np.zeros((3))
-        r[0] = rr*math.cos(decl)*math.cos(rtasc)
-        r[1] = rr*math.cos(decl)*math.sin(rtasc)
-        r[2] = rr*math.sin(decl)
-        r = r.T
 
-        v = np.zeros([3])
-        v[0] = drr*math.cos(decl)*math.cos(rtasc) \
-            - rr*math.sin(decl)*math.cos(rtasc)*ddecl \
-            - rr*math.cos(decl)*math.sin(rtasc)*drtasc
-        v[1] = drr*math.cos(decl)*math.sin(rtasc) \
-            - rr*math.sin(decl)*math.sin(rtasc)*ddecl \
-            + rr*math.cos(decl)*math.cos(rtasc)*drtasc
-        v[2] = drr*math.sin(decl) + rr*math.cos(decl)*ddecl
-        v = v.T
+    Parameters
+    ----------
+    rr : float
+        radius of the satellite: er
+    rtasc : float
+        right ascension: rad
+    decl : float
+        declination: rad
+    drr : float
+        radius of the satellite rate: er/tu
+    drtasc : float
+        right ascension rate: rad/tu
+    ddecl : float
+        declination rate: rad/tu
 
-        return r, v
+    Returns
+    -------
+    r : ndarray
+        position vector: er
+    v : ndarray
+        velocity vector: er/tu
+    """
+
+    sinrt = math.sin(rtasc)
+    cosrt = math.cos(rtasc)
+    sindec = math.sin(decl)
+    cosdec = math.cos(decl)
+
+    r = np.zeros(3)
+    # r[0] = rr*math.cos(decl)*math.cos(rtasc)
+    # r[1] = rr*math.cos(decl)*math.sin(rtasc)
+    # r[2] = rr*math.sin(decl)
+    # r = r.T
+    r[0] = rr * cosdec * cosrt
+    r[1] = rr * cosdec * sinrt
+    r[2] = rr * sindec
+
+    v = np.zeros(3)
+    # v[0] = drr*math.cos(decl)*math.cos(rtasc) \
+    #     - rr*math.sin(decl)*math.cos(rtasc)*ddecl \
+    #     - rr*math.cos(decl)*math.sin(rtasc)*drtasc
+    # v[1] = drr*math.cos(decl)*math.sin(rtasc) \
+    #     - rr*math.sin(decl)*math.sin(rtasc)*ddecl \
+    #     + rr*math.cos(decl)*math.cos(rtasc)*drtasc
+    # v[2] = drr*math.sin(decl) + rr*math.cos(decl)*ddecl
+    # v = v.T
+    v[0] = drr * cosdec * cosrt - rr * sindec * cosrt * ddecl \
+        - rr * cosdec * sinrt * drtasc
+    v[1] = drr * cosdec * sinrt - rr* sindec * sinrt \
+        + rr * cosdec * cosrt * drtasc
+    v[2] = drr * sindec + rr * cosdec * ddecl
+    return r, v
 
 
 # ------------------------------------------------------------------------------
@@ -6083,32 +6438,56 @@ def radec2rv(rr, rtasc, decl, drr, drtasc, ddecl):
 # [rr, rtasc, decl, drr, drtasc, ddecl] = rv2radec(r, v)
 # ------------------------------------------------------------------------------
 
+def rv2radec(r: np.ndarray, v: np.ndarray):
+    """this function converts the right ascension and declination values with
+    position and velocity vectors of a satellite. uses velocity vector to
+    find the solution of singular cases.
 
-def rv2radec(r, v):
-        # -------------------------  implementation   -------------------------
-        # ------------- calculate angles and rates ----------------
-        rr = smu.mag(r)
-        temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
-        if (temp < small):
-            rtasc = math.atan2(v[1] , v[0])
-        else:
-            rtasc = math.atan2(r[1] , r[0])
-        if (rtasc < 0.0):
-            rtasc = rtasc + twopi
-        decl = math.asin(r[2]/rr)
+    Parameters
+    ----------
+    r : ndarray
+        position vector: km
+    v : ndarray
+        velocity vector: km/s
 
-        temp1 = -r[1]*r[1] - r[0]*r[0]  # different now
-        drr = np.dot(r, v)/rr
-        if (abs(temp1) > small):
-            drtasc = (v[0]*r[1] - v[1]*r[0]) / temp1
-        else:
-            drtasc = 0.0
-        if (abs(temp) > small):
-            ddecl = (v[2] - drr*math.sin(decl)) / temp
-        else:
-            ddecl = 0.0
+    Returns
+    -------
+    rr: float
+        radius of the satellite: km
+    rtasc: float
+        right ascension: rad
+    decl: float
+        declination: rad
+    drr: float
+        radius of the satellite rate: km/s
+    drtasc: float
+        right ascension rate: rad/s
+    ddecl: float
+        declination rate: rad/s
+    """
+    # ------------- calculate angles and rates ----------------
+    rr = smu.mag(r)
+    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    if (temp < small):
+        rtasc = math.atan2(v[1] , v[0])
+    else:
+        rtasc = math.atan2(r[1] , r[0])
+    if (rtasc < 0.0):
+        rtasc = rtasc + twopi
+    decl = math.asin(r[2]/rr)
 
-        return rr, rtasc, decl, drr, drtasc, ddecl
+    temp1 = -r[1]*r[1] - r[0]*r[0]  # different now
+    drr = np.dot(r, v)/rr
+    if (abs(temp1) > small):
+        drtasc = (v[0]*r[1] - v[1]*r[0]) / temp1
+    else:
+        drtasc = 0.0
+    if (abs(temp) > small):
+        ddecl = (v[2] - drr*math.sin(decl)) / temp
+    else:
+        ddecl = 0.0
+
+    return rr, rtasc, decl, drr, drtasc, ddecl
 
 
 # ------------------------------------------------------------------------------
@@ -6136,6 +6515,8 @@ def rv2radec(r, v):
 #    xp          - polar motion coefficient                 rad
 #    yp          - polar motion coefficient                 rad
 #    terms       - number of terms for ast calculation      0, 2
+#    ddpsi       - delta psi correction to gcrf   rad
+#    ddeps       - delta eps correction to gcrf   rad
 #
 #  outputs       :
 #    rho         - satellite range from site                km
@@ -6160,18 +6541,68 @@ def rv2radec(r, v):
 #  [rho, trtasc, tdecl, drho, dtrtasc, dtdecl] = rv2tradec (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
 # ------------------------------------------------------------------------------
 
+def rv2tradec(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
+              alt: float, ttt: float, jdut1: float, lod: float, xp: float,
+              yp: float, terms, ddpsi: float, ddeps: float):
+    """this function converts geocentric equatorial (eci) position and velocity
+    vectors into range, topcentric right acension, declination, and rates.
+    notice the value of small as it can affect the rate term calculations.
+    the solution uses the velocity vector to find the singular cases. also,
+    the right acension and declination rate terms are not observable unless
+    the acceleration vector is available.
 
-def rv2tradec (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp,
-               terms, ddpsi, ddeps):
+    Parameters
+    ----------
+    reci : np.ndarray
+        position vector eci: km
+    veci : np.ndarray
+        velocity vector eci: km/s
+    latgd : float
+        geodetic latitude: rad
+    lon : float
+        longitude: rad
+    alt : float
+        altitude: km
+    ttt : float
+        centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms :
+        NOT USED
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
 
-    # --------------------- implementation ------------------------
+    Returns
+    -------
+    rho : float
+        satellite range from site: km
+    trtasc : float
+        topocentric right ascension: 0.0 to 2pi rad
+    tdecl : float
+        topocentric declination: -pi/2 to pi/2 rad
+    drho : float
+        range rate: km/s
+    dtrtasc : float
+        topocentric rtasc rate: rad/s
+    dtdecl : float
+        topocentric decl rate: rad/s
+    """
+
     # ----------------- get site vector in ecef -------------------
     rsecef, vsecef = obu.site (latgd, lon, alt)
 
     #rs
     #vs
     # -------------------- convert ecef to eci --------------------
-    a = np.zeros((3))
+    a = np.zeros(3)
     rseci, vseci, aeci = ecef2eci(rsecef, vsecef, a, ttt, jdut1, lod, xp, yp,
                                   2, ddpsi, ddeps)
     #rseci
@@ -6219,8 +6650,6 @@ def rv2tradec (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp,
 
     return rho, trtasc, tdecl, drho, dtrtasc, dtdecl
 
-
-
 # ------------------------------------------------------------------------------
 #
 #                           function rv2razel
@@ -6248,9 +6677,11 @@ def rv2tradec (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp,
 #    ttt         - julian centuries of tt         centuries
 #    jdut1       - julian date of ut1             days from 4713 bc
 #    lod         - excess length of day           sec
-#    xp          - polar motion coefficient       arc sec
-#    yp          - polar motion coefficient       arc sec
+#    xp          - polar motion coefficient       rad
+#    yp          - polar motion coefficient       rad
 #    terms       - number of terms for ast calculation 0, 2
+#    ddpsi       - delta psi correction to gcrf   rad
+#    ddeps       - delta eps correction to gcrf   rad
 #
 #  outputs       :
 #    rho         - satellite range from site      km
@@ -6284,16 +6715,68 @@ def rv2tradec (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp,
 # ------------------------------------------------------------------------------
 
 
-def rv2razel (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms,
-              ddpsi, ddeps):
-    # --------------------- implementation ------------------------
+def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
+             alt: float, ttt: float, jdut1: float, lod: float, xp: float,
+             yp: float, terms: int, ddpsi: float, ddeps: float):
+    """this function converts geocentric equatorial (eci) position and velocity
+    vectors into range, azimuth, elevation, and rates.  notice the value
+    of small as it can affect the rate term calculations. the solution uses
+    the velocity vector to find the singular cases. also, the elevation and
+    azimuth rate terms are not observable unless the acceleration vector is
+    available.
+
+    Parameters
+    ----------
+    reci : np.ndarray
+        eci position vector: km
+    veci : np.ndarray
+        eci velocity vector: km/s
+    latgd : float
+        geodetic latitude of site: rad
+    lon : float
+        longituge of site: rad
+    alt : float
+        altitude of site: km
+    ttt : float
+        julian centuries: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess lenght of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        number of terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    rho
+        satellite range from site: km
+    az
+        azimuth: 0.0 to 2pi rad
+    el
+        elevation: -pi/2 to pi/2 rad
+    drho
+        range rate: km/s
+    daz
+        azimuth rate: rad/s
+    del
+        elevation rate: rad/s
+    """
+
     # ----------------- get site vector in ecef -------------------
-    rsecef, vsecef = obu.site(latgd, lon, alt)
+    rsecef, _ = obu.site(latgd, lon, alt)
     #print('rsecef    %14.7f %14.7f %14.7f \n', rsecef)
 
     # -------------------- convert eci to ecef --------------------
     a = np.array([[0],[0],[0]])
-    recef, vecef, aecef = eci2ecef(reci, veci, a, ttt, jdut1, lod, xp, yp, terms,
+    recef, vecef, _ = eci2ecef(reci, veci, a, ttt, jdut1, lod, xp, yp, terms,
                                  ddpsi, ddeps)
 
     #print('sat recef    %14.7f %14.7f %14.7f \n', recef)
@@ -6312,14 +6795,28 @@ def rv2razel (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms,
     rho = smu.mag(rhoecef)
 
     # ------------- convert to sez for calculations ---------------
-    tempvec = smu.rot3(rhoecef, lon)
-    rhosez = smu.rot2(tempvec, halfpi-latgd)
+    # tempvec = smu.rot3(rhoecef, lon)
+    # rhosez = smu.rot2(tempvec, halfpi-latgd)
 
-    tempvec = smu.rot3(drhoecef, lon)
-    drhosez = smu.rot2(tempvec, halfpi-latgd)
+    # tempvec = smu.rot3(drhoecef, lon)
+    # drhosez = smu.rot2(tempvec, halfpi-latgd)
+
+
+    # alternate (faster?) sez conversion
+    sinlat = math.sin(latgd)
+    coslat = math.cos(latgd)
+    sinlon = math.sin(lon)
+    coslon = math.cos(lon)
+    ecef2sez = np.array([[sinlat*coslon, sinlat*sinlon, -coslat],
+                         [-sinlon, coslon, 0],
+                         [coslat*coslon, coslat*sinlon, sinlat]])
+    rhosez = ecef2sez @ rhoecef
+    drhosez = ecef2sez @ drhoecef
+
 
     # ------------- calculate azimuth and elevation ---------------
-    temp = np.sqrt(rhosez[0]*rhosez[0] + rhosez[1]*rhosez[1])
+    temp = math.sqrt(rhosez[0]*rhosez[0] + rhosez[1]*rhosez[1])
+
     if (temp < small):           # directly over the north pole
         el = np.sign(rhosez[2])*halfpi   # +- 90 deg
     else:
@@ -6327,7 +6824,8 @@ def rv2razel (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms,
         el = math.asin(rhosez[2] / magrhosez)
 
     if (temp < small):
-        az = math.atan2(drhosez[1], -drhosez[0])
+        dtemp = math.sqrt(drhosez[0]**2 + drhosez[1]**2)
+        az = math.atan2(drhosez[1]/dtemp, -drhosez[0]/dtemp)
     else:
         az = math.atan2(rhosez[1]/temp, -rhosez[0]/temp)
     if (az < 0.0):
@@ -6341,85 +6839,127 @@ def rv2razel (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms,
         daz = 0.0
 
     if (abs(temp) > small):
-        del_ = (drhosez[2] - drho*np.sin(el)) / temp
+        del_ = (drhosez[2] - drho*math.sin(el)) / temp
     else:
         del_ = 0.0
     return rho, az, el, drho, daz, del_
 
-
-
-#
 # position and velocity to ecliptic latitude longitude
 # dav 28 mar 04
 #
 # [rr, ecllon, ecllat, drr, decllon, decllat] = rv2ell (rijk, vijk)
 
 
-def rv2ell (rijk, vijk):
+def rv2ell (rijk: np.ndarray, vijk: np.ndarray):
+    """this function takes position and velocity vectors and turns them into
+    ecliptic latitude and longitude
 
-        # --------------------  implementation   ----------------------
-        obliquity = 0.40909280   #23.439291 /rad
+    Parameters
+    ----------
+    rijk : np.ndarray
+        position vector: km
+    vijk : np.ndarray
+        velocity vector: km/s
 
-        r = smu.rot1 (rijk, obliquity)
-        v = smu.rot1 (vijk, obliquity)
+    Returns
+    -------
+    rr : float
+        range: km
+    ecllon : float
+        ecliptic longitude: rad
+    ecllat: float
+        ecliptic latitude: rad
+    drr : float
+        rate of range: km/sec
+    decllon: float
+        rate of ecliptic longitude: rad
+    decllat: float
+        rate of ecliptic latitude: rad
+    """
 
-        # ------------- calculate angles and rates ----------------
-        rr = smu.mag(r)
-        temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
-        if (temp < small):
-            temp1 = np.sqrt(v[0]*v[0] + v[1]*v[1])
-            if (abs(temp1) > small):
-                ecllon = math.atan2(v[1] , v[0])
-            else:
-                ecllon = 0.0
-        else:
-            ecllon = math.atan2(r[1] , r[0])
-        ecllat = math.asin(r[2]/rr)
+    obliquity = 0.40909280   #23.439291 /rad
 
-        temp1 = -r[1]*r[1] - r[0]*r[0]  # different now
-        drr = np.dot(r, v)/rr
+    r = smu.rot1 (rijk, obliquity)
+    v = smu.rot1 (vijk, obliquity)
+
+    # ------------- calculate angles and rates ----------------
+    rr = smu.mag(r)
+    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    if (temp < small):
+        temp1 = np.sqrt(v[0]*v[0] + v[1]*v[1])
         if (abs(temp1) > small):
-            decllon = (v[0]*r[1] - v[1]*r[0]) / temp1
+            ecllon = math.atan2(v[1] , v[0])
         else:
-            decllon = 0.0
-        if (abs(temp) > small):
-            decllat = (v[2] - drr*math.sin(ecllat)) / temp
-        else:
-            decllat = 0.0
-        return rr, ecllon, ecllat, drr, decllon, decllat
+            ecllon = 0.0
+    else:
+        ecllon = math.atan2(r[1] , r[0])
+    ecllat = math.asin(r[2]/rr)
 
+    temp1 = -r[1]*r[1] - r[0]*r[0]  # different now
+    drr = np.dot(r, v)/rr
+    if (abs(temp1) > small):
+        decllon = (v[0]*r[1] - v[1]*r[0]) / temp1
+    else:
+        decllon = 0.0
+    if (abs(temp) > small):
+        decllat = (v[2] - drr*math.sin(ecllat)) / temp
+    else:
+        decllat = 0.0
+    return rr, ecllon, ecllat, drr, decllon, decllat
 
-
-#
 # ecliptic latitude longitude to position and velocity
 # dav 28 mar 04
 #
 # [rijk, vijk] = ell2rv (rr, ecllon, ecllat, drr, decllon, decllat)
 
+def ell2rv(rr: float, ecllon: float, ecllat: float, drr: float,
+           decllon: float, decllat: float):
+    """this function takes the range and ecliptic latitude and longitude
+    and converts them into position and velocity vectors
 
-def ell2rv (rr, ecllon, ecllat, drr, decllon, decllat):
+    Parameters
+    ----------
+    rr : float
+        range: km
+    ecllon : float
+        ecliptic longitude: rad
+    ecllat : float
+        ecliptic latidue: rad
+    drr : float
+        rate of range: km/s
+    decllon : float
+        rate of ecliptic longitude: rad/s
+    decllat : float
+        rate of ecliptic latitude: rad/s
 
-        # --------------------  implementation   ----------------------
-        obliquity = 0.40909280   #23.439291 /rad
+    Returns
+    -------
+    rijk : ndarray
+        position vector: km
+    vijk : ndarray
+        velocity vector: km/s
+    """
 
-        r = np.zeros((3))
-        r[0] = rr*math.cos(ecllat)*math.cos(ecllon)
-        r[1] = rr*math.cos(ecllat)*math.sin(ecllon)
-        r[2] = rr*math.sin(ecllat)
+    obliquity = 0.40909280   #23.439291 /rad
 
-        v = np.zeros((3))
-        v[0] = drr*math.cos(ecllat)*math.cos(ecllon) \
-                 - rr*math.sin(ecllat)*math.cos(ecllon)*decllat \
-                 - rr*math.cos(ecllat)*math.sin(ecllon)*decllon
-        v[1] = drr*math.cos(ecllat)*math.sin(ecllon) \
-                 - rr*math.sin(ecllat)*math.sin(ecllon)*decllat \
-                 + rr*math.cos(ecllat)*math.cos(ecllon)*decllon
-        v[2] = drr*math.sin(ecllat) + rr*math.cos(ecllat)*decllat
+    r = np.zeros((3))
+    r[0] = rr*math.cos(ecllat)*math.cos(ecllon)
+    r[1] = rr*math.cos(ecllat)*math.sin(ecllon)
+    r[2] = rr*math.sin(ecllat)
 
-        rijk = smu.rot1 (r, -obliquity)
-        vijk = smu.rot1 (v, -obliquity)
+    v = np.zeros((3))
+    v[0] = drr*math.cos(ecllat)*math.cos(ecllon) \
+                - rr*math.sin(ecllat)*math.cos(ecllon)*decllat \
+                - rr*math.cos(ecllat)*math.sin(ecllon)*decllon
+    v[1] = drr*math.cos(ecllat)*math.sin(ecllon) \
+                - rr*math.sin(ecllat)*math.sin(ecllon)*decllat \
+                + rr*math.cos(ecllat)*math.cos(ecllon)*decllon
+    v[2] = drr*math.sin(ecllat) + rr*math.cos(ecllat)*decllat
 
-        return rijk, vijk
+    rijk = smu.rot1(r, -obliquity)
+    vijk = smu.rot1(v, -obliquity)
+
+    return rijk, vijk
 
 
 # ----------------------------------------------------------------------------
@@ -6461,9 +7001,32 @@ def ell2rv (rr, ecllon, ecllat, drr, decllon, decllat):
 # ----------------------------------------------------------------------------
 
 
-def mod2eci(rmod, vmod, amod, ttt):
+def mod2eci(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray, ttt: float):
+    """this function transforms a vector from the mean equator mean equinox of
+    date (mod) to the mean equator mean equinox (j2000) frame.
 
-    prec, psia, wa, ea, xa = obu.precess(ttt, '80')
+    Parameters
+    ----------
+    rmod : np.ndarray
+        position vector mod: km
+    vmod : np.ndarray
+        velocity vector mod: km/s
+    amod : np.ndarray
+        acceleration vector mod: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+
+    Returns
+    -------
+    reci : ndarray
+        position vector eci            km
+    veci : ndarray
+        velocity vector eci            km/s
+    aeci : ndarray
+        acceleration vector eci        km/s2
+    """
+
+    prec, _, _, _, _ = obu.precess(ttt, '80')
 
     reci = prec@rmod
     veci = prec@vmod
