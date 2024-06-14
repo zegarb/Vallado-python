@@ -1,3 +1,5 @@
+these examples are tested using the 4th edition of the book.
+
 Examples:
 
 1_1: Y
@@ -32,7 +34,9 @@ Examples:
           ^^^^^^^^^^
 AttributeError: module 'orbit_utils' has no attribute 'moonel'. Did you mean: 'moon'?
 
-5_5: Y
+5_5: Y (matches the actual values explained in ErattaVer4, which are slightly
+        different than the book)
+
 5_6: Y
 5_7: Y
 6_1: Y
@@ -61,14 +65,12 @@ NameError: name 'lowthrust' is not defined
 
 
 7_5: Think it's fixed, had to copy check for -y to before xold calculation
-     (line 851) to prevent imaginary dtold.
+     (labertu(), line 1845) to prevent imaginary dtold.
 
+7_34: Y
+10_1: Y
 
-7_34: Good
-10_1: Good (Tried out formatted string literals from pep 498)
-
-10_2: Extra code at the bottom with no print statements, and matlab output provided
-      has extra print outputs not in code
+10_2: Extra code at the bottom with no assignments/print statements
 
 10_3: Matlab example output is full of errors. Think the code is right.
 
