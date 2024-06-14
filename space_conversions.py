@@ -5288,9 +5288,9 @@ def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     eqeterms : int
         terms for ast calculation: 0, 2
     ddpsi : float
-        delta psi correction to grcf: rad
+        delta psi correction to gcrf: rad
     ddeps : float
-        delta psi correction to grcf: rad
+        delta psi correction to gcrf: rad
 
     Returns
     -------
@@ -5408,9 +5408,9 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     eqeterms : int
         terms for ast calculation: 0, 2
     ddpsi : float
-        delta psi correction to grcf: rad
+        delta psi correction to gcrf: rad
     ddeps : float
-        delta psi correction to grcf: rad
+        delta psi correction to gcrf: rad
 
     Returns
     -------
@@ -7699,10 +7699,40 @@ def tradec2rv(rho: float, trtasc: float, tdecl: float, drho: float,
 # [reci, veci, aeci] = teme2eci  (rteme, vteme, ateme, ttt, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def teme2eci(rteme=None, vteme=None, ateme=None,
-             ttt=None, ddpsi=None, ddeps=None):
-    prec, psia, wa, ea, xa = obu.precess(ttt, '80')
-    deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+def teme2eci(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
+             ttt: float, ddpsi: float, ddeps: float):
+    """this function transforms a vector from the true equator mean equinox system,
+    (teme) to the mean equator mean equinox (j2000) system.
+
+    Parameters
+    ----------
+    rteme : np.ndarray
+        position vector of date
+        true equator, mean equinox: km
+    vteme : np.ndarray
+        velocity vector of date
+        true equator, mean equinox: km
+    ateme : np.ndarray
+        acceleration vector of date
+        true equator, mean equinox: km
+    ttt : float
+        julian centuries of tt: centuries
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    reci: ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    aeci: ndarray
+        acceleration vector eci: km/s2
+    """
+    prec, _, _, _, _ = obu.precess(ttt, '80')
+    deltapsi, _, meaneps, _, nut = obu.nutation(ttt, ddpsi, ddeps)
     # ------------------------ find eqeg ----------------------
 # rotate teme through just geometric terms
     eqeg = deltapsi * np.cos(meaneps)
@@ -7765,8 +7795,44 @@ def teme2eci(rteme=None, vteme=None, ateme=None,
 # [recef, vecef, aecef] = teme2ecef(rteme, vteme, ateme, ttt, jdut1, lod, xp, yp, eqeterms)
 # ----------------------------------------------------------------------------
 
-def teme2ecef(rteme=None, vteme=None, ateme=None, ttt=None, jdut1=None,
-              lod=None, xp=None, yp=None, eqeterms=None):
+def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
+              ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+              eqeterms: int):
+    """this function trsnforms a vector from the true equator mean equniox frame
+    (teme), to an earth fixed (ITRF) frame.  the results take into account
+    the effects of sidereal time, and polar motion.
+
+    Parameters
+    ----------
+    rteme : np.ndarray
+        position vector teme: km
+    vteme : np.ndarray
+        velocity vector teme: km/s
+    ateme : np.ndarray
+        acceleration vector teme: km/s2
+    ttt : float
+        julain centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        use 2 extra terms (kinematic) after 1997: 0, 2
+
+    Returns
+    -------
+    recef: ndarray
+        position vector earth fixed: km
+    vecef: ndarray
+        velocity vector earth fixed: km/s
+    aecef: ndarray
+        acceleration vector earth fixed: km/s2
+    """
+
     # ------------------------ find gmst --------------------------
     gmst = stu.gstime(jdut1)
     # find omega from nutation theory
@@ -7774,8 +7840,8 @@ def teme2ecef(rteme=None, vteme=None, ateme=None, ttt=None, jdut1=None,
                             * ttt + 0.008 * ttt * ttt * ttt) / 3600.0
     omega = np.fmod(omega, 360.0) * deg2rad
     # ------------------------ find mean ast ----------------------
-# teme does not include the geometric terms here
-# after 1997, kinematic terms apply
+    # teme does not include the geometric terms here
+    # after 1997, kinematic terms apply
     if (jdut1 > 2450449.5) and (eqeterms > 0):
         gmstg = (gmst + 0.00264 * arcsec2rad * np.sin(omega)
                  + 6.3e-05 * arcsec2rad * np.sin(2.0 * omega))
@@ -7858,9 +7924,49 @@ def teme2ecef(rteme=None, vteme=None, ateme=None, ttt=None, jdut1=None,
 # [rpef, vpef, apef] = eci2pef  (reci, veci, aeci, opt, ttt, jdut1, lod, eqeterms, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def eci2pef(reci=None, veci=None, aeci=None, opt=None, ttt=None,
-            jdut1=None, lod=None, eqeterms=None, ddpsi=None,
-            ddeps=None, ddx=None, ddy=None):
+def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt:int,
+            ttt: float, jdut1: float, lod: float, eqeterms: int, ddpsi: float,
+            ddeps: float, ddx: float, ddy: float):
+    """this function transforms a vector from the mean equator, mean equinox frame
+    (j2000), to the pseudo earth fixed frame (pef).
+
+    Parameters
+    ----------
+    reci : np.ndarray
+        position vector eci: km
+    veci : np.ndarray
+        velocity vector eci: km/s
+    aeci : np.ndarray
+        acceleration vector eci: kms/2
+    opt : int
+        method option: '80', '6a', '6b', '6c'
+    ttt : float
+        julian centuries of  tt: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    eqeterms : int
+        # of terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta psi correction to gcrf: rad
+    ddx : float
+        _description_
+    ddy : float
+        _description_
+
+    Returns
+    -------
+    rpef: ndarray
+        position vector pseudo earth fixed: km
+    vpef: ndarray
+        velocity vector pseudo earth fixed: km/s
+    apef: ndarray
+        acceleration vector pseudo earth fixed: km/s2
+    """
+
     prec, psia, wa, ea, xa = obu.precess(ttt, opt)
 
 #need to fix this if else to default to '80' when opt is not specified
