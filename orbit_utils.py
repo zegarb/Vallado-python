@@ -5588,7 +5588,6 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
 # ----------------------------------------------------------------------------
 
 def iau06pna(ttt=None):
-    showit = 'y'
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
     ttt4 = ttt2 * ttt2
@@ -5633,7 +5632,7 @@ def iau06pna(ttt=None):
     deltapsi = pnsum + pplnsum
 
     deltaeps = ensum + eplnsum
-    if showit == 'y':
+    if sh.iauhelp == 'y':
         print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     # iau2006 approach - does not seem to be correct, close though
@@ -5673,12 +5672,12 @@ def iau06pna(ttt=None):
     deltapsi = deltapsi + deltapsi * (4.697e-07 + j2d)
 
     deltaeps = deltaeps + deltaeps * j2d
-    if showit == 'y':
+    if sh.iauhelp == 'y':
         print('dpsi %11.7f deltaeps %11.7f \n'
               % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     prec, psia, wa, ea, xa = precess(ttt, '06')
-    if showit == 'y':
+    if sh.iauhelp == 'y':
         print('prec iau 06 \n' % ())
         print((prec))
 
@@ -5725,17 +5724,17 @@ def iau06pna(ttt=None):
 
     pnb = a10 * a9 * a8 * a7 * a6 * a5 * a4 * a3 * a2 * a1
     prec = a7 * a6 * a5 * a4
-    if showit == 'y':
+    if sh.iauhelp == 'y':
         print('prec iau 06a alt \n' % ())
         print((prec))
 
     nut = a3 * a2 * a1
-    if showit == 'y':
+    if sh.iauhelp == 'y':
         print('nut iau 06a \n' % ())
         print((nut))
 
     frb = a10 * a9 * a8
-    if showit == 'y':
+    if sh.iauhelp == 'y':
         print('frb iau 06a \n' % ())
         print((frb))
 
