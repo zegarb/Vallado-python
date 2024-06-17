@@ -1,4 +1,5 @@
 from space_conversions import *
+import numpy as np
 from pprint import pprint as pp
 
 latgc = math.pi*0.20
@@ -36,6 +37,7 @@ ddeps = -0.003875 * arcsec2rad
 ddx = -0.000205 * arcsec2rad  # " to rad
 ddy = -0.000136 * arcsec2rad
 order = 106
+terms = 2
 eqeterms = 2
 timezone=0
 opt = 'c' # specify the iau00 cio approach
@@ -97,27 +99,41 @@ pp(reci)
 pp(veci)
 pp(aeci)
 
-
-rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6a", ttt,jdut1,lod,
-                            eqeterms,ddpsi,ddeps)
-print('eci2pef 6a returned: ')
+rpef,vpef,apef = eci2pef(reci,veci,aeci,ttt,jdut1,lod,terms,ddpsi,ddeps)
+print('eci2pef returned: ')
 pp(rpef)
 pp(vpef)
 pp(apef)
 
-rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6b", ttt,jdut1,lod,
-                            eqeterms,ddpsi,ddeps)
-print('eci2pef 6b returned: ')
-pp(rpef)
-pp(vpef)
-pp(apef)
+# tirs conversions not functioning properly, J and K values on eci vectors
+# are halved for some reason
+rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "a", ttt, jdut1, lod,
+                                    0, 0)
+print("eci2tirsiau06 a returned:")
+pp(rtirs)
+pp(vtirs)
+pp(atirs)
 
-rpef,vpef,apef = eci2pef  (reci,veci,aeci,"6c", ttt,jdut1,lod,
-                            eqeterms,ddpsi,ddeps,ddx,ddy)
-print('eci2pef 6c returned: ')
-pp(rpef)
-pp(vpef)
-pp(apef)
+reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "a", ttt, jdut1, lod,
+                                 0, 0)
+print("tirs2eciiau06 a returned:")
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "b", ttt, jdut1, lod,
+                                    0, 0)
+print("eci2tirsiau06 b returned:")
+pp(rtirs)
+pp(vtirs)
+pp(atirs)
+
+reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "b", ttt, jdut1, lod,
+                                 0, 0)
+print("tirs2eciiau06 b returned:")
+pp(reci)
+pp(veci)
+pp(aeci)
 
 rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'b')
 print('ecef2cirsiau06 returned: ')
@@ -125,37 +141,37 @@ pp(rcirs)
 pp(vcirs)
 pp(acirs)
 
-rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'a', ddx, ddy)
+rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'a', ddx, ddy)
 print('eci2cirsiau06 a returned: ')
 pp(rcirs)
 pp(vcirs)
 pp(acirs)
 
-reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'a', ddx, ddy)
+reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'a', ddx, ddy)
 print('cirs2eciiau06 a returned: ')
 pp(reci)
 pp(veci)
 pp(aeci)
 
-rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'b', ddx, ddy)
+rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'b', ddx, ddy)
 print('eci2cirsiau06 b returned: ')
 pp(rcirs)
 pp(vcirs)
 pp(acirs)
 
-reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'b', ddx, ddy)
+reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'b', ddx, ddy)
 print('cirs2eciiau06 b returned: ')
 pp(reci)
 pp(veci)
 pp(aeci)
 
-rcirs,vcirs,acirs = eci2cirsiau06  (reci,veci,aeci,ttt,'c', ddx, ddy)
+rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'c', ddx, ddy)
 print('eci2cirsiau06 c returned: ')
 pp(rcirs)
 pp(vcirs)
 pp(acirs)
 
-reci,veci,aeci = cirs2eciiau06 (rcirs,vcirs,acirs,ttt,'c', ddx, ddy)
+reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'c', ddx, ddy)
 print('cirs2eciiau06 c returned: ')
 pp(reci)
 pp(veci)

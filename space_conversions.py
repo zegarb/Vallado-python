@@ -7547,10 +7547,10 @@ def pef2eci(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray, ttt: float,
     thetasa = earthrot * (1.0 - lod / 86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
     reci = prec @ nut @ st @ rpef
-    veci = prec @ nut @ st @ (vpef + np.cross(omegaearth, rpef.T))
+    veci = prec @ nut @ st @ (vpef + np.cross(omegaearth, rpef.T).T)
     temp = np.cross(omegaearth, rpef.T)
-    aeci = prec @ nut @ st @ (apef + np.cross(omegaearth, temp) + 2.0
-                              * np.cross(omegaearth, vpef.T))
+    aeci = prec @ nut @ st @ (apef + np.cross(omegaearth, temp).T + 2.0
+                              * np.cross(omegaearth, vpef.T).T)
     return reci, veci, aeci
 
 # -----------------------------------------------------------------------------
@@ -7924,9 +7924,9 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
 # [rpef, vpef, apef] = eci2pef  (reci, veci, aeci, opt, ttt, jdut1, lod, eqeterms, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt:int,
-            ttt: float, jdut1: float, lod: float, eqeterms: int, ddpsi: float,
-            ddeps: float, ddx: float, ddy: float):
+def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
+            ttt: float, jdut1: float, lod: float, terms: int, ddpsi: float,
+            ddeps: float):
     """this function transforms a vector from the mean equator, mean equinox frame
     (j2000), to the pseudo earth fixed frame (pef).
 
@@ -7938,24 +7938,18 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt:int,
         velocity vector eci: km/s
     aeci : np.ndarray
         acceleration vector eci: kms/2
-    opt : int
-        method option: '80', '6a', '6b', '6c'
     ttt : float
         julian centuries of  tt: centuries
     jdut1 : float
         julian date of ut1: days from 4713 bc
     lod : float
         excess length of day: sec
-    eqeterms : int
+    terms : int
         # of terms for ast calculation: 0, 2
     ddpsi : float
         delta psi correction to gcrf: rad
     ddeps : float
         delta psi correction to gcrf: rad
-    ddx : float
-        _description_
-    ddy : float
-        _description_
 
     Returns
     -------
@@ -7967,32 +7961,10 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt:int,
         acceleration vector pseudo earth fixed: km/s2
     """
 
+    prec, _, _, _, _ = obu.precess(ttt, '80')
+    deltapsi, _, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, terms)
 
-
-#need to fix this if else to default to '80' when opt is not specified
-
-    if opt == '80' or not opt:
-        prec, psia, wa, ea, xa = obu.precess(ttt, '80')
-        deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
-        st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
-    else:
-        # ---- ceo based, iau2006
-        if opt == '6c':
-            x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
-            st = obu.iau06era(jdut1)
-        # ---- class equinox based, 2000a
-        if opt == '6a':
-            deltapsi, pnb, prec, nut, l, l1, f, d, omega, lonmer, lonven, lonear, \
-                lonmar, lonjup, lonsat, lonurn, lonnep, precrate = obu.iau06pna(ttt)
-            gst, st = obu.iau06gst(jdut1, ttt, deltapsi, '06')
-        # ---- class equinox based, 2000b
-        if opt == '6b':
-            deltapsi, pnb, prec, nut, l, l1, f, d, omega, lonmer, lonven, lonear, \
-                lonmar, lonjup, lonsat, lonurn, lonnep, precrate = obu.iau06pnb(ttt)
-            gst, st = obu.iau06gst(jdut1, ttt, deltapsi, '06')
-        prec = np.eye(3)
-        nut = pnb
-        st = st
 
     thetasa = earthrot * (1.0 - lod / 86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
@@ -8004,6 +7976,140 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt:int,
         - 2.0*np.cross(omegaearth, vpef.T).T
 
     return rpef, vpef, apef
+
+def eci2tirsiau06(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
+                  opt: str, ttt: float, jdut1: float, lod: float,
+                  ddx: float = None, ddy: float = None):
+    """this function transforms a vector from the mean equator, mean equinox
+    frame (GCRF) to the Terrestrial Intermediate Reference System (TIRS).
+
+    Parameters
+    ----------
+    reci : np.ndarray
+        position vector eci: km
+    veci : np.ndarray
+        velocity vector eci: km/s
+    aeci : np.ndarray
+        acceleration vector eci: km/s2
+    opt : str
+        "c": cio based, iau2006
+        "a": class equinox based, 2000a
+        "b": class equinox based, 2000b
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    ddx : float, optional
+        coordinates of the Celestial Intermediate Pole,
+        needed for opt 'c'
+    ddy : float, optional
+        coordinates of the Celestial Intermediate Pole,
+        needed for opt 'c'
+
+    Returns
+    -------
+    rtirs: ndarray
+        position vector tirs: km
+    vtirs: ndarray
+        velocity vector tirs: km/s
+    atirs: ndarray
+        acceleration vector tirs: km/s2
+    """
+
+     # ---- cio based, iau2006
+    if opt == 'c':
+        _, _, _, pnb = obu.iau06xys(ttt, ddx, ddy)
+        st = obu.iau06era(jdut1)
+    # ---- class equinox based, 2000a
+    if opt == 'a':
+        deltapsi, pnb, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ \
+            = obu.iau06pna(ttt)
+        _, st = obu.iau06gst(jdut1, ttt, deltapsi, '06')
+    # ---- class equinox based, 2000b
+    if opt == 'b':
+        deltapsi, pnb, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ \
+            = obu.iau06pnb(ttt)
+        _, st = obu.iau06gst(jdut1, ttt, deltapsi, '06')
+
+    thetasa = earthrot * (1.0 - lod / 86400.0)
+    omegaearth = np.array([0.0, 0.0, thetasa])
+    rtirs = st.T @ pnb.T @ reci
+    vtirs = st.T @ pnb.T @ veci - np.cross(omegaearth, rtirs.T).T
+
+    temp = np.cross(omegaearth, rtirs.T)
+    atirs = st.T @ pnb.T @ aeci - np.cross(omegaearth, temp).T \
+        - 2.0*np.cross(omegaearth, vtirs.T).T
+
+    return rtirs, vtirs, atirs
+
+def tirs2eciiau06(rtirs: np.ndarray, vtirs: np.ndarray, atirs: np.ndarray,
+                  opt: str, ttt: float, jdut1: float, lod: float,
+                  ddx: float = None, ddy: float = None):
+    """this function transforms a vector from the mean equator, mean equinox
+    frame (GCRF) to the Terrestrial Intermediate Reference System (TIRS).
+
+    Parameters
+    ----------
+    rtirs : np.ndarray
+        position vector eci: km
+    vtirs : np.ndarray
+        velocity vector eci: km/s
+    atirs : np.ndarray
+        acceleration vector eci: km/s2
+    opt : str
+        "c": cio based, iau2006
+        "a": class equinox based, 2000a
+        "b": class equinox based, 2000b
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    ddx : float, optional
+        coordinates of the Celestial Intermediate Pole,
+        needed for opt 'c'
+    ddy : float, optional
+        coordinates of the Celestial Intermediate Pole,
+        needed for opt 'c'
+
+    Returns
+    -------
+    reci: ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    aeci: ndarray
+        acceleration vector eci: km/s2
+    """
+
+     # ---- cio based, iau2006
+    if opt == 'c':
+        _, _, _, pnb = obu.iau06xys(ttt, ddx, ddy)
+        st = obu.iau06era(jdut1)
+    # ---- class equinox based, 2000a
+    if opt == 'a':
+        deltapsi, pnb, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ \
+            = obu.iau06pna(ttt)
+        _, st = obu.iau06gst(jdut1, ttt, deltapsi, '06')
+    # ---- class equinox based, 2000b
+    if opt == 'b':
+        deltapsi, pnb, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ \
+            = obu.iau06pnb(ttt)
+        _, st = obu.iau06gst(jdut1, ttt, deltapsi, '06')
+
+    thetasa = earthrot * (1.0 - lod / 86400.0)
+    omegaearth = np.array([0.0, 0.0, thetasa])
+    reci = pnb @ st @ rtirs
+    veci = pnb @ st @ (vtirs + np.cross(omegaearth, reci.T).T)
+
+    temp = np.cross(omegaearth, reci.T)
+    aeci = pnb @ st @ (atirs + np.cross(omegaearth, temp).T \
+        + 2.0*np.cross(omegaearth, veci.T).T)
+
+    return reci, veci, aeci
 
 # ----------------------------------------------------------------------------
 #
