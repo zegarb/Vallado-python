@@ -7967,11 +7967,12 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt:int,
         acceleration vector pseudo earth fixed: km/s2
     """
 
-    prec, psia, wa, ea, xa = obu.precess(ttt, opt)
+
 
 #need to fix this if else to default to '80' when opt is not specified
 
     if opt == '80' or not opt:
+        prec, psia, wa, ea, xa = obu.precess(ttt, '80')
         deltapsi, trueeps, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
         st, stdot = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
     else:
