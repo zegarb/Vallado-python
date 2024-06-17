@@ -2481,135 +2481,135 @@ def polarm (xp, yp, ttt, opt):
 
 def fundarg(ttt, opt):
 
-        # ---- determine coefficients for iau 2000 nutation theory ----
-        ttt2 = ttt*ttt
-        ttt3 = ttt2*ttt
-        ttt4 = ttt2*ttt2
+    # ---- determine coefficients for iau 2000 nutation theory ----
+    ttt2 = ttt*ttt
+    ttt3 = ttt2*ttt
+    ttt4 = ttt2*ttt2
 
-        # ---- iau 2006 theory
-        if opt == '06':
-            # ------ form the delaunay fundamental arguments in deg
-            l = 134.96340251  + (1717915923.2178 *ttt + \
-                     31.8792 *ttt2 + 0.051635 *ttt3 - 0.00024470 *ttt4) / 3600.0
-            l1 = 357.52910918  + (129596581.0481 *ttt - \
-                      0.5532 *ttt2 + 0.000136 *ttt3 - 0.00001149*ttt4)  / 3600.0
-            f = 93.27209062  + (1739527262.8478 *ttt - \
-                     12.7512 *ttt2 - 0.001037 *ttt3 + 0.00000417*ttt4)  / 3600.0
-            d = 297.85019547  + (1602961601.2090 *ttt - \
-                      6.3706 *ttt2 + 0.006593 *ttt3 - 0.00003169*ttt4)  / 3600.0
-            omega = 125.04455501  + (-6962890.5431 *ttt + \
-                      7.4722 *ttt2 + 0.007702 *ttt3 - 0.00005939*ttt4)  / 3600.0
+    # ---- iau 2006 theory
+    if opt == '06':
+        # ------ form the delaunay fundamental arguments in deg
+        l = 134.96340251  + (1717915923.2178 *ttt + \
+                    31.8792 *ttt2 + 0.051635 *ttt3 - 0.00024470 *ttt4) / 3600.0
+        l1 = 357.52910918  + (129596581.0481 *ttt - \
+                    0.5532 *ttt2 + 0.000136 *ttt3 - 0.00001149*ttt4)  / 3600.0
+        f = 93.27209062  + (1739527262.8478 *ttt - \
+                    12.7512 *ttt2 - 0.001037 *ttt3 + 0.00000417*ttt4)  / 3600.0
+        d = 297.85019547  + (1602961601.2090 *ttt - \
+                    6.3706 *ttt2 + 0.006593 *ttt3 - 0.00003169*ttt4)  / 3600.0
+        omega = 125.04455501  + (-6962890.5431 *ttt + \
+                    7.4722 *ttt2 + 0.007702 *ttt3 - 0.00005939*ttt4)  / 3600.0
 
-            # ------ form the planetary arguments in deg
-            lonmer = 252.250905494  + 149472.6746358  *ttt
-            lonven = 181.979800853  +  58517.8156748  *ttt
-            lonear = 100.466448494  +  35999.3728521  *ttt
-            lonmar = 355.433274605  +  19140.299314   *ttt
-            lonjup = 34.351483900  +   3034.90567464 *ttt
-            lonsat = 50.0774713998 +   1222.11379404 *ttt
-            lonurn = 314.055005137  +    428.466998313*ttt
-            lonnep = 304.348665499  +    218.486200208*ttt
-            precrate = 1.39697137214*ttt + 0.0003086*ttt2
+        # ------ form the planetary arguments in deg
+        lonmer = 252.250905494  + 149472.6746358  *ttt
+        lonven = 181.979800853  +  58517.8156748  *ttt
+        lonear = 100.466448494  +  35999.3728521  *ttt
+        lonmar = 355.433274605  +  19140.299314   *ttt
+        lonjup = 34.351483900  +   3034.90567464 *ttt
+        lonsat = 50.0774713998 +   1222.11379404 *ttt
+        lonurn = 314.055005137  +    428.466998313*ttt
+        lonnep = 304.348665499  +    218.486200208*ttt
+        precrate = 1.39697137214*ttt + 0.0003086*ttt2
 
-        # ---- iau 2000b theory
-        elif opt == '02':
-            # ------ form the delaunay fundamental arguments in deg
-            l = 134.96340251  + (1717915923.2178 *ttt) / 3600.0
-            l1 = 357.52910918  + (129596581.0481 *ttt) / 3600.0
-            f = 93.27209062  + (1739527262.8478 *ttt) / 3600.0
-            d = 297.85019547  + (1602961601.2090 *ttt) / 3600.0
-            omega = 125.04455501  + ( -6962890.5431 *ttt) / 3600.0
+    # ---- iau 2000b theory
+    elif opt == '02':
+        # ------ form the delaunay fundamental arguments in deg
+        l = 134.96340251  + (1717915923.2178 *ttt) / 3600.0
+        l1 = 357.52910918  + (129596581.0481 *ttt) / 3600.0
+        f = 93.27209062  + (1739527262.8478 *ttt) / 3600.0
+        d = 297.85019547  + (1602961601.2090 *ttt) / 3600.0
+        omega = 125.04455501  + ( -6962890.5431 *ttt) / 3600.0
 
-            # ------ form the planetary arguments in deg
-            lonmer = 0.0
-            lonven = 0.0
-            lonear = 0.0
-            lonmar = 0.0
-            lonjup = 0.0
-            lonsat = 0.0
-            lonurn = 0.0
-            lonnep = 0.0
-            precrate = 0.0
+        # ------ form the planetary arguments in deg
+        lonmer = 0.0
+        lonven = 0.0
+        lonear = 0.0
+        lonmar = 0.0
+        lonjup = 0.0
+        lonsat = 0.0
+        lonurn = 0.0
+        lonnep = 0.0
+        precrate = 0.0
 
-        # ---- iau 1996 theory
-        elif opt == '96':
-            l = 134.96340251  + (1717915923.2178 *ttt + \
-                     31.8792 *ttt2 + 0.051635 *ttt3 - 0.00024470 *ttt4) / 3600.0
-            l1 = 357.52910918  + (129596581.0481 *ttt - \
-                      0.5532 *ttt2 - 0.000136 *ttt3 - 0.00001149*ttt4)  / 3600.0
-            f = 93.27209062  + (1739527262.8478 *ttt - \
-                     12.7512 *ttt2 + 0.001037 *ttt3 + 0.00000417*ttt4)  / 3600.0
-            d = 297.85019547  + (1602961601.2090 *ttt - \
-                      6.3706 *ttt2 + 0.006593 *ttt3 - 0.00003169*ttt4)  / 3600.0
-            omega = 125.04455501  + ( -6962890.2665 *ttt + \
-                      7.4722 *ttt2 + 0.007702 *ttt3 - 0.00005939*ttt4)  / 3600.0
-            # ------ form the planetary arguments in deg
-            lonmer = 0.0
-            lonven = 181.979800853  +  58517.8156748  *ttt   # deg
-            lonear = 100.466448494  +  35999.3728521  *ttt
-            lonmar = 355.433274605  +  19140.299314   *ttt
-            lonjup = 34.351483900  +   3034.90567464 *ttt
-            lonsat = 50.0774713998 +   1222.11379404 *ttt
-            lonurn = 0.0
-            lonnep = 0.0
-            precrate = 1.39697137214*ttt + 0.0003086*ttt2
+    # ---- iau 1996 theory
+    elif opt == '96':
+        l = 134.96340251  + (1717915923.2178 *ttt + \
+                    31.8792 *ttt2 + 0.051635 *ttt3 - 0.00024470 *ttt4) / 3600.0
+        l1 = 357.52910918  + (129596581.0481 *ttt - \
+                    0.5532 *ttt2 - 0.000136 *ttt3 - 0.00001149*ttt4)  / 3600.0
+        f = 93.27209062  + (1739527262.8478 *ttt - \
+                    12.7512 *ttt2 + 0.001037 *ttt3 + 0.00000417*ttt4)  / 3600.0
+        d = 297.85019547  + (1602961601.2090 *ttt - \
+                    6.3706 *ttt2 + 0.006593 *ttt3 - 0.00003169*ttt4)  / 3600.0
+        omega = 125.04455501  + ( -6962890.2665 *ttt + \
+                    7.4722 *ttt2 + 0.007702 *ttt3 - 0.00005939*ttt4)  / 3600.0
+        # ------ form the planetary arguments in deg
+        lonmer = 0.0
+        lonven = 181.979800853  +  58517.8156748  *ttt   # deg
+        lonear = 100.466448494  +  35999.3728521  *ttt
+        lonmar = 355.433274605  +  19140.299314   *ttt
+        lonjup = 34.351483900  +   3034.90567464 *ttt
+        lonsat = 50.0774713998 +   1222.11379404 *ttt
+        lonurn = 0.0
+        lonnep = 0.0
+        precrate = 1.39697137214*ttt + 0.0003086*ttt2
 
-         # ---- iau 1980 theory
-        elif opt == '80':
-            l = ((((0.064) * ttt + 31.310) * ttt
-                  + 1717915922.6330) * ttt) / 3600.0 + 134.96298139
-            l1 = ((((-0.012) * ttt - 0.577) * ttt
-                   + 129596581.2240) * ttt) / 3600.0 + 357.52772333
-            f = ((((0.011) * ttt - 13.257) * ttt
-                  + 1739527263.1370) * ttt) / 3600.0 + 93.27191028
-            d = ((((0.019) * ttt - 6.891) * ttt
-                  + 1602961601.3280) * ttt) / 3600.0 + 297.85036306
-            omega = ((((0.008) * ttt + 7.455) * ttt
-                      - 6962890.5390) * ttt) / 3600.0 + 125.04452222
+        # ---- iau 1980 theory
+    elif opt == '80':
+        l = ((((0.064) * ttt + 31.310) * ttt
+                + 1717915922.6330) * ttt) / 3600.0 + 134.96298139
+        l1 = ((((-0.012) * ttt - 0.577) * ttt
+                + 129596581.2240) * ttt) / 3600.0 + 357.52772333
+        f = ((((0.011) * ttt - 13.257) * ttt
+                + 1739527263.1370) * ttt) / 3600.0 + 93.27191028
+        d = ((((0.019) * ttt - 6.891) * ttt
+                + 1602961601.3280) * ttt) / 3600.0 + 297.85036306
+        omega = ((((0.008) * ttt + 7.455) * ttt
+                    - 6962890.5390) * ttt) / 3600.0 + 125.04452222
 
-            # ------ form the planetary arguments in deg
-            lonmer = 252.3 + 149472.0 *ttt
-            lonven = 179.9 +  58517.8 *ttt   # deg
-            lonear = 98.4 +  35999.4 *ttt
-            lonmar = 353.3 +  19140.3 *ttt
-            lonjup = 32.3 +   3034.9 *ttt
-            lonsat = 48.0 +   1222.1 *ttt
-            lonurn = 0.0
-            lonnep = 0.0
-            precrate = 0.0
+        # ------ form the planetary arguments in deg
+        lonmer = 252.3 + 149472.0 *ttt
+        lonven = 179.9 +  58517.8 *ttt   # deg
+        lonear = 98.4 +  35999.4 *ttt
+        lonmar = 353.3 +  19140.3 *ttt
+        lonjup = 32.3 +   3034.9 *ttt
+        lonsat = 48.0 +   1222.1 *ttt
+        lonurn = 0.0
+        lonnep = 0.0
+        precrate = 0.0
 
-        # ---- convert units to rad
-        l = np.fmod(l, 360.0)     * deg2rad # rad
-        l1 = np.fmod(l1, 360.0)    * deg2rad
-        f = np.fmod(f, 360.0)     * deg2rad
-        d = np.fmod(d, 360.0)     * deg2rad
-        omega = np.fmod(omega, 360.0) * deg2rad
+    # ---- convert units to rad
+    l = np.fmod(l, 360.0)     * deg2rad # rad
+    l1 = np.fmod(l1, 360.0)    * deg2rad
+    f = np.fmod(f, 360.0)     * deg2rad
+    d = np.fmod(d, 360.0)     * deg2rad
+    omega = np.fmod(omega, 360.0) * deg2rad
 
-        lonmer = np.fmod(lonmer, 360.0) * deg2rad  # rad
-        lonven = np.fmod(lonven, 360.0) * deg2rad
-        lonear = np.fmod(lonear, 360.0) * deg2rad
-        lonmar = np.fmod(lonmar, 360.0) * deg2rad
-        lonjup = np.fmod(lonjup, 360.0) * deg2rad
-        lonsat = np.fmod(lonsat, 360.0) * deg2rad
-        lonurn = np.fmod(lonurn, 360.0) * deg2rad
-        lonnep = np.fmod(lonnep, 360.0) * deg2rad
-        precrate = np.fmod(precrate, 360.0) * deg2rad
+    lonmer = np.fmod(lonmer, 360.0) * deg2rad  # rad
+    lonven = np.fmod(lonven, 360.0) * deg2rad
+    lonear = np.fmod(lonear, 360.0) * deg2rad
+    lonmar = np.fmod(lonmar, 360.0) * deg2rad
+    lonjup = np.fmod(lonjup, 360.0) * deg2rad
+    lonsat = np.fmod(lonsat, 360.0) * deg2rad
+    lonurn = np.fmod(lonurn, 360.0) * deg2rad
+    lonnep = np.fmod(lonnep, 360.0) * deg2rad
+    precrate = np.fmod(precrate, 360.0) * deg2rad
 
-        if sh.iauhelp == 'y':
-            print('fa %11.7f  %11.7f  %11.7f  %11.7f  %11.7f deg \n'
-                  % (l*180/math.pi, l1*180/math.pi, f*180/math.pi,
-                     d*180/math.pi, omega*180/math.pi))
-            print('fa %11.7f  %11.7f  %11.7f  %11.7f deg \n'
-                  % (lonmer*180/math.pi, lonven*180/math.pi,
-                     lonear*180/math.pi, lonmar*180/math.pi))
-            print('fa %11.7f  %11.7f  %11.7f  %11.7f deg \n'
-                  % (lonjup*180/math.pi, lonsat*180/math.pi,
-                     lonurn*180/math.pi, lonnep*180/math.pi))
-            print('fa %11.7f  \n' % (precrate*180/math.pi))
+    if sh.iauhelp == 'y':
+        print('fa %11.7f  %11.7f  %11.7f  %11.7f  %11.7f deg \n'
+                % (l*180/math.pi, l1*180/math.pi, f*180/math.pi,
+                    d*180/math.pi, omega*180/math.pi))
+        print('fa %11.7f  %11.7f  %11.7f  %11.7f deg \n'
+                % (lonmer*180/math.pi, lonven*180/math.pi,
+                    lonear*180/math.pi, lonmar*180/math.pi))
+        print('fa %11.7f  %11.7f  %11.7f  %11.7f deg \n'
+                % (lonjup*180/math.pi, lonsat*180/math.pi,
+                    lonurn*180/math.pi, lonnep*180/math.pi))
+        print('fa %11.7f  \n' % (precrate*180/math.pi))
 
 
-       # test if they are equivalent
-       # most around 1e-10, but some at 1e-6
+    # test if they are equivalent
+    # most around 1e-10, but some at 1e-6
 
 #         oo3600 = 1.0 / 3600.0
 #         deg2rad = math.pi / 180.0
@@ -2648,8 +2648,8 @@ def fundarg(ttt, opt):
 #
 
 
-        return l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
-            lonsat, lonurn, lonnep, precrate
+    return l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
+        lonsat, lonurn, lonnep, precrate
 
 # -----------------------------------------------------------------------------
 #
