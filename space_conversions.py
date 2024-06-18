@@ -4849,11 +4849,11 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
     Parameters
     ----------
-    recef : np.ndarray
+    recef : ndarray
         position vector earth fixed: km
-    vecef : np.ndarray
+    vecef : ndarray
         velocity vector earth fixed: km/s
-    aecef : np.ndarray
+    aecef : ndarray
         acceleration vector earth fixed: km/s2
     ttt : float
         julian centuries of tt: centuries
@@ -5269,11 +5269,11 @@ def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
     Parameters
     ----------
-    recef : np.ndarray
+    recef : ndarray
         position vector earth fixed: km
-    vecef : np.ndarray
+    vecef : ndarray
         velocity vector earth fixed: km/s
-    aecef : np.ndarray
+    aecef : ndarray
         acceleration vector earth fixed: km/s2
     ttt : float
         julian centuries of tt: centuries
@@ -5389,11 +5389,11 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
     Parameters
     ----------
-    recef : np.ndarray
+    recef : ndarray
         position vector earth fixed: km
-    vecef : np.ndarray
+    vecef : ndarray
         velocity vector earth fixed: km/s
-    aecef : np.ndarray
+    aecef : ndarray
         acceleration vector earth fixed: km/s2
     ttt : float
         julian centuries of tt: centuries
@@ -5497,11 +5497,11 @@ def ecef2teme(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
     Parameters
     ----------
-    recef : np.ndarray
+    recef : ndarray
         position vector earth fixed: km
-    vecef : np.ndarray
+    vecef : ndarray
         velocity vector earth fixed: km/s
-    aecef : np.ndarray
+    aecef : ndarray
         acceleration vector earth fixed: km/s2
     ttt : float
         julian centuries of tt: centuries
@@ -5621,11 +5621,11 @@ def ecef2pef(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
     Parameters
     ----------
-    recef : np.ndarray
+    recef : ndarray
         position vector earth fixed: km
-    vecef : np.ndarray
+    vecef : ndarray
         velocity vector earth fixed: km/s
-    aecef : np.ndarray
+    aecef : ndarray
         acceleration vector earth fixed: km/s2
     opt : str
         polarm method option: '01', '02', '80'
@@ -5723,11 +5723,11 @@ def eci2ecef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         eci position vector: km
-    veci : np.ndarray
+    veci : ndarray
         eci velocity vector: km/s
-    aeci : np.ndarray
+    aeci : ndarray
         eci acceleration vector: km/s2
     latgd : float
         geodetic latitude of site: rad
@@ -5837,11 +5837,11 @@ def eci2mod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float):
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         position vector eci: km
-    veci : np.ndarray
+    veci : ndarray
         velocity vector eci: km
-    aeci : np.ndarray
+    aeci : ndarray
         acceleration vector eci: km
     ttt : float
         julian centuries of tt
@@ -5925,11 +5925,11 @@ def eci2tod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt: str,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         position vector eci: km
-    veci : np.ndarray
+    veci : ndarray
         velocity vector eci: km/s
-    aeci : np.ndarray
+    aeci : ndarray
         acceleration vector eci: km/s2
     opt : str
         calculation option: '80, '6a', '6b', '6c'
@@ -6046,11 +6046,11 @@ def eci2teme(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         position vector eci: km
-    veci : np.ndarray
+    veci : ndarray
         velocity vector eci: km/s
-    aeci : np.ndarray
+    aeci : ndarray
         acceleration vector eci: km/s2
     ttt : float
         julian centuries of tt: centuries
@@ -6183,12 +6183,12 @@ def gc2gd(latgc: float):
     Parameters
     ----------
     latgc : float
-        geocentric latitude
+        geocentric latitude: -pi to pi rad
 
     Returns
     -------
     latgd: float
-        geodetic latitude
+        geodetic latitude: -pi to pi rad
     """
     latgd = math.atan(math.tan(latgc)/(1.0  - eccearthsqrd))
 
@@ -6553,9 +6553,9 @@ def rv2tradec(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         position vector eci: km
-    veci : np.ndarray
+    veci : ndarray
         velocity vector eci: km/s
     latgd : float
         geodetic latitude: rad
@@ -6727,9 +6727,9 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         eci position vector: km
-    veci : np.ndarray
+    veci : ndarray
         eci velocity vector: km/s
     latgd : float
         geodetic latitude of site: rad
@@ -6856,9 +6856,9 @@ def rv2ell (rijk: np.ndarray, vijk: np.ndarray):
 
     Parameters
     ----------
-    rijk : np.ndarray
+    rijk : ndarray
         position vector: km
-    vijk : np.ndarray
+    vijk : ndarray
         velocity vector: km/s
 
     Returns
@@ -7007,11 +7007,11 @@ def mod2eci(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray, ttt: float):
 
     Parameters
     ----------
-    rmod : np.ndarray
+    rmod : ndarray
         position vector mod: km
-    vmod : np.ndarray
+    vmod : ndarray
         velocity vector mod: km/s
-    amod : np.ndarray
+    amod : ndarray
         acceleration vector mod: km/s2
     ttt : float
         julian centuries of tt: centuries
@@ -7298,9 +7298,9 @@ def rvs2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 
     Parameters
     ----------
-    rhosez : np.ndarray
+    rhosez : ndarray
         position vector sez: km
-    drhosez : np.ndarray
+    drhosez : ndarray
         velocity vector sez: km/s
 
     Returns
@@ -7512,9 +7512,9 @@ def pef2eci(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray, ttt: float,
 
     Parameters
     ----------
-    rpef : np.ndarray
+    rpef : ndarray
         position vector pef: km
-    vpef : np.ndarray
+    vpef : ndarray
         velocity vector pef: km/s
     apef : np.ndarray
         acceleration vector pef: km/s2
@@ -7617,9 +7617,9 @@ def tradec2rv(rho: float, trtasc: float, tdecl: float, drho: float,
         topocentric right angle of ascension rate: rad/s
     dtdecl : float
         topocentric declination rate: rad/s
-    rseci : np.ndarray
+    rseci : ndarray
         eci position vector of site: km
-    vseci : np.ndarray
+    vseci : ndarray
         eci velocity vector of site: km
     lod : float
         excess length of day: sec
@@ -7706,13 +7706,13 @@ def teme2eci(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
 
     Parameters
     ----------
-    rteme : np.ndarray
+    rteme : ndarray
         position vector of date
         true equator, mean equinox: km
-    vteme : np.ndarray
+    vteme : ndarray
         velocity vector of date
         true equator, mean equinox: km
-    ateme : np.ndarray
+    ateme : ndarray
         acceleration vector of date
         true equator, mean equinox: km
     ttt : float
@@ -7804,11 +7804,11 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
 
     Parameters
     ----------
-    rteme : np.ndarray
+    rteme : ndarray
         position vector teme: km
-    vteme : np.ndarray
+    vteme : ndarray
         velocity vector teme: km/s
-    ateme : np.ndarray
+    ateme : ndarray
         acceleration vector teme: km/s2
     ttt : float
         julain centuries of tt: centuries
@@ -7932,11 +7932,11 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         position vector eci: km
-    veci : np.ndarray
+    veci : ndarray
         velocity vector eci: km/s
-    aeci : np.ndarray
+    aeci : ndarray
         acceleration vector eci: kms/2
     ttt : float
         julian centuries of  tt: centuries
@@ -7985,11 +7985,11 @@ def eci2tirsiau06(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
 
     Parameters
     ----------
-    reci : np.ndarray
+    reci : ndarray
         position vector eci: km
-    veci : np.ndarray
+    veci : ndarray
         velocity vector eci: km/s
-    aeci : np.ndarray
+    aeci : ndarray
         acceleration vector eci: km/s2
     opt : str
         "c": cio based, iau2006
@@ -8052,11 +8052,11 @@ def tirs2eciiau06(rtirs: np.ndarray, vtirs: np.ndarray, atirs: np.ndarray,
 
     Parameters
     ----------
-    rtirs : np.ndarray
+    rtirs : ndarray
         position vector eci: km
-    vtirs : np.ndarray
+    vtirs : ndarray
         velocity vector eci: km/s
-    atirs : np.ndarray
+    atirs : ndarray
         acceleration vector eci: km/s2
     opt : str
         "c": cio based, iau2006
@@ -8153,10 +8153,46 @@ def tirs2eciiau06(rtirs: np.ndarray, vtirs: np.ndarray, atirs: np.ndarray,
 # [recef, vecef, aecef] = cirs2ecefiau06  (rcirs, vcirs, acirs, ttt, jdut1, lod, xp, yp, option, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def cirs2ecefiau06(rcirs=None, vcirs=None, acirs=None, ttt=None,
-                   jdut1=None, lod=None, xp=None, yp=None, option=None):
+def cirs2ecefiau06(rcirs: np.ndarray, vcirs:np.ndarray, acirs:np.ndarray,
+                   ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+                   option: str):
+    """this function trsnforms a vector from the cirs
+    (gcrf), to an earth fixed (itrf) frame.  the results take into account
+    the effects of  sidereal time, and polar motion.
 
-    # ---- ceo based, iau2006
+    Parameters
+    ----------
+    rcirs : ndarray
+        position vector cirs: km
+    vcirs : ndarray
+        velocity vector cirs: km/s
+    acirs : ndarray
+        acceleration vector cirs: km/s2
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    option : str
+        approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
+        2000b, 'c' - cio iau2006
+
+    Returns
+    -------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    """
+
+    # ---- cio based, iau2006
     if option == 'c':
         x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
         st = obu.iau06era(jdut1)
@@ -8226,8 +8262,38 @@ def cirs2ecefiau06(rcirs=None, vcirs=None, acirs=None, ttt=None,
 # [reci, veci, aeci] = cirs2eciiau06 (rcirs, vcirs, acirs, ttt, option, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def cirs2eciiau06(rcirs=None, vcirs=None, acirs=None, ttt=None,
-                  option=None, ddx=None, ddy=None):
+def cirs2eciiau06(rcirs: np.ndarray, vcirs: np.ndarray, acirs: np.ndarray,
+                  ttt: float, option: str, ddx: float, ddy: float):
+    """this function transforms a vector from the cirs frame, to
+    the eci mean equator mean equinox (gcrf).
+
+    Parameters
+    ----------
+    rcirs : ndarray
+        position vector cirs: km
+    vcirs : ndarray
+        velocity vector cirs: km/s
+    acirs : ndarray
+        acceleration vector cirs: km/s2
+    ttt : float
+        julian centuries of date: centuries
+    option : str
+        approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
+        2000b, 'c' - cio iau2006
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
+
+    Returns
+    -------
+    reci: ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    aeci: ndarray
+        acceleration vector eci: km/s2
+    """
     # ---- ceo based, iau2006
     if option == 'c':
         x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
@@ -8287,8 +8353,39 @@ def cirs2eciiau06(rcirs=None, vcirs=None, acirs=None, ttt=None,
 # [rcirs, vcirs, acirs] = eci2cirsiau06  (reci, veci, aeci, ttt, option, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def eci2cirsiau06(reci=None, veci=None, aeci=None, ttt=None,
-                  option=None, ddx=None, ddy=None):
+def eci2cirsiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
+                  ttt: float, option: str, ddx: float, ddy: float):
+    """this function trsnforms a vector from the mean equator mean equniox frame
+    (gcrf), to the CIRS frame.  the results take into account
+    the effects of precession, nutation.
+
+    Parameters
+    ----------
+    reci : ndarray
+        position array eci: km
+    veci : ndarray
+        velocity vector eci: km/s
+    aeci : ndarray
+        acceleration vector eci: km/s2
+    ttt : float
+        julian centuries of date: centuries
+    option : str
+        approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
+        2000b, 'c' - cio iau2006
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
+
+    Returns
+    -------
+    rcirs: ndarray
+        position vector cirs: km
+    vcirs: ndarray
+        velocity vector cirs: km/s
+    acirs: ndarray
+        acceleration vector: km/s2
+    """
 
     # ---- ceo based, iau2000
     if option == 'c':
@@ -8354,9 +8451,48 @@ def eci2cirsiau06(reci=None, veci=None, aeci=None, ttt=None,
 # [recef, vecef, aecef] = eci2ecefiau06  (reci, veci, aeci, ttt, jdut1, lod, xp, yp, option, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def eci2ecefiau06(reci=None, veci=None, aeci=None, ttt=None,
-                  jdut1=None, lod=None, xp=None, yp=None,
-                  option=None, ddx=None, ddy=None):
+def eci2ecefiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
+                  ttt: float, jdut1: float, lod: float, xp: float,
+                  yp: float, option: str, ddx: float, ddy:float):
+    """this function trsnforms a vector from the mean equator mean equniox frame
+    (gcrf), to an earth fixed (itrf) frame.  the results take into account
+    the effects of precession, nutation, sidereal time, and polar motion.
+
+    Parameters
+    ----------
+    reci : ndarray
+        position vector eci: km
+    veci : ndarray
+        velocity vector eci: km/s
+    aeci : ndarray
+        acceleration vector eci: km/s2
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    option : str
+        approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
+        2000b, 'c' - cio iau2006
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
+
+    Returns
+    -------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    """
     # ---- ceo based, iau2006
     if option == 'c':
         x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
@@ -8377,47 +8513,46 @@ def eci2ecefiau06(reci=None, veci=None, aeci=None, ttt=None,
     thetasa = earthrot * (1.0 - lod / 86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
 
-    rpef = st.T@pnb.T@reci
-    recef = pm.T@rpef
+    rtirs = st.T@pnb.T@reci
+    recef = pm.T@rtirs
 
-    print("spv")
-    print(st.T@pnb.T@veci)
-    print(np.cross(omegaearth, rpef.T))
-    print("pmt")
-    print(pm.T)
-    vpef = st.T@pnb.T@veci - np.cross(omegaearth, rpef.T).T
-    print("vpef")
-    print(vpef)
-    vecef = pm.T@vpef
+    vtirs = st.T@pnb.T@veci - np.cross(omegaearth, rtirs.T).T
+    vecef = pm.T@vtirs
+    if sh.iauhelp:
+        print("spv")
+        print(st.T@pnb.T@veci)
+        print(np.cross(omegaearth, rtirs.T))
+        print("pmt")
+        print(pm.T)
+        print("vtirs")
+        print(vtirs)
 
-    temp = np.cross(omegaearth, rpef.T)
+    temp = np.cross(omegaearth, rtirs.T)
     aecef = pm.T@(st.T@pnb.T@aeci - np.cross(omegaearth, temp).T
-                  - 2.0*np.cross(omegaearth, vpef.T).T)
+                  - 2.0*np.cross(omegaearth, vtirs.T).T)
 
-    #        if iauhelp == 'y'
-    rtirs = pnb.T @ reci
-    vtirs = pnb.T @ veci
 
-    if (option == 'a') or (option == 'b'):
-        rmod20 = prec.T @ reci
-        vmod20 = prec.T @ veci
-        print('eci           IAU-2006 %c     ' % (option))
-        print(reci)
-        print('MOD           IAU-2006 %c     ' % (option))
-        print(rmod20)
-        print(' v ', (vmod20))
-        print(' a', (aeci))
-        print('ERS           IAU-2006 %c   ' % (option))
-        print(rtirs)
+    if sh.iauhelp == 'y':
+        rcirs = pnb.T @ reci
+        vcirs = pnb.T @ veci
+        if (option == 'a') or (option == 'b'):
+            rmod20 = prec.T @ reci
+            vmod20 = prec.T @ veci
+            print('eci           IAU-2006 %c     ' % (option))
+            print(reci)
+            print('MOD           IAU-2006 %c     ' % (option))
+            print(rmod20)
+            print(' v ', (vmod20))
+            print(' a', (aeci))
+            print('ERS           IAU-2006 %c   ' % (option))
+            print(rcirs)
 
-    if option == 'c':
-        print('CIRS          IAU-2006 CIO ', (rtirs))
-
-    print(' v ' , (vtirs))
-    print('TIRS          IAU-2006 %c   ' % (option))
-    print(rpef)
-    print(' v ' , (vpef))
-    #          end
+        if option == 'c':
+            print('CIRS          IAU-2006 CIO ', (rcirs))
+            print(' v ', (vcirs))
+            print('TIRS          IAU-2006 %c   ' % (option))
+            print(rtirs)
+            print(' v ', (vtirs))
 
     return recef, vecef, aecef
 
@@ -8464,8 +8599,44 @@ def eci2ecefiau06(reci=None, veci=None, aeci=None, ttt=None,
 # [rcirs, vcirs, acirs] = ecef2cirsiau06 (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, option, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def ecef2cirsiau06(recef=None, vecef=None, aecef=None, ttt=None,
-                   jdut1=None, lod=None, xp=None, yp=None, option=None):
+def ecef2cirsiau06(recef: np.ndarray, vecef: np.ndarray, aecef:np.ndarray,
+                   ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+                   option: str):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the cirs. Sidereal time and polar motion are taken into account.
+
+    Parameters
+    ----------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    option : str
+        approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
+        2000b, 'c' - cio iau2006
+
+    Returns
+    -------
+    rcirs : ndarray
+        position vector cirs: km
+    vcirs : ndarray
+        velocity vector cirs: km/s
+    acirs : ndarray
+        acceleration vector cirs: km/s2
+    """
+
     # ---- ceo based, iau2006
     if option == 'c':
         x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
@@ -8541,9 +8712,48 @@ def ecef2cirsiau06(recef=None, vecef=None, aecef=None, ttt=None,
 # [reci, veci, aeci] = ecef2eciiau06 (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, option, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def ecef2eciiau06(recef=None, vecef=None, aecef=None, ttt=None,
-                  jdut1=None, lod=None, xp=None, yp=None,
-                  option=None, ddx=None, ddy=None):
+def ecef2eciiau06(recef: np.ndarray, vecef:np.ndarray, aecef:np.ndarray,
+                  ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+                  option: str, ddx: float, ddy: float):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the eci mean equator mean equinox (gcrf).
+
+    Parameters
+    ----------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    option : str
+        approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
+        2000b, 'c' - cio iau2006
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
+
+    Returns
+    -------
+    reci: ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    aeci: ndarray
+        acceleration vector eci: km/s2
+    """
+
     pnb = np.eye(3)
     st = np.eye(3)
 
@@ -8609,15 +8819,31 @@ def ecef2eciiau06(recef=None, vecef=None, aecef=None, ttt=None,
 # [hr, min, sec] = rad2hms(hms)
 # -----------------------------------------------------------------------------
 
-def rad2hms(hms):
-        # ------------------------  implementation   ------------------
-        temp = 15.0 * math.pi/180.0
+def rad2hms(hms: float):
+    """this function converts radians to hours, minutes and seconds. notice
+    the conversion 0.2617 is simply the radian equivalent of 15 degrees.
 
-        temp = hms   / temp
-        hr = np.fix(temp)
-        min = np.fix((temp - hr)*60.0)
-        sec = (temp - hr - min/60.0) * 3600.0
-        return hr, min, sec
+    Parameters
+    ----------
+    hms : float
+        radians to convert
+
+    Returns
+    -------
+    hr: float
+        hours: 0...24
+    min: float
+        minutes: 0...59
+    sec: float
+        seconds: 0...59.99
+    """
+
+    temp = 15.0 * math.pi/180.0
+    temp = hms / temp
+    hr = np.fix(temp)
+    min = np.fix((temp - hr)*60.0)
+    sec = (temp - hr - min/60.0) * 3600.0
+    return hr, min, sec
 
 
 # -----------------------------------------------------------------------------
@@ -8652,13 +8878,29 @@ def rad2hms(hms):
 # [hms] = hms2rad(hr, min, sec)
 # -----------------------------------------------------------------------------
 
-def hms2rad(hr, min, sec):
+def hms2rad(hr: float, min: float, sec: float):
+    """this function converts hours, minutes and seconds into radians. notice
+    the conversion 0.2617 is simply the radian equivalent of 15 degrees.
 
-        # ------------------------  implementation   ------------------
-        temp = 15.0 * math.pi/180.0
+    Parameters
+    ----------
+    hr: float
+        hours: 0...24
+    min: float
+        minutes: 0...59
+    sec: float
+        seconds: 0...59.99
 
-        hms = (hr + min/60.0 + sec/3600.0)*temp
-        return hms
+    Returns
+    -------
+    hms: float
+        radians
+    """
+
+    temp = 15.0 * math.pi/180.0
+
+    hms = (hr + min/60.0 + sec/3600.0)*temp
+    return hms
 
 #  -----------------------------------------------------------------------------
 #
@@ -8715,7 +8957,38 @@ def hms2rad(hr, min, sec):
 #          typerun, typeinput, opsmode, whichconst)
 #  ----------------------------------------------------------------------------
 
-def twoline2rv(longstr1, longstr2, typerun, typeinput, opsmode, whichconst):
+def twoline2rv(longstr1: str, longstr2: str, typerun: str,
+               typeinput, opsmode: str, whichconst: str):
+    """this function converts the two line element set character string data to
+    variables and initializes the sgp4 variables. several intermediate varaibles
+    and quantities are determined. note that the result is a structure so multiple
+    satellites can be processed simultaneously without having to reinitialize. the
+    verification mode is an important option that permits quick checks of any
+    changes to the underlying technical theory. this option works using a
+    modified tle file in which the start, stop, and delta time values are
+    included at the end of the second line of data. this only works with the
+    verification mode. the catalog mode simply propagates from -1440 to 1440 min
+    from epoch and is useful when performing entire catalog runs.
+
+    Parameters
+    ----------
+    longstr1 : str
+        TLE character string
+    longstr2 : str
+        TLE character string
+    typerun : character for mode of SGP4 execution
+        'c' = catalog mode (propagates at 20 min timesteps from
+            one day before epoch to one day after)
+        'v' = verification mode (propagates according to start,
+            stop, and timestep specified in longstr2)
+        'u' = user input, whatever
+    typeinput : type of manual input
+        used for commented out 'm' typerun - currently unused
+    opsmode : str
+        satrec opsmode
+    whichconst : str
+        which set of constants to use: 721, 72, 84
+    """
 
     # sgp4fix no longer needed, put in satrec
     # global tumin radiusearthkm xke j2 j3 j4 j3oj2
@@ -8808,11 +9081,21 @@ def twoline2rv(longstr1, longstr2, typerun, typeinput, opsmode, whichconst):
     satrec['mo'] = float(longstr2[42:51])
     satrec['no_kozai'] = float(longstr2[51:63])
     satrec['revnum'] = float(longstr2[63:68])
+
     if (typerun == 'v'):
         startmfe = float(longstr2[69:81])
         stopmfe  = float(longstr2[82:96])
         deltamin = float(longstr2[96:105])
-
+    # perform complete catalog evaluation
+    if (typerun == 'c'):
+        startmfe =  -1440.0
+        stopmfe  =  1440.0
+        deltamin = 20.0
+    # user input
+    if (typerun == 'u'):
+        startmfe =  0.0
+        stopmfe  =  14400.0
+        deltamin = 1440.0
 
     #     // ---- find no, ndot, nddot ----
     satrec['no_kozai'] = satrec['no_kozai'] / xpdotp #//* rad/min
@@ -8908,18 +9191,6 @@ def twoline2rv(longstr1, longstr2, typerun, typeinput, opsmode, whichconst):
     #         stopmfe  = input('input stop mfe: ')
     #         deltamin = input('input time step in minutes: ')
 
-    # perform complete catalog evaluation
-    if (typerun == 'c'):
-        startmfe =  -1440.0
-        stopmfe  =  1440.0
-        deltamin = 20.0
-
-
-    # user input
-    if (typerun == 'u'):
-        startmfe =  0.0
-        stopmfe  =  14400.0
-        deltamin = 1440.0
 
 
 
