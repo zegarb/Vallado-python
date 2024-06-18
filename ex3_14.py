@@ -92,11 +92,8 @@ print('hms %3i %3i %8.6f \n' % (h, m, s))
 print('tdb %8.6f ttdb %16.12f jdtdb %18.11f\n' % (tdb, ttdb, jdtdb+jdtdbfrac))
 
 
-#modified this. unsure if this is preferred  todo -jmb
 recigg, vecigg, aecig = ecef2eciiau06(recef, vecef, aecef, ttt, jdut1+jdut1frac,
                                       lod, xp, yp, 'c', ddx, ddy )
-# recigg, vecigg, aecig = ecef2eci(recef, vecef, aecef, ttt, jdut1+jdut1frac,
-#                                   lod, xp, yp, 2, ddx, ddy)
 print('GCRF          IAU-2006 CIO:')
 print(' r: \n' , (recigg))
 print(' v: \n' , (vecigg))

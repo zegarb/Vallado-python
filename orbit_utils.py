@@ -1285,13 +1285,13 @@ def iau06in():
 
 
     # ------------------------  implementation   -------------------
-# " Note: File reads in as micro-arcseconds
+    # " Note: File reads in as micro-arcseconds
     # ------------------------------
-#  note that since all these coefficients have only a single
-#  decimal place, one could store them as integres, and then simply
-#  divide by one additional power of ten. it woul dmake memeory
-#  storage much smaller and potentially faster.
-# ------------------------------
+    #  note that since all these coefficients have only a single
+    #  decimal place, one could store them as integres, and then simply
+    #  divide by one additional power of ten. it woul dmake memeory
+    #  storage much smaller and potentially faster.
+    # ------------------------------
 
     # xys values
     fn = os.path.join(os.path.dirname(__file__), "data", "iau06xtab5.2.a.dat")
@@ -6224,8 +6224,8 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     s = - x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2 + ssum3 * ttt3 + ssum4 * ttt4
 
     if sh.iauhelp == 'y':
-        print('06xys before x  %14.12f y  %14.12f s %14.12f a %14.12f rad \n'
-              % (x, y, s, a))
+        print('06xys before x  %14.12f y  %14.12f s %14.12f rad \n'
+              % (x, y, s))
         print('xys s %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
               % (ssum0 / deg2rad, ssum1 / deg2rad, ssum2 / deg2rad,
                  ssum3 / deg2rad, ssum4 / deg2rad))
