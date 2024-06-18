@@ -135,7 +135,6 @@ pp(reci)
 pp(veci)
 pp(aeci)
 
-# 'c' seems off
 rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "c", ttt, jdut1, lod,
                                     0, 0)
 print("eci2tirsiau06 c returned:")
@@ -232,7 +231,6 @@ pp(recef)
 pp(vecef)
 pp(aecef)
 
-# ecef2eci 'c' and back seems slightly off
 reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
                                 lod,xp,yp,'c', ddx, ddy)
 print('ecef2eciiau06 c returned: ')
