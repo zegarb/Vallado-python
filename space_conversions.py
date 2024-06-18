@@ -8103,11 +8103,11 @@ def tirs2eciiau06(rtirs: np.ndarray, vtirs: np.ndarray, atirs: np.ndarray,
     thetasa = earthrot * (1.0 - lod / 86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
     reci = pnb @ st @ rtirs
-    veci = pnb @ st @ (vtirs + np.cross(omegaearth, reci.T).T)
+    veci = pnb @ st @ (vtirs + np.cross(omegaearth, rtirs.T).T)
 
-    temp = np.cross(omegaearth, reci.T)
+    temp = np.cross(omegaearth, rtirs.T)
     aeci = pnb @ st @ (atirs + np.cross(omegaearth, temp).T \
-        + 2.0*np.cross(omegaearth, veci.T).T)
+        + 2.0*np.cross(omegaearth, vtirs.T).T)
 
     return reci, veci, aeci
 
@@ -8179,11 +8179,11 @@ def cirs2ecefiau06(rcirs=None, vcirs=None, acirs=None, ttt=None,
     rpef = st.T@rcirs
     recef = pm.T@rpef
 
-    vpef = st.T@vcirs - np.cross(omegaearth, rpef.T)
+    vpef = st.T@vcirs - np.cross(omegaearth, rpef.T).T
     vecef = pm.T@vpef
 
     temp = np.cross(omegaearth, rpef.T)
-    aecef = pm.T@(st.T@acirs - np.cross(omegaearth, temp).T - 2.0*np.cross(omegaearth, vpef.T))
+    aecef = pm.T@(st.T@acirs - np.cross(omegaearth, temp).T - 2.0*np.cross(omegaearth, vpef.T).T)
 
     return recef, vecef, aecef
 
@@ -8303,7 +8303,6 @@ def eci2cirsiau06(reci=None, veci=None, aeci=None, ttt=None,
     if option == 'b':
         deltapsi, pnb, prec, nut, l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, \
             lonjup, lonsat, lonurn, lonnep, precrate = obu.iau06pnb(ttt)
-
     rcirs = pnb.T @ reci
     vcirs = pnb.T @ veci
     acirs = pnb.T @ aeci

@@ -5684,19 +5684,19 @@ def iau06pna(ttt=None):
     oblo = 84381.406 * arcsec2rad
 
     # ----------------- find nutation matrix ----------------------
-# mean to true
+    # mean to true
     a1 = smu.rot1mat(ea + deltaeps)
     a2 = smu.rot3mat(deltapsi)
-    a3 = smu.rot1mat(- ea)
+    a3 = smu.rot1mat(-ea)
     # j2000 to date (precession)
-    a4 = smu.rot3mat(- xa)
-    a5 = smu.rot1mat(wa)
-    a6 = smu.rot3mat(psia)
-    a7 = smu.rot1mat(- oblo)
+    a4 = smu.rot1mat(ea)
+    a5 = smu.rot3mat(-psia)
+    a6 = smu.rot1mat(-wa)
+    a7 = smu.rot3mat(xa)
     # icrs to j2000
     a8 = smu.rot1mat(- 0.0068192 * arcsec2rad)
-    a9 = smu.rot2mat(0.041775 * np.sin(oblo) * arcsec2rad)
-    #      a9 = smu.rot2mat(0.0166170*arcsec2rad)
+    a9 = smu.rot2mat(0.041775 * math.sin(oblo) * arcsec2rad)
+    # a9 = smu.rot2mat(0.0166170*arcsec2rad)
     a10 = smu.rot3mat(0.0146 * arcsec2rad)
     if sh.iauhelp == 'y':
         print('p e %11.7f  %11.7f  \n'
@@ -5719,21 +5719,21 @@ def iau06pna(ttt=None):
                  wa * rad2arcsec, ea * rad2arcsec,
                  xa * rad2arcsec))
         # temp1 = a7*a6*a5*a4
-# temp2 = a3*a2*a1
-# temp3 = a10*a9*a8
+        # temp2 = a3*a2*a1
+        # temp3 = a10*a9*a8
 
-    pnb = a10 * a9 * a8 * a7 * a6 * a5 * a4 * a3 * a2 * a1
-    prec = a7 * a6 * a5 * a4
+    pnb = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4 @ a3 @ a2 @ a1
+    prec = a7 @ a6 @ a5 @ a4
     if sh.iauhelp == 'y':
         print('prec iau 06a alt \n' % ())
         print((prec))
 
-    nut = a3 * a2 * a1
+    nut = a3 @ a2 @ a1
     if sh.iauhelp == 'y':
         print('nut iau 06a \n' % ())
         print((nut))
 
-    frb = a10 * a9 * a8
+    frb = a10 @ a9 @ a8
     if sh.iauhelp == 'y':
         print('frb iau 06a \n' % ())
         print((frb))
@@ -5869,20 +5869,20 @@ def iau06pnb(ttt=None):
 # mean to true
     a1 = smu.rot1mat(ea + deltaeps)
     a2 = smu.rot3mat(deltapsi)
-    a3 = smu.rot1mat(- ea)
+    a3 = smu.rot1mat(-ea)
     # j2000 to date (precession)
-    a4 = smu.rot3mat(- xa)
-    a5 = smu.rot1mat(wa)
-    a6 = smu.rot3mat(psia)
-    a7 = smu.rot1mat(- oblo)
+    a4 = smu.rot1mat(ea)
+    a5 = smu.rot3mat(-psia)
+    a6 = smu.rot1mat(-wa)
+    a7 = smu.rot3mat(xa)
     # icrs to j2000
     a8 = smu.rot1mat(- 0.0068192 * arcsec2rad)
     a9 = smu.rot2mat(0.041775 * np.sin(oblo) * arcsec2rad)
-    #      a9 = smu.rot2mat(0.0166170*arcsec2rad)
+    # a9 = smu.rot2mat(0.0166170*arcsec2rad)
     a10 = smu.rot3mat(0.0146 * arcsec2rad)
-    pnb = a10 * a9 * a8 * a7 * a6 * a5 * a4 * a3 * a2 * a1
-    prec = a10 * a9 * a8 * a7 * a6 * a5 * a4
-    nut = a3 * a2 * a1
+    pnb = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4 @ a3 @ a2 @ a1
+    prec = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4
+    nut = a3 @ a2 @ a1
     if sh.iauhelp == 'y':
         print('p e %11.7f  %11.7f  \n' % (pnsum * 180 / np.pi, ensum * 180 / np.pi))
         print('dpsi %11.7f deps %11.7f  \n'
@@ -6016,12 +6016,12 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, lonsat, \
         lonurn, lonnep, precrate = smu.fundarg(ttt, opt)
     # fprintf(1, '\ndelauany #11.7f #11.7f #11.7f #11.7f #11.7f \n planetary #11.7f #11.7f #11.7f #11.7f #11.7f #11.7f #11.7f #11.7f #11.7f \n', ...
-#     l/deg2rad, l1/deg2rad, f/deg2rad, d/deg2rad, omega/deg2rad, lonmer/deg2rad, lonven/deg2rad, ...
-#     lonear/deg2rad, lonmar/deg2rad, lonjup/deg2rad, lonsat/deg2rad, lonurn/deg2rad, lonnep/deg2rad, precrate/deg2rad)
+    # l/deg2rad, l1/deg2rad, f/deg2rad, d/deg2rad, omega/deg2rad, lonmer/deg2rad, lonven/deg2rad, ...
+    # lonear/deg2rad, lonmar/deg2rad, lonjup/deg2rad, lonsat/deg2rad, lonurn/deg2rad, lonnep/deg2rad, precrate/deg2rad)
 
     # ---------------- first find x
-# the iers code puts the constants in here, however
-# don't sum constants in here because they're larger than the last few terms
+    # the iers code puts the constants in here, however
+    # don't sum constants in here because they're larger than the last few terms
     xsum0 = 0.0
     for i in range(1305, -1, - 1):
         tempval = (a0xi[i, 0] * l + a0xi[i, 1] * l1 + a0xi[i, 2] * f
@@ -6034,9 +6034,9 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
 
     xsum1 = 0.0
     # note that the index changes here to j. this is because the a0xi etc
-# indicies go from 1 to 1600, but there are 5 groups. the i index counts through each
-# calculation, and j takes care of the individual summations. note that
-# this same process is used for y and s.
+    # indicies go from 1 to 1600, but there are 5 groups. the i index counts
+    # through each calculation, and j takes care of the individual summations.
+    # note that this same process is used for y and s.
     for j in range(252, -1, - 1):
         i = 1306 + j
         tempval = (a0xi[i, 0] * l + a0xi[i, 1] * l1 + a0xi[i, 2] * f
@@ -6218,10 +6218,9 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
         ssum4 = ssum4 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
 
     s = 9.4e-05 + 0.00380865 * ttt - 0.00012268 * ttt2 - 0.07257411 * ttt3 + 2.798e-05 * ttt4 + 1.562e-05 * ttt5
-
-    #            + 0.00000171*ttt*sin(omega) + 0.00000357*ttt*cos(2.0*omega) ...
-#            + 0.00074353*ttt2*sin(omega) + 0.00005691*ttt2*sin(2.0*(f-d+omega)) ...
-#            + 0.00000984*ttt2*sin(2.0*(f+omega)) - 0.00000885*ttt2*sin(2.0*omega)
+    # + 0.00000171*ttt*sin(omega) + 0.00000357*ttt*cos(2.0*omega) ...
+    # + 0.00074353*ttt2*sin(omega) + 0.00005691*ttt2*sin(2.0*(f-d+omega)) ...
+    # + 0.00000984*ttt2*sin(2.0*(f+omega)) - 0.00000885*ttt2*sin(2.0*omega)
     s = - x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2 + ssum3 * ttt3 + ssum4 * ttt4
 
     if sh.iauhelp == 'y':
@@ -6251,13 +6250,13 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     # ----------------- find nutation matrix ----------------------
     nut1 = np.zeros((3, 3))
     nut1[0, 0] = 1.0 - a * x * x
-    nut1[0, 1] = - a * x * y
+    nut1[0, 1] = -a * x * y
     nut1[0, 2] = x
-    nut1[1, 0] = - a * x * y
+    nut1[1, 0] = -a * x * y
     nut1[1, 1] = 1.0 - a * y * y
     nut1[1, 2] = y
-    nut1[2, 0] = - x
-    nut1[2, 1] = - y
+    nut1[2, 0] = -x
+    nut1[2, 1] = -y
     nut1[2, 2] = 1.0 - a * (x * x + y * y)
     #nut1
 
@@ -6265,16 +6264,16 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     nut2[0, 0] = np.cos(s)
     nut2[1, 1] = np.cos(s)
     nut2[0, 1] = np.sin(s)
-    nut2[1, 0] = - np.sin(s)
-    nut = nut1 * nut2
-    #       the matrix appears to be orthogonal now, so the extra processing is not needed.
-#        if (x ~= 0.0) && (y ~= 0.0)
-#            e = atan2(y, x)
-#          else
-#            e = 0.0
-#          end
-#        d = atan(sqrt((x^2 + y^2) / (1.0-x^2-y^2)))
-#        nut1 = smu.rot3mat(-e)*smu.rot2mat(-d)*smu.rot3mat(e+s)
+    nut2[1, 0] = -np.sin(s)
+    nut = nut1 @ nut2
+    # the matrix appears to be orthogonal now, so the extra processing
+    # is not needed.
+    # if (x ~= 0.0) && (y ~= 0.0)
+    #     e = atan2(y, x)
+    # else
+    #     e = 0.0
+    # d = atan(sqrt((x^2 + y^2) / (1.0-x^2-y^2)))
+    # nut1 = smu.rot3mat(-e)*smu.rot2mat(-d)*smu.rot3mat(e+s)
 
     return x, y, s, nut
 

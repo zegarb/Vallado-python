@@ -135,6 +135,21 @@ pp(reci)
 pp(veci)
 pp(aeci)
 
+# 'c' seems off
+rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "c", ttt, jdut1, lod,
+                                    0, 0)
+print("eci2tirsiau06 c returned:")
+pp(rtirs)
+pp(vtirs)
+pp(atirs)
+
+reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "c", ttt, jdut1, lod,
+                                 0, 0)
+print("tirs2eciiau06 c returned:")
+pp(reci)
+pp(veci)
+pp(aeci)
+
 rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'b')
 print('ecef2cirsiau06 returned: ')
 pp(rcirs)
@@ -178,13 +193,13 @@ pp(veci)
 pp(aeci)
 
 recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'a')
-print('cirs2ecefiau06 returned: ')
+print('cirs2ecefiau06 a returned: ')
 pp(recef)
 pp(vecef)
 pp(aecef)
 
 recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'b')
-print('cirs2ecefiau06 returned: ')
+print('cirs2ecefiau06 b returned: ')
 pp(recef)
 pp(vecef)
 pp(aecef)
@@ -217,6 +232,7 @@ pp(recef)
 pp(vecef)
 pp(aecef)
 
+# ecef2eci 'c' and back seems slightly off
 reci,veci,aeci = ecef2eciiau06(recef,vecef,aecef,ttt,jdut1,
                                 lod,xp,yp,'c', ddx, ddy)
 print('ecef2eciiau06 c returned: ')
