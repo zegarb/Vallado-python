@@ -5656,6 +5656,47 @@ def ecef2pef(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
     return rpef, vpef, apef
 
+def pef2ecef(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray,
+             opt: str, xp: float, yp: float, ttt: float):
+    """this function transforms a vector from the pseudo earth fixed frame
+    (pef) to the earth fixed itrf frame (itrf).
+
+    Parameters
+    ----------
+    rpef : ndarray
+        position vector pef: km
+    vpef : ndarray
+        velocity vector pef: km/s
+    apef : ndarray
+        acceleration vector pef: km/s2
+    opt : str
+        polarm method option: '01', '02', '80'
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    ttt : float
+        julian centuries of tt: centuries
+
+    Returns
+    -------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    """
+
+    pm = smu.polarm(xp, yp, ttt, opt)
+
+    recef = pm.T@rpef
+
+    vecef = pm.T@vpef
+
+    aecef = pm.T@apef
+
+    return recef, vecef, aecef
 
 
 # ----------------------------------------------------------------------------
@@ -8155,7 +8196,7 @@ def tirs2eciiau06(rtirs: np.ndarray, vtirs: np.ndarray, atirs: np.ndarray,
 
 def cirs2ecefiau06(rcirs: np.ndarray, vcirs:np.ndarray, acirs:np.ndarray,
                    ttt: float, jdut1: float, lod: float, xp: float, yp: float,
-                   option: str):
+                   option: str, ddx: float, ddy: float):
     """this function trsnforms a vector from the cirs
     (gcrf), to an earth fixed (itrf) frame.  the results take into account
     the effects of  sidereal time, and polar motion.
@@ -8181,6 +8222,10 @@ def cirs2ecefiau06(rcirs: np.ndarray, vcirs:np.ndarray, acirs:np.ndarray,
     option : str
         approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
         2000b, 'c' - cio iau2006
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
 
     Returns
     -------
@@ -8601,7 +8646,7 @@ def eci2ecefiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
 
 def ecef2cirsiau06(recef: np.ndarray, vecef: np.ndarray, aecef:np.ndarray,
                    ttt: float, jdut1: float, lod: float, xp: float, yp: float,
-                   option: str):
+                   option: str, ddx: float, ddy: float):
     """this function transforms a vector from the earth fixed (itrf) frame, to
     the cirs. Sidereal time and polar motion are taken into account.
 
@@ -8626,6 +8671,10 @@ def ecef2cirsiau06(recef: np.ndarray, vecef: np.ndarray, aecef:np.ndarray,
     option : str
         approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
         2000b, 'c' - cio iau2006
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
 
     Returns
     -------
@@ -8637,7 +8686,7 @@ def ecef2cirsiau06(recef: np.ndarray, vecef: np.ndarray, aecef:np.ndarray,
         acceleration vector cirs: km/s2
     """
 
-    # ---- ceo based, iau2006
+    # ---- cio based, iau2006
     if option == 'c':
         x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
         st = obu.iau06era(jdut1)

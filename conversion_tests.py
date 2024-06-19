@@ -88,10 +88,28 @@ print("lon is ", lon)
 
 #--------------------------------ecef2--------------------------------------------------------------
 rpef, vpef, apef = ecef2pef(recef, vecef, aecef, '80', xp, yp, ttt)
-print('ecef2pef returned: ')
+print('ecef2pef 80 returned: ')
 pp(rpef)
 pp(vpef)
 pp(apef)
+
+recef, vecef, aecef = pef2ecef(rpef, vpef, apef, '80', xp, yp, ttt)
+print('pef2ecef 80 returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+rpef, vpef, apef = ecef2pef(recef, vecef, aecef, '01', xp, yp, ttt)
+print('ecef2pef 01 returned: ')
+pp(rpef)
+pp(vpef)
+pp(apef)
+
+recef, vecef, aecef = pef2ecef(rpef, vpef, apef, '01', xp, yp, ttt)
+print('pef2ecef 01 returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
 
 reci,veci,aeci = pef2eci(rpef,vpef,apef,ttt,jdut1,lod,eqeterms,ddpsi,ddeps)
 print('pef2eci returned: ')
@@ -105,8 +123,6 @@ pp(rpef)
 pp(vpef)
 pp(apef)
 
-# tirs conversions not functioning properly, J and K values on eci vectors
-# are halved for some reason
 rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "a", ttt, jdut1, lod,
                                     0, 0)
 print("eci2tirsiau06 a returned:")
