@@ -5959,10 +5959,10 @@ def eci2mod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float):
 # ----------------------------------------------------------------------------
 
 
-def eci2tod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt: str,
-            ttt: float, ddpsi: float, ddeps: float, ddx: float, ddy: float):
-    """this function transforms a vector from the mean equator mean equinox frame
-    (j2000) to the true equator true equinox of date (tod).
+def eci2tod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float,
+            ddpsi: float, ddeps: float):
+    """this function transforms a vector from the mean equator mean equinox
+    frame (j2000) to the true equator true equinox of date (tod).
 
     Parameters
     ----------
@@ -5980,10 +5980,6 @@ def eci2tod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt: str,
         correction for iau2000: rad
     ddeps : float
         correction for iau2000: rad
-    ddx : float
-        ???
-    ddy : float
-        ???
 
     Returns
     -------
@@ -5996,27 +5992,8 @@ def eci2tod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, opt: str,
     """
 
 
-    prec, _, _, _, _ = obu.precess (ttt, opt)
-
-    if opt == '80':
-        deltapsi, trueeps, meaneps, _, nut = obu.nutation(ttt, ddpsi, ddeps)
-    else:
-        # ---- ceo based, iau2006
-        if opt == '6c':
-            _, _, _, pnb = obu.iau06xys (ttt, ddx, ddy)
-
-        # ---- class equinox based, 2000a
-        elif opt == '6a':
-             deltapsi, pnb, prec, nut, _, _, _, _, _, _, _, _, _, _, _, _, _, \
-                _ = obu.iau06pna (ttt)
-
-        # ---- class equinox based, 2000b
-        elif opt == '6b':
-            deltapsi, pnb, prec, nut, _, _, _, _, _, _, _, _, _, _, _, _, _,\
-            _ = obu.iau06pnb (ttt)
-        prec = np.eye(3)
-        nut = pnb
-
+    prec, _, _, _, _ = obu.precess(ttt, '80')
+    deltapsi, trueeps, meaneps, _, nut = obu.nutation(ttt, ddpsi, ddeps)
     if sh.show == 'y':
         print('dpsi %11.7f trueeps %11.7f mean eps %11.7f deltaeps %11.7f \n'
               %(deltapsi * rad2arcsec, trueeps * rad2arcsec, meaneps * rad2arcsec,
@@ -8399,9 +8376,10 @@ def cirs2eciiau06(rcirs: np.ndarray, vcirs: np.ndarray, acirs: np.ndarray,
 # ----------------------------------------------------------------------------
 
 def eci2cirsiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
-                  ttt: float, option: str, ddx: float, ddy: float):
-    """this function trsnforms a vector from the mean equator mean equniox frame
-    (gcrf), to the CIRS frame.  the results take into account
+                  ttt: float, option: str, ddx: float = None,
+                  ddy: float = None):
+    """this function transforms a vector from the mean equator mean equniox
+    frame (gcrf), to the CIRS frame. the results take into account
     the effects of precession, nutation.
 
     Parameters
@@ -8417,10 +8395,12 @@ def eci2cirsiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
     option : str
         approach to use: 'a' - classical equinox 2000a, 'b' - classical equinox
         2000b, 'c' - cio iau2006
-    ddx : float
+    ddx : float, optional
         eop correction for x: rad
-    ddy : float
+            only needed for option 'c'
+    ddy : float, optional
         eop correction for y: rad
+            only needed for option 'c'
 
     Returns
     -------
@@ -8432,7 +8412,7 @@ def eci2cirsiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
         acceleration vector: km/s2
     """
 
-    # ---- ceo based, iau2000
+    # ---- cio based, iau2000
     if option == 'c':
         x, y, s, pnb = obu.iau06xys(ttt, ddx, ddy)
 
