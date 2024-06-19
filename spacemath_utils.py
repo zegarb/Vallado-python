@@ -8,29 +8,30 @@ import orbit_utils as obu
 from space_constants import sethelp as sh
 
 
-# * ------------------------------------------------------------------------------
-# *
-# *                           FUNCTION BINOMIAL
-# *
-# *  this function finds the value of a BINOMIAL coefficient
-# *
-# *  Author        : David Vallado                  719-573-2600    1 Mar 2001
-# *
-# *  Inputs          Description                    Range / Units
-# *    i           -
-# *    j           -
-# *
-# *  Outputs       :
-# *    FUNCTION    - answer
-# *
-# *  Locals        :
-# *    None.
-# *
-# *  Coupling      :
-# *    FACTORIAL   - Finds the FACTORIAL of a number
-# *
-# * ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+#
+#                           FUNCTION BINOMIAL
+#
+#  this function finds the value of a BINOMIAL coefficient
+#
+#  Author        : David Vallado                  719-573-2600    1 Mar 2001
+#
+#  Inputs          Description                    Range / Units
+#    i           -
+#    j           -
+#
+#   Outputs       :
+#     FUNCTION    - answer
+#
+#   Locals        :
+#     None.
+#
+#   Coupling      :
+#     FACTORIAL   - Finds the FACTORIAL of a number
+#
+#  ------------------------------------------------------------------------------
 
+### Just use math.comb(). - zeg
 def binomial(i, j):
     bino = math.factorial(j) / (math.factorial(i)*math.factorial(j-i))
     return bino
@@ -64,9 +65,21 @@ def binomial(i, j):
 # [outmat] = rot1mat (xval)
 # ----------------------------------------------------------------------------- }
 
+### could use scipy Rotation class instead. - zeg
+def rot1mat (xval: float):
+    """this function sets up a rotation matrix for an input angle about the first
+    axis.
 
-def rot1mat (xval):
+    Parameters
+    ----------
+    xval : float
+        angle of rotation: rad
 
+    Returns
+    -------
+    outmat: ndarray
+        rotation matrix
+    """
     c = math.cos(xval)
     s = math.sin(xval)
 
@@ -112,7 +125,20 @@ def rot1mat (xval):
 # ----------------------------------------------------------------------------- }
 
 
-def rot2mat(xval):
+def rot2mat(xval: float):
+    """this function sets up a rotation matrix for an input angle about the second
+    axis.
+
+    Parameters
+    ----------
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outmat: ndarray
+        rotation matrix
+    """
 
     c = math.cos(xval)
     s = math.sin(xval)
@@ -160,7 +186,20 @@ def rot2mat(xval):
 # ----------------------------------------------------------------------------- }
 
 
-def rot3mat(xval):
+def rot3mat(xval: float):
+    """this function sets up a rotation matrix for an input angle about the third
+    axis.
+
+    Parameters
+    ----------
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outmat: ndarray
+        rotation matrix
+    """
 
     c = math.cos(xval)
     s = math.sin(xval)
@@ -222,34 +261,61 @@ def rot3mat(xval):
 # [range, az] = rngaz(60.0/rad, -80.0/rad , 41.0/rad, 74.0/rad, 0)
 # ------------------------------------------------------------------------------
 
-def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
-    small = 1e-08
-    omegaearth = 0.05883359221938136
+def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
+    """this function calculates the range and azimuth between two specified
+    ground points on a spherical earth.  notice the range will always be
+    within the range of values listed since you for not know the direction of
+    firing, long or short.  the function will calculate rotating earth ranges
+    if the tof is passed in other than 0.0 . range is calulated in rad and
+    converted to er by s = ro, but the radius of the earth = 1 er, so it's
+    s = o.
+
+    Parameters
+    ----------
+    llat : float
+        start geocentric latitude: -pi/2 to pi/2 rad
+    llon : float
+        start geocentric longitude (west -): -2pi to 2pi rad
+    tlat : float
+        end geocentric latitude: -pi/2 to pi/2 rad
+    tlon : float
+        end geocentric longitude (west -): -2pi to 2pi rad
+    tof : float
+        time of flight if icbm, or 0.0 min
+
+    Returns
+    -------
+    range : float
+        range between 2 points
+    az: float
+        azimuth: 0 to 2pi rad
+    """
+    small = smalle8
+    omegaearth = omegaearthradptu
     # fix units on tof and omegaearth
 
-    # -------------------------  implementation   -------------------------
-    range_ = np.arccos(np.sin(llat) * np.sin(tlat)
-                       + np.cos(llat) * np.cos(tlat) *
-                         np.cos(tlon - llon + omegaearth * tof))
+    range_ = math.acos(math.sin(llat) * math.sin(tlat)
+                       + math.cos(llat) * math.cos(tlat)
+                       * math.cos(tlon - llon + omegaearth * tof))
     # ------ check if the range is 0 or half the earth  ---------
-    if (np.abs(np.sin(range_) * np.cos(llat)) < small):
-        if (np.abs(range_ - np.pi) < small):
-            az = np.pi
+    if (abs(math.sin(range_) * math.cos(llat)) < small):
+        if (abs(range_ - math.pi) < small):
+            az = math.pi
         else:
             az = 0.0
     else:
-        az = np.arccos((np.sin(tlat) - np.cos(range_) * np.sin(llat))
-                       / (np.sin(range_) * np.cos(llat)))
+        az = math.acos((math.sin(tlat) - math.cos(range_) * math.sin(llat))
+                       / (math.sin(range_) * math.cos(llat)))
 
     # ------ check if the azimuth is grt than pi (180deg) -------
-    if (np.sin(tlon - llon + omegaearth * tof) < 0.0):
+    if (math.sin(tlon - llon + omegaearth * tof) < 0.0):
         az = twopi - az
 
     ###looks like this was test code -jmb
 
 
     print('spehrical range %11.7f km az %11.7f \n'
-          % (range_ * 6378.1363, az * 180 / np.pi))
+          % (range_ * 6378.1363, az * 180 / math.pi))
     # test ellipsoidal approach
     alt = 0.0
     rlch, vlch = obu.site(llat, llon, alt)
@@ -273,7 +339,8 @@ def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
 
     v = np.cross(rlu, w)
     print('v uxw %11.7f %11.7f  %11.7f \n' % (v[0], v[1], v[2]))
-    phi = np.pi - 0.5 * math.atan2(- 2 * v[2] * rlu[2], v[2] ** 2 - rlu[2] ** 2)
+    phi = math.pi - 0.5 * math.atan2(- 2 * v[2] * rlu[2], v[2] ** 2
+                                     - rlu[2] ** 2)
 
     print('phi %11.7f %11.7f \n' % (phi, phi * rad2deg))
     #        phi = 0.5*math.atan2(-2*.47024*.86603, .47024^2-.86603^2)
@@ -282,14 +349,16 @@ def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
     temp = np.array([np.dot(rlch, rlu), np.dot(rlch, rtu), 0.0])
     uprime = rot3(temp, phi) / 6378.137
 
-    print('uprime %11.7f %11.7f  %11.7f \n' % (uprime[0], uprime[1], uprime[2]))
-    phi1 = 2 * np.pi + math.atan2(uprime[1] * np.sqrt(1 + eps), uprime[0])
+    print('uprime %11.7f %11.7f  %11.7f \n'
+          % (uprime[0], uprime[1], uprime[2]))
+    phi1 = 2 * math.pi + math.atan2(uprime[1] * math.sqrt(1 + eps), uprime[0])
     print('phi1 %11.7f %11.7f \n' % (phi1, phi1 * rad2deg))
     temp = np.array([np.dot(rtgt, rlu), np.dot(rtgt, rtu), 0.0])
     vprime = rot3(temp, phi) / 6378.137
 
-    print('vprime %11.7f %11.7f  %11.7f \n' % (vprime[0], vprime[1], vprime[2]))
-    phi2 = 2 * np.pi + math.atan2(vprime[1] * np.sqrt(1 + eps), vprime[0])
+    print('vprime %11.7f %11.7f  %11.7f \n'
+          % (vprime[0], vprime[1], vprime[2]))
+    phi2 = 2 * math.pi + math.atan2(vprime[1] * math.sqrt(1 + eps), vprime[0])
     print('phi1 %11.7f %11.7f \n' % (phi2, phi2 * rad2deg))
     e = 0.08181922
     # do each half of integral evaluation
@@ -299,20 +368,20 @@ def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
     s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
-          * (np.cos(phi) ** (2 * r + 1)))
-    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * s1
+          * (math.cos(phi) ** (2 * r + 1)))
+    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * s1
     r = 0
     m = 2
     s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
-          * (np.cos(phi) ** (2 * r + 1)))
+          * (math.cos(phi) ** (2 * r + 1)))
     r = 1
     s2 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
-          * (np.cos(phi) ** (2 * r + 1)))
-    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * (s1 + s2)
+          * (math.cos(phi) ** (2 * r + 1)))
+    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * (s1 + s2)
     funct2 = (1.0 - e ** 2 / 2 * f1 - binomial(2 * m - 3, m - 2) * (e ** 2 * f2)
               / (m * 2 ** (2 * m - 2)))
     phi = phi1
@@ -321,20 +390,20 @@ def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
     s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
-          * (np.cos(phi) ** (2 * r + 1)))
-    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * s1
+          * (math.cos(phi) ** (2 * r + 1)))
+    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * s1
     r = 0
     m = 2
     s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
-          * (np.cos(phi) ** (2 * r + 1)))
+          * (math.cos(phi) ** (2 * r + 1)))
     r = 1
     s2 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
-          * (np.cos(phi) ** (2 * r + 1)))
-    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + np.sin(phi) * (s1 + s2)
+          * (math.cos(phi) ** (2 * r + 1)))
+    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * (s1 + s2)
     funct1 = (1.0 - e ** 2 / 2 * f1
               - binomial(2 * m - 3, m - 2) * (e ** 2 * f2)
               / (m * 2 ** (2 * m - 2)))
@@ -343,9 +412,6 @@ def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
 
     return range_, az
 
-
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function recovqt
@@ -378,9 +444,26 @@ def rngaz(llat=None, llon=None, tlat=None, tlon=None, tof=None):
 # ------------------------------------------------------------------------------
 
 
-def recovqt(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None, root=None):
+def recovqt(p1: float, p2: float, p3: float, p4: float, p5: float, p6: float,
+            root: float):
+    """this function recovers the time and function values in quartic blending
+    routines.
+
+    Parameters
+    ----------
+    p1, p2, p3, p4, p5, p6 : float
+        function values used for blending
+    root:  float
+        root used as variable
+
+    Returns
+    -------
+    funvalue: float
+        function value
+    """
+
     # ------ set up function from C-45 --------
-#  aqit5*x**5 + aqit4*x**4 + etc
+    # aqit5*x**5 + aqit4*x**4 + etc
     temp = 1.0 / 24.0
     aqit0 = p3
     aqit1 = (2 * p1 - 16 * p2 + 16 * p4 - 2 * p5) * temp
@@ -426,7 +509,22 @@ def recovqt(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None, root=None):
 # ------------------------------------------------------------------------------
 
 
-def recovqd(p1=None, p2=None, p3=None, root=None):
+def recovqd(p1: float, p2: float, p3: float, root: float):
+    """this function recovers the time and function values in parabolic
+    blending routines.
+
+    Parameters
+    ----------
+    p1, p2, p3 : float
+        function values used for blending
+    root : float
+        root used as variable
+
+    Returns
+    -------
+    funvalue: float
+        function value
+    """
     # ------ set up function from C-39 --------
     aqd0 = p1
     aqd1 = (- 3.0 * p1 + 4.0 * p2 - p3) * 0.5
@@ -468,9 +566,24 @@ def recovqd(p1=None, p2=None, p3=None, root=None):
 # ------------------------------------------------------------------------------
 
 
-def recovpar(p1=None, p2=None, p3=None, p4=None, root=None):
+def recovpar(p1: float, p2: float, p3: float, p4: float, root: float):
+    """this function recovers the time and function values in parabolic
+    blending routines.
+
+    Parameters
+    ----------
+    p1, p2, p3, p4 : float
+        function values used for blending
+    root : float
+        root used as variable
+
+    Returns
+    -------
+    funvalue: float
+        function value
+    """
     # ------ set up function from C-39 -------
-#  acut3*x**3 + acut2*x**2 + etc
+    #  acut3*x**3 + acut2*x**2 + etc
     acut0 = p2
     acut1 = (- p1 + p3) * 0.5
     acut2 = p1 - 2.5 * p2 + 2.0 * p3 - 0.5 * p4
@@ -512,7 +625,26 @@ def recovpar(p1=None, p2=None, p3=None, p4=None, root=None):
 # [minfound, rootf, funrate] = parabbln(p1, p2, p3)
 # ------------------------------------------------------------------------------
 
-def parabbln(p1=None, p2=None, p3=None):
+### definitely not finished; minfound never changed from 'n' -zeg
+def parabbln(p1: float, p2: float, p3: float):
+    """this function performs parabolic blending of an input zero crossing
+    function in order to find event times.
+
+    Parameters
+    ----------
+    p1, p2, p3: float
+        function values used for blending
+
+    Returns
+    -------
+    minfound : str
+        test of success: always 'n'?
+    rootf : float
+        root of the function
+    funrate : float
+        function rate
+    """
+
     rootf = 0.0
     funrate = 0.0
     minfound = 'n'
@@ -530,16 +662,13 @@ def parabbln(p1=None, p2=None, p3=None):
         if (indx2 == 1):
             root = r2r
         if ((root >= 0.0) and (root <= 2.0)):
-            #               [time] = recovqd(t1, t2, t3, root) # should be 0.0!!!!!!
+            # [time] = recovqd(t1, t2, t3, root) # should be 0.0!!!!!!
             ans = recovqd(p1, p2, p3, root)
             # ----- recover the function value derivative
             funrate = 2.0 * aqd2 * root + aqd1
 
     return minfound, rootf, funrate
 
-
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function quartbln
@@ -572,7 +701,26 @@ def parabbln(p1=None, p2=None, p3=None):
 # [minfound, rootf, funrate] = quartbln (p1, p2, p3, p4, p5, p6)
 # ------------------------------------------------------------------------------
 
-def quartbln(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None):
+### np.roots is old, switch to numpy Polynomial class instead? -zeg
+def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
+             p6: float):
+    """this function performs quartic blending of an input zero crossing
+    function in order to find event times.
+
+    Parameters
+    ----------
+    p1, p2, p3, p4, p5, p6: float
+        function values used for blending
+
+    Returns
+    -------
+    minfound: str
+        test of success: 'y' or 'n'
+    rootf: float
+        root of the function
+    funrate: float
+        function rate
+    """
     rootf = 0.0
     funrate = 0.0
     minfound = 'n'
@@ -617,8 +765,6 @@ def quartbln(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None):
 
     return minfound, rootf, funrate
 
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function quartic
@@ -681,6 +827,8 @@ def quartbln(p1=None, p2=None, p3=None, p4=None, p5=None, p6=None):
 # [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i] = quartic(a, b, c, d, e, opt)
 # ------------------------------------------------------------------------------
 
+### all of the polynomial functions could just be replaced with
+### numpy's polynomial class... -zeg
 def quartic(a=None, b=None, c=None, d=None, e=None, opt=None):
     # --------------------  implementation   ----------------------
     onethird = 1.0 / 3.0
@@ -797,8 +945,6 @@ def quartic(a=None, b=None, c=None, d=None, e=None, opt=None):
 
     return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i
 
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function quintic
@@ -918,7 +1064,7 @@ def quintic(a=None, b=None, c=None, d=None, e=None, f=None, opt=None):
         return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
 
     # ----- find a good first guess for a real root between 0 and 1
-# ----- by assigning 5 evenly spaced points on the interval
+    # ----- by assigning 5 evenly spaced points on the interval
     p1 = f
     z = 0.25
     p2 = ((((a * z + b) * z + c) * z + d) * z + e) * z + f
@@ -955,7 +1101,7 @@ def quintic(a=None, b=None, c=None, d=None, e=None, f=None, opt=None):
         return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
 
     # -----   initialize parameters using xx[0]/4 as a first guess for a real root
-# -----   (this rescales the root to the  interval 0 to 1)
+    # -----   (this rescales the root to the  interval 0 to 1)
     maxdz = 0.1
     olddz = maxdz
     z = r1r * 0.25
@@ -1023,8 +1169,8 @@ def printdiff(strin=None, mat1=None, mat2=None):
     print((np.transpose(mat1) - np.transpose(mat2)))
     print('pctdiff %s pct over 1e-18  \n' % (strin))
     #    fprintf(1, '#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f \n', 100.0*((mat1' - mat2')/mat1'))
-#    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
-#    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
+    #    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
+    #    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
     tm1 = np.transpose(mat1)
     tm2 = np.transpose(mat2)
     diffmm = np.zeros((6, 6))
