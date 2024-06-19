@@ -39,7 +39,34 @@ from space_constants import *
 # [jd, jdfrac] = jdayall(year, mon, day, hr, min, sec, whichtype)
 # -----------------------------------------------------------------------------
 
-def jdayall(year=None, mon=None, day=None, hr=None, min=None, sec=None, whichtype=None):
+def jdayall(year: int, mon: int, day: int, hr: int, min: int, sec: float,
+            whichtype: str):
+    """this function finds the julian date given the year, month, day, and time.
+    the julian date is defined by each elapsed day since noon, jan 1, 4713 bc.
+
+    Parameters
+    ----------
+    year : int
+        year: 1900 to 2100
+    mon : int
+        month: 1 to 12
+    day : int
+        day: 1 to 31
+    hr : int
+        hour: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
+    whichtype : str
+        Julian or gegorian: 'j' or 'g'
+
+    Returns
+    -------
+    jd: float
+        julian date: days from 4713 bc
+    """
+
     if mon <= 2:
         year = year - 1
         mon = mon + 12
@@ -66,7 +93,7 @@ def jdayall(year=None, mon=None, day=None, hr=None, min=None, sec=None, whichtyp
 #
 # -----------------------------------------------------------------------------
 #
-#                           function getintda
+#                           function getintday
 #
 #  this function finds the integer equivalent of the 3 character string
 #    representation of the day of the week.
@@ -91,15 +118,27 @@ def jdayall(year=None, mon=None, day=None, hr=None, min=None, sec=None, whichtyp
 # [dayn] = getintda(daystr)
 # -----------------------------------------------------------------------------
 
-def getintda(daystr=None):
-    # ------------------------  implementation   --------------------------
+def getintday(daystr: str):
+    """this function finds the integer equivalent of the 3 character string
+    representation of the day of the week.
+
+    Parameters
+    ----------
+    daystr : str
+        name of day: 'sun', 'mon' etc.
+
+    Returns
+    -------
+    dayn : int
+        day integer equivalent: 1 to 7
+    """
     daytitle = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat']
     dayn = daytitle.index(daystr) + 1
     return dayn
 
 # -----------------------------------------------------------------------------
 #
-#                           function dayofwee
+#                           function dayofweek
 #
 #  this function finds the day of the week. integers are used for the days,
 #    1 = 'sun', 2 = 'mon', ... 7 = 'sat'.
@@ -127,9 +166,21 @@ def getintda(daystr=None):
 # dayofweek = dayofwee(jd)
 # -----------------------------------------------------------------------------
 
-def dayofwee(jd=None):
-    # ------------------------  implementation   ------------------
-# ------- be sure jd is at 0.0d0 h on the day of interest -----
+def dayofweek(jd: float):
+    """this function finds the day of the week. integers are used for the days,
+    1 = 'sun', 2 = 'mon', ... 7 = 'sat'.
+
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+
+    Returns
+    -------
+    dayofweek: int
+        day of the week: 1 to 7
+    """
+    # ------- be sure jd is at 0.0d0 h on the day of interest -----
     jd = int(np.floor(jd + 0.5))
     dayofweek = np.rint(jd - 7 * np.rint((jd + 1) / 7) + 2)
     return dayofweek
@@ -161,9 +212,22 @@ def dayofwee(jd=None):
 # -----------------------------------------------------------------------------
 
 
-def getintmon(monstr=None):
-    # ------------------------  implementation   --------------------------
-    monthtitle = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+def getintmon(monstr: str):
+    """this function finds the integer equivalent of the 3 character string
+    representation of month.
+
+    Parameters
+    ----------
+    monstr : str
+        3 character month name: 'jan', 'feb', etc.
+
+    Returns
+    -------
+    mon: int
+        integer month equivalent: 1 to 12
+    """
+    monthtitle = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug',
+                  'sep', 'oct', 'nov', 'dec']
     mon = monthtitle.index(monstr) + 1
     return mon
 
@@ -182,7 +246,7 @@ def getintmon(monstr=None):
 #                -
 #
 #  inputs          description                    range / units
-#    hr          - hours                          0 .. 24
+#    hr          - hours                          0 .. 23
 #    min         - minutes                        0 .. 59
 #    sec         - seconds                        0.0 .. 59.99
 #
@@ -199,11 +263,26 @@ def getintmon(monstr=None):
 # -----------------------------------------------------------------------------
 
 
-def hms2sec(hr, min, sec):
+def hms2sec(hr: int, min: int, sec: float):
+    """this function converts hours, minutes and seconds into seconds from the
+    beginning of the day.
 
-        # ------------------------  implementation   ------------------
-        utsec = hr * 3600.0 + min * 60.0 + sec
-        return utsec
+    Parameters
+    ----------
+    hr : int
+        hours: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
+
+    Returns
+    -------
+    utsec: float
+        seconds from start of day: 0 to 86400
+    """
+    utsec = hr * 3600.0 + min * 60.0 + sec
+    return utsec
 
 
 # -----------------------------------------------------------------------------
@@ -222,7 +301,7 @@ def hms2sec(hr, min, sec):
 #    utsec       - seconds                        0.0 .. 86400.0
 #
 #  outputs       :
-#    hr          - hours                          0 .. 24
+#    hr          - hours                          0 .. 23
 #    min         - minutes                        0 .. 59
 #    sec         - seconds                        0.0 .. 59.99
 #
@@ -236,20 +315,35 @@ def hms2sec(hr, min, sec):
 # -----------------------------------------------------------------------------
 
 
-def sec2hms(utsec):
+def sec2hms(utsec: float):
+    """this function converts seconds from the beginning of the day into hours,
+    minutes and seconds.
 
-        # ------------------------  implementation   ------------------
-        temp = utsec / 3600.0
-        hr = np.fix(temp)
-        min = np.fix((temp - hr) * 60.0)
-        sec = (temp - hr - min/60.0) * 3600.0
-        return hr, min, sec
+    Parameters
+    ----------
+    utsec : float
+        seconds from beginning of day: 0 to 86400
+
+    Returns
+    -------
+    hr: int
+        hours: 0 to 23
+    min: int
+        minutes: 0 to 59
+    sec: float
+        seconds: 0 to 59.99
+    """
+    temp = utsec / 3600.0
+    hr = np.fix(temp)
+    min = np.fix((temp - hr) * 60.0)
+    sec = (temp - hr - min/60.0) * 3600.0
+    return hr, min, sec
 
 
 
 # -----------------------------------------------------------------------------
 #
-#                           function jday.m
+#                           function jday
 #
 #  this function finds the julian date given the year, month, day, and time.
 #
@@ -284,22 +378,46 @@ def sec2hms(utsec):
 # -----------------------------------------------------------------------------
 
 
-def jday(yr, mon, day, hr, min, sec):
+def jday(yr: int, mon: int, day: int, hr: int, min: int, sec: float):
+    """this function finds the julian date given the year, month, day, and
+    time.
 
-        # ------------------------  implementation   ------------------
-        jd = 367.0 * yr  \
-             - math.floor((7 * (yr + math.floor((mon + 9) / 12.0))) * 0.25)   \
-             + math.floor(275 * mon / 9.0) \
-             + day + 1721013.5   # use - 678987.0 to go to mjd directly
-        jdfrac = (sec + min * 60.0 + hr *3600.0) / 86400.0
+    Parameters
+    ----------
+    yr : int
+        years: 1900 to 2100
+    mon : int
+        months: 1 to 12
+    day : int
+        days: 1 to 31
+    hr : int
+        hours: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
 
-        # check jdfrac
-        if jdfrac > 1.0:
-            jd = jd + math.floor(jdfrac)
-            jdfrac = jdfrac - math.floor(jdfrac)
+    Returns
+    -------
+    jd : float
+        julian date: days from 4713 bc
+    jdfrac: float
+        julian date fraction of a day: 0.0 to 1.0
+    """
 
-        #  - 0.5 * sign(100.0 * yr + mon - 190002.5) + 0.5
-        return jd, jdfrac
+    jd = 367.0 * yr  \
+            - math.floor((7 * (yr + math.floor((mon + 9) / 12.0))) * 0.25)   \
+            + math.floor(275 * mon / 9.0) \
+            + day + 1721013.5   # use - 678987.0 to go to mjd directly
+    jdfrac = (sec + min * 60.0 + hr *3600.0) / 86400.0
+
+    # check jdfrac
+    if jdfrac > 1.0:
+        jd = jd + math.floor(jdfrac)
+        jdfrac = jdfrac - math.floor(jdfrac)
+
+    #  - 0.5 * sign(100.0 * yr + mon - 190002.5) + 0.5
+    return jd, jdfrac
 
 
 # ------------------------------------------------------------------------------
@@ -342,7 +460,32 @@ def jday(yr, mon, day, hr, min, sec):
 # [year, mon, day, hr, min, sec] = invjday (jd, jdfrac)
 # -----------------------------------------------------------------------------
 
-def invjday (jd, jdfrac=None):
+def invjday (jd: float, jdfrac: float = None):
+    """this function finds the year, month, day, hour, minute and second
+    given the julian date. tu can be ut1, tdt, tdb, etc.
+
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+    jdfrac: float, optional
+        julian date fraction of a day: 0.0 to 1.0 , default None
+
+    Returns
+    -------
+    yr : int
+        years: 1900 to 2100
+    mon : int
+        months: 1 to 12
+    day : int
+        days: 1 to 31
+    hr : int
+        hours: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
+    """
     if (jdfrac == None):
         jdfrac = jd - math.floor(jd)
         jd = math.floor(jd)
@@ -413,45 +556,68 @@ def invjday (jd, jdfrac=None):
 # [mon, day, hr, minute, sec] = days2mdh (year, days)
 # -----------------------------------------------------------------------------
 
-def days2mdh (year, days):
+def days2mdh (year: int, days: float):
+    """this function converts the day of the year, days, to the equivalent month
+    day, hour, minute and second.
 
-        # --------------- set up array of days in month  --------------
-        lmonth = np.zeros(12)
-        for i in range(12):
-            lmonth[i] = 31
-            if i == 1:
-                lmonth[i] = 28
-            if (i == 3 or i == 5 or i == 8 or i == 10):
-                lmonth[i] = 30
+    Parameters
+    ----------
+    year : int
+        year: 1900 to 2100
+    days : float
+        julian day of the year: 0 to 366.0
 
-        dayofyr = math.floor(days)
+    Returns
+    -------
+    mon : int
+        month: 1 to 12
+    day : int
+        day: 1 to 31
+    hr : int
+        hour: 0 to 23
+    minute : int
+        minutes: 0 to 59
+    sec: float
+        seconds: 0 to 59.99
+    """
 
-        # ----------------- find month and day of month ---------------
-        if (np.fmod(year-1900, 4) == 0):
-            lmonth[1] = 29
+    # --------------- set up array of days in month  --------------
+    lmonth = np.zeros(12)
+    for i in range(12):
+        lmonth[i] = 31
+        if i == 1:
+            lmonth[i] = 28
+        if (i == 3 or i == 5 or i == 8 or i == 10):
+            lmonth[i] = 30
 
-        i = 0
-        inttemp = 0
-        while (dayofyr > inttemp + lmonth[i]) and (i < 11):
-            inttemp = inttemp + lmonth[i]
-            i = i+1
+    dayofyr = math.floor(days)
 
-        mon = i+1
-        day = dayofyr - inttemp
+    # ----------------- find month and day of month ---------------
+    if (np.fmod(year-1900, 4) == 0):
+        lmonth[1] = 29
 
-        # ----------------- find hours minutes and seconds ------------
-        temp = (days - dayofyr)*24.0
-        hr = np.fix(temp)
-        temp = (temp-hr) * 60.0
-        minute = np.fix(temp)
-        sec = (temp-minute) * 60.0
-        sec = round(sec, 3)
-        if (sec == 60.0):
-            sec = 0.0
-            minute = minute + 1
+    i = 0
+    inttemp = 0
+    while (dayofyr > inttemp + lmonth[i]) and (i < 11):
+        inttemp = inttemp + lmonth[i]
+        i = i+1
+
+    mon = i+1
+    day = dayofyr - inttemp
+
+    # ----------------- find hours minutes and seconds ------------
+    temp = (days - dayofyr)*24.0
+    hr = np.fix(temp)
+    temp = (temp-hr) * 60.0
+    minute = np.fix(temp)
+    sec = (temp-minute) * 60.0
+    sec = round(sec, 3)
+    if (sec == 60.0):
+        sec = 0.0
+        minute = minute + 1
 
 
-        return mon, day, hr, minute, sec
+    return mon, day, hr, minute, sec
 
 
 # -----------------------------------------------------------------------------
@@ -485,19 +651,31 @@ def days2mdh (year, days):
 # [lst, gst] = lstime (lon, jd)
 # -----------------------------------------------------------------------------
 
-def lstime (lon, jd):
-        # ------------------------  implementation   ------------------
-        gst = gstime(jd)
-        lst = lon + gst
+def lstime(lon: float, jd: float):
+    """this function finds the local sidereal time at a given location.
 
-        # ----------------------- check quadrants ---------------------
-        lst = np.fmod(lst, twopi)
-        if (lst < 0.0):
-            lst = lst + twopi
-        return lst, gst
+    Parameters
+    ----------
+    lon : float
+        site longitude (west -): -2pi to 2pi rad
+    jd : float
+        julian date: days from 4713
 
+    Returns
+    -------
+    lst : float
+        local sidereal time: 0 to 2pi rad
+    gst : float
+        greenwich sidereal time: 0 to 2pi rad
+    """
+    gst = gstime(jd)
+    lst = lon + gst
 
-
+    # ----------------------- check quadrants ---------------------
+    lst = np.fmod(lst, twopi)
+    if (lst < 0.0):
+        lst = lst + twopi
+    return lst, gst
 
 # ------------------------------------------------------------------------------
 #
@@ -567,124 +745,151 @@ def lstime (lon, jd):
 # ------------------------------------------------------------------------------
 
 
-def convtime(year, mon, day, hr, min, sec, timezone, dut1, dat):
+def convtime(year: int, mon: int, day: int, hr: int, min: int, sec: float,
+             timezone: int, dut1: float, dat: float):
+    """this function finds the time parameters and julian century values for
+    inputs of utc or ut1. numerous outputs are found as shown in the local
+    variables. because calucations are in utc, you must include timezone if
+    (you enter a local time, otherwise it should be zero.
 
-        # ------------------------  implementation   ------------------
-        jd, jdfrac = jday(year, mon, day, hr + timezone, min, sec)
-        mjd = jd + jdfrac - 2400000.5
-        mfme = hr*60.0 + min + sec/60.0
+    Parameters
+    ----------
+    year : int
+        year: 1900 to 2100
+    mon : int
+        month: 1 to 12
+    day : int
+        day: 1 to 31
+    hr : int
+        hour: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
+    timezone : int
+        offset to utc from local site: 0 to 23 hr
+    dut1 : float
+        delta of ut1 - utc: sec
+    dat : float
+        delta of tai - utc: sec
+    """
 
-        # ------------------ start if (ut1 is known ------------------
-        localhr = timezone + hr
-        utc = hms2sec(localhr, min, sec)
+    jd, jdfrac = jday(year, mon, day, hr + timezone, min, sec)
+    mjd = jd + jdfrac - 2400000.5
+    mfme = hr*60.0 + min + sec/60.0
 
-        ut1 = utc + dut1
-        hrtemp, mintemp, sectemp = sec2hms(ut1)
-        jdut1, jdut1frac = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        tut1 = (jdut1 + jdut1frac - 2451545.0) / 36525.0
+    # ------------------ start if (ut1 is known ------------------
+    localhr = timezone + hr
+    utc = hms2sec(localhr, min, sec)
 
-        tai = utc + dat
-        hrtemp, mintemp, sectemp = sec2hms(tai)
-        jdtai, jdtaifrac = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    ut1 = utc + dut1
+    hrtemp, mintemp, sectemp = sec2hms(ut1)
+    jdut1, jdut1frac = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    tut1 = (jdut1 + jdut1frac - 2451545.0) / 36525.0
 
-        tt = tai + 32.184   # sec
-        hrtemp, mintemp, sectemp = sec2hms(tt)
-        jdtt, jdttfrac = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        ttt = (jdtt+jdttfrac - 2451545.0) / 36525.0
+    tai = utc + dat
+    hrtemp, mintemp, sectemp = sec2hms(tai)
+    jdtai, jdtaifrac = jday(year, mon, day, hrtemp, mintemp, sectemp)
+
+    tt = tai + 32.184   # sec
+    hrtemp, mintemp, sectemp = sec2hms(tt)
+    jdtt, jdttfrac = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    ttt = (jdtt+jdttfrac - 2451545.0) / 36525.0
 
 #%%%%%%%%%%%%%%%%%%% tdb
-        '''
-        % vallado approach (extra digits)
-        %         me = 357.5277233  + 35999.05034 *ttt
-        %         me = mod(me, 360.0 )
-        %         me = me * deg2rad
-        %         tdb = tt + 0.001658  * sin(me) + 0.00001385 *sin(2.0 *me)
-        %         [hrtemp, mintemp, sectemp] = sec2hms(tdb)
-        %         [jdtdb, jdtdbfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        %         ttdb = (jdtdb + jdtdbfrac - 2451545.0 )/ 36525.0
-        %         fprintf(1, 'book tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb, ttdb, jdtdb, jdtdbfrac)
-        % std approach (digits)
-        %         me = 357.53  + 0.9856003 * (jdtt - 2451545.0)
-        %         me = mod(me, 360.0 )
-        %         me = me * deg2rad
-        %         tdb1 = tt + 0.001658  * sin(me) + 0.000014 *sin(2.0 *me)
-        %         [hrtemp, mintemp, sectemp] = sec2hms(tdb1)
-        %         [jdtdb1, jdtdb1frac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        %         ttdb1 = (jdtdb1 + jdtdb1frac - 2451545.0 )/ 36525.0
-        %         fprintf(1, 'std  tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb1, ttdb1, jdtdb1, jdtdb1frac)
-        % ast alm approach (2012) bradley email
-        '''
+    '''
+    % vallado approach (extra digits)
+    %         me = 357.5277233  + 35999.05034 *ttt
+    %         me = mod(me, 360.0 )
+    %         me = me * deg2rad
+    %         tdb = tt + 0.001658  * sin(me) + 0.00001385 *sin(2.0 *me)
+    %         [hrtemp, mintemp, sectemp] = sec2hms(tdb)
+    %         [jdtdb, jdtdbfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    %         ttdb = (jdtdb + jdtdbfrac - 2451545.0 )/ 36525.0
+    %         fprintf(1, 'book tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb, ttdb, jdtdb, jdtdbfrac)
+    % std approach (digits)
+    %         me = 357.53  + 0.9856003 * (jdtt - 2451545.0)
+    %         me = mod(me, 360.0 )
+    %         me = me * deg2rad
+    %         tdb1 = tt + 0.001658  * sin(me) + 0.000014 *sin(2.0 *me)
+    %         [hrtemp, mintemp, sectemp] = sec2hms(tdb1)
+    %         [jdtdb1, jdtdb1frac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    %         ttdb1 = (jdtdb1 + jdtdb1frac - 2451545.0 )/ 36525.0
+    %         fprintf(1, 'std  tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb1, ttdb1, jdtdb1, jdtdb1frac)
+    % ast alm approach (2012) bradley email
+    '''
 
 
-        me = 357.53  + 0.98560028 * (jdtt - 2451545.0)
-        me = np.remainder(me, 360.0 ) ###not quite equivalent to matlab mod command, but close
-        me = me * deg2rad
-        dlje = 246.11 + 0.90251792*(jdtt - 2451545.0)
-        tdb2 = tt + 0.001657  * math.sin(me) + 0.000022 *math.sin(dlje)
-        [hrtemp, mintemp, sectemp] = sec2hms(tdb2)
-        [jdtdb2, jdtdb2frac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        ttdb2 = (jdtdb2 + jdtdb2frac - 2451545.0 )/ 36525.0
+    me = 357.53  + 0.98560028 * (jdtt - 2451545.0)
+    me = np.remainder(me, 360.0 ) ###not quite equivalent to matlab mod command, but close
+    me = me * deg2rad
+    dlje = 246.11 + 0.90251792*(jdtt - 2451545.0)
+    tdb2 = tt + 0.001657  * math.sin(me) + 0.000022 *math.sin(dlje)
+    [hrtemp, mintemp, sectemp] = sec2hms(tdb2)
+    [jdtdb2, jdtdb2frac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    ttdb2 = (jdtdb2 + jdtdb2frac - 2451545.0 )/ 36525.0
  #       fprintf(1, 'asta tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb2, ttdb2, jdtdb2, jdtdb2frac)
-# usno circular approach
-        tdb = tt + 0.001657*math.sin(628.3076*ttt+6.2401) \
-               + 0.000022*math.sin(575.3385*ttt+4.2970) \
-               + 0.000014*math.sin(1256.6152*ttt+6.1969) \
-               + 0.000005*math.sin(606.9777*ttt+4.0212) \
-               + 0.000005*math.sin(52.9691*ttt+0.4444) \
-               + 0.000002*math.sin(21.3299*ttt+5.5431) \
-               + 0.000010*ttt*math.sin(628.3076*ttt+4.2490)  # USNO circ (14)
-        [hrtemp, mintemp, sectemp] = sec2hms(tdb)
-        [jdtdb, jdtdbfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        ttdb = (jdtdb + jdtdbfrac - 2451545.0 )/ 36525.0
+    # usno circular approach
+    tdb = tt + 0.001657*math.sin(628.3076*ttt+6.2401) \
+            + 0.000022*math.sin(575.3385*ttt+4.2970) \
+            + 0.000014*math.sin(1256.6152*ttt+6.1969) \
+            + 0.000005*math.sin(606.9777*ttt+4.0212) \
+            + 0.000005*math.sin(52.9691*ttt+0.4444) \
+            + 0.000002*math.sin(21.3299*ttt+5.5431) \
+            + 0.000010*ttt*math.sin(628.3076*ttt+4.2490)  # USNO circ (14)
+    [hrtemp, mintemp, sectemp] = sec2hms(tdb)
+    [jdtdb, jdtdbfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    ttdb = (jdtdb + jdtdbfrac - 2451545.0 )/ 36525.0
 
 #        fprintf(1, 'usno tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb, ttdb, jdtdb, jdtdbfrac)
-        [h, m, s] = sec2hms(tdb)
+    [h, m, s] = sec2hms(tdb)
 #        fprintf(1, 'hms %3i %3i %8.6f \n', h, m, s)
 
         #
 #%%%%%%%%%%%%%%%%%%% tcg
 # approx with tai
-        tcg = tt + 6.969290134e-10*(jdtai - 2443144.5003725)*86400.0  # AAS 05-352 (10) and IERS TN (104)
-        [hrtemp, mintemp, sectemp] = sec2hms(tcg)
-        [jdtcg, jdtcgfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        tt2 = tcg-6.969290134e-10*(jdtcg+jdtcgfrac-2443144.5003725)*86400.0
+    tcg = tt + 6.969290134e-10*(jdtai - 2443144.5003725)*86400.0  # AAS 05-352 (10) and IERS TN (104)
+    [hrtemp, mintemp, sectemp] = sec2hms(tcg)
+    [jdtcg, jdtcgfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    tt2 = tcg-6.969290134e-10*(jdtcg+jdtcgfrac-2443144.5003725)*86400.0
 
   #      fprintf(1, 'tcg %8.6f jdtcg  %18.11f ', tcg, jdtcg)
-        [h, m, s] = sec2hms(tcg)
+    [h, m, s] = sec2hms(tcg)
 #        fprintf(1, 'hms %3i %3i %8.6f \n', h, m, s)
 
-        '''
-        % binomial approach with days
-        %        lg = 6.969290134e-10*86400.0
-        %        tcg1 = tt + (jdtt - 2443144.5003725)*(lg + lg*lg + lg*lg*lg)
-        % days from 77
-        %        jdttx = jday(year, mon, day, 0, 0, 0.0)
-        %        ttx = tt/86400.0 + jdttx-2443144.5003725  % days from the 1977 epoch
-        %        tcg2 = (jdttx - 6.969290134e-10*2443144.5003725) / (1.0 - 6.969290134e-10) % days
-        %        tcg2 = (tcg2 - jdttx)*86400*86400
-        % sec from 77
-        %        ttx = tt + (jdttx-2443144.5003725)*86400.0  % s from the 1977 epoch
-        %        tcg3 = ttx / (1.0 - 6.969290134e-10) % s
-        %        tcg3 = tcg3 -(jdttx-2443144.5003725)*86400.0
-        % check with tcg
-        %        tcg4 = tt + 6.969290134e-10*(jdtcg - 2443144.5003725)*86400.0  % AAS 05-352 (10) and IERS TN (104)
-        %        [hrtemp, mintemp, sectemp] = sec2hms(tcg4)
-        %        jdtcg4 = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        %        tt2 = tcg4-6.969290134e-10*(jdtcg4-2443144.5003725)*86400.0
-        %        difchk = tt2-tt
-        '''
+    '''
+    % binomial approach with days
+    %        lg = 6.969290134e-10*86400.0
+    %        tcg1 = tt + (jdtt - 2443144.5003725)*(lg + lg*lg + lg*lg*lg)
+    % days from 77
+    %        jdttx = jday(year, mon, day, 0, 0, 0.0)
+    %        ttx = tt/86400.0 + jdttx-2443144.5003725  % days from the 1977 epoch
+    %        tcg2 = (jdttx - 6.969290134e-10*2443144.5003725) / (1.0 - 6.969290134e-10) % days
+    %        tcg2 = (tcg2 - jdttx)*86400*86400
+    % sec from 77
+    %        ttx = tt + (jdttx-2443144.5003725)*86400.0  % s from the 1977 epoch
+    %        tcg3 = ttx / (1.0 - 6.969290134e-10) % s
+    %        tcg3 = tcg3 -(jdttx-2443144.5003725)*86400.0
+    % check with tcg
+    %        tcg4 = tt + 6.969290134e-10*(jdtcg - 2443144.5003725)*86400.0  % AAS 05-352 (10) and IERS TN (104)
+    %        [hrtemp, mintemp, sectemp] = sec2hms(tcg4)
+    %        jdtcg4 = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    %        tt2 = tcg4-6.969290134e-10*(jdtcg4-2443144.5003725)*86400.0
+    %        difchk = tt2-tt
+    '''
 
 
-        tcbmtdb = -1.55051976772e-8*(jdtai+jdtaifrac - 2443144.5003725)*86400.0 - 6.55e-5  # sec, value for de405 AAS 05-352 (10) and IERS TN (104)?
-        tcb = tdb + tcbmtdb
-        [hrtemp, mintemp, sectemp] = sec2hms(tcb)
-        [jdtcb, jdtcbfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-        ttcb = (jdtcb + jdtcbfrac - 2451545.0 )/ 36525.0
+    tcbmtdb = (-1.55051976772e-8 * (jdtai + jdtaifrac - 2443144.5003725)
+               * 86400.0 - 6.55e-5)  # sec, value for de405 AAS 05-352 (10) and IERS TN (104)?
+    tcb = tdb + tcbmtdb
+    [hrtemp, mintemp, sectemp] = sec2hms(tcb)
+    [jdtcb, jdtcbfrac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    ttcb = (jdtcb + jdtcbfrac - 2451545.0 ) / 36525.0
 #        fprintf(1, '     tcb %8.6f ttcb  %16.12f jdtcb  %18.11f %18.11f \n', tcb, ttcb, jdtcb, jdtcbfrac)
 
 
-        return ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, \
-          tdb, ttdb, jdtdb, jdtdbfrac
+    return ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, \
+        tdb, ttdb, jdtdb, jdtdbfrac
 
 
 
@@ -720,24 +925,30 @@ def convtime(year, mon, day, hr, min, sec, timezone, dut1, dat):
 # -----------------------------------------------------------------------------
 
 
-def gstime(jdut1):
+def gstime(jdut1: float):
+    """this function finds the greenwich sidereal time (iau-82).
 
-  # ------------------------  implementation   ------------------
-  tut1 = (jdut1 - 2451545.0) / 36525.0
+    Parameters
+    ----------
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    """
 
-  temp = - 6.2e-6 * tut1 * tut1 * tut1 + 0.093104 * tut1 * tut1  \
-         + (876600.0 * 3600.0 + 8640184.812866) * tut1 + 67310.54841
+    tut1 = (jdut1 - 2451545.0) / 36525.0
+
+    temp = - 6.2e-6 * tut1 * tut1 * tut1 + 0.093104 * tut1 * tut1  \
+        + (876600.0 * 3600.0 + 8640184.812866) * tut1 + 67310.54841
 
   # 360/86400 = 1/240, to deg, to rad
-  temp = np.fmod(temp*deg2rad/240.0, twopi)
+    temp = np.fmod(temp*deg2rad/240.0, twopi)
 
   # ------------------------ check quadrants --------------------
-  if (temp < 0.0):
-      temp = temp + twopi
+    if (temp < 0.0):
+        temp = temp + twopi
 
-  gst = temp
+    gst = temp
 
-  return gst
+    return gst
 
 
 # -----------------------------------------------------------------------------
@@ -773,8 +984,22 @@ def gstime(jdut1):
 # gst0 = gstime0(year)
 # -----------------------------------------------------------------------------
 
-def gstime0(year):
-    # ------------------------  implementation   ------------------
+def gstime0(year: int):
+    """this function finds the greenwich sidereal time at the beginning of a
+    year. this formula is derived from the astronomical almanac and is good
+    only 0 hr ut1, jan 1 of a year.
+
+    Parameters
+    ----------
+    year : int
+        year: 1998, 1999 etc
+
+    Returns
+    -------
+    gst0 : float
+        greenwich sidereal time: 0 to 2pi rad
+    """
+
     jd = 367.0 * year  \
          - math.floor((7 * (year + math.floor(10 / 12.0))) * 0.25)   \
          + math.floor(275 / 9.0) \
@@ -794,10 +1019,6 @@ def gstime0(year):
 
     gst0 = temp
     return gst0
-
-
-
-
 
 # ----------------------------------------------------------------------------
 #
@@ -845,50 +1066,72 @@ def gstime0(year):
 # ----------------------------------------------------------------------------
 
 
-def sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms):
+def sidereal(jdut1: float, deltapsi: float, meaneps: float, omega: float,
+             lod: float, eqeterms: int):
+    """this function calulates the transformation matrix that accounts for the
+    effects of sidereal time. Notice that deltaspi should not be mod'ed to a
+    positive number because it is multiplied rather than used in a
+    trigonometric argument.
 
-        # ------------------------ find gmst --------------------------
-        gmst = gstime(jdut1)
+    Parameters
+    ----------
+    jdut1 : float
+        julian days of ut1: days from 4713 bc
+    deltapsi : float
+        nutation angle: rad
+    meaneps : float
+        mean obliquity of the ecliptic: rad
+    omega : float
+        longitude of ascending node of moon: rad
+    lod : float
+        length od day: sec
+    eqeterms : int
+        terms for ast calculation: 0, 2
+    """
 
-        # ------------------------ find mean ast ----------------------
-        # after 1997, kinematic terms apply as well as gemoetric in eqe
-        if (jdut1 > 2450449.5) and (eqeterms > 0):
-            ast = gmst + deltapsi* math.cos(meaneps) \
-                + 0.00264 * arcsec2rad * math.sin(omega) \
-                + 0.000063 * arcsec2rad * math.sin(2.0 *omega)
-        else:
-            ast = gmst + deltapsi* math.cos(meaneps)
 
-        ast = np.fmod(ast, 2.0*math.pi)
-        thetasa = earthrot * (1.0  - lod/86400.0)
-        omegaearth = thetasa
+    # ------------------------ find gmst --------------------------
+    gmst = gstime(jdut1)
+
+    # ------------------------ find mean ast ----------------------
+    # after 1997, kinematic terms apply as well as gemoetric in eqe
+    if (jdut1 > 2450449.5) and (eqeterms > 0):
+        ast = gmst + deltapsi* math.cos(meaneps) \
+            + 0.00264 * arcsec2rad * math.sin(omega) \
+            + 0.000063 * arcsec2rad * math.sin(2.0 *omega)
+    else:
+        ast = gmst + deltapsi* math.cos(meaneps)
+
+    ast = np.fmod(ast, 2.0*math.pi)
+    thetasa = earthrot * (1.0  - lod/86400.0)
+    omegaearth = thetasa
 
 #print('st gmst %11.8f ast %11.8f ome  %11.8f \n', gmst*180/math.pi, ast*180/math.pi, omegaearth*180/math.pi)
 
-        st = np.zeros((3, 3))
-        st[0, 0] = math.cos(ast)
-        st[0, 1] = -math.sin(ast)
-        st[0, 2] = 0.0
-        st[1, 0] = math.sin(ast)
-        st[1, 1] = math.cos(ast)
-        st[1, 2] = 0.0
-        st[2, 0] = 0.0
-        st[2, 1] = 0.0
-        st[2, 2] = 1.0
+    st = np.zeros((3, 3))
+    st[0, 0] = math.cos(ast)
+    st[0, 1] = -math.sin(ast)
+    st[0, 2] = 0.0
+    st[1, 0] = math.sin(ast)
+    st[1, 1] = math.cos(ast)
+    st[1, 2] = 0.0
+    st[2, 0] = 0.0
+    st[2, 1] = 0.0
+    st[2, 2] = 1.0
 
-        # compute sidereal time rate matrix
-        stdot = np.zeros((3, 3))
-        stdot[0, 0] = -omegaearth * math.sin(ast)
-        stdot[0, 1] = -omegaearth * math.cos(ast)
-        stdot[0, 2] = 0.0
-        stdot[1, 0] = omegaearth * math.cos(ast)
-        stdot[1, 1] = -omegaearth * math.sin(ast)
-        stdot[1, 2] = 0.0
-        stdot[2, 0] = 0.0
-        stdot[2, 1] = 0.0
-        stdot[2, 2] = 0.0
+    # compute sidereal time rate matrix
+    stdot = np.zeros((3, 3))
+    stdot[0, 0] = -omegaearth * math.sin(ast)
+    stdot[0, 1] = -omegaearth * math.cos(ast)
+    stdot[0, 2] = 0.0
+    stdot[1, 0] = omegaearth * math.cos(ast)
+    stdot[1, 1] = -omegaearth * math.sin(ast)
+    stdot[1, 2] = 0.0
+    stdot[2, 0] = 0.0
+    stdot[2, 1] = 0.0
+    stdot[2, 2] = 0.0
 
-        return st, stdot
+    return st, stdot
 
 
 # -----------------------------------------------------------------------------
@@ -920,8 +1163,20 @@ def sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms):
 # sse = jd2sse(jd)
 # -----------------------------------------------------------------------------
 
-def jd2sse(jd=None):
-    # ------------------------  implementation   ------------------
+def jd2sse(jd: float):
+    """this function finds the seconds since epoch (1 Jan 2000) given the
+    julian date
+
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+
+    Returns
+    -------
+    sse: float
+        seconds since epoch 1 jan 2000
+    """
     sse = (jd - 2451544.5) * 86400.0
     return sse
 
@@ -962,7 +1217,30 @@ def jd2sse(jd=None):
 # [days] = finddays (year, month, day, hr, min, sec)
 # -----------------------------------------------------------------------------
 
-def finddays(year=None, month=None, day=None, hr=None, min=None, sec=None):
+def finddays(year: int, month: int, day: int, hr: int, min: int, sec: float):
+    """this function finds the fractional days through a year given the year,
+    month, day, hour, minute and second.
+
+    Parameters
+    ----------
+    year : int
+        years: 1900 to 2100
+    month : int
+        months: 1 to 12
+    day : int
+        days: 1 t 31
+    hr : int
+        hours: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
+
+    Returns
+    -------
+    days: float
+        day of the year + fraction: days
+    """
     lmonth = np.zeros(12)
     for i in range(12):
         lmonth[i] = 31
