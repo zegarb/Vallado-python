@@ -1163,20 +1163,32 @@ def quintic(a=None, b=None, c=None, d=None, e=None, f=None, opt=None):
 #  printdiff(strin, cov1, cov2)
 # ----------------------------------------------------------------------------
 
-def printdiff(strin=None, mat1=None, mat2=None):
-    small = 1e-18
+def printdiff(strin: str, mat1: np.ndarray, mat2: np.ndarray):
+    """this function prints a covariance matrix difference
+
+    Parameters
+    ----------
+    strin : str
+        title string
+    mat1 : np.ndarray
+        6x6 input matrix
+    mat2 : np.ndarray
+        6x6 input matrix
+    """
+
+    small = smalle18
     print('diff %s \n' % (strin))
-    print((np.transpose(mat1) - np.transpose(mat2)))
+    print(mat1.T - mat2.T)
     print('pctdiff %s pct over 1e-18  \n' % (strin))
     #    fprintf(1, '#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f \n', 100.0*((mat1' - mat2')/mat1'))
     #    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
     #    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
-    tm1 = np.transpose(mat1)
-    tm2 = np.transpose(mat2)
+    tm1 = mat1.T
+    tm2 = mat2.T
     diffmm = np.zeros((6, 6))
     for i in range(6):
         for j in range(6):
-            if (np.abs(tm1[i, j] - tm2[i, j]) < small) or (np.abs(tm1[i, j]) < small):
+            if (abs(tm1[i, j] - tm2[i, j]) < small) or (abs(tm1[i, j]) < small):
                 diffmm[i, j] = 0.0
             else:
                 diffmm[i, j] = 100.0 * ((tm1[i, j] - tm2[i, j]) / tm1[i, j])
