@@ -111,101 +111,57 @@ pp(recef)
 pp(vecef)
 pp(aecef)
 
-reci,veci,aeci = pef2eci(rpef,vpef,apef,ttt,jdut1,lod,eqeterms,ddpsi,ddeps)
-print('pef2eci returned: ')
-pp(reci)
-pp(veci)
-pp(aeci)
+# vK, aJ, aK ecef values slightly off
+rtod, vtod, atod = ecef2tod(recef, vecef, aecef, ttt,
+                            jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
+print('ecef2tod returned: ')
+pp(rtod)
+pp(vtod)
+pp(atod)
+recef, vecef, aecef = tod2ecef(rtod, vtod, atod, ttt, jdut1 + jdut1frac, lod,
+                               xp, yp, 2, ddpsi, ddeps)
+print('tod2ecef returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
 
-rpef,vpef,apef = eci2pef(reci,veci,aeci,ttt,jdut1,lod,terms,ddpsi,ddeps)
-print('eci2pef returned: ')
-pp(rpef)
-pp(vpef)
-pp(apef)
+# vK, aJ, aK ecef values slightly off
+rmod, vmod, amod = ecef2mod(recef, vecef, aecef, ttt,
+                            jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
+print('ecef2mod returned: ')
+pp(rmod)
+pp(vmod)
+pp(amod)
+recef, vecef, aecef = mod2ecef(rmod, vmod, amod, ttt, jdut1 + jdut1frac, lod,
+                               xp, yp, 2, ddpsi, ddeps)
+print('mod2ecef returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
 
-rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "a", ttt, jdut1, lod,
-                                    0, 0)
-print("eci2tirsiau06 a returned:")
-pp(rtirs)
-pp(vtirs)
-pp(atirs)
+recig, vecig, aecig = ecef2eci(recef, vecef, aecef, ttt,
+                                jdut1+jdut1frac, lod, xp, yp, 2,
+                                ddpsi, ddeps)
+print('ecef2eci returned: ')
+pp(recig)
+pp(vecig)
+pp(aecig)
 
-reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "a", ttt, jdut1, lod,
-                                 0, 0)
-print("tirs2eciiau06 a returned:")
-pp(reci)
-pp(veci)
-pp(aeci)
+recef, vecef, aecef = eci2ecef(recig, vecig, aecig, ttt,
+                                jdut1+jdut1frac, lod, xp, yp, 2,
+                                ddpsi, ddeps)
+print('eci2ecef returned:')
+pp(recef)
+pp(vecef)
+pp(aecef)
 
-rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "b", ttt, jdut1, lod,
-                                    0, 0)
-print("eci2tirsiau06 b returned:")
-pp(rtirs)
-pp(vtirs)
-pp(atirs)
+### ecef2tirsiau06 & tirs2ecefiau06 conversions
 
-reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "b", ttt, jdut1, lod,
-                                 0, 0)
-print("tirs2eciiau06 b returned:")
-pp(reci)
-pp(veci)
-pp(aeci)
-
-rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "c", ttt, jdut1, lod,
-                                    0, 0)
-print("eci2tirsiau06 c returned:")
-pp(rtirs)
-pp(vtirs)
-pp(atirs)
-
-reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "c", ttt, jdut1, lod,
-                                 0, 0)
-print("tirs2eciiau06 c returned:")
-pp(reci)
-pp(veci)
-pp(aeci)
-
-rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'b')
-print('ecef2cirsiau06 returned: ')
+rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'a')
+print('ecef2cirsiau06 a returned: ')
 pp(rcirs)
 pp(vcirs)
 pp(acirs)
-
-rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'a', ddx, ddy)
-print('eci2cirsiau06 a returned: ')
-pp(rcirs)
-pp(vcirs)
-pp(acirs)
-
-reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'a', ddx, ddy)
-print('cirs2eciiau06 a returned: ')
-pp(reci)
-pp(veci)
-pp(aeci)
-
-rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'b', ddx, ddy)
-print('eci2cirsiau06 b returned: ')
-pp(rcirs)
-pp(vcirs)
-pp(acirs)
-
-reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'b', ddx, ddy)
-print('cirs2eciiau06 b returned: ')
-pp(reci)
-pp(veci)
-pp(aeci)
-
-rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'c', ddx, ddy)
-print('eci2cirsiau06 c returned: ')
-pp(rcirs)
-pp(vcirs)
-pp(acirs)
-
-reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'c', ddx, ddy)
-print('cirs2eciiau06 c returned: ')
-pp(reci)
-pp(veci)
-pp(aeci)
 
 recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'a')
 print('cirs2ecefiau06 a returned: ')
@@ -213,8 +169,26 @@ pp(recef)
 pp(vecef)
 pp(aecef)
 
+rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'b')
+print('ecef2cirsiau06 b returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
 recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'b')
 print('cirs2ecefiau06 b returned: ')
+pp(recef)
+pp(vecef)
+pp(aecef)
+
+rcirs,vcirs,acirs = ecef2cirsiau06(recef,vecef,aecef,ttt,jdut1,lod,xp,yp,'c')
+print('ecef2cirsiau06 c returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+recef,vecef,aecef = cirs2ecefiau06(rcirs,vcirs,acirs,ttt,jdut1,lod,xp,yp,'c')
+print('cirs2ecefiau06 c returned: ')
 pp(recef)
 pp(vecef)
 pp(aecef)
@@ -275,40 +249,6 @@ pp(recef)
 pp(vecef)
 pp(aecef)
 
-rtod, vtod, atod = ecef2tod(recef, vecef, aecef, ttt,
-                            jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
-print('ecef2tod returned: ')
-pp(rtod)
-pp(vtod)
-pp(atod)
-
-# recef, vecef, aecef = tod2ecef()
-
-rmod, vmod, amod = ecef2mod(recef, vecef, aecef, ttt,
-                            jdut1+jdut1frac, lod, xp, yp, 2, ddpsi, ddeps)
-print('ecef2mod returned: ')
-pp(rmod)
-pp(vmod)
-pp(amod)
-
-# recef, vecef, aecef = mod2ecef()
-
-recig, vecig, aecig = ecef2eci(recef, vecef, aecef, ttt,
-                                jdut1+jdut1frac, lod, xp, yp, 2,
-                                ddpsi, ddeps)
-print('ecef2eci returned: ')
-pp(recig)
-pp(vecig)
-pp(aecig)
-
-recef, vecef, aecef = eci2ecef(recig, vecig, aecig, ttt,
-                                jdut1+jdut1frac, lod, xp, yp, 2,
-                                ddpsi, ddeps)
-print('eci2ecef returned:')
-pp(recef)
-pp(vecef)
-pp(aecef)
-
 #--------------------------------eci2--------------------------------------------------------------
 rteme, vteme, ateme = eci2teme(recig, vecig, aecig, ttt, ddpsi, ddeps)
 print('eci2teme returned:')
@@ -323,8 +263,7 @@ pp(recig)
 pp(vecig)
 pp(aecig)
 
-rtod, vtod, atod = eci2tod(recig, vecig, aecig, '80',
-                            ttt, ddpsi, ddeps, ddx, ddy)
+rtod, vtod, atod = eci2tod(recig, vecig, aecig, ttt, ddpsi, ddeps)
 print('eci2tod returned:')
 pp(rtod)
 pp(vtod)
@@ -347,6 +286,96 @@ print('mod2eci returned:')
 pp(recig)
 pp(vecig)
 pp(aecig)
+
+reci,veci,aeci = pef2eci(rpef,vpef,apef,ttt,jdut1,lod,eqeterms,ddpsi,ddeps)
+print('pef2eci returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rpef,vpef,apef = eci2pef(reci,veci,aeci,ttt,jdut1,lod,terms,ddpsi,ddeps)
+print('eci2pef returned: ')
+pp(rpef)
+pp(vpef)
+pp(apef)
+
+rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "a", ttt, jdut1, lod,
+                                    0, 0)
+print("eci2tirsiau06 a returned:")
+pp(rtirs)
+pp(vtirs)
+pp(atirs)
+
+reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "a", ttt, jdut1, lod,
+                                 0, 0)
+print("tirs2eciiau06 a returned:")
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "b", ttt, jdut1, lod,
+                                    0, 0)
+print("eci2tirsiau06 b returned:")
+pp(rtirs)
+pp(vtirs)
+pp(atirs)
+
+reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "b", ttt, jdut1, lod,
+                                 0, 0)
+print("tirs2eciiau06 b returned:")
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rtirs, vtirs, atirs = eci2tirsiau06(reci, veci, aeci, "c", ttt, jdut1, lod,
+                                    0, 0)
+print("eci2tirsiau06 c returned:")
+pp(rtirs)
+pp(vtirs)
+pp(atirs)
+
+reci, veci, aeci = tirs2eciiau06(rtirs, vtirs, atirs, "c", ttt, jdut1, lod,
+                                 0, 0)
+print("tirs2eciiau06 c returned:")
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'a', ddx, ddy)
+print('eci2cirsiau06 a returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'a', ddx, ddy)
+print('cirs2eciiau06 a returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'b', ddx, ddy)
+print('eci2cirsiau06 b returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'b', ddx, ddy)
+print('cirs2eciiau06 b returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
+
+rcirs,vcirs,acirs = eci2cirsiau06(reci,veci,aeci,ttt,'c', ddx, ddy)
+print('eci2cirsiau06 c returned: ')
+pp(rcirs)
+pp(vcirs)
+pp(acirs)
+
+reci,veci,aeci = cirs2eciiau06(rcirs,vcirs,acirs,ttt,'c', ddx, ddy)
+print('cirs2eciiau06 c returned: ')
+pp(reci)
+pp(veci)
+pp(aeci)
 
 print("----------------------------------------")
 

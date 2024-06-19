@@ -5324,10 +5324,75 @@ def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vmod = nut@st@(vpef + np.cross(omegaearth, rpef.T).T)
 
     temp = np.cross(omegaearth, rpef.T)
-    amod = nut@st@(pm@aecef + np.cross(omegaearth, temp).T \
+    amod = nut @ st @ (pm @ aecef + np.cross(omegaearth, temp).T \
             + 2.0*np.cross(omegaearth, vpef.T).T)
 
     return rmod, vmod, amod
+
+def mod2ecef(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray,
+             ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+             eqeterms: int, ddpsi: float, ddeps: float):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the mean of date (mod) frame.
+
+    Parameters
+    ----------
+    rmod : ndarray
+        position vector mod: km
+    vmod : ndarray
+        velocity vector mod: km/s
+    amod : ndarray
+        acceleration vector mod: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta psi correction to gcrf: rad
+
+    Returns
+    -------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    """
+
+    # ---- find matrices
+    deltapsi, _, meaneps, omega, nut = obu.nutation(ttt, ddpsi, ddeps)
+
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+
+    pm = smu.polarm(xp, yp, ttt, '80')
+
+    # ---- perform transformations
+    thetasa = earthrot * (1.0  - lod/86400.0)
+
+    omegaearth = np.array([0.0, 0.0, thetasa])
+
+    rpef = st.T @ nut.T @ rmod
+    recef = pm.T @ rpef
+
+    vpef = st.T @ nut.T @ vmod
+    vecef = pm.T @ vpef - np.cross(omegaearth, rpef.T).T
+
+    temp = np.cross(omegaearth, rpef.T)
+    aecef = pm.T @ st.T @ nut.T @ amod - np.cross(omegaearth, temp).T \
+            - 2.0*np.cross(omegaearth, vpef.T).T
+
+    return recef, vecef, aecef
 
 
 # ----------------------------------------------------------------------------
@@ -5432,19 +5497,80 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     thetasa = earthrot * (1.0  - lod/86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
 
-    rpef = pm@recef
-    rtod = st@rpef
+    rpef = pm @ recef
+    rtod = st @ rpef
 
-    vpef = pm@vecef
-    vtod = st@(vpef + np.cross(omegaearth, rpef.T).T)
+    vpef = pm @ vecef
+    vtod = st @ (vpef + np.cross(omegaearth, rpef.T).T)
 
     temp = np.cross(omegaearth, rpef.T)
-    atod = st@(pm@aecef + np.cross(omegaearth, temp).T \
+    atod = st @ (pm @ aecef + np.cross(omegaearth, temp).T \
             + 2.0*np.cross(omegaearth, vpef.T).T)
 
     return rtod, vtod, atod
 
+def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
+             ttt: float, jdut1: float, lod: float, xp: float, yp: float,
+             eqeterms: int, ddpsi: float, ddeps: float):
+    """this function transforms a vector from the earth fixed (itrf) frame, to
+    the mean of date (mod) frame.
 
+    Parameters
+    ----------
+    rtod : ndarray
+        position vector tod: km
+    vtod : ndarray
+        velocity vector tod: km/s
+    atod : ndarray
+        acceleration vector tod: km/s2
+    ttt : float
+        julian centuries of tt: centuries
+    jdut1 : float
+        julian date of ut1: days since 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    eqeterms : int
+        terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta psi correction to gcrf: rad
+
+    Returns
+    -------
+    recef: ndarray
+        position vector ecef: km
+    vecef: ndarray
+        velocity vector ecef: km/s
+    aecef: ndarray
+        acceleration vector ecef: km/s2
+    """
+    # ---- find matrices - note nut is only needed for st argument inputs
+    deltapsi, _, meaneps, omega, _ = obu.nutation(ttt, ddpsi, ddeps)
+
+    st, _ = stu.sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms)
+
+    pm = smu.polarm(xp, yp, ttt, '80')
+
+    # ---- perform transformations
+    thetasa = earthrot * (1.0  - lod/86400.0)
+    omegaearth = np.array([0.0, 0.0, thetasa])
+
+    rpef = st.T@rtod
+    recef = pm.T@rpef
+
+    vpef = st.T@vtod
+    vecef = pm.T @ vpef - np.cross(omegaearth, rpef.T).T
+
+    temp = np.cross(omegaearth, rpef.T)
+    aecef = pm.T @ st.T @ atod - np.cross(omegaearth, temp).T \
+            - 2.0 * np.cross(omegaearth, vpef.T).T
+
+    return recef, vecef, aecef
 
 # ----------------------------------------------------------------------------
 #
@@ -5897,7 +6023,7 @@ def eci2mod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float):
         acceleration vector mod: km/s2
     """
 
-    prec, _, _, _, _ = obu.precess (ttt, '80')
+    prec, _, _, _, _ = obu.precess(ttt, '80')
 
     rmod = prec.T@reci
 
@@ -5929,8 +6055,8 @@ def eci2mod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float):
 #    ttt         - julian centuries of tt         centuries
 #    ddpsi       - correction for iau2000         rad
 #    ddeps       - correction for iau2000         rad
-#    ddx
-#    ddy
+#    ddx         - eop correction for x           rad
+#    ddy         - eop correction for y           rad
 #
 #  outputs       :
 #    rtod        - position vector of date
