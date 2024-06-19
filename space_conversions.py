@@ -4911,11 +4911,10 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     # two additional terms not needed if satellite is not on surface
     # of the Earth
     c1 = np.cross(omegaearth, temp)
-    c2 = 2.0*np.cross(omegaearth.T, vpef.T)
-    aeci = tmpmat @ pm @ aecef
+    c2 = 2.0*np.cross(omegaearth, vpef.T)
+    aeci = tmpmat @ (pm @ aecef + c1.T + c2.T)
     #print("aeci: ", aeci)
 
-    aeci = aeci + c1.T + c2.T
     return reci, veci, aeci
 
 
@@ -5386,12 +5385,11 @@ def mod2ecef(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray,
     recef = pm.T @ rpef
 
     vpef = st.T @ nut.T @ vmod
-    vecef = pm.T @ vpef - np.cross(omegaearth, rpef.T).T
+    vecef = pm.T @ (vpef - np.cross(omegaearth, rpef.T).T)
 
     temp = np.cross(omegaearth, rpef.T)
-    aecef = pm.T @ st.T @ nut.T @ amod - np.cross(omegaearth, temp).T \
-            - 2.0*np.cross(omegaearth, vpef.T).T
-
+    aecef = pm.T @ (st.T @ nut.T @ amod - np.cross(omegaearth, temp).T
+                    - 2.0*np.cross(omegaearth, vpef.T).T)
     return recef, vecef, aecef
 
 
@@ -5560,15 +5558,15 @@ def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
     thetasa = earthrot * (1.0  - lod/86400.0)
     omegaearth = np.array([0.0, 0.0, thetasa])
 
-    rpef = st.T@rtod
-    recef = pm.T@rpef
+    rpef = st.T @ rtod
+    recef = pm.T @ rpef
 
-    vpef = st.T@vtod
-    vecef = pm.T @ vpef - np.cross(omegaearth, rpef.T).T
+    vpef = st.T @ vtod
+    vecef = pm.T @ (vpef - np.cross(omegaearth, rpef.T).T)
 
     temp = np.cross(omegaearth, rpef.T)
-    aecef = pm.T @ st.T @ atod - np.cross(omegaearth, temp).T \
-            - 2.0 * np.cross(omegaearth, vpef.T).T
+    aecef = pm.T @ (st.T @ atod - np.cross(omegaearth, temp).T
+                    - 2.0 * np.cross(omegaearth, vpef.T).T)
 
     return recef, vecef, aecef
 
@@ -5948,14 +5946,14 @@ def eci2ecef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float,
     recef = pm.T@rpef
 
     temp = np.cross(omegaearth, rpef.T) #turn from column to row vectors for cross product
-    vpef = tmpmat@veci - temp.T
-    vecef = pm.T@vpef
+    vpef = tmpmat @ veci - temp.T
+    vecef = pm.T @ vpef
 
     # two additional terms not needed if satellite is not on surface
     # of the Earth
     c1 = np.cross(omegaearth, temp)
     c2 = 2.0*np.cross(omegaearth, vpef.T)
-    aecef = np.matmul(pm.T, np.matmul(tmpmat, aeci)) - c1.T - c2.T
+    aecef = pm.T @ (tmpmat @ aeci - c1.T - c2.T)
     return recef, vecef, aecef
 
 

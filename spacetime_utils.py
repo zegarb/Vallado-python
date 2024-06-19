@@ -845,7 +845,7 @@ def gstime0(year):
 # ----------------------------------------------------------------------------
 
 
-def sidereal (jdut1, deltapsi, meaneps, omega, lod, eqeterms):
+def sidereal(jdut1, deltapsi, meaneps, omega, lod, eqeterms):
 
         # ------------------------ find gmst --------------------------
         gmst = gstime(jdut1)
@@ -859,7 +859,7 @@ def sidereal (jdut1, deltapsi, meaneps, omega, lod, eqeterms):
         else:
             ast = gmst + deltapsi* math.cos(meaneps)
 
-        ast = np.fmod (ast, 2.0*math.pi)
+        ast = np.fmod(ast, 2.0*math.pi)
         thetasa = earthrot * (1.0  - lod/86400.0)
         omegaearth = thetasa
 
