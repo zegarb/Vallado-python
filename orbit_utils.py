@@ -108,7 +108,14 @@ def clean_fwf(lins, maxsp, isint=True, isfloat=False):
 #     vallado, crawford, hujsak, kelso  2006
 #  ----------------------------------------------------------------------------*/
 
-def dsinit(xke = None,cosim = None,emsq = None,argpo = None,s1 = None,s2 = None,s3 = None,s4 = None,s5 = None,sinim = None,ss1 = None,ss2 = None,ss3 = None,ss4 = None,ss5 = None,sz1 = None,sz3 = None,sz11 = None,sz13 = None,sz21 = None,sz23 = None,sz31 = None,sz33 = None,t = None,tc = None,gsto = None,mo = None,mdot = None,no = None,nodeo = None,nodedot = None,xpidot = None,z1 = None,z3 = None,z11 = None,z13 = None,z21 = None,z23 = None,z31 = None,z33 = None,em = None,argpm = None,inclm = None,mm = None,nm = None,nodem = None,ecco = None,eccsq = None):
+def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
+           s3=None, s4=None, s5=None, sinim=None, ss1=None, ss2=None,
+           ss3=None, ss4=None, ss5=None, sz1=None, sz3=None, sz11=None,
+           sz13=None, sz21=None, sz23=None, sz31=None, sz33=None, t=None,
+           tc=None, gsto=None, mo=None, mdot=None, no=None, nodeo=None,
+           nodedot=None, xpidot=None, z1=None, z3=None, z11=None, z13=None,
+           z21=None, z23=None, z31=None, z33=None, em=None, argpm=None,
+           inclm=None, mm=None, nm=None, nodem=None, ecco=None, eccsq=None):
     # /* --------------------- local variables ------------------------ */
     aonv = 0.0
     q22 = 1.7891679e-06
@@ -185,7 +192,7 @@ def dsinit(xke = None,cosim = None,emsq = None,argpo = None,s1 = None,s2 = None,
 
     # /* ----------- calculate deep space resonance effects -------- */
     dndt = 0.0
-    theta = np.fmod(gsto + tc * rptim,twopi)
+    theta = np.fmod(gsto + tc * rptim, twopi)
     em = em + dedt * t
     inclm = inclm + didt * t
     argpm = argpm + domdt * t
@@ -275,7 +282,7 @@ def dsinit(xke = None,cosim = None,emsq = None,argpo = None,s1 = None,s2 = None,
             temp = 2.0 * temp1 * root54
             d5421 = temp * f542 * g521
             d5433 = temp * f543 * g533
-            xlamo = np.fmod(mo + nodeo + nodeo - theta - theta,twopi)
+            xlamo = np.fmod(mo + nodeo + nodeo - theta - theta, twopi)
             xfact = mdot + dmdt + 2.0 * (nodedot + dnodt - rptim) - no
             em = emo
             emsq = emsqo
@@ -292,7 +299,7 @@ def dsinit(xke = None,cosim = None,emsq = None,argpo = None,s1 = None,s2 = None,
             del2 = 2.0 * del1 * f220 * g200 * q22
             del3 = 3.0 * del1 * f330 * g300 * q33 * aonv
             del1 = del1 * f311 * g310 * q31 * aonv
-            xlamo = np.fmod(mo + nodeo + argpo - theta,twopi)
+            xlamo = np.fmod(mo + nodeo + argpo - theta, twopi)
             xfact = mdot + xpidot - rptim + dmdt + domdt + dnodt - no
         # /* ------------ for sgp4, initialize the integrator ---------- */
         xli = xlamo
@@ -301,7 +308,7 @@ def dsinit(xke = None,cosim = None,emsq = None,argpo = None,s1 = None,s2 = None,
         nm = no + dndt
 
 
-    return em,argpm,inclm,mm,nm,nodem,irez,atime,d2201,d2211,d3210,d3222,d4410,d4422,d5220,d5232,d5421,d5433,dedt,didt,dmdt,dndt,dnodt,domdt,del1,del2,del3,xfact,xlamo,xli,xni
+    return em, argpm, inclm, mm, nm, nodem, irez, atime, d2201, d2211, d3210, d3222, d4410, d4422, d5220, d5232, d5421, d5433, dedt, didt, dmdt, dndt, dnodt, domdt, del1, del2, del3, xfact, xlamo, xli, xni
 
 # -----------------------------------------------------------------------------
 #
@@ -386,11 +393,13 @@ def dsinit(xke = None,cosim = None,emsq = None,argpo = None,s1 = None,s2 = None,
 #     hoots, norad spacetrack report #6 1986
 #     hoots, schumacher and glover 2004
 #     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------*/
+#  ----------------------------------------------------------------------------
 
-def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar = None,xndot = None,xnddot = None,xecco = None,xargpo = None,xinclo = None,xmo = None,xno_kozai = None,xnodeo = None):
-    # /* ------------------------ initialization --------------------- */
-# /* ----------- set all near earth variables to zero ------------ */
+def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
+             xbstar=None, xndot=None, xnddot=None, xecco=None,
+             xargpo=None, xinclo=None, xmo=None, xno_kozai=None, xnodeo=None):
+    # ------------------------ initialization ---------------------
+    # ----------- set all near earth variables to zero ------------
     satrec['isimp'] = 0
     satrec['method'] = 'n'
     satrec['aycof'] = 0.0
@@ -418,7 +427,7 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
     satrec['xlcof'] = 0.0
     satrec['xmcof'] = 0.0
     satrec['nodecf'] = 0.0
-    # /* ----------- set all deep space variables to zero ------------ */
+    # ----------- set all deep space variables to zero ------------
     satrec['irez'] = 0
     satrec['d2201'] = 0.0
     satrec['d2211'] = 0.0
@@ -478,10 +487,11 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
     # sgp4fix add opsmode
     satrec['operationmode'] = opsmode
     satrec['error'] = 0
-    # sgp4fix - note the following variables are also passed directly via satrec.
-# it is possible to streamline the sgp4init call by deleting the "x"
-# variables, but the user would need to set the satrec.* values first. we
-# include the additional assignment in case twoline2rv is not used.
+    # sgp4fix - note the following variables are also passed directly via
+    # satrec.
+    # it is possible to streamline the sgp4init call by deleting the "x"
+    # variables, but the user would need to set the satrec.* values first. we
+    # include the additional assignment in case twoline2rv is not used.
     satrec['bstar'] = xbstar
     # sgp4fix allow additional parameters in the struct
     satrec['ndot'] = xndot
@@ -501,30 +511,35 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
     satrec['mm'] = 0.0
     satrec['nm'] = 0.0
     #     /* -------------------- wgs-72 earth constants ----------------- */
-#     // sgp4fix identify constants and allow alternate values
-# sgp4fix switch to satrec['so'] only one call is needed to initialize
-# constants
-#global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
-    satrec['tumin'],satrec['mu'],satrec['radiusearthkm'],satrec['xke'],satrec['j2'],satrec['j3'],satrec['j4'],satrec['j3oj2'] = getgravc(whichconst)
+    #     // sgp4fix identify constants and allow alternate values
+    # sgp4fix switch to satrec['so'] only one call is needed to initialize
+    # constants
+    #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+    satrec['tumin'], satrec['mu'], satrec['radiusearthkm'], satrec['xke'], \
+        satrec['j2'], satrec['j3'], satrec['j4'], satrec['j3oj2'] \
+            = getgravc(whichconst)
     ss = 78.0 / satrec['radiusearthkm'] + 1.0
     qzms2t = ((120.0 - 78.0) / satrec['radiusearthkm']) ** 4
     x2o3 = 2.0 / 3.0
     # sgp4fix divisor for divide by zero check on inclination
-# the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
-# 1.5 e-12, so the threshold was changed to 1.5e-12 for consistancy
+    # the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
+    # 1.5 e-12, so the threshold was changed to 1.5e-12 for consistancy
     temp4 = 1.5e-12
     satrec['init'] = 'y'
     satrec['t'] = 0.0
-    satrec['method'],ainv,ao,satrec['con41'],con42,cosio,cosio2,eccsq,omeosq,posq,rp,rteosq,sinio,satrec['gsto'],satrec['no'] = initl(satrec['xke'],satrec['j2'],satrec['ecco'],epoch,satrec['inclo'],satrec['no_kozai'],satrec['operationmode'])
+    satrec['method'], ainv, ao, satrec['con41'], con42, cosio, cosio2, eccsq, \
+        omeosq, posq, rp, rteosq, sinio, satrec['gsto'], satrec['no'] \
+            = initl(satrec['xke'], satrec['j2'], satrec['ecco'], epoch,
+                    satrec['inclo'], satrec['no_kozai'],
+                    satrec['operationmode'])
     satrec['a'] = (satrec['no'] * satrec['tumin']) ** (- 2.0 / 3.0)
     satrec['alta'] = satrec['a'] * (1.0 + satrec['ecco']) - 1.0
     satrec['altp'] = satrec['a'] * (1.0 - satrec['ecco']) - 1.0
     # sgp4fix remove this check as it is unnecessary
-# the mrt check in sgp4 handles decaying satellite cases even if the starting
-#if (rp < 1.0)
-#   printf("# *** satn#d epoch elts sub-orbital ***\n", satn);
-#    satrec['error'] = 5;
-#end
+    # the mrt check in sgp4 handles decaying satellite cases even if the starting
+    #if (rp < 1.0)
+    #   printf("# *** satn#d epoch elts sub-orbital ***\n", satn);
+    #    satrec['error'] = 5;
 
     if ((omeosq >= 0.0) or (satrec['no'] >= 0.0)):
         satrec['isimp'] = 0
@@ -548,22 +563,41 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
         psisq = np.abs(1.0 - etasq)
         coef = qzms24 * tsi ** 4.0
         coef1 = coef / psisq ** 3.5
-        cc2 = coef1 * satrec['no'] * (ao * (1.0 + 1.5 * etasq + eeta * (4.0 + etasq)) + 0.375 * satrec['j2'] * tsi / psisq * satrec['con41'] * (8.0 + 3.0 * etasq * (8.0 + etasq)))
+        cc2 = (coef1 * satrec['no']
+               * (ao * (1.0 + 1.5 * etasq + eeta * (4.0 + etasq))
+                  + 0.375 * satrec['j2'] * tsi / psisq * satrec['con41']
+                  * (8.0 + 3.0 * etasq * (8.0 + etasq))))
         satrec['cc1'] = satrec['bstar'] * cc2
         cc3 = 0.0
         if (satrec['ecco'] > 0.0001):
-            cc3 = - 2.0 * coef * tsi * satrec['j3oj2'] * satrec['no'] * sinio / satrec['ecco']
+            cc3 = (-2.0 * coef * tsi * satrec['j3oj2'] * satrec['no'] * sinio
+                   / satrec['ecco'])
         satrec['x1mth2'] = 1.0 - cosio2
-        satrec['cc4'] = 2.0 * satrec['no'] * coef1 * ao * omeosq * (satrec['eta'] * (2.0 + 0.5 * etasq) + satrec['ecco'] * (0.5 + 2.0 * etasq) - satrec['j2'] * tsi / (ao * psisq) * (- 3.0 * satrec['con41'] * (1.0 - 2.0 * eeta + etasq * (1.5 - 0.5 * eeta)) + 0.75 * satrec['x1mth2'] * (2.0 * etasq - eeta * (1.0 + etasq)) * np.cos(2.0 * satrec['argpo'])))
-        satrec['cc5'] = 2.0 * coef1 * ao * omeosq * (1.0 + 2.75 * (etasq + eeta) + eeta * etasq)
+        satrec['cc4'] = (2.0 * satrec['no'] * coef1 * ao * omeosq
+                         * (satrec['eta'] * (2.0 + 0.5 * etasq)
+                            + satrec['ecco'] * (0.5 + 2.0 * etasq)
+                            - satrec['j2'] * tsi / (ao * psisq)
+                            * (- 3.0 * satrec['con41']
+                               * (1.0 - 2.0 * eeta + etasq * (1.5 - 0.5 * eeta))
+                               + 0.75 * satrec['x1mth2']
+                               * (2.0 * etasq - eeta * (1.0 + etasq))
+                               * np.cos(2.0 * satrec['argpo']))))
+        satrec['cc5'] = (2.0 * coef1 * ao * omeosq *
+                         (1.0 + 2.75 * (etasq + eeta) + eeta * etasq))
         cosio4 = cosio2 * cosio2
         temp1 = 1.5 * satrec['j2'] * pinvsq * satrec['no']
         temp2 = 0.5 * temp1 * satrec['j2'] * pinvsq
         temp3 = - 0.46875 * satrec['j4'] * pinvsq * pinvsq * satrec['no']
-        satrec['mdot'] = satrec['no'] + 0.5 * temp1 * rteosq * satrec['con41'] + 0.0625 * temp2 * rteosq * (13.0 - 78.0 * cosio2 + 137.0 * cosio4)
-        satrec['argpdot'] = - 0.5 * temp1 * con42 + 0.0625 * temp2 * (7.0 - 114.0 * cosio2 + 395.0 * cosio4) + temp3 * (3.0 - 36.0 * cosio2 + 49.0 * cosio4)
+        satrec['mdot'] = (satrec['no'] + 0.5 * temp1 * rteosq * satrec['con41']
+                          + 0.0625 * temp2 * rteosq
+                          * (13.0 - 78.0 * cosio2 + 137.0 * cosio4))
+        satrec['argpdot'] = (-0.5 * temp1 * con42 + 0.0625 * temp2
+                             * (7.0 - 114.0 * cosio2 + 395.0 * cosio4)
+                             + temp3 * (3.0 - 36.0 * cosio2 + 49.0 * cosio4))
         xhdot1 = - temp1 * cosio
-        satrec['nodedot'] = xhdot1 + (0.5 * temp2 * (4.0 - 19.0 * cosio2) + 2.0 * temp3 * (3.0 - 7.0 * cosio2)) * cosio
+        satrec['nodedot'] = (xhdot1 + (0.5 * temp2 * (4.0 - 19.0 * cosio2)
+                                       + 2.0 * temp3 * (3.0 - 7.0 * cosio2))
+                             * cosio)
         xpidot = satrec['argpdot'] + satrec['nodedot']
         satrec['omgcof'] = satrec['bstar'] * cc3 * np.cos(satrec['argpo'])
         satrec['xmcof'] = 0.0
@@ -573,9 +607,11 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
         satrec['t2cof'] = 1.5 * satrec['cc1']
         # // sgp4fix for divide by zero with xinco = 180 deg
         if (np.abs(cosio + 1.0) > 1.5e-12):
-            satrec['xlcof'] = - 0.25 * satrec['j3oj2'] * sinio * (3.0 + 5.0 * cosio) / (1.0 + cosio)
+            satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinio
+                               * (3.0 + 5.0 * cosio) / (1.0 + cosio))
         else:
-            satrec['xlcof'] = - 0.25 * satrec['j3oj2'] * sinio * (3.0 + 5.0 * cosio) / temp4
+            satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinio
+                               * (3.0 + 5.0 * cosio) / temp4)
         satrec['aycof'] = - 0.5 * satrec['j3oj2'] * sinio
         satrec['delmo'] = (1.0 + satrec['eta'] * np.cos(satrec['mo'])) ** 3
         satrec['sinmao'] = np.sin(satrec['mo'])
@@ -587,12 +623,60 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
             tc = 0.0
             inclm = satrec['inclo']
             # changed from dscom to dpper without testing -jmb
-            sinim,cosim,sinomm,cosomm,snodm,cnodm,day,satrec['e3'],satrec['ee2'],em,emsq,gam,satrec['peo'],satrec['pgho'],satrec['pho'],satrec['pinco'],satrec['plo'],rtemsq,satrec['se2'],satrec['se3'],satrec['sgh2'],satrec['sgh3'],satrec['sgh4'],satrec['sh2'],satrec['sh3'],satrec['si2'],satrec['si3'],satrec['sl2'],satrec['sl3'],satrec['sl4'],s1,s2,s3,s4,s5,s6,s7,ss1,ss2,ss3,ss4,ss5,ss6,ss7,sz1,sz2,sz3,sz11,sz12,sz13,sz21,sz22,sz23,sz31,sz32,sz33,satrec['xgh2'],satrec['xgh3'],satrec['xgh4'],satrec['xh2'],satrec['xh3'],satrec['xi2'],satrec['xi3'],satrec['xl2'],satrec['xl3'],satrec['xl4'],nm,z1,z2,z3,z11,z12,z13,z21,z22,z23,z31,z32,z33,satrec['zmol'],satrec['zmos'] = dpper(epoch,satrec['ecco'],satrec['argpo'],tc,satrec['inclo'],satrec['nodeo'],satrec['no'])
-            satrec['ecco'],satrec['inclo'],satrec['nodeo'],satrec['argpo'],satrec['mo'] = dpper(satrec['e3'],satrec['ee2'],satrec['peo'],satrec['pgho'],satrec['pho'],satrec['pinco'],satrec['plo'],satrec['se2'],satrec['se3'],satrec['sgh2'],satrec['sgh3'],satrec['sgh4'],satrec['sh2'],satrec['sh3'],satrec['si2'],satrec['si3'],satrec['sl2'],satrec['sl3'],satrec['sl4'],satrec['t'],satrec['xgh2'],satrec['xgh3'],satrec['xgh4'],satrec['xh2'],satrec['xh3'],satrec['xi2'],satrec['xi3'],satrec['xl2'],satrec['xl3'],satrec['xl4'],satrec['zmol'],satrec['zmos'],inclm,satrec['init'],satrec['ecco'],satrec['inclo'],satrec['nodeo'],satrec['argpo'],satrec['mo'],satrec['operationmode'])
+            (sinim, cosim, sinomm, cosomm, snodm, cnodm, day, satrec['e3'],
+             satrec['ee2'], em, emsq, gam, satrec['peo'], satrec['pgho'],
+             satrec['pho'], satrec['pinco'], satrec['plo'], rtemsq,
+             satrec['se2'], satrec['se3'], satrec['sgh2'], satrec['sgh3'],
+             satrec['sgh4'], satrec['sh2'], satrec['sh3'], satrec['si2'],
+             satrec['si3'], satrec['sl2'], satrec['sl3'], satrec['sl4'],
+             s1, s2, s3, s4, s5, s6, s7, ss1, ss2, ss3, ss4, ss5, ss6, ss7,
+             sz1, sz2, sz3, sz11, sz12, sz13, sz21, sz22, sz23,
+             sz31, sz32, sz33, satrec['xgh2'], satrec['xgh3'], satrec['xgh4'],
+             satrec['xh2'], satrec['xh3'], satrec['xi2'], satrec['xi3'],
+             satrec['xl2'], satrec['xl3'], satrec['xl4'], nm, z1, z2, z3, z11,
+             z12, z13, z21, z22, z23, z31, z32, z33, satrec['zmol'],
+             satrec['zmos']) = dpper(epoch, satrec['ecco'], satrec['argpo'],
+                                     tc, satrec['inclo'], satrec['nodeo'],
+                                     satrec['no'])
+            (satrec['ecco'], satrec['inclo'], satrec['nodeo'], satrec['argpo'],
+             satrec['mo']) = dpper(satrec['e3'], satrec['ee2'],
+                                   satrec['peo'], satrec['pgho'],
+                                   satrec['pho'], satrec['pinco'],
+                                   satrec['plo'], satrec['se2'],
+                                   satrec['se3'], satrec['sgh2'],
+                                   satrec['sgh3'], satrec['sgh4'],
+                                   satrec['sh2'], satrec['sh3'],
+                                   satrec['si2'], satrec['si3'],
+                                   satrec['sl2'], satrec['sl3'],
+                                   satrec['sl4'], satrec['t'],
+                                   satrec['xgh2'], satrec['xgh3'],
+                                   satrec['xgh4'], satrec['xh2'],
+                                   satrec['xh3'], satrec['xi2'],
+                                   satrec['xi3'], satrec['xl2'],
+                                   satrec['xl3'], satrec['xl4'],
+                                   satrec['zmol'], satrec['zmos'], inclm,
+                                   satrec['init'], satrec['ecco'],
+                                   satrec['inclo'], satrec['nodeo'],
+                                   satrec['argpo'], satrec['mo'],
+                                   satrec['operationmode'])
             argpm = 0.0
             nodem = 0.0
             mm = 0.0
-            em,argpm,inclm,mm,nm,nodem,satrec['irez'],satrec['atime'],satrec['d2201'],satrec['d2211'],satrec['d3210'],satrec['d3222'],satrec['d4410'],satrec['d4422'],satrec['d5220'],satrec['d5232'],satrec['d5421'],satrec['d5433'],satrec['dedt'],satrec['didt'],satrec['dmdt'],dndt,satrec['dnodt'],satrec['domdt'],satrec['del1'],satrec['del2'],satrec['del3'],satrec['xfact'],satrec['xlamo'],satrec['xli'],satrec['xni'] = dsinit(satrec['xke'],cosim,emsq,satrec['argpo'],s1,s2,s3,s4,s5,sinim,ss1,ss2,ss3,ss4,ss5,sz1,sz3,sz11,sz13,sz21,sz23,sz31,sz33,satrec['t'],tc,satrec['gsto'],satrec['mo'],satrec['mdot'],satrec['no'],satrec['nodeo'],satrec['nodedot'],xpidot,z1,z3,z11,z13,z21,z23,z31,z33,em,argpm,inclm,mm,nm,nodem,satrec['ecco'],eccsq)
+            (em, argpm, inclm, mm, nm, nodem, satrec['irez'], satrec['atime'],
+             satrec['d2201'], satrec['d2211'], satrec['d3210'],
+             satrec['d3222'], satrec['d4410'], satrec['d4422'],
+             satrec['d5220'], satrec['d5232'], satrec['d5421'],
+             satrec['d5433'], satrec['dedt'], satrec['didt'], satrec['dmdt'],
+             dndt, satrec['dnodt'], satrec['domdt'], satrec['del1'],
+             satrec['del2'], satrec['del3'], satrec['xfact'], satrec['xlamo'],
+             satrec['xli'], satrec['xni']) = \
+                dsinit(satrec['xke'], cosim, emsq, satrec['argpo'], s1, s2, s3,
+                        s4, s5, sinim, ss1, ss2, ss3, ss4, ss5, sz1, sz3, sz11,
+                          sz13, sz21, sz23, sz31, sz33, satrec['t'], tc,
+                          satrec['gsto'], satrec['mo'], satrec['mdot'],
+                          satrec['no'], satrec['nodeo'], satrec['nodedot'],
+                          xpidot, z1, z3, z11, z13, z21, z23, z31, z33, em,
+                          argpm, inclm, mm, nm, nodem, satrec['ecco'], eccsq)
         # /* ----------- set variables if not deep space ----------- */
         if (satrec['isimp'] != 1):
             cc1sq = satrec['cc1'] * satrec['cc1']
@@ -601,21 +685,22 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
             satrec['d3'] = (17.0 * ao + sfour) * temp
             satrec['d4'] = 0.5 * temp * ao * tsi * (221.0 * ao + 31.0 * sfour) * satrec['cc1']
             satrec['t3cof'] = satrec['d2'] + 2.0 * cc1sq
-            satrec['t4cof'] = 0.25 * (3.0 * satrec['d3'] + satrec['cc1'] * (12.0 * satrec['d2'] + 10.0 * cc1sq))
-            satrec['t5cof'] = 0.2 * (3.0 * satrec['d4'] + 12.0 * satrec['cc1'] * satrec['d3'] + 6.0 * satrec['d2'] * satrec['d2'] + 15.0 * cc1sq * (2.0 * satrec['d2'] + cc1sq))
+            satrec['t4cof'] = (0.25 * (3.0 * satrec['d3'] + satrec['cc1'] *
+                                       (12.0 * satrec['d2'] + 10.0 * cc1sq)))
+            satrec['t5cof'] = (0.2 * (3.0 * satrec['d4']
+                                      + 12.0 * satrec['cc1'] * satrec['d3']
+                                      + 6.0 * satrec['d2'] * satrec['d2']
+                                      + 15.0 * cc1sq * (2.0 * satrec['d2']
+                                                        + cc1sq)))
 
     # /* finally propogate to zero epoch to initialise all others. */
-# sgp4fix take out check to let satellites process until they are actually below earth surface
-#if(satrec['error'] == 0)
-    satrec, satrec['r'],satrec['v'] = sgp4(satrec, 0.0)
-    #end
+    # sgp4fix take out check to let satellites process until they are actually below earth surface
+    #if(satrec['error'] == 0)
+    satrec, satrec['r'], satrec['v'] = sgp4(satrec, 0.0)
 
     satrec['init'] = 'n'
 
     return satrec
-
-
-
 
 # -----------------------------------------------------------------------------
 #
@@ -715,16 +800,16 @@ def sgp4init(whichconst = None,opsmode = None,satrec = None,epoch = None,xbstar 
 #     vallado, crawford, hujsak, kelso  2006
 #  ----------------------------------------------------------------------------*/
 
-def sgp4(satrec = None,tsince = None):
+def sgp4(satrec=None, tsince=None):
     # /* ------------------ set mathematical constants --------------- */
     x2o3 = 2.0 / 3.0
     # sgp4fix divisor for divide by zero check on inclination
-# the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
-# 1.5 e-12, so the threshold was changed to 1.5e-12 for consistancy
+    # the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
+    # 1.5 e-12, so the threshold was changed to 1.5e-12 for consistancy
     temp4 = 1.5e-12
     #  // sgp4fix identify constants and allow alternate values
-# no longer needed, pass in through satrec
-#global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+    # no longer needed, pass in through satrec
+    #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
     vkmpersec = satrec['radiusearthkm'] * satrec['xke'] / 60.0
     # /* --------------------- clear sgp4 error flag ----------------- */
     satrec['t'] = tsince
@@ -743,22 +828,42 @@ def sgp4(satrec = None,tsince = None):
     templ = satrec['t2cof'] * t2
     if (satrec['isimp'] != 1):
         delomg = satrec['omgcof'] * satrec['t']
-        delm = satrec['xmcof'] * ((1.0 + satrec['eta'] * np.cos(xmdf)) ** 3 - satrec['delmo'])
+        delm = satrec['xmcof'] * ((1.0 + satrec['eta'] * np.cos(xmdf)) ** 3
+                                  - satrec['delmo'])
         temp = delomg + delm
         mm = xmdf + temp
         argpm = argpdf - temp
         t3 = t2 * satrec['t']
         t4 = t3 * satrec['t']
-        tempa = tempa - satrec['d2'] * t2 - satrec['d3'] * t3 - satrec['d4'] * t4
-        tempe = tempe + satrec['bstar'] * satrec['cc5'] * (np.sin(mm) - satrec['sinmao'])
-        templ = templ + satrec['t3cof'] * t3 + t4 * (satrec['t4cof'] + satrec['t'] * satrec['t5cof'])
+        tempa = tempa - satrec['d2'] * t2 - satrec['d3'] * t3 - satrec['d4'] \
+            * t4
+        tempe = tempe + satrec['bstar'] * satrec['cc5'] * (np.sin(mm)
+                                                           - satrec['sinmao'])
+        templ = templ + satrec['t3cof'] * t3 + t4 * (satrec['t4cof']
+                                                     + satrec['t']
+                                                     * satrec['t5cof'])
 
     nm = satrec['no']
     em = satrec['ecco']
     inclm = satrec['inclo']
     if (satrec['method'] == 'd'):
         tc = satrec['t']
-        satrec['atime'],em,argpm,inclm,satrec['xli'],mm,satrec['xni'],nodem,dndt,nm = dspace(satrec['d2201'],satrec['d2211'],satrec['d3210'],satrec['d3222'],satrec['d4410'],satrec['d4422'],satrec['d5220'],satrec['d5232'],satrec['d5421'],satrec['d5433'],satrec['dedt'],satrec['del1'],satrec['del2'],satrec['del3'],satrec['didt'],satrec['dmdt'],satrec['dnodt'],satrec['domdt'],satrec['irez'],satrec['argpo'],satrec['argpdot'],satrec['t'],tc,satrec['gsto'],satrec['xfact'],satrec['xlamo'],satrec['no'],satrec['atime'],em,argpm,inclm,satrec['xli'],mm,satrec['xni'],nodem,nm)
+        (satrec['atime'], em, argpm, inclm, satrec['xli'], mm, satrec['xni'],
+         nodem, dndt, nm) = dspace(satrec['d2201'], satrec['d2211'],
+                                   satrec['d3210'], satrec['d3222'],
+                                   satrec['d4410'], satrec['d4422'],
+                                   satrec['d5220'], satrec['d5232'],
+                                   satrec['d5421'], satrec['d5433'],
+                                   satrec['dedt'], satrec['del1'],
+                                   satrec['del2'], satrec['del3'],
+                                   satrec['didt'], satrec['dmdt'],
+                                   satrec['dnodt'], satrec['domdt'],
+                                   satrec['irez'], satrec['argpo'],
+                                   satrec['argpdot'], satrec['t'], tc,
+                                   satrec['gsto'], satrec['xfact'],
+                                   satrec['xlamo'], satrec['no'],
+                                   satrec['atime'], em, argpm, inclm,
+                                   satrec['xli'], mm, satrec['xni'], nodem, nm)
 
     if (nm <= 0.0):
         #       fprintf(1,'# error nm #f\n', nm);
@@ -780,10 +885,10 @@ def sgp4(satrec = None,tsince = None):
     xlm = mm + argpm + nodem
     emsq = em * em
     temp = 1.0 - emsq
-    nodem = np.fmod(nodem,twopi)
-    argpm = np.fmod(argpm,twopi)
-    xlm = np.fmod(xlm,twopi)
-    mm = np.fmod(xlm - argpm - nodem,twopi)
+    nodem = np.fmod(nodem, twopi)
+    argpm = np.fmod(argpm, twopi)
+    xlm = np.fmod(xlm, twopi)
+    mm = np.fmod(xlm - argpm - nodem, twopi)
     # /* ----------------- compute extra mean quantities ------------- */
     sinim = np.sin(inclm)
     cosim = np.cos(inclm)
@@ -796,13 +901,24 @@ def sgp4(satrec = None,tsince = None):
     sinip = sinim
     cosip = cosim
     if (satrec['method'] == 'd'):
-        ep,xincp,nodep,argpp,mp = dpper(satrec['e3'],satrec['ee2'],satrec['peo'],satrec['pgho'],satrec['pho'],satrec['pinco'],satrec['plo'],satrec['se2'],satrec['se3'],satrec['sgh2'],satrec['sgh3'],satrec['sgh4'],satrec['sh2'],satrec['sh3'],satrec['si2'],satrec['si3'],satrec['sl2'],satrec['sl3'],satrec['sl4'],satrec['t'],satrec['xgh2'],satrec['xgh3'],satrec['xgh4'],satrec['xh2'],satrec['xh3'],satrec['xi2'],satrec['xi3'],satrec['xl2'],satrec['xl3'],satrec['xl4'],satrec['zmol'],satrec['zmos'],satrec['inclo'],satrec['init'],ep,xincp,nodep,argpp,mp,satrec['operationmode'])
+        ep, xincp, nodep, argpp, mp \
+            = dpper(satrec['e3'], satrec['ee2'], satrec['peo'], satrec['pgho'],
+                    satrec['pho'], satrec['pinco'], satrec['plo'],
+                    satrec['se2'], satrec['se3'], satrec['sgh2'],
+                    satrec['sgh3'], satrec['sgh4'], satrec['sh2'],
+                    satrec['sh3'], satrec['si2'], satrec['si3'], satrec['sl2'],
+                    satrec['sl3'], satrec['sl4'], satrec['t'], satrec['xgh2'],
+                    satrec['xgh3'], satrec['xgh4'], satrec['xh2'],
+                    satrec['xh3'], satrec['xi2'], satrec['xi3'], satrec['xl2'],
+                    satrec['xl3'], satrec['xl4'], satrec['zmol'],
+                    satrec['zmos'], satrec['inclo'], satrec['init'], ep, xincp,
+                    nodep, argpp, mp, satrec['operationmode'])
         if (xincp < 0.0):
             xincp = - xincp
             nodep = nodep + np.pi
             argpp = argpp - np.pi
         if ((ep < 0.0) or (ep > 1.0)):
-            #           fprintf(1,'# error ep #f\n', ep);
+            # fprintf(1,'# error ep #f\n', ep);
             satrec['error'] = 3
 
     # /* -------------------- long period periodics ------------------ */
@@ -812,16 +928,18 @@ def sgp4(satrec = None,tsince = None):
         satrec['aycof'] = - 0.5 * satrec['j3oj2'] * sinip
         # // sgp4fix for divide by zero with xinco = 180 deg
         if (np.abs(cosip + 1.0) > 1.5e-12):
-            satrec['xlcof'] = - 0.25 * satrec['j3oj2'] * sinip * (3.0 + 5.0 * cosip) / (1.0 + cosip)
+            satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinip
+                               * (3.0 + 5.0 * cosip) / (1.0 + cosip))
         else:
-            satrec['xlcof'] = - 0.25 * satrec['j3oj2'] * sinip * (3.0 + 5.0 * cosip) / temp4
+            satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinip
+                               * (3.0 + 5.0 * cosip) / temp4)
 
     axnl = ep * np.cos(argpp)
     temp = 1.0 / (am * (1.0 - ep * ep))
     aynl = ep * np.sin(argpp) + temp * satrec['aycof']
     xl = mp + argpp + nodep + temp * satrec['xlcof'] * axnl
     # /* --------------------- solve kepler's equation --------------- */
-    u = np.fmod(xl - nodep,twopi)
+    u = np.fmod(xl - nodep, twopi)
     eo1 = u
     tem5 = 9999.9
     ktr = 1
@@ -841,7 +959,6 @@ def sgp4(satrec = None,tsince = None):
         eo1 = eo1 + tem5
         ktr = ktr + 1
 
-
     # /* ------------- short period preliminary quantities ----------- */
     ecose = axnl * coseo1 + aynl * sineo1
     esine = axnl * sineo1 - aynl * coseo1
@@ -860,7 +977,7 @@ def sgp4(satrec = None,tsince = None):
         temp = esine / (1.0 + betal)
         sinu = am / rl * (sineo1 - aynl - axnl * temp)
         cosu = am / rl * (coseo1 - axnl + aynl * temp)
-        su = math.atan2(sinu,cosu)
+        su = math.atan2(sinu, cosu)
         sin2u = (cosu + cosu) * sinu
         cos2u = 1.0 - 2.0 * sinu * sinu
         temp = 1.0 / pl
@@ -872,12 +989,16 @@ def sgp4(satrec = None,tsince = None):
             satrec['con41'] = 3.0 * cosisq - 1.0
             satrec['x1mth2'] = 1.0 - cosisq
             satrec['x7thm1'] = 7.0 * cosisq - 1.0
-        mrt = rl * (1.0 - 1.5 * temp2 * betal * satrec['con41']) + 0.5 * temp1 * satrec['x1mth2'] * cos2u
+        mrt = (rl * (1.0 - 1.5 * temp2 * betal * satrec['con41'])
+               + 0.5 * temp1 * satrec['x1mth2'] * cos2u)
         su = su - 0.25 * temp2 * satrec['x7thm1'] * sin2u
         xnode = nodep + 1.5 * temp2 * cosip * sin2u
         xinc = xincp + 1.5 * temp2 * cosip * sinip * cos2u
         mvt = rdotl - nm * temp1 * satrec['x1mth2'] * sin2u / satrec['xke']
-        rvdot = rvdotl + nm * temp1 * (satrec['x1mth2'] * cos2u + 1.5 * satrec['con41']) / satrec['xke']
+        rvdot = (rvdotl + nm * temp1
+                 * (satrec['x1mth2'] * cos2u
+                    + 1.5 * satrec['con41'])
+                 / satrec['xke'])
         # /* --------------------- orientation vectors ------------------- */
         sinsu = np.sin(su)
         cossu = np.cos(su)
@@ -905,10 +1026,10 @@ def sgp4(satrec = None,tsince = None):
 
     # // sgp4fix for decaying satellites
     if (mrt < 1.0):
-        #         printf("# decay condition #11.6f \n",mrt);
+        #         printf("# decay condition #11.6f \n", mrt);
         satrec['error'] = 6
 
-    return satrec,r,v
+    return satrec, r, v
 
 
 
@@ -969,10 +1090,11 @@ def sgp4(satrec = None,tsince = None):
 #     vallado, crawford, hujsak, kelso  2006
 #  ----------------------------------------------------------------------------*/
 
-def initl(xke = None,j2 = None,ecco = None,epoch = None,inclo = None,no_kozai = None,opsmode = None):
+def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
+          opsmode=None):
     # /* -------------------- wgs-72 earth constants ----------------- */
-#     // sgp4fix identify constants and allow alternate values
-# global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+    #     // sgp4fix identify constants and allow alternate values
+    # global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
     x2o3 = 2.0 / 3.0
     #   global opsmode
 
@@ -986,7 +1108,8 @@ def initl(xke = None,j2 = None,ecco = None,epoch = None,inclo = None,no_kozai = 
     ak = (xke / no_kozai) ** x2o3
     d1 = 0.75 * j2 * (3.0 * cosio2 - 1.0) / (rteosq * omeosq)
     del_ = d1 / (ak * ak)
-    adel = ak * (1.0 - del_ * del_ - del_ * (1.0 / 3.0 + 134.0 * del_ * del_ / 81.0))
+    adel = ak * (1.0 - del_ * del_ - del_
+                 * (1.0 / 3.0 + 134.0 * del_ * del_ / 81.0))
     del_ = d1 / (adel * adel)
     no_unkozai = no_kozai / (1.0 + del_)
     ao = (xke / no_unkozai) ** x2o3
@@ -1013,12 +1136,14 @@ def initl(xke = None,j2 = None,ecco = None,epoch = None,inclo = None,no_kozai = 
         thgr70 = 1.7321343856509375
         fk5r = 5.075514194322695e-15
         c1p2p = c1 + twopi
-        gsto = np.fmod(thgr70 + c1 * ids70 + c1p2p * tfrac + ts70 * ts70 * fk5r,twopi)
+        gsto = np.fmod(thgr70 + c1 * ids70 + c1p2p * tfrac
+                       + ts70 * ts70 * fk5r, twopi)
 
     if (gsto < 0.0):
         gsto = gsto + twopi
 
-    return method,ainv,ao,con41,con42,cosio,cosio2,eccsq,omeosq,posq,rp,rteosq,sinio,gsto,no_unkozai
+    return method, ainv, ao, con41, con42, cosio, cosio2, eccsq, omeosq, posq,\
+        rp, rteosq, sinio, gsto, no_unkozai
 
 
 # ------------------------------------------------------------------------------
@@ -1115,7 +1240,7 @@ def findtof (ro, r, p):
 
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #
 #                           function makeorbitrv
 #
@@ -1157,11 +1282,14 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
     error = 'ok'
 
     if (kind == 'k'):
-        outfile = open(os.path.join(os.path.dirname(__file__), "data", 'makeorbrvKep.out'), 'wt')
+        outfile = open(os.path.join(os.path.dirname(__file__),
+                                    "data", 'makeorbrvKep.out'), 'wt')
     elif (kind == 'p'):
-        outfile = open(os.path.join(os.path.dirname(__file__), "data", 'makeorbrvJ2.out'), 'wt')
+        outfile = open(os.path.join(os.path.dirname(__file__),
+                                    "data", 'makeorbrvJ2.out'), 'wt')
     elif (kind == 'j'):
-        outfile = open(os.path.join(os.path.dirname(__file__), "data", 'makeorbrvJ4.out'), 'wt')
+        outfile = open(os.path.join(os.path.dirname(__file__),
+                                    "data", 'makeorbrvJ4.out'), 'wt')
 
     # --------------- approximate ast with gst for this simple demo --------------
 #    gmst = gstime(jd)
@@ -1188,8 +1316,10 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
     nddot = 0.0
     #    period = 2.0*pi*sqrt(a*a*a/398600.4418)
     jdut1 = jd
-    outfile.write(' 1601   xx \n' % ())
-    outfile.write('Time (UTCG)                x (km)             y (km)             z (km)         vx (km/sec)     vy (km/sec)     vz (km/sec)\n' % ())
+    outfile.write(' 1601   xx \n')
+    outfile.write('Time (UTCG)                x (km)             y (km)       '
+                  '      z (km)         vx (km/sec)     vy (km/sec)     '
+                  'vz (km/sec)\n')
     outfile.write('-------------------------    ---------------    ---------------    ---------------    ------------    ------------    ------------\n' % ())
     for i in range(101):
         #        dtsec = (i-1)*period/120.0
@@ -1220,8 +1350,10 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
 #         end
 #        fprintf(outfile, '#11.7f  #11.7f   1.0 \n', latgd * rad2deg, lon * rad2deg)
         h, m, s = stu.sec2hms(dtsec)
-        outfile.write('1 Jun 2018 %2i:%2i:%7.4f  %16.9f  %16.9f %16.9f  %16.9f %16.9f  %16.9f \n' % \
-                    (h, m, s, reci1[0], reci1[1], reci1[2], veci1[0], veci1[1], veci1[2]))
+        outfile.write('1 Jun 2018 %2i:%2i:%7.4f  %16.9f  %16.9f %16.9f  %16.9f'
+                      ' %16.9f  %16.9f \n'
+                      % (h, m, s, reci1[0], reci1[1], reci1[2], veci1[0],
+                         veci1[1], veci1[2]))
         #        x(i, 1) = reci1(1)
 #        y(i, 1) = reci1(2)
 #        z(i, 1) = reci1(3)
@@ -1462,6 +1594,7 @@ def iau06in():
 
 def getgravc(whichconst=None):
     #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+
     if 721 == whichconst:
         # -- wgs-72 low precision str#3 constants --
         mu = 398600.79964
@@ -1472,32 +1605,32 @@ def getgravc(whichconst=None):
         j3 = - 2.53881e-06
         j4 = - 1.65597e-06
         j3oj2 = j3 / j2
+
+    elif 72 == whichconst:
+        # ------------ wgs-72 constants ------------
+        mu = 398600.8
+        radiusearthkm = 6378.135
+        xke = 60.0 / np.sqrt(radiusearthkm * radiusearthkm
+                                * radiusearthkm / mu)
+        tumin = 1.0 / xke
+        j2 = 0.001082616
+        j3 = - 2.53881e-06
+        j4 = - 1.65597e-06
+        j3oj2 = j3 / j2
+
+    elif 84 == whichconst:
+        # ------------ wgs-84 constants ------------
+        mu = 398600.5
+        radiusearthkm = 6378.137
+        xke = 60.0 / np.sqrt(radiusearthkm * radiusearthkm
+                                * radiusearthkm / mu)
+        tumin = 1.0 / xke
+        j2 = 0.00108262998905
+        j3 = - 2.53215306e-06
+        j4 = - 1.61098761e-06
+        j3oj2 = j3 / j2
     else:
-        if 72 == whichconst:
-            # ------------ wgs-72 constants ------------
-            mu = 398600.8
-            radiusearthkm = 6378.135
-            xke = 60.0 / np.sqrt(radiusearthkm * radiusearthkm
-                                 * radiusearthkm / mu)
-            tumin = 1.0 / xke
-            j2 = 0.001082616
-            j3 = - 2.53881e-06
-            j4 = - 1.65597e-06
-            j3oj2 = j3 / j2
-        else:
-            if 84 == whichconst:
-                # ------------ wgs-84 constants ------------
-                mu = 398600.5
-                radiusearthkm = 6378.137
-                xke = 60.0 / np.sqrt(radiusearthkm * radiusearthkm
-                                     * radiusearthkm / mu)
-                tumin = 1.0 / xke
-                j2 = 0.00108262998905
-                j3 = - 2.53215306e-06
-                j4 = - 1.61098761e-06
-                j3oj2 = j3 / j2
-            else:
-                print('unknown gravity option (%d)\n' % (whichconst))
+        print('unknown gravity option (%d)\n' % (whichconst))
 
 
     return tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2
@@ -1630,10 +1763,9 @@ def pathm(llat=None, llon=None, range_=None, az=None):
 #  satfov (incl, az, slatgd, slon, salt, tfov, etactr, fovmax)
 # ------------------------------------------------------------------------------
 
-def satfov(incl=None, az=None, slatgd=None,
-           slon=None, salt=None, tfov=None, etactr=None):
-    # -------------------------  implementation   -----------------
-# ------- find satellite parameters and limiting cases --------
+def satfov(incl=None, az=None, slatgd=None, slon=None, salt=None, tfov=None,
+           etactr=None):
+    # ------- find satellite parameters and limiting cases --------
     r = re + salt
     etahoriz = np.arcsin(re / r)
     rhohoriz = r * np.cos(etahoriz)
@@ -1650,7 +1782,8 @@ def satfov(incl=None, az=None, slatgd=None,
 
     rhomax = re * np.cos(gamma) + r * np.cos(fovmin)
     print('fovmin %11.7f gamma %11.7f gamma %11.7f rho %11.7f  \n'
-          % (fovmin * rad2deg, gamma * rad2deg, (np.pi - gamma) * rad2deg, rhomax))
+          % (fovmin * rad2deg, gamma * rad2deg, (np.pi - gamma) * rad2deg,
+             rhomax))
     # --------------------- slant range --------------------
     lambda_ = np.arcsin(rhomax * np.sin(fovmin) / re)
     rhomin = lambda_ * re
@@ -1736,9 +1869,8 @@ def satfov(incl=None, az=None, slatgd=None,
 # ------------------------------------------------------------------------------
 
 
-def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
+def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
 
-    # -------------------------  implementation   -------------------------
     numiter = 20
     errorl = '      ok'
     v1dv = np.zeros((3))
@@ -1758,25 +1890,25 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
     magr2 = smu.mag(r2)
 
     # this value stays constant in all calcs, vara changes with df
-    cosdeltanu = np.dot(r1, r2) / (magr1*magr2)
+    cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
     if abs(cosdeltanu) > 1.0:
         cosdeltanu = np.sign(cosdeltanu) * 1.0
     if (dm == 'L'):  #dm == 'l'
-        vara = -math.sqrt(magr1*magr2*(1.0 + cosdeltanu))
+        vara = -math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
     else:
-        vara = math.sqrt(magr1*magr2*(1.0 + cosdeltanu))
+        vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
 
     # setup variables for speed
     oomu = 1.0 / math.sqrt(mu)
 
     # --------- set up initial bounds for the bissection ----------
     if (nrev == 0):
-        lower = -16.0*math.pi*math.pi  # allow hyperbolic and parabolic solutions
-        upper = 4.0*math.pi*math.pi  # could be negative infinity for all cases
+        lower = -16.0 * math.pi * math.pi  # allow hyperbolic and parabolic solutions
+        upper = 4.0 * math.pi * math.pi  # could be negative infinity for all cases
     else:
         # set absolute limits for multi-rev cases
-        lower = 4.0*nrev**2*math.pi*math.pi
-        upper = 4.0*(nrev + 1.0)**2*math.pi*math.pi
+        lower = 4.0 * nrev**2 * math.pi * math.pi
+        upper = 4.0 * (nrev + 1.0)**2 * math.pi * math.pi
         # adjust based on long or short way if dm == 'l'
         #if ((dm == 'l') and (df == 'd')) or ((dm == 's') and (df == 'r'))
         #if ((df == 'r') and (dm == 's')) or ((df == 'd') and (dm == 'l'))
@@ -1878,15 +2010,16 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
                and (loops < numiter) and (ynegktr <= 10)):
             # print('%3i  dtnew-dtsec %11.7f yneg %3i \n', loops, dtnew-dtsec, ynegktr)
             if (abs(c2new) > small):
-                y = magr1 + magr2 - (vara*(1.0 - psiold*c3new)/math.sqrt(c2new))
+                y = magr1 + magr2 - (vara * (1.0 - psiold * c3new) /
+                                     math.sqrt(c2new))
             else:
                 y = magr1 + magr2
             # ----------- check for negative values of y ----------
             if ((vara > 0.0) and (y < 0.0)):  # (vara > 0.0) &
                 ynegktr = 1
                 while ((y < 0.0) and (ynegktr < 10)):
-                    psinew = 0.8*(1.0 / c3new)*(1.0 - (magr1 + magr2)
-                                                *math.sqrt(c2new)/vara)
+                    psinew = 0.8 * (1.0 / c3new) * (1.0 - (magr1 + magr2)
+                                                    * math.sqrt(c2new) / vara)
                     # -------- find c2 and c3 functions -----------
                     c2new, c3new = smu.findc2c3(psinew)
                     psiold = psinew
@@ -1897,7 +2030,8 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
                     else:
                         y = magr1 + magr2
                     # outfile
-                    print('yneg %3i  y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
+                    print('yneg %3i  y %11.7f lower %11.7f c2 %11.7f psinew '
+                          '%11.7f yneg %3i \n'
                           % (loops, y, lower, c2new, psinew, ynegktr))
                     ynegktr = ynegktr + 1
                 #end # while
@@ -1911,22 +2045,24 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
                 else:
                     xold = 0.0
                 xcubed = xold**3
-                dtnew = (xcubed*c3new + vara*math.sqrt(y)) * oomu
+                dtnew = (xcubed * c3new + vara*math.sqrt(y)) * oomu
 
                 # try newton rhapson iteration to update psi
                 if (abs(psiold) > 1e-5):
-                    c2dot = 0.5/psiold * (1.0 - psiold*c3new - 2.0*c2new)
-                    c3dot = 0.5/psiold * (c2new - 3.0*c3new)
+                    c2dot = 0.5 / psiold * (1.0 - psiold * c3new - 2.0 * c2new)
+                    c3dot = 0.5 / psiold * (c2new - 3.0 * c3new)
                 else:  # case for parabolic orbit
-                    c2dot = (-1.0/np.math.factorial(4) + 2.0*psiold/np.math.factorial(6)
-                             - 3.0*psiold**2/np.math.factorial(8)
-                             + 4.0*psiold**3/np.math.factorial(10)
-                             - 5.0*psiold**4/np.math.factorial(12))
-                    c3dot = (-1.0/np.math.factorial(5) + 2.0*psiold/np.math.factorial(7)
-                             - 3.0*psiold**2/np.math.factorial(9)
-                             + 4.0*psiold**3/np.math.factorial(11)
-                             - 5.0*psiold**4/np.math.factorial(13))
-                dtdpsi = (xcubed*(c3dot - 3.0*c3new*c2dot/(2.0*c2new))
+                    c2dot = (-1.0 / np.math.factorial(4)
+                             + 2.0 * psiold / np.math.factorial(6)
+                             - 3.0 * psiold**2 / np.math.factorial(8)
+                             + 4.0 * psiold**3 / np.math.factorial(10)
+                             - 5.0 * psiold**4 / np.math.factorial(12))
+                    c3dot = (-1.0 / np.math.factorial(5)
+                             + 2.0 * psiold / np.math.factorial(7)
+                             - 3.0 * psiold**2 / np.math.factorial(9)
+                             + 4.0 * psiold**3 / np.math.factorial(11)
+                             - 5.0 * psiold**4 / np.math.factorial(13))
+                dtdpsi = (xcubed * (c3dot - 3.0 * c3new * c2dot / (2.0 * c2new))
                           + 0.125*vara
                           * (3.0*c3new*math.sqrt(y)/c2new + vara/xold)) * oomu
                 # Newton iteration test to see if it keeps within the bounds
@@ -1951,9 +2087,10 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
                 # ------------- find c2 and c3 functions ----------
                 c2new, c3new = smu.findc2c3(psinew)
                 #if nrev > 0
-                print('%3i  y %11.7f x %11.7f %11.7f dtnew %11.7f %11.7f %11.7f psinew %11.7f %11.7f \n' %
-                    (loops, y, xold, dtsec, dtnew, lower, upper, psinew, dtdpsi)) #(dtnew - dtsec)/dtdpsi)( # c2dot, c3dot
-                #end
+                print('%3i  y %11.7f x %11.7f %11.7f dtnew %11.7f %11.7f '
+                      '%11.7f psinew %11.7f %11.7f \n' %
+                    (loops, y, xold, dtsec, dtnew, lower, upper, psinew,
+                     dtdpsi)) #(dtnew - dtsec)/dtdpsi)( # c2dot, c3dot
                 psilast = psiold  # keep previous iteration
                 psiold = psinew
                 dtold = dtnew
@@ -1983,8 +2120,8 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
             #  fdot = math.sqrt(mu*y)*(-magr2-magr1 + y)/(magr1*magr2*vara)
             #  f*gdot - fdot*g
             for i in range(3):
-                v1dv[i] = (r2[i] - f*r1[i])*g
-                v2dv[i] = (gdot*r2[i] - r1[i])*g
+                v1dv[i] = (r2[i] - f * r1[i]) * g
+                v2dv[i] = (gdot * r2[i] - r1[i]) * g
 
         #end   # if  the answer has converged
     else:
@@ -1995,17 +2132,17 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
         # do hohmann but in 3-d...
         # can't do bissection because w series is not accurate
         mum = 3.986004418e5   # 14 m3/s2
-        atx = (mum*(dtsec/(1.0*math.pi))**2)**(1.0/3.0)  # 1pi since half period
-        v1tmag = math.sqrt(2.0*mum/(magr1) - mum/atx)
-        v2tmag = math.sqrt(2.0*mum/(magr2) - mum/atx)
+        atx = (mum * (dtsec / (1.0 * math.pi))**2)**(1.0/3.0)  # 1pi since half period
+        v1tmag = math.sqrt(2.0 * mum / magr1 - mum / atx)
+        v2tmag = math.sqrt(2.0 * mum / magr2 - mum / atx)
         wx = np.cross(r1, v1)
         wxu = smu.unit(wx)
         v1dir = np.cross(r1, wxu) # get retro direc
         v2dir = np.cross(r2, wxu) # get retro direc
         v1diru = smu.unit(v1dir)
         v2diru = smu.unit(v2dir)
-        v1t = -v1tmag*v1diru
-        v2t = -v2tmag*v2diru
+        v1t = -v1tmag * v1diru
+        v2t = -v2tmag * v2diru
         print('%11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n'
               % (r1[0], r1[1], r1[2], v1t[0], v1t[1], v1t[2]))
         print('%11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n'
@@ -2030,20 +2167,25 @@ def lambertu (r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
     if (errorl != '      ok'):
         print("\n\n-----Error found in lambertu: ", errorl)
         print("\n\n")
-        p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = sc.rv2coe (r1, v1dv)
-        print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f case %11.7f %11.7f %11.7f %11.7f %11.7f ' % \
-            (errorl, loops, nrev, dm, de, dtnew, y, xold, v1dv[0], v1dv[1], v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew, dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
-        print('C%3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f  %11.7f dnu %11.7f \n' % \
-            (loops, nrev, dm, de, dtnew, magr1, magr2, vara, y, xold, psinew, math.acos(cosdeltanu)*180.0/math.pi))
+        p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
+         = sc.rv2coe (r1, v1dv)
+        print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f '
+              '%11.7f %11.7f %11.7f case %11.7f %11.7f %11.7f %11.7f %11.7f '
+              % (errorl, loops, nrev, dm, de, dtnew, y, xold, v1dv[0], v1dv[1],
+                 v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew,
+                 dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
+        print('C%3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f  '
+              '%11.7f dnu %11.7f \n'
+              % (loops, nrev, dm, de, dtnew, magr1, magr2, vara, y, xold,
+                 psinew, math.acos(cosdeltanu) * 180.0 / math.pi))
     else:
         #fprintf(outfile, '#s \n', errorl)
         print('#s \n', errorl)
 
-
     return v1dv, v2dv, errorl
 
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 #
 #                           function lambertb
 #
@@ -2173,12 +2315,15 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
                 A = (np.sqrt(b) + np.sqrt(b + 1.0)) ** (1.0 / 3.0)
                 f = A + 1.0 / A
             y = 2.0 / 3.0 * temp1 * (1.0 + h1) * (np.sqrt(b + 1.0) / f + 1.0)
-            xn = 0.5 * ((m / (y * y) - (1.0 + L)) - np.sqrt((m / (y * y) - (1.0 + L)) ** 2 - 4.0 * L))
-            print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f %11.7f \n'
+            xn = 0.5 * ((m / (y * y) - (1.0 + L))
+                        - np.sqrt((m / (y * y) - (1.0 + L)) ** 2
+                                  - 4.0 * L))
+            print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f '
+                  '%11.7f \n'
                   % (loops, y, x, h1, h2, b, f))
             loops = loops + 1
 
-        print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f %11.7f \n'
+        print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f %11.7f\n'
               % (loops, y, x, h1, h2, b, f))
         x = xn
         a = s * (1.0 + lam) ** 2 * (1.0 + x) * (L + x) / (8.0 * x)
@@ -2198,7 +2343,8 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
             if (nrev > 0):
                 x = xn
                 temp = 1.0 / ((1.0 + 2.0 * x + L) * (4.0 * x ** 2))
-                temp1 = (nrev * np.pi * 0.5 + np.arctan(np.sqrt(x))) / np.sqrt(x)
+                temp1 = (nrev * np.pi * 0.5
+                         + np.arctan(np.sqrt(x))) / np.sqrt(x)
                 h1 = (temp * (L + x) ** 2
                       * (3.0 * (1.0 + x) ** 2 * temp1 - (3.0 + 5.0 * x)))
                 h2 = (temp * m * ((x * x - x * (1.0 + L) - 3.0 * L)
@@ -2206,7 +2352,8 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
             else:
                 x = xn
                 tempx = smu.seebatt(x)
-                denom = 1.0 / ((1.0 + 2.0 * x + L) * (4.0 * x + tempx * (3.0 + x)))
+                denom = 1.0 / ((1.0 + 2.0 * x + L)
+                               * (4.0 * x + tempx * (3.0 + x)))
                 h1 = (L + x) ** 2 * (1.0 + 3.0 * x + tempx) * denom
                 h2 = m * (x - L + tempx) * denom
             # ----------------------- evaluate cubic ------------------
@@ -2231,10 +2378,11 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #        end
             y1 = np.sqrt(m / ((L + x) * (1.0 + x)))
             loops = loops + 1
-            print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 %11.7f \n'
+            print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 '
+                  '%11.7f \n'
                   % (loops, y, x, k2, b, u, y1))
 
-        print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 %11.7f \n'
+        print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 %11.7f\n'
               % (loops, y, x, k2, b, u, y1))
         if (loops < 30):
             # blair approach use y from solution
@@ -2339,9 +2487,6 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
                 * (r2[i] - (1.0 - magr2 / pmin * (1.0 - cosdeltanu)) * r1[i]))
 
     return v, aminenergy, tminenergy, tminabs
-
-    return v, aminenergy, tminenergy, tminabs
-
 
 #------------------------------------------------------------------------------
 #
@@ -2501,7 +2646,8 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
 
     #      [tmin, tminp, tminenergy] = lambertminT(r1, r2, dm, de, nrev)
 
-    print('%c  %c %i  %f  %f  %f  \n' % (dm, de, nrev, tmin, tminp, tminenergy))
+    print('%c  %c %i  %f  %f  %f  \n'
+          % (dm, de, nrev, tmin, tminp, tminenergy))
     return tmin, tminp, tminenergy
 
 # -------------------------------------------------------------------------
@@ -2572,11 +2718,13 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
             c3ddot = (1.0 / (4.0 * psiold ** 2)
                       * ((15.0 - psiold) * c3 - 7.0 * c2 + 1.0))
         else:
-            c2dot = (- 2.0 / np.math.factorial(4) + 2.0 * psiold / np.math.factorial(6)
+            c2dot = (-2.0 / np.math.factorial(4)
+                     + 2.0 * psiold / np.math.factorial(6)
                      - 3.0 * psiold ** 2 / np.math.factorial(8)
                      + 4.0 * psiold ** 3 / np.math.factorial(10)
                      - 5.0 * psiold ** 4 / np.math.factorial(12))
-            c3dot = (- 1.0 / np.math.factorial(5) + 2.0 * psiold / np.math.factorial(7)
+            c3dot = (-1.0 / np.math.factorial(5)
+                     + 2.0 * psiold / np.math.factorial(7)
                      - 3.0 * psiold ** 2 / np.math.factorial(9)
                      + 4.0 * psiold ** 3 / np.math.factorial(11)
                      - 5.0 * psiold ** 4 / np.math.factorial(13))
@@ -2614,8 +2762,9 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
     dtnew = (x ** 3 * c3 + vara * sqrty) * oomu
     tof = dtnew
     psib = psinew
-    print(' %3i %12.4f %12.4f %12.4f %12.4f %11.4f %12.4f %12.4f %11.4f %11.4f \n'
-          % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi, dtdpsi2, lower, upper))
+    print(' %3i %12.4f %12.4f %12.4f %12.4f %11.4f %12.4f %12.4f %11.4f %11.4f\n'
+          % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi,
+             dtdpsi2, lower, upper))
     #       fprintf(1, ' nrev #3i  dtnew #12.5f psi #12.5f  lower #10.3f upper #10.3f #10.6f #10.6f \n', nrev, dtnew, psiold, lower, upper, c2, c3)
 #   end # for checking multi rev cases
 
@@ -2704,9 +2853,11 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
             nvec = - nvec
         #       fprintf(1, 'gtr than\n')
 
-    v1t = (np.sqrt(mu * p) / magr1) * ((x1 / mu) * r1 + np.cross(nvec, r1) / magr1)
+    v1t = (np.sqrt(mu * p) / magr1) * ((x1 / mu) * r1
+                                       + np.cross(nvec, r1) / magr1)
     x2 = x1 * np.cos(dnu) + a * np.sin(dnu)
-    v2t = (np.sqrt(mu * p) / magr2) * ((x2 / mu) * r2 + np.cross(nvec, r2) / magr2)
+    v2t = (np.sqrt(mu * p) / magr2) * ((x2 / mu) * r2
+                                       + np.cross(nvec, r2) / magr2)
     return v1t, v2t
 
 
@@ -2773,162 +2924,166 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
 
 def kepler(ro, vo, dtseco):
 
-  # -------------------------  implementation   -----------------
-  # set constants and intermediate printouts
-  velkmps = math.sqrt(mu / re)
-  numiter = 50
+    # set constants and intermediate printouts
+    velkmps = math.sqrt(mu / re)
+    numiter = 50
 
-  if sh.show =='y':
-      print(' ro %16.8f %16.8f %16.8f km \n'% (ro[0], ro[1], ro[2]))
-      print(' vo %16.8f %16.8f %16.8f km/s \n'% (vo[0], vo[1], vo[2]))
-      print(' ro %16.8f %16.8f %16.8f ER \n'
-            % (ro[0]/re, ro[1]/re, ro[2]/re))
-      print(' vo %16.8f %16.8f %16.8f ER/TU \n'
-            % (vo[0]/velkmps, vo[1]/velkmps, vo[2]/velkmps))
+    if sh.show =='y':
+        print(' ro %16.8f %16.8f %16.8f km \n'% (ro[0], ro[1], ro[2]))
+        print(' vo %16.8f %16.8f %16.8f km/s \n'% (vo[0], vo[1], vo[2]))
+        print(' ro %16.8f %16.8f %16.8f ER \n'
+                % (ro[0]/re, ro[1]/re, ro[2]/re))
+        print(' vo %16.8f %16.8f %16.8f ER/TU \n'
+                % (vo[0]/velkmps, vo[1]/velkmps, vo[2]/velkmps))
 
-  # --------------------  initialize values   -------------------
-  ktr = 0
-  xold = 0.0
-  znew = 0.0
-  errork = '      ok'
-  dtsec = dtseco
-  nrev = 0
-  sqmu = math.sqrt(mu)
+    # --------------------  initialize values   -------------------
+    ktr = 0
+    xold = 0.0
+    znew = 0.0
+    errork = '      ok'
+    dtsec = dtseco
+    nrev = 0
+    sqmu = math.sqrt(mu)
 
-  if (abs(dtseco) > small):
-      magro = smu.mag(ro)
-      magvo = smu.mag(vo)
-      rdotv = np.dot(ro, vo)
+    if (abs(dtseco) > small):
+        magro = smu.mag(ro)
+        magvo = smu.mag(vo)
+        rdotv = np.dot(ro, vo)
 
-      # -------------  find sme, alpha, and a  ------------------
-      sme = ((magvo**2)*0.5) - (mu /magro)
-      alpha = -sme*2.0/mu
+        # -------------  find sme, alpha, and a  ------------------
+        sme = ((magvo**2)*0.5) - (mu /magro)
+        alpha = -sme*2.0/mu
 
-      if (abs(sme) > small):
-          a = -mu / (2.0 *sme)
-      else:
-          a = infinite
-      if (abs(alpha) < small):   # parabola
-          alpha = 0.0
+        if (abs(sme) > small):
+            a = -mu / (2.0 *sme)
+        else:
+            a = infinite
+        if (abs(alpha) < small):   # parabola
+            alpha = 0.0
 
-      if sh.show =='y':
-          print(' sme %16.8f  a %16.8f alp  %16.8f ER \n'
-                % (sme/(mu/re), a/re, alpha*re))
-          print(' sme %16.8f  a %16.8f alp  %16.8f km \n' % (sme, a, alpha))
-          print(' ktr      xn        psi           r          xn+1        dtn \n')
+        if sh.show =='y':
+            print(' sme %16.8f  a %16.8f alp  %16.8f ER \n'
+                    % (sme/(mu/re), a/re, alpha*re))
+            print(' sme %16.8f  a %16.8f alp  %16.8f km \n' % (sme, a, alpha))
+            print(' ktr      xn        psi           r          xn+1        '
+                  'dtn\n')
 
-      # ------------   setup initial guess for x  ---------------
-      # -----------------  circle and ellipse -------------------
-      if (alpha >= small):
-          period = twopi * math.sqrt(abs(a)**3.0/mu)
-          # ------- next if needed for 2body multi-rev ----------
-          if (abs(dtseco) > abs(period)):
-              # including the truncation will produce vertical lines that are parallel
-              # (plotting chi vs time)
-              dtsec = math.fmod(dtseco, period)
-              nrev = math.floor(dtseco/period)
-          xold = sqmu *dtsec * alpha
-      else:
-          # --------------------  parabola  ---------------------
-          if (abs(alpha) < small):
-              h = np.cross(ro, vo)
-              magh = smu.mag(h)
-              p = magh*magh/mu
-              s = 0.5 * (halfpi - math.atan(3.0 * math.sqrt(mu / (p*p*p)) * dtsec))
-              w = math.atan(math.tan(s) ** (1.0 / 3.0))
-              xold = math.sqrt(p) * (2.0 * math.cot(2.0 * w))
-              alpha = 0.0
-          else:
-              # ------------------  hyperbola  ------------------
-              temp = -2.0 * mu * dtsec / \
-                  (a*(rdotv + np.sign(dtsec)*math.sqrt(-mu*a)* \
-                  (1.0 -magro*alpha)))
-              xold = np.sign(dtsec) * math.sqrt(-a) *math.log(temp)
+        # ------------   setup initial guess for x  ---------------
+        # -----------------  circle and ellipse -------------------
+        if (alpha >= small):
+            period = twopi * math.sqrt(abs(a)**3.0/mu)
+            # ------- next if needed for 2body multi-rev ----------
+            if (abs(dtseco) > abs(period)):
+                # including the truncation will produce vertical lines that are parallel
+                # (plotting chi vs time)
+                dtsec = math.fmod(dtseco, period)
+                nrev = math.floor(dtseco/period)
+            xold = sqmu *dtsec * alpha
+        else:
+            # --------------------  parabola  ---------------------
+            if (abs(alpha) < small):
+                h = np.cross(ro, vo)
+                magh = smu.mag(h)
+                p = magh*magh/mu
+                s = 0.5 * (halfpi - math.atan(3.0 * math.sqrt(mu / (p*p*p))
+                                              * dtsec))
+                w = math.atan(math.tan(s) ** (1.0 / 3.0))
+                xold = math.sqrt(p) * (2.0 * math.cot(2.0 * w))
+                alpha = 0.0
+            else:
+                # ------------------  hyperbola  ------------------
+                temp = -2.0 * mu * dtsec / \
+                    (a*(rdotv + np.sign(dtsec)*math.sqrt(-mu*a)* \
+                    (1.0 -magro*alpha)))
+                xold = np.sign(dtsec) * math.sqrt(-a) *math.log(temp)
 
-      ktr = 1
-      dtnew = -10.0
-      # conv for dtsec to x units
-      tmp = 1.0 / sqmu
+        ktr = 1
+        dtnew = -10.0
+        # conv for dtsec to x units
+        tmp = 1.0 / sqmu
 
-      while ((abs(dtnew*tmp - dtsec) >= small) and (ktr < numiter)):
-          xoldsqrd = xold*xold
-          znew = xoldsqrd * alpha
+        while ((abs(dtnew*tmp - dtsec) >= small) and (ktr < numiter)):
+            xoldsqrd = xold*xold
+            znew = xoldsqrd * alpha
 
-          # ------------- find c2 and c3 functions --------------
-          c2new, c3new = smu.findc2c3(znew)
+            # ------------- find c2 and c3 functions --------------
+            c2new, c3new = smu.findc2c3(znew)
 
-          # ------- use a newton iteration for new values -------
-          rval = xoldsqrd*c2new + rdotv*tmp *xold*(1.0 -znew*c3new) + \
-              magro*(1.0  - znew*c2new)
-          dtnew = xoldsqrd*xold*c3new + rdotv*tmp*xoldsqrd*c2new + \
-              magro*xold*(1.0  - znew*c3new)
+            # ------- use a newton iteration for new values -------
+            rval = xoldsqrd*c2new + rdotv*tmp *xold*(1.0 -znew*c3new) + \
+                magro*(1.0  - znew*c2new)
+            dtnew = xoldsqrd*xold*c3new + rdotv*tmp*xoldsqrd*c2new + \
+                magro*xold*(1.0  - znew*c3new)
 
-          # ------------- calculate new value for x -------------
-          temp1 = (dtsec*sqmu - dtnew) / rval
-          xnew = xold + temp1
+            # ------------- calculate new value for x -------------
+            temp1 = (dtsec*sqmu - dtnew) / rval
+            xnew = xold + temp1
 
-          # ----- check if the univ param goes negative. if so, use bissection
-          if (xnew < 0.0 and dtsec > 0.0):
-              xnew = xold*0.5
+            # ----- check if the univ param goes negative. if so, use bissection
+            if (xnew < 0.0 and dtsec > 0.0):
+                xnew = xold*0.5
 
-          if sh.show =='y':
-              print('kep %3i %11.7f %11.7f %11.7f %11.7f %11.7f \n' \
-                  % (ktr, xold, znew, rval, xnew, dtnew*tmp))
-              print('%3i %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n' \
-                  % (ktr, xold/math.sqrt(re), znew, c2new, c3new, rval/re, xnew/math.sqrt(re), dtnew/math.sqrt(mu)))
+            if sh.show =='y':
+                print('kep %3i %11.7f %11.7f %11.7f %11.7f %11.7f \n' \
+                    % (ktr, xold, znew, rval, xnew, dtnew*tmp))
+                print('%3i %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n' \
+                    % (ktr, xold/math.sqrt(re), znew, c2new, c3new, rval/re,
+                       xnew/math.sqrt(re), dtnew/math.sqrt(mu)))
 
-          ktr = ktr + 1
-          xold = xnew
+            ktr = ktr + 1
+            xold = xnew
 
-      if (ktr >= numiter):
-          errork = 'knotconv'
-          print('kep not conv in %2i iter %11.3f \n' % (numiter, dtseco))
-          r = np.array([0.0, 0.0, 0.0])
-          v = np.array([0.0, 0.0, 0.0])
-          for i in range(3):
-              v[i] = 0.0
-              r[i] = v[i]
-      else:
-          # --- find position and velocity vectors at new time --
-          xnewsqrd = xnew*xnew
-          f = 1.0  - (xnewsqrd*c2new / magro)
-          g = dtsec - xnewsqrd*xnew*c3new/math.sqrt(mu)
+        if (ktr >= numiter):
+            errork = 'knotconv'
+            print('kep not conv in %2i iter %11.3f \n' % (numiter, dtseco))
+            r = np.array([0.0, 0.0, 0.0])
+            v = np.array([0.0, 0.0, 0.0])
+            for i in range(3):
+                v[i] = 0.0
+                r[i] = v[i]
+        else:
+            # --- find position and velocity vectors at new time --
+            xnewsqrd = xnew*xnew
+            f = 1.0  - (xnewsqrd*c2new / magro)
+            g = dtsec - xnewsqrd*xnew*c3new/math.sqrt(mu)
 
-          r = np.array([0.0, 0.0, 0.0])
-          v = np.array([0.0, 0.0, 0.0])
-          for i in range(3):
-              r[i] = f*ro[i] + g*vo[i]
-          magr = smu.mag(r)
-          gdot = 1.0  - (xnewsqrd*c2new / magr)
-          fdot = (math.sqrt(mu)*xnew / (magro*magr)) * (znew*c3new-1.0)
-          for i in range(3):
-              v[i] = fdot*ro[i] + gdot*vo[i]
+            r = np.array([0.0, 0.0, 0.0])
+            v = np.array([0.0, 0.0, 0.0])
+            for i in range(3):
+                r[i] = f*ro[i] + g*vo[i]
+            magr = smu.mag(r)
+            gdot = 1.0  - (xnewsqrd*c2new / magr)
+            fdot = (math.sqrt(mu)*xnew / (magro*magr)) * (znew*c3new-1.0)
+            for i in range(3):
+                v[i] = fdot*ro[i] + gdot*vo[i]
 
-          temp = f*gdot - fdot*g
-          if (abs(temp-1.0) > 0.00001):
-              errork = 'fandg'
+            temp = f*gdot - fdot*g
+            if (abs(temp-1.0) > 0.00001):
+                errork = 'fandg'
 
-          if sh.show =='y':
-              print('f %16.8f g %16.8f fdot %16.8f gdot %16.8f \n' % (f, g, fdot, gdot))
-              tusec = math.sqrt(re**3/mu)
-              print('f %16.8f g %16.8f fdot %16.8f gdot %16.8f \n' % (f, g/tusec, fdot*tusec, gdot))
-              print('r1 %16.8f %16.8f %16.8f km \n' % (r[0], r[1], r[2]))
-              print('v1 %16.8f %16.8f %16.8f km/s \n' % (v[0], v[1], v[2]))
-              print('r1 %16.8f %16.8f %16.8f ER \n'
-                    % (r[0]/re, r[1]/re, r[2]/re))
-              print('v1 %16.8f %16.8f %16.8f ER/TU \n'
-                    % (vo[0]/velkmps, vo[1]/velkmps, vo[2]/velkmps))
+            if sh.show =='y':
+                print('f %16.8f g %16.8f fdot %16.8f gdot %16.8f \n'
+                      % (f, g, fdot, gdot))
+                tusec = math.sqrt(re**3/mu)
+                print('f %16.8f g %16.8f fdot %16.8f gdot %16.8f \n'
+                      % (f, g/tusec, fdot*tusec, gdot))
+                print('r1 %16.8f %16.8f %16.8f km \n' % (r[0], r[1], r[2]))
+                print('v1 %16.8f %16.8f %16.8f km/s \n' % (v[0], v[1], v[2]))
+                print('r1 %16.8f %16.8f %16.8f ER \n'
+                        % (r[0]/re, r[1]/re, r[2]/re))
+                print('v1 %16.8f %16.8f %16.8f ER/TU \n'
+                        % (vo[0]/velkmps, vo[1]/velkmps, vo[2]/velkmps))
 
-  else:
-      # ----------- set vectors to incoming since 0 time --------
-      r = np.array([0.0, 0.0, 0.0])
-      v = np.array([0.0, 0.0, 0.0])
-      for i in range(3):
-          r[i] = ro[i]
-          v[i] = vo[i]
+    else:
+        # ----------- set vectors to incoming since 0 time --------
+        r = np.array([0.0, 0.0, 0.0])
+        v = np.array([0.0, 0.0, 0.0])
+        for i in range(3):
+            r[i] = ro[i]
+            v[i] = vo[i]
 
 
-  return r, v, errork
+    return r, v, errork
 
 
 
@@ -2991,25 +3146,26 @@ def kepler(ro, vo, dtseco):
 
 def pkepler(ro, vo, dtsec, ndot, nddot):
 
-    p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper = sc.rv2coe(ro, vo)
+    p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper \
+        = sc.rv2coe(ro, vo)
     #print(p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper)
     #print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg\n')
     #print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % \
     #        (p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
     #print("arglat, truelon, lonper: ", arglat, truelon, lonper)
 
-    n = math.sqrt(mu/(a*a*a))
+    n = math.sqrt(mu / (a * a * a))
 
      # ------------- find the value of j2 perturbations -------------
-    j2op2 = (n*1.5*re**2*j2) / (p*p)
+    j2op2 = (n * 1.5 * re**2 * j2) / (p * p)
 #     nbar = n*(1.0 + j2op2*sqrt(1.0-ecc*ecc)* (1.0 - 1.5*sin(incl)*sin(incl)))
     raandot = -j2op2 * math.cos(incl)
-    argpdot = j2op2 * (2.0-2.5*math.sin(incl)*math.sin(incl))
+    argpdot = j2op2 * (2.0 - 2.5 * math.sin(incl)**2)
     mdot = n
 
-    a = a - 2.0*ndot*dtsec * a / (3.0*n)
-    ecc = ecc - 2.0*(1.0 - ecc)*ndot*dtsec / (3.0*n)
-    p = a*(1.0 - ecc*ecc)
+    a = a - 2.0 * ndot * dtsec * a / (3.0 * n)
+    ecc = ecc - 2.0 * (1.0 - ecc) * ndot * dtsec / (3.0 * n)
+    p = a * (1.0 - ecc * ecc)
 
      # ----- update the orbital elements for each orbit type --------
     if ecc < small:
@@ -3030,7 +3186,7 @@ def pkepler(ro, vo, dtsec, ndot, nddot):
         lonperdot = raandot + argpdot
         lonper = lonper + lonperdot * dtsec
         lonper = math.fmod(lonper, twopi)
-        m = m + mdot*dtsec + 0.5*ndot*dtsec*dtsec + (1/6)*nddot*dtsec*dtsec*dtsec
+        m = m + mdot * dtsec + 0.5*ndot*dtsec**2 + (1/6)*nddot*dtsec**3
         m = math.fmod(m, twopi)
         e0, nu = smu.newtonm(ecc, m)
     else:
@@ -3039,7 +3195,7 @@ def pkepler(ro, vo, dtsec, ndot, nddot):
         raan = math.fmod(raan, twopi)
         argp = argp  + argpdot  * dtsec
         argp = math.fmod(argp, twopi)
-        m = m + mdot*dtsec + 0.5*ndot*dtsec*dtsec + (1/6)*nddot*dtsec*dtsec*dtsec
+        m = m + mdot * dtsec + 0.5*ndot*dtsec**2 + (1/6)*nddot*dtsec**3
         m = np.remainder(m, twopi)
         e0, nu = smu.newtonm(ecc, m)
 
@@ -3121,7 +3277,8 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     j3 = - 2.53241052e-06
     j4 = - 1.6198976e-06
     j6 = - 5.40666576e-07
-    p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper = sc.rv2coe(ro, vo)
+    p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper = \
+        sc.rv2coe(ro, vo)
     #     fprintf(1, '          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg      arglat   truelon    lonper\n')
 #     fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f\n', ...
 #             p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg, ...
@@ -3221,7 +3378,7 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
             truelondot = raandot + argpdot + mdot
             truelon = truelon + truelondot * dtsec
             truelon = np.fmod(truelon, twopi)
-            print('circ equat\n' % ())
+            print('circ equat\n')
         else:
             # -------------  circular inclined    --------------
             raan = raan + raandot * dtsec
@@ -3229,7 +3386,7 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
             arglatdot = argpdot + mdot
             arglat = arglat + arglatdot * dtsec
             arglat = np.fmod(arglat, twopi)
-            print('circ incl\n' % ())
+            print('circ incl\n')
     else:
         # -- elliptical, parabolic, hyperbolic equatorial ---
         if (incl < small) or (np.abs(incl - np.pi) < small):
@@ -3329,7 +3486,6 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
              rtasc2=None, rtasc3=None, jd1=None, jdf1=None,
              jd2=None, jdf2=None, jd3=None, jdf3=None,
              rsite1=None, rsite2=None, rsite3=None, re=None, mu=None):
-    # -------------------------  implementation   -------------------------
 #   constastro
 
     # for sun
@@ -3347,12 +3503,12 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
     tau13 = (jd1 - jd3) * 86400.0 + (jdf1 - jdf3) * 86400.0
     tau32 = (jd3 - jd2) * 86400.0 + (jdf3 - jdf2) * 86400.0
     # form line of sight vectors
-    los1 = np.transpose(np.array([np.cos(decl1) * np.cos(rtasc1), np.cos(decl1)
-                                  * np.sin(rtasc1), np.sin(decl1)]))
-    los2 = np.transpose(np.array([np.cos(decl2) * np.cos(rtasc2), np.cos(decl2)
-                                  * np.sin(rtasc2), np.sin(decl2)]))
-    los3 = np.transpose(np.array([np.cos(decl3) * np.cos(rtasc3), np.cos(decl3)
-                                  * np.sin(rtasc3), np.sin(decl3)]))
+    los1 = np.array([math.cos(decl1) * math.cos(rtasc1), math.cos(decl1)
+                     * math.sin(rtasc1), math.sin(decl1)]).T
+    los2 = np.array([math.cos(decl2) * math.cos(rtasc2), math.cos(decl2)
+                     * math.sin(rtasc2), math.sin(decl2)]).T
+    los3 = np.array([math.cos(decl3) * math.cos(rtasc3), math.cos(decl3)
+                     * math.sin(rtasc3), math.sin(decl3)]).T
     # --------- now we're ready to start the actual double r algorithm ---------
     magr1old = 99999.9
     magr2old = 99999.9
@@ -3364,16 +3520,17 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
     cc2 = 2.0 * np.dot(los2, rsite2)
     ktr = 0
     # main loop to get three values of the double-r for processing
-    while (np.abs(magr1in - magr1old) > (tol or np.abs(magr2in - magr2old)) > tol):
+    while (abs(magr1in - magr1old) > tol or abs(magr2in - magr2old) > tol):
 
         ktr = ktr + 1
         print('%2i ' % (ktr))
         r2, r3, f1, f2, q1, magr1, magr2, a, deltae32 = \
-            smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1, los2,
-                        los3, rsite1, rsite2, rsite3, tau12, tau32, direct, re, mu)
+            smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1,
+                        los2, los3, rsite1, rsite2, rsite3, tau12, tau32,
+                        direct, re, mu)
         # check intermediate status
-        f = 1.0 - a / magr2 * (1.0 - np.cos(deltae32))
-        g = tau32 - np.sqrt(a ** 3 / mu) * (deltae32 - np.sin(deltae32))
+        f = 1.0 - a / magr2 * (1.0 - math.cos(deltae32))
+        g = tau32 - math.sqrt(a**3 / mu) * (deltae32 - math.sin(deltae32))
         v2 = (r3 - f * r2) / g
         p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
             sc.rv2coeh(r2, v2, re, mu)
@@ -3413,10 +3570,10 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
         magr1old = magr1in
         magr2old = magr2in
         #  may need to limit the amount of the correction
-        if np.abs(deltar1) > magr1in * pctchg:
+        if abs(deltar1) > magr1in * pctchg:
             print('%11.7f \n' % (deltar1))
             #         deltar1 = sign(deltar1)*magr1in*pctchg
-        if np.abs(deltar2) > magr2in * pctchg:
+        if abs(deltar2) > magr2in * pctchg:
             print('%11.7f \n' % (deltar2))
             #         deltar2 = sign(deltar2)*magr2in*pctchg
         magr1in = magr1in + deltar1
@@ -3439,8 +3596,8 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
         smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1, los2, los3,
                     rsite1, rsite2, rsite3, tau12, tau32, direct, re, mu)
     if a and mu and magr2:
-      f = 1.0 - a / magr2 * (1.0 - np.cos(deltae32))
-      g = tau32 - np.sqrt(a ** 3 / mu) * (deltae32 - np.sin(deltae32))
+      f = 1.0 - a / magr2 * (1.0 - math.cos(deltae32))
+      g = tau32 - math.sqrt(a ** 3 / mu) * (deltae32 - math.sin(deltae32))
       v2 = (r3 - f * r2) / g
     else:
       v2=None
@@ -3545,17 +3702,17 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     print('tau12 %14.6f tau13  %14.6f tau32  %14.6f \n' % (tau12, tau13, tau32))
     # ----------------  find line of sight unit vectors  ---------------
     los1 = np.zeros(3)
-    los1[0] = np.cos(decl1) * np.cos(rtasc1)
-    los1[1] = np.cos(decl1) * np.sin(rtasc1)
-    los1[2] = np.sin(decl1)
+    los1[0] = math.cos(decl1) * math.cos(rtasc1)
+    los1[1] = math.cos(decl1) * math.sin(rtasc1)
+    los1[2] = math.sin(decl1)
     los2 = np.zeros(3)
-    los2[0] = np.cos(decl2) * np.cos(rtasc2)
-    los2[1] = np.cos(decl2) * np.sin(rtasc2)
-    los2[2] = np.sin(decl2)
+    los2[0] = math.cos(decl2) * math.cos(rtasc2)
+    los2[1] = math.cos(decl2) * math.sin(rtasc2)
+    los2[2] = math.sin(decl2)
     los3 = np.zeros(3)
-    los3[0] = np.cos(decl3) * np.cos(rtasc3)
-    los3[1] = np.cos(decl3) * np.sin(rtasc3)
-    los3[2] = np.sin(decl3)
+    los3[0] = math.cos(decl3) * math.cos(rtasc3)
+    los3[1] = math.cos(decl3) * math.sin(rtasc3)
+    los3[2] = math.sin(decl3)
     # topo to body fixed (ecef)
 #     latgd = 40.0/rad
 #     lon = -110.0/rad
@@ -3732,7 +3889,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     print('now refine the answer \n' % ())
     rho2 = infinite
     ll = 0
-    while ((np.abs(rhoold2 - rho2) > 1e-12) and (ll <= 0)):
+    while ((abs(rhoold2 - rho2) > 1e-12) and (ll <= 0)):
 
         ll = ll + 1
         print(' iteration %3i \n' % (ll))
@@ -3754,7 +3911,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
               % (v2[0], v2[1], v2[2]))
         # check if too close obs
         if ((str(error) == str('          ok')) and
-                ((np.abs(theta) < 1.0 * deg2rad) or (np.abs(theta1) < 1.0 * deg2rad))):
+                ((abs(theta) < 1.0 * deg2rad) or (abs(theta1) < 1.0 * deg2rad))):
             p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
                 sc.rv2coeh(r2, v2, re, mu)
             ###print('coes init ans %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
@@ -3793,10 +3950,10 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             # -------- use exact method to find f and g -----------
             theta = smu.angl(r1, r2)
             theta1 = smu.angl(r2, r3)
-            f1 = 1.0 - ((magr1 * (1.0 - np.cos(theta)) / p))
-            g1 = (magr1 * magr2 * np.sin(- theta)) / np.sqrt(p)
-            f3 = 1.0 - ((magr3 * (1.0 - np.cos(theta1)) / p))
-            g3 = (magr3 * magr2 * np.sin(theta1)) / np.sqrt(p)
+            f1 = 1.0 - ((magr1 * (1.0 - math.cos(theta)) / p))
+            g1 = (magr1 * magr2 * math.sin(- theta)) / math.sqrt(p)
+            f3 = 1.0 - ((magr3 * (1.0 - math.cos(theta1)) / p))
+            g3 = (magr3 * magr2 * math.sin(theta1)) / math.sqrt(p)
         c1 = g3 / (f1 * g3 - f3 * g1)
         c3 = - g1 / (f1 * g3 - f3 * g1)
         print(' c1 %11.7f c3 %11.7f %11.7f \n' % (c1, c2, c3))
@@ -3954,17 +4111,17 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # --------------- find line of sight vectors ------------------
 # should be eci...
     los1 = np.zeros(3)
-    los1[0] = np.cos(decl1) * np.cos(rtasc1)
-    los1[1] = np.cos(decl1) * np.sin(rtasc1)
-    los1[2] = np.sin(decl1)
+    los1[0] = math.cos(decl1) * math.cos(rtasc1)
+    los1[1] = math.cos(decl1) * math.sin(rtasc1)
+    los1[2] = math.sin(decl1)
     los2 = np.zeros(3)
-    los2[0] = np.cos(decl2) * np.cos(rtasc2)
-    los2[1] = np.cos(decl2) * np.sin(rtasc2)
-    los2[2] = np.sin(decl2)
+    los2[0] = math.cos(decl2) * math.cos(rtasc2)
+    los2[1] = math.cos(decl2) * math.sin(rtasc2)
+    los2[2] = math.sin(decl2)
     los3 = np.zeros(3)
-    los3[0] = np.cos(decl3) * np.cos(rtasc3)
-    los3[1] = np.cos(decl3) * np.sin(rtasc3)
-    los3[2] = np.sin(decl3)
+    los3[0] = math.cos(decl3) * math.cos(rtasc3)
+    los3[1] = math.cos(decl3) * math.sin(rtasc3)
+    los3[2] = math.sin(decl3)
     # same- they're both unit vectors
 #     l1
 #     unit(l1)
@@ -4072,7 +4229,7 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
 #         inc[i]
 #     until (abs(oldr-magr) < small) | (i .ge. 30)
 
-    if (np.abs(d) > 1.0 - 14):
+    if (abs(d) > 1.0 - 14):
         poly = np.zeros(9)
         # --------------- solve eighth order poly -----------------
         l2dotrs = np.dot(los2, rs2)
@@ -4219,7 +4376,7 @@ def gibbs(r1=None, r2=None, r3=None):
 #       determine if  the orbit is possible.  both d and n must be in
 #         the same direction, and non-zero.
 # -------------------------------------------------------------
-    if (((np.abs(magd) < small) or (np.abs(magn) < small)) or
+    if (((abs(magd) < small) or (abs(magn) < small)) or
             (np.dot(nn, dn) < small)):
         error = '  impossible'
     else:
@@ -4231,7 +4388,7 @@ def gibbs(r1=None, r2=None, r3=None):
         r2mr3 = magr2 - magr3
         s = r1mr2 * r3 + r3mr1 * r2 + r2mr3 * r1
         b = np.cross(d, r2)
-        l = np.sqrt(mu / (magd * magn))
+        l = math.sqrt(mu / (magd * magn))
         tover2 = l / magr2
         v2 = tover2 * b + l * s
 
@@ -4333,7 +4490,7 @@ def gibbsh(r1=None, r2=None, r3=None, re=None, mu=None):
 #       determine if  the orbit is possible.  both d and n must be in
 #         the same direction, and non-zero.
 # -------------------------------------------------------------
-    if ((((np.abs(magd) < small) or (np.abs(magn) < small)) or
+    if ((((abs(magd) < small) or (abs(magn) < small)) or
             (np.dot(nn, dn) < small))):
         error = '  impossible'
     else:
@@ -4345,7 +4502,7 @@ def gibbsh(r1=None, r2=None, r3=None, re=None, mu=None):
         r2mr3 = magr2 - magr3
         s = r1mr2 * r3 + r3mr1 * r2 + r2mr3 * r1
         b = np.cross(d, r2)
-        l = np.sqrt(mu / (magd * magn))
+        l = math.sqrt(mu / (magd * magn))
         tover2 = l / magr2
         v2 = tover2 * b + l * s
 
@@ -4590,27 +4747,27 @@ def noncoplr(phasei=None, aint=None, atgt=None, ktgt=None, kint=None,
              arglatint=None, nodeint=None, truelon=None, deltai=None):
     mu = 1.0
 
-    angvelint = np.sqrt(mu / (aint * aint * aint))
-    angveltgt = np.sqrt(mu / (atgt * atgt * atgt))
+    angvelint = math.sqrt(mu / (aint * aint * aint))
+    angveltgt = math.sqrt(mu / (atgt * atgt * atgt))
     atrans = (aint + atgt) * 0.5
-    ttrans = np.pi * np.sqrt((atrans * atrans * atrans) / mu)
+    ttrans = math.pi * math.sqrt((atrans * atrans * atrans) / mu)
     deltatnode = phasei / angvelint
     lead = angveltgt * ttrans
     omeganode = angveltgt * deltatnode
-    phasenew = nodeint + np.pi - (truelon + omeganode)
-    leadnew = np.pi + phasenew
+    phasenew = nodeint + math.pi - (truelon + omeganode)
+    leadnew = math.pi + phasenew
     tphase = (leadnew - lead + twopi * ktgt) / angveltgt
     aphase = (mu * (tphase / (twopi * kint)) ** 2) ** (1.0 / 3.0)
     # -----------------  find deltav's  ----------------- }
-    vint = np.sqrt(mu / aint)
-    vphase = np.sqrt(2.0 * mu / aint - mu / aphase)
+    vint = math.sqrt(mu / aint)
+    vphase = math.sqrt(2.0 * mu / aint - mu / aphase)
     dvphase = vphase - vint
-    vtrans1 = np.sqrt(2.0 * mu / aint - mu / atrans)
+    vtrans1 = math.sqrt(2.0 * mu / aint - mu / atrans)
     dvtrans1 = vtrans1 - vphase
-    vtrans2 = np.sqrt(2.0 * mu / atgt - mu / atrans)
-    vtgt = np.sqrt(mu / atgt)
-    dvtrans2 = np.sqrt(vtgt * vtgt + vtrans2 * vtrans2
-                       - 2.0 * vtgt * vtrans2 * np.cos(deltai))
+    vtrans2 = math.sqrt(2.0 * mu / atgt - mu / atrans)
+    vtgt = math.sqrt(mu / atgt)
+    dvtrans2 = math.sqrt(vtgt * vtgt + vtrans2 * vtrans2
+                       - 2.0 * vtgt * vtrans2 * math.cos(deltai))
     dvtotal = dvphase + dvtrans1 + dvtrans2
     ttotal = deltatnode + ttrans + tphase
     print(' angvelint %11.7f %11.7f rad/s  \n' % (angvelint, angvelint / tusec))
@@ -4680,19 +4837,19 @@ def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
           nuinit=None, nufinal=None, ktgt=None, kint=None):
 
     mu = 1.0
-    angvelint = np.sqrt(mu / (rcs1 * rcs1 * rcs1))
-    angveltgt = np.sqrt(mu / (rcs3 * rcs3 * rcs3))
-    vint = np.sqrt(mu / rcs1)
+    angvelint = math.sqrt(mu / (rcs1 * rcs1 * rcs1))
+    angveltgt = math.sqrt(mu / (rcs3 * rcs3 * rcs3))
+    vint = math.sqrt(mu / rcs1)
     print(' angvelint %11.7f %11.7f rad/s  \n' % (angvelint, angvelint / tusec))
     print(' angveltgt %11.7f %11.7f rad/s  \n' % (angveltgt, angveltgt / tusec))
     # ---------- check for satellites in the same orbits ----------- }
-    if np.abs(angvelint - angveltgt) < 1e-06:
+    if abs(angvelint - angveltgt) < 1e-06:
         periodtrans = (ktgt * twopi + phasei) / angveltgt
         atrans = (periodtrans / (twopi * kint)) ** (2.0 / 3.0)
         rp = 2.0 * atrans - rcs1
         if rp < 1.0:
             print(' error - the transfer orbit intersects the earth ' % ())
-        vtrans = np.sqrt(((2.0 * mu) / rcs1) - (mu / atrans)) - np.sqrt(1/rcs1)
+        vtrans = math.sqrt(((2.0 * mu) / rcs1) - (mu / atrans)) - math.sqrt(1/rcs1)
         deltav = 2.0 * vtrans
         phasef = phasei
         waittime = periodtrans
@@ -4705,30 +4862,30 @@ def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
     else:
         # ---- different orbits
         atrans = (rcs1 + rcs3) / 2.0
-        dttutrans = np.pi * np.sqrt(atrans * atrans * atrans / mu)
+        dttutrans = math.pi * math.sqrt(atrans * atrans * atrans / mu)
         leadang = angveltgt * dttutrans
-        phasef = np.pi - leadang
+        phasef = math.pi - leadang
         phasef * rad2deg
         if phasef < 0.0:
-            phasef = phasef + np.pi
-        waittime = (phasef - phasei + 2.0 * np.pi * ktgt) / (angvelint - angveltgt)
-        a1 = (rcs1 * (1.0 + einit * np.cos(nuinit))) / (1.0 - einit * einit)
+            phasef = phasef + math.pi
+        waittime = (phasef - phasei + 2.0 * math.pi * ktgt) / (angvelint - angveltgt)
+        a1 = (rcs1 * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
         a2 = (rcs1 + rcs3) / 2.0
-        a3 = (rcs3 * (1.0 + efinal * np.cos(nufinal))) / (1.0 - efinal * efinal)
+        a3 = (rcs3 * (1.0 + efinal * math.cos(nufinal))) / (1.0 - efinal * efinal)
         sme1 = -mu / (2.0 * a1)
         sme2 = -mu / (2.0 * a2)
         sme3 = -mu / (2.0 * a3)
         # -----------------  find delta v at point a  ------------------ }
-        vinit = np.sqrt(2.0 * ((mu / rcs1) + sme1))
-        vtransa = np.sqrt(2.0 * ((mu / rcs1) + sme2))
-        deltava = np.abs(vtransa - vinit)
+        vinit = math.sqrt(2.0 * ((mu / rcs1) + sme1))
+        vtransa = math.sqrt(2.0 * ((mu / rcs1) + sme2))
+        deltava = abs(vtransa - vinit)
         # -----------------  find delta v at point b  ------------------ }
-        vfinal = np.sqrt(2.0 * ((mu / rcs3) + sme3))
-        vtransb = np.sqrt(2.0 * ((mu / rcs3) + sme2))
-        deltavb = np.abs(vfinal - vtransb)
+        vfinal = math.sqrt(2.0 * ((mu / rcs3) + sme3))
+        vtransb = math.sqrt(2.0 * ((mu / rcs3) + sme2))
+        deltavb = abs(vfinal - vtransb)
         deltav = deltava + deltavb
         print('atrans %11.7f %11.7f km \n' % (atrans, atrans * 6378.137))
-        ttrans = np.pi * np.sqrt(atrans ** 3 / 1.0)
+        ttrans = math.pi * math.sqrt(atrans ** 3 / 1.0)
         print('ttrans %11.7f %11.7f km \n' % (ttrans, ttrans * tusec / 60.0))
         print('leadang %11.7f %11.7f  \n' % (leadang, leadang * rad2deg))
         print('vinit %11.7f %11.7f km/s \n' % (vinit, vinit * velkmps))
@@ -4888,17 +5045,17 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
 def iandnode(iinit=None, deltaraan=None, ifinal=None, vinit=None, fpa=None):
     deltai = iinit - ifinal
     # variables for speed
-    cosdraan = np.cos(deltaraan)
-    cosii = np.cos(iinit)
-    sinii = np.sin(iinit)
-    cosif = np.cos(ifinal)
-    sinif = np.sin(ifinal)
+    cosdraan = math.cos(deltaraan)
+    cosii = math.cos(iinit)
+    sinii = math.sin(iinit)
+    cosif = math.cos(ifinal)
+    sinif = math.sin(ifinal)
     cost = cosii * cosif + sinii * sinif * cosdraan
-    theta = np.arccos(cost)
-    sint = np.sin(theta)
-    deltav = 2.0 * vinit * np.cos(fpa) * np.sin(0.5 * theta)
-    arglat = np.arccos((sinif * np.cos(deltaraan) - cost * sinii) / (sint * cosii))
-    arglat1 = np.arccos((cosii * sinif - sinii * cosif * cosdraan) / sint)
+    theta = math.acos(cost)
+    sint = math.sin(theta)
+    deltav = 2.0 * vinit * math.cos(fpa) * math.sin(0.5 * theta)
+    arglat = math.acos((sinif * math.cos(deltaraan) - cost * sinii) / (sint * cosii))
+    arglat1 = math.acos((cosii * sinif - sinii * cosif * cosdraan) / sint)
     print(' theta   %11.7f  \n' % (theta * rad2deg))
     print(' arglat   %11.7f  %11.7f  \n' % (arglat * rad2deg, arglat1 * rad2deg))
     return deltav
@@ -4940,7 +5097,8 @@ def iandnode(iinit=None, deltaraan=None, ifinal=None, vinit=None, fpa=None):
 # function [ifinal, deltav ] = nodeonly(iinit, ecc, deltaomega, vinit, fpa, incl)
 # ----------------------------------------------------------------------------- }
 
-def nodeonly(iinit=None, ecc=None, deltaomega=None, vinit=None, fpa=None, incl=None):
+def nodeonly(iinit=None, ecc=None, deltaomega=None, vinit=None, fpa=None,
+             incl=None):
     if ecc > 1e-07:
         # ------------------------- elliptical --------------------- }
         theta = np.arctan(np.sin(iinit) * np.tan(deltaomega))
@@ -5045,7 +5203,6 @@ def ionlychg(deltai=None, vinit=None, fpa=None):
 
 def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
             nuinit=None, nutran=None):
-    # --------------------  initialize values   ------------------- }
     mu = 1.0
     e = 0.0
     deltava = 0.0
@@ -5065,11 +5222,11 @@ def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
         ainit = (rinit * (1.0 + einit * np.cos(nuinit))) / (1.0 - einit * einit)
         afinal = (rfinal * (1.0 + efinal * np.cos(nutran))) / (1.0 - efinal * efinal)
         # nutran is used since it = nufinal!! }
-#    fprintf(1, ' ainti and final   #11.7f  #11.7f km \n', ainit*re, afinal*re)
-#ainit = rinit
-#afinal = rfinal
-        if np.abs(etran - 1.0) > 1e-06:
-            if np.abs(nuinit) < 0.01:
+        #    fprintf(1, ' ainti and final   #11.7f  #11.7f km \n', ainit*re, afinal*re)
+        #ainit = rinit
+        #afinal = rfinal
+        if abs(etran - 1.0) > 1e-06:
+            if abs(nuinit) < 0.01:
                 atran = ((rinit * (1.0 + etran * np.cos(nuinit)))
                          / (1.0 - etran * etran))
             else:
@@ -5081,28 +5238,28 @@ def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
         ptran = rinit * (1.0 + etran)
         atran = ptran / (1.0 - etran ** 2)
         # -----------------  find delta v at point a  ----------------- }
-        vinit = np.sqrt(mu / rinit)
-        vtrana = np.sqrt((2.0 * mu) / rinit - (mu / atran))
-        deltava = np.abs(vtrana - vinit)
+        vinit = math.sqrt(mu / rinit)
+        vtrana = math.sqrt((2.0 * mu) / rinit - (mu / atran))
+        deltava = abs(vtrana - vinit)
         # -----------------  find delta v at point b  ----------------- }
-        vfinal = np.sqrt((2.0 * mu) / rfinal - (mu / afinal))
-        vtranb = np.sqrt((2.0 * mu) / rfinal - (mu / atran))
-        fpatranb = np.arctan((etran * np.sin(nutran))
-                             / (1.0 + etran * np.cos(nutran)))
-        fpafinal = np.arctan((efinal * np.sin(nutran))
-                             / (1.0 + efinal * np.cos(nutran)))
-        deltavb = np.sqrt(vtranb * vtranb + vfinal * vfinal
-                          - 2.0 * vtranb * vfinal * np.cos(fpatranb - fpafinal))
+        vfinal = math.sqrt((2.0 * mu) / rfinal - (mu / afinal))
+        vtranb = math.sqrt((2.0 * mu) / rfinal - (mu / atran))
+        fpatranb = math.atan((etran * math.sin(nutran))
+                             / (1.0 + etran * math.cos(nutran)))
+        fpafinal = math.atan((efinal * math.sin(nutran))
+                             / (1.0 + efinal * math.cos(nutran)))
+        deltavb = math.sqrt(vtranb * vtranb + vfinal * vfinal
+                          - 2.0 * vtranb * vfinal * math.cos(fpatranb - fpafinal))
         # ----------------  find transfer time of flight  ------------- }
         if etran < 0.99999:
-            sinv = ((np.sqrt(1.0 - etran * etran) * np.sin(nutran))
-                    / (1.0 + etran * np.cos(nutran)))
-            cosv = (etran + np.cos(nutran)) / (1.0 + etran * np.cos(nutran))
+            sinv = ((math.sqrt(1.0 - etran * etran) * math.sin(nutran))
+                    / (1.0 + etran * math.cos(nutran)))
+            cosv = (etran + math.cos(nutran)) / (1.0 + etran * math.cos(nutran))
             e = math.atan2(sinv, cosv)
-            dttu = (np.sqrt((atran * atran * atran) / mu)
-                    * (e - etran * np.sin(e) - (eainit - etran * np.sin(eainit))))
+            dttu = (math.sqrt((atran * atran * atran) / mu)
+                    * (e - etran * math.sin(e) - (eainit - etran * math.sin(eainit))))
         else:
-            if np.abs(etran - 1.0) < 1e-06:
+            if abs(etran - 1.0) < 1e-06:
                 # parabolic dttu }
                 pass
             else:
@@ -5180,15 +5337,15 @@ def hohmann(rinit=None, rfinal=None, einit=None, efinal=None,
     dttu = 0.0
     if (einit < 1.0) or (efinal < 1.0):
         # -----------------  find delta v at point a  -------------- }
-        vinit = np.sqrt((2.0 * mu) / rinit - (mu / ainit))
-        vtrana = np.sqrt((2.0 * mu) / rinit - (mu / atran))
-        deltava = np.abs(vtrana - vinit)
+        vinit = math.sqrt((2.0 * mu) / rinit - (mu / ainit))
+        vtrana = math.sqrt((2.0 * mu) / rinit - (mu / atran))
+        deltava = abs(vtrana - vinit)
         # -----------------  find delta v at point b  -------------- }
-        vfinal = np.sqrt((2.0 * mu) / rfinal - (mu / afinal))
-        vtranb = np.sqrt((2.0 * mu) / rfinal - (mu / atran))
-        deltavb = np.abs(vfinal - vtranb)
+        vfinal = math.sqrt((2.0 * mu) / rfinal - (mu / afinal))
+        vtranb = math.sqrt((2.0 * mu) / rfinal - (mu / atran))
+        deltavb = abs(vfinal - vtranb)
         # ----------------  find transfer time of flight  ---------- }
-        dttu = np.pi * np.sqrt((atran * atran * atran) / mu)
+        dttu = math.pi * math.sqrt((atran * atran * atran) / mu)
         print(' atran   %11.7f  %11.7f km \n' % (atran, atran * re))
         print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit * velkmps))
         print(' vtrana  %11.7f  %11.7f km/s \n' % (vtrana, vtrana * velkmps))
@@ -5245,61 +5402,61 @@ def hohmann(rinit=None, rfinal=None, einit=None, efinal=None,
 
 
 def biellip(rinit, rb, rfinal, einit, efinal, nuinit, nufinal):
-     # --------------------  initialize values   ------------------- }
-     mu = 1.0 # cannonical units
+    # --------------------  initialize values   ------------------- }
+    mu = 1.0 # cannonical units
 
-     ainit = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
-     atran1 = (rinit + rb) * 0.5
-     atran2 = (rb + rfinal) * 0.5
-     afinal = ((rfinal * (1.0 + efinal * math.cos(nufinal)))
-               / (1.0 - efinal * efinal))
+    ainit = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
+    atran1 = (rinit + rb) * 0.5
+    atran2 = (rb + rfinal) * 0.5
+    afinal = ((rfinal * (1.0 + efinal * math.cos(nufinal)))
+            / (1.0 - efinal * efinal))
 
-     deltava = 0.0
-     deltavb = 0.0
-     deltavc = 0.0
-     dttu = 0.0
+    deltava = 0.0
+    deltavb = 0.0
+    deltavc = 0.0
+    dttu = 0.0
 
-     if (einit < 1.0) and (efinal < 1.0):
+    if (einit < 1.0) and (efinal < 1.0):
 
-     # -----------------  find delta v at point a  ----------------- }
-         vinit = math.sqrt((2.0 * mu)/rinit - (mu/ainit))
-         vtran1a = math.sqrt((2.0 * mu)/rinit - (mu/atran1))
-         deltava = abs(vtran1a - vinit)
+    # -----------------  find delta v at point a  ----------------- }
+        vinit = math.sqrt((2.0 * mu)/rinit - (mu/ainit))
+        vtran1a = math.sqrt((2.0 * mu)/rinit - (mu/atran1))
+        deltava = abs(vtran1a - vinit)
 
-     # -----------------  find delta v at point b  ----------------- }
-         vtran1b = math.sqrt((2.0 * mu)/rb - (mu/atran1))
-         vtran2b = math.sqrt((2.0 * mu)/rb - (mu/atran2))
-         deltavb = abs(vtran1b - vtran2b)
+    # -----------------  find delta v at point b  ----------------- }
+        vtran1b = math.sqrt((2.0 * mu)/rb - (mu/atran1))
+        vtran2b = math.sqrt((2.0 * mu)/rb - (mu/atran2))
+        deltavb = abs(vtran1b - vtran2b)
 
-     # -----------------  find delta v at point c  ----------------- }
-         vtran2c = math.sqrt((2.0 * mu)/rfinal - (mu/atran2))
-         vfinal = math.sqrt((2.0 * mu)/rfinal - (mu/afinal))
-         deltavc = abs(vfinal - vtran2c)
+    # -----------------  find delta v at point c  ----------------- }
+        vtran2c = math.sqrt((2.0 * mu)/rfinal - (mu/atran2))
+        vfinal = math.sqrt((2.0 * mu)/rfinal - (mu/afinal))
+        deltavc = abs(vfinal - vtran2c)
 
-     # ----------------  find transfer time of flight  ------------- }
-         dttu = (math.pi * math.sqrt((atran1 * atran1 * atran1)/mu)
-                + math.pi * math.sqrt((atran2 * atran2 * atran2)/mu))
-
-
-     #it is odd that they redefine mu here...
-     mu = 398600.4415      # km3/s2
-     velkmps = math.sqrt(mu / re)
+    # ----------------  find transfer time of flight  ------------- }
+        dttu = (math.pi * math.sqrt((atran1 * atran1 * atran1)/mu)
+            + math.pi * math.sqrt((atran2 * atran2 * atran2)/mu))
 
 
-     t1 = math.pi * math.sqrt((atran1 * atran1 * atran1)/1)*13.446852064
-     t2 = math.pi * math.sqrt((atran2 * atran2 * atran2)/1)*13.446852064
-     print(' atran1   %11.7f  %11.7f km \n' % (atran1, atran1*re))
-     print(' atran2   %11.7f  %11.7f km \n' % (atran2, atran2*re))
-     print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit*velkmps))
-     print(' vtran1a  %11.7f  %11.7f km/s \n' % (vtran1a, vtran1a*velkmps))
-     print(' vtran1b  %11.7f  %11.7f km/s \n' % (vtran1b, vtran1b*velkmps))
-     print(' vtran2b  %11.7f  %11.7f km/s \n' % (vtran2b, vtran2b*velkmps))
-     print(' vtran2c  %11.7f  %11.7f km/s \n' % (vtran2c, vtran2c*velkmps))
-     print(' vfinal  %11.7f  %11.7f km/s \n' % (vfinal, vfinal*velkmps))
-     print(' t1  %11.7f t2 %11.7f min \n' % (t1, t2))
+    #it is odd that they redefine mu here...
+    mu = 398600.4415      # km3/s2
+    velkmps = math.sqrt(mu / re)
 
 
-     return deltava, deltavb, deltavc, dttu
+    t1 = math.pi * math.sqrt((atran1 * atran1 * atran1)/1)*13.446852064
+    t2 = math.pi * math.sqrt((atran2 * atran2 * atran2)/1)*13.446852064
+    print(' atran1   %11.7f  %11.7f km \n' % (atran1, atran1 * re))
+    print(' atran2   %11.7f  %11.7f km \n' % (atran2, atran2 * re))
+    print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit * velkmps))
+    print(' vtran1a  %11.7f  %11.7f km/s \n' % (vtran1a, vtran1a * velkmps))
+    print(' vtran1b  %11.7f  %11.7f km/s \n' % (vtran1b, vtran1b * velkmps))
+    print(' vtran2b  %11.7f  %11.7f km/s \n' % (vtran2b, vtran2b * velkmps))
+    print(' vtran2c  %11.7f  %11.7f km/s \n' % (vtran2c, vtran2c * velkmps))
+    print(' vfinal  %11.7f  %11.7f km/s \n' % (vfinal, vfinal * velkmps))
+    print(' t1  %11.7f t2 %11.7f min \n' % (t1, t2))
+
+
+    return deltava, deltavb, deltavc, dttu
 
 
 
@@ -5338,7 +5495,6 @@ def biellip(rinit, rb, rfinal, einit, efinal, nuinit, nufinal):
 
 
 def iau80in():
-    # ------------------------  implementation   -------------------
     # 0.0001" to rad
     convrt = 0.0001 * math.pi / (180*3600.0)
 
@@ -5351,14 +5507,14 @@ def iau80in():
 
     ii = 0
     for rec in tdat:
-      lnd = rec.strip().replace(" ", ", ").replace(", , , , ", ", ").replace(", , , ", ", ").replace(", , ", ", ")
-      lid = [int(xx) for xx in lnd.split(", ")[0:5]]
-      iarr[ii, 0:5] = np.array([lid])
+        lnd = rec.strip().replace(" ", ", ").replace(", , , , ", ", ").replace(", , , ", ", ").replace(", , ", ", ")
+        lid = [int(xx) for xx in lnd.split(", ")[0:5]]
+        iarr[ii, 0:5] = np.array([lid])
 
-      rid = [float(xx)*convrt for xx in lnd.split(", ")[5:10]]
-      rarr[ii, 0:5] = np.array([rid])
+        rid = [float(xx)*convrt for xx in lnd.split(", ")[5:10]]
+        rarr[ii, 0:5] = np.array([rid])
 
-      ii += 1
+        ii += 1
 
     #print("iau80 float constant is: ", convrt)
 
@@ -5399,15 +5555,15 @@ def iau06era(jdut1=None):
     era = twopi * (0.779057273264 + 1.0027378119113546 * tut1d)
     era = np.fmod(era, twopi)
     if sh.iauhelp == 'y':
-      print('era%11.7f  \n' % (era * 180 / np.pi))
+        print('era%11.7f  \n' % (era * 180 / math.pi))
 
     # transformation matrix
     st = np.zeros((3, 3))
-    st[0, 0] = np.cos(era)
-    st[0, 1] = - np.sin(era)
+    st[0, 0] = math.cos(era)
+    st[0, 1] = - math.sin(era)
     st[0, 2] = 0.0
-    st[1, 0] = np.sin(era)
-    st[1, 1] = np.cos(era)
+    st[1, 0] = math.sin(era)
+    st[1, 1] = math.cos(era)
     st[1, 2] = 0.0
     st[2, 0] = 0.0
     st[2, 1] = 0.0
@@ -5476,13 +5632,13 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
 
     #  evaluate the ee complementary terms
     gstsum0 = 0.0
-    for i in range(32, -1, -1):
-        tempval = agsti[i, 0] * l + agsti[i, 1] * l1 + agsti[i, 2] * f + \
-                  agsti[i, 3] * d + agsti[i, 4] * omega + agsti[i, 5] * lonmer + \
-                  agsti[i, 6] * lonven + agsti[i, 7] * lonear + agsti[i, 8] * lonmar + \
-                  agsti[i, 9] * lonjup + agsti[i, 10] * lonsat + agsti[i, 11] * lonurn + \
-                  agsti[i, 12] * lonnep + agsti[i, 13] * precrate
-        gstsum0 = gstsum0 + agst[i, 0] * np.sin(tempval) + agst[i, 1] * np.cos(tempval)
+    for i in range(32):
+        tempval = (agsti[i, 0] * l + agsti[i, 1] * l1 + agsti[i, 2] * f +
+                  agsti[i, 3] * d + agsti[i, 4] * omega + agsti[i, 5] * lonmer +
+                  agsti[i, 6] * lonven + agsti[i, 7] * lonear + agsti[i, 8] * lonmar +
+                  agsti[i, 9] * lonjup + agsti[i, 10] * lonsat + agsti[i, 11] * lonurn +
+                  agsti[i, 12] * lonnep + agsti[i, 13] * precrate)
+        gstsum0 = gstsum0 + agst[i, 0] * math.sin(tempval) + agst[i, 1] * math.cos(tempval)
 
     gstsum1 = 0.0
     for j in range(1): #i have no idea why this was done this way -jmb
@@ -5492,12 +5648,12 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
                   agsti[i, 6] * lonven + agsti[i, 7] * lonear + agsti[i, 8] * lonmar + \
                   agsti[i, 9] * lonjup + agsti[i, 10] * lonsat + agsti[i, 11] * lonurn + \
                   agsti[i, 12] * lonnep + agsti[i, 13] * precrate
-        gstsum1 = gstsum1 + agst[i, 0] * ttt * np.sin(tempval) + agst[i, 1] * ttt * np.cos(tempval)
+        gstsum1 = gstsum1 + agst[i, 0] * ttt * math.sin(tempval) + agst[i, 1] * ttt * math.cos(tempval)
 
     eect2000 = gstsum0 + gstsum1 * ttt
 
     # equation of the equinoxes
-    ee2000 = deltapsi * np.cos(epsa) + eect2000
+    ee2000 = deltapsi * math.cos(epsa) + eect2000
 
     #  earth rotation angle
     tut1d = jdut1 - 2451545.0
@@ -5513,19 +5669,19 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
 
     if sh.iauhelp == 'y':
         print('meanobl %11.7f getsum %11.7f %11.7f eect %11.7f  \n'
-              % (epsa * 180 / np.pi, gstsum0 * 180 / np.pi,
-                 gstsum1 * 180 / np.pi, eect2000 * 180 / np.pi))
+              % (epsa * 180 / math.pi, gstsum0 * 180 / math.pi,
+                 gstsum1 * 180 / math.pi, eect2000 * 180 / math.pi))
         print('ee2000 %11.7f gmst2000 %11.7f gst %11.7f  \n'
-              % (ee2000 * 180 / np.pi, gmst2000 * 180 / np.pi,
-                  gst * 180 / np.pi))
+              % (ee2000 * 180 / math.pi, gmst2000 * 180 / math.pi,
+                  gst * 180 / math.pi))
 
     # transformation matrix
     st = np.zeros((3, 3))
-    st[0, 0] = np.cos(gst)
-    st[0, 1] = - np.sin(gst)
+    st[0, 0] = math.cos(gst)
+    st[0, 1] = - math.sin(gst)
     st[0, 2] = 0.0
-    st[1, 0] = np.sin(gst)
-    st[1, 1] = np.cos(gst)
+    st[1, 0] = math.sin(gst)
+    st[1, 1] = math.cos(gst)
     st[1, 2] = 0.0
     st[2, 0] = 0.0
     st[2, 1] = 0.0
@@ -5605,16 +5761,16 @@ def iau06pna(ttt=None):
     for i in range(677, -1, -1):
         tempval = (apni[i, 0] * l + apni[i, 1] * l1 + apni[i, 2]
                    * f + apni[i, 3] * d + apni[i, 4] * omega)
-        tempval = np.mod(tempval, 2 * np.pi)
+        tempval = np.mod(tempval, 2 * math.pi)
         #            pnsum = pnsum + (apn[i, 0] + apn[i, 1]*ttt) * sin(tempval) ...
         #                          + (apn[i, 4] + apn[i, 5]*ttt) * cos(tempval)
         #            ensum = ensum + (apn[i, 2] + apn[i, 3]*ttt) * cos(tempval) ...
         #                          + (apn[i, 6] + apn[i, 7]*ttt) * sin(tempval)
         # iers doesn't include the last few terms
-        pnsum = (pnsum + (apn[i, 0] + apn[i, 1] * ttt) * np.sin(tempval)
-                 + (apn[i, 4]) * np.cos(tempval))
-        ensum = (ensum + (apn[i, 2] + apn[i, 3] * ttt) * np.cos(tempval)
-                 + (apn[i, 6]) * np.sin(tempval))
+        pnsum = (pnsum + (apn[i, 0] + apn[i, 1] * ttt) * math.sin(tempval)
+                 + (apn[i, 4]) * math.cos(tempval))
+        ensum = (ensum + (apn[i, 2] + apn[i, 3] * ttt) * math.cos(tempval)
+                 + (apn[i, 6]) * math.sin(tempval))
 
     pplnsum = 0.0
     eplnsum = 0.0
@@ -5625,8 +5781,8 @@ def iau06pna(ttt=None):
                   appli[i, 6] * lonven + appli[i, 7] * lonear + appli[i, 8] * lonmar + \
                   appli[i, 9] * lonjup + appli[i, 10] * lonsat + appli[i, 11] * lonurn + \
                   appli[i, 12] * lonnep + appli[i, 13] * precrate
-        pplnsum = pplnsum + appl[i, 0] * np.sin(tempval) + appl[i, 1] * np.cos(tempval)
-        eplnsum = eplnsum + appl[i, 2] * np.sin(tempval) + appl[i, 3] * np.cos(tempval)
+        pplnsum = pplnsum + appl[i, 0] * math.sin(tempval) + appl[i, 1] * math.cos(tempval)
+        eplnsum = eplnsum + appl[i, 2] * math.sin(tempval) + appl[i, 3] * math.cos(tempval)
 
     #  add planetary and luni-solar components.
     deltapsi = pnsum + pplnsum
@@ -5816,10 +5972,10 @@ def iau06pnb(ttt=None):
     for i in range(76, -1, -1):
         tempval = (apni[i, 0] * l + apni[i, 1] * l1 + apni[i, 2] * f
                    + apni[i, 3] * d + apni[i, 4] * omega)
-        pnsum = (pnsum + (apn[i, 0] + apn[i, 1] * ttt) * np.sin(tempval)
-                 + (apn[i, 4] + apn[i, 5] * ttt) * np.cos(tempval))
-        ensum = (ensum + (apn[i, 2] + apn[i, 3] * ttt) * np.cos(tempval)
-                 + (apn[i, 6] + apn[i, 7] * ttt) * np.sin(tempval))
+        pnsum = (pnsum + (apn[i, 0] + apn[i, 1] * ttt) * math.sin(tempval)
+                 + (apn[i, 4] + apn[i, 5] * ttt) * math.cos(tempval))
+        ensum = (ensum + (apn[i, 2] + apn[i, 3] * ttt) * math.cos(tempval)
+                 + (apn[i, 6] + apn[i, 7] * ttt) * math.sin(tempval))
         #             pnsum = pnsum + (apn[i, 0] + apn[i, 1]*ttt) * sin(tempval) ...
 #                           + (apn[i, 4]) * cos(tempval)
 #             tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega
@@ -5877,27 +6033,27 @@ def iau06pnb(ttt=None):
     a7 = smu.rot3mat(xa)
     # icrs to j2000
     a8 = smu.rot1mat(- 0.0068192 * arcsec2rad)
-    a9 = smu.rot2mat(0.041775 * np.sin(oblo) * arcsec2rad)
+    a9 = smu.rot2mat(0.041775 * math.sin(oblo) * arcsec2rad)
     # a9 = smu.rot2mat(0.0166170*arcsec2rad)
     a10 = smu.rot3mat(0.0146 * arcsec2rad)
     pnb = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4 @ a3 @ a2 @ a1
     prec = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4
     nut = a3 @ a2 @ a1
     if sh.iauhelp == 'y':
-        print('p e %11.7f  %11.7f  \n' % (pnsum * 180 / np.pi, ensum * 180 / np.pi))
+        print('p e %11.7f  %11.7f  \n' % (pnsum * 180 / math.pi, ensum * 180 / math.pi))
         print('dpsi %11.7f deps %11.7f  \n'
-              % (deltapsi * 180 / np.pi, deltaeps * 180 / np.pi))
+              % (deltapsi * 180 / math.pi, deltaeps * 180 / math.pi))
         print('psia %11.7f wa %11.7f ea %11.7f xa %11.7f  \n'
-              % (psia * 180 / np.pi, wa * 180 / np.pi, ea * 180 / np.pi,
-                 xa * 180 / np.pi))
+              % (psia * 180 / math.pi, wa * 180 / math.pi, ea * 180 / math.pi,
+                 xa * 180 / math.pi))
 
     # -------------- these are extra not needed for pnb
     if (sh.iaupnhelp == 'y'):
-        p = psia + (deltapsi * np.sin(ea) * np.cos(xa)
-                    - deltaeps * np.sin(xa)) / np.sin(wa)
-        w = wa + deltapsi * np.sin(ea) * np.sin(xa) + deltaeps * np.cos(xa)
-        xbar = np.sin(w) * np.sin(p)
-        ybar = - np.sin(oblo) * np.cos(w) + np.cos(oblo) * np.sin(w) * np.cos(p)
+        p = psia + (deltapsi * math.sin(ea) * math.cos(xa)
+                    - deltaeps * math.sin(xa)) / math.sin(wa)
+        w = wa + deltapsi * math.sin(ea) * math.sin(xa) + deltaeps * math.cos(xa)
+        xbar = math.sin(w) * math.sin(p)
+        ybar = - math.sin(oblo) * math.cos(w) + math.cos(oblo) * math.sin(w) * math.cos(p)
         x = xbar + (- 0.016617 + 0.0146 * ybar) * arcsec2rad
         #            x = xbar + (-0.0417750 + 0.01460*ybar)*arcsec2rad  # rad
         y = ybar + (- 0.0068192 - 0.0146 * xbar) * arcsec2rad
@@ -5908,35 +6064,35 @@ def iau06pnb(ttt=None):
         for i in range(32, -1, -1):
             tempval = (a0si[i, 0] * l + a0si[i, 1] * l1
                        + a0si[i, 2] * f + a0si[i, 3] * d + a0si[i, 4] * omega)
-            ssum0 = (ssum0 + ass0[i, 0] * np.sin(tempval)
-                     + ass0[i, 1] * np.cos(tempval))
+            ssum0 = (ssum0 + ass0[i, 0] * math.sin(tempval)
+                     + ass0[i, 1] * math.cos(tempval))
         ssum1 = 0.0
         for j in range(2, -1, -1):
             i = 33 + j
             tempval = (a0si[i, 0] * l + a0si[i, 1] * l1
                        + a0si[i, 2] * f + a0si[i, 3] * d + a0si[i, 4] * omega)
-            ssum1 = ssum1 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
+            ssum1 = ssum1 + ass0[i, 0] * math.sin(tempval) + ass0[i, 1] * math.cos(tempval)
         ssum2 = 0.0
         for j in range(24, -1, -1):
             i = 33 + 3 + j
             tempval = (a0si[i, 0] * l + a0si[i, 1] * l1
                        + a0si[i, 2] * f + a0si[i, 3] * d + a0si[i, 4] * omega)
-            ssum2 = (ssum2 + ass0[i, 0] * np.sin(tempval)
-                     + ass0[i, 1] * np.cos(tempval))
+            ssum2 = (ssum2 + ass0[i, 0] * math.sin(tempval)
+                     + ass0[i, 1] * math.cos(tempval))
         ssum3 = 0.0
         for j in range(3, -1, -1):
             i = 33 + 3 + 25 + j
             tempval = (a0si[i, 0] * l + a0si[i, 1] * l1
                        + a0si[i, 2] * f + a0si[i, 3] * d + a0si[i, 4] * omega)
-            ssum3 = (ssum3 + ass0[i, 0] * np.sin(tempval)
-                     + ass0[i, 1] * np.cos(tempval))
+            ssum3 = (ssum3 + ass0[i, 0] * math.sin(tempval)
+                     + ass0[i, 1] * math.cos(tempval))
         ssum4 = 0.0
         for j in range(1):
             i = 33 + 3 + 25 + 4 + j
             tempval = (a0si[i, 0] * l + a0si[i, 1] * l1 + a0si[i, 2]
                        * f + a0si[i, 3] * d + a0si[i, 4] * omega)
-            ssum4 = (ssum4 + ass0[i, 0] * np.sin(tempval)
-                     + ass0[i, 1] * np.cos(tempval))
+            ssum4 = (ssum4 + ass0[i, 0] * math.sin(tempval)
+                     + ass0[i, 1] * math.cos(tempval))
         s = (9.4e-05 + 0.00380835 * ttt - 0.00011994 * ttt2
              - 0.07257409 * ttt3 + 2.77e-05 * ttt4 + 1.561e-05 * ttt5)
         s = (- x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2
@@ -6030,7 +6186,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0xi[i, 8] * lonmar + a0xi[i, 9] * lonjup
                    + a0xi[i, 10] * lonsat + a0xi[i, 11] * lonurn
                    + a0xi[i, 12] * lonnep + a0xi[i, 13] * precrate)
-        xsum0 = xsum0 + axs0[i, 0] * np.sin(tempval) + axs0[i, 1] * np.cos(tempval)
+        xsum0 = xsum0 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     xsum1 = 0.0
     # note that the index changes here to j. this is because the a0xi etc
@@ -6045,7 +6201,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0xi[i, 8] * lonmar + a0xi[i, 9] * lonjup
                    + a0xi[i, 10] * lonsat + a0xi[i, 11] * lonurn
                    + a0xi[i, 12] * lonnep + a0xi[i, 13] * precrate)
-        xsum1 = xsum1 + axs0[i, 0] * np.sin(tempval) + axs0[i, 1] * np.cos(tempval)
+        xsum1 = xsum1 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     xsum2 = 0.0
     for j in range(35, - 1, - 1):
@@ -6056,7 +6212,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0xi[i, 8] * lonmar + a0xi[i, 9] * lonjup
                    + a0xi[i, 10] * lonsat + a0xi[i, 11] * lonurn
                    + a0xi[i, 12] * lonnep + a0xi[i, 13] * precrate)
-        xsum2 = xsum2 + axs0[i, 0] * np.sin(tempval) + axs0[i, 1] * np.cos(tempval)
+        xsum2 = xsum2 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     xsum3 = 0.0
     for j in range(3, - 1, - 1):
@@ -6067,7 +6223,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0xi[i, 8] * lonmar + a0xi[i, 9] * lonjup
                    + a0xi[i, 10] * lonsat + a0xi[i, 11] * lonurn
                    + a0xi[i, 12] * lonnep + a0xi[i, 13] * precrate)
-        xsum3 = xsum3 + axs0[i, 0] * np.sin(tempval) + axs0[i, 1] * np.cos(tempval)
+        xsum3 = xsum3 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     xsum4 = 0.0
     for j in range(1):
@@ -6078,7 +6234,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0xi[i, 8] * lonmar + a0xi[i, 9] * lonjup
                    + a0xi[i, 10] * lonsat + a0xi[i, 11] * lonurn
                    + a0xi[i, 12] * lonnep + a0xi[i, 13] * precrate)
-        xsum4 = xsum4 + axs0[i, 0] * np.sin(tempval) + axs0[i, 1] * np.cos(tempval)
+        xsum4 = xsum4 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     x = - 0.016617 + 2004.191898 * ttt - 0.4297829 * ttt2 - 0.19861834 * ttt3 - 7.578e-06 * ttt4 + 5.9285e-06 * ttt5
 
@@ -6097,7 +6253,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ysum0 = ysum0 + ays0[i, 0] * np.sin(tempval) + ays0[i, 1] * np.cos(tempval)
+        ysum0 = ysum0 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum1 = 0.0
     for j in range(276, - 1, - 1):
@@ -6109,7 +6265,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ysum1 = ysum1 + ays0[i, 0] * np.sin(tempval) + ays0[i, 1] * np.cos(tempval)
+        ysum1 = ysum1 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum2 = 0.0
     for j in range(29, - 1, - 1):
@@ -6121,7 +6277,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ysum2 = ysum2 + ays0[i, 0] * np.sin(tempval) + ays0[i, 1] * np.cos(tempval)
+        ysum2 = ysum2 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum3 = 0.0
     for j in range(4, - 1, - 1):
@@ -6133,7 +6289,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ysum3 = ysum3 + ays0[i, 0] * np.sin(tempval) + ays0[i, 1] * np.cos(tempval)
+        ysum3 = ysum3 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum4 = 0.0
     for j in range(1):
@@ -6145,7 +6301,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ysum4 = ysum4 + ays0[i, 0] * np.sin(tempval) + ays0[i, 1] * np.cos(tempval)
+        ysum4 = ysum4 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     y = (- 0.006951 - 0.025896 * ttt - 22.4072747 * ttt2
          + 0.00190059 * ttt3 + 0.001112526 * ttt4 + 1.358e-07 * ttt5)
@@ -6167,7 +6323,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0si[i, 9] * lonjup + a0si[i, 10] * lonsat
                    + a0si[i, 11] * lonurn + a0si[i, 12] * lonnep
                    + a0si[i, 13] * precrate)
-        ssum0 = ssum0 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
+        ssum0 = ssum0 + ass0[i, 0] * math.sin(tempval) + ass0[i, 1] * math.cos(tempval)
 
     ssum1 = 0.0
     for j in range(2, - 1, - 1):
@@ -6179,7 +6335,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ssum1 = ssum1 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
+        ssum1 = ssum1 + ass0[i, 0] * math.sin(tempval) + ass0[i, 1] * math.cos(tempval)
 
     ssum2 = 0.0
     for j in range(24, - 1, - 1):
@@ -6191,7 +6347,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ssum2 = ssum2 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
+        ssum2 = ssum2 + ass0[i, 0] * math.sin(tempval) + ass0[i, 1] * math.cos(tempval)
 
     ssum3 = 0.0
     for j in range(3, - 1, - 1):
@@ -6203,7 +6359,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ssum3 = ssum3 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
+        ssum3 = ssum3 + ass0[i, 0] * math.sin(tempval) + ass0[i, 1] * math.cos(tempval)
 
     ssum4 = 0.0
     for j in range(1):
@@ -6215,7 +6371,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
                    + a0yi[i, 9] * lonjup + a0yi[i, 10] * lonsat
                    + a0yi[i, 11] * lonurn + a0yi[i, 12] * lonnep
                    + a0yi[i, 13] * precrate)
-        ssum4 = ssum4 + ass0[i, 0] * np.sin(tempval) + ass0[i, 1] * np.cos(tempval)
+        ssum4 = ssum4 + ass0[i, 0] * math.sin(tempval) + ass0[i, 1] * math.cos(tempval)
 
     s = 9.4e-05 + 0.00380865 * ttt - 0.00012268 * ttt2 - 0.07257411 * ttt3 + 2.798e-05 * ttt4 + 1.562e-05 * ttt5
     # + 0.00000171*ttt*sin(omega) + 0.00000357*ttt*cos(2.0*omega) ...
@@ -6261,10 +6417,10 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     #nut1
 
     nut2 = np.eye(3)
-    nut2[0, 0] = np.cos(s)
-    nut2[1, 1] = np.cos(s)
-    nut2[0, 1] = np.sin(s)
-    nut2[1, 0] = -np.sin(s)
+    nut2[0, 0] = math.cos(s)
+    nut2[1, 1] = math.cos(s)
+    nut2[0, 1] = math.sin(s)
+    nut2[1, 0] = -math.sin(s)
     nut = nut1 @ nut2
     # the matrix appears to be orthogonal now, so the extra processing
     # is not needed.
@@ -6846,17 +7002,17 @@ def site (latgd, lon, alt):
         eccearth = math.sqrt(2.0*flat - flat**2)
         eccearthsqrd = eccearth**2
         # -------------------------  implementation   -----------------
-        sinlat = np.sin((latgd))
+        sinlat = math.sin((latgd))
 
         # ------  find rdel and rk components of site vector  ---------
         cearth = re / math.sqrt(1.0 - (eccearthsqrd*sinlat*sinlat))
-        rdel = (cearth + alt)*np.cos((latgd))
+        rdel = (cearth + alt)*math.cos((latgd))
         rk = ((1.0-eccearthsqrd)*cearth + alt)*sinlat
 
         # ---------------  find site position vector  -----------------
         rs = np.zeros((3))
-        rs[0] = rdel * np.cos((lon))
-        rs[1] = rdel * np.sin((lon))
+        rs[0] = rdel * math.cos((lon))
+        rs[1] = rdel * math.sin((lon))
         rs[2] = rk
         rs = rs.T
 
@@ -7079,10 +7235,10 @@ def light (r, jd, whichkind):
 def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
     # ------------------------  implementation   ------------------
     # -------------- make sure lon is within +- 180 deg -----------
-    if (lon > np.pi):
+    if (lon > math.pi):
         lon = lon - twopi
 
-    if (lon < - np.pi):
+    if (lon < - math.pi):
         lon = lon + twopi
 
     if (whichkind == 's'):
@@ -7114,8 +7270,8 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
         meananomalysun = np.fmod(meananomalysun * deg2rad, twopi)
         if (meananomalysun < 0.0):
             meananomalysun = meananomalysun + twopi
-        lonecliptic = (meanlonsun + 1.914666471 * np.sin(meananomalysun)
-                       + 0.019994643 * np.sin(2.0 * meananomalysun))
+        lonecliptic = (meanlonsun + 1.914666471 * math.sin(meananomalysun)
+                       + 0.019994643 * math.sin(2.0 * meananomalysun))
         lonecliptic = np.fmod(lonecliptic * deg2rad, twopi)
         if (lonecliptic < 0.0):
             lonecliptic = lonecliptic + twopi
@@ -7123,23 +7279,23 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
         obliquity = obliquity * deg2rad
         print('lonecl %11.7f tut1 %11.7f  obl %11.7f  \n'
               % (lonecliptic * rad2deg, tut1, obliquity * rad2deg))
-        ra = np.arctan(np.cos(obliquity) * np.tan(lonecliptic))
-        decl = np.arcsin(np.sin(obliquity) * np.sin(lonecliptic))
+        ra = math.atan(math.cos(obliquity) * math.tan(lonecliptic))
+        decl = math.asin(math.sin(obliquity) * math.sin(lonecliptic))
         if (ra < 0.0):
             ra = ra + twopi
-        if (((lonecliptic > np.pi) and (ra < np.pi))):
-            ra = ra + np.pi
-        if (((lonecliptic < np.pi) and (ra > np.pi))):
-            ra = ra - np.pi
+        if (((lonecliptic > math.pi) and (ra < math.pi))):
+            ra = ra + math.pi
+        if (((lonecliptic < math.pi) and (ra > math.pi))):
+            ra = ra - math.pi
         print('mlonsun %11.7f meanansun %11.7f  eclon %11.7f  \n'
               % (meanlonsun + 1080.0, meananomalysun * rad2deg,
                  lonecliptic * rad2deg))
         print('ra %11.7f decl %11.7f  \n' % (ra * rad2deg, decl * rad2deg))
-        lha = ((np.cos(sunangle) - np.sin(decl) * np.sin(latgd))
-               / (np.cos(decl) * np.cos(latgd)))
+        lha = ((math.cos(sunangle) - math.sin(decl) * math.sin(latgd))
+               / (math.cos(decl) * math.cos(latgd)))
         #fprintf(1, 'lha 1st #11.7f   \n', 90.0 + lha*rad2deg)
-        if (np.abs(lha) <= 1.0):
-            lha = np.arccos(lha)
+        if (abs(lha) <= 1.0):
+            lha = math.acos(lha)
         else:
             error = 'not ok'
             print('error \n' % ())
@@ -7225,26 +7381,26 @@ def moon(jd=None, show=None):
     # -------------------------  implementation   -----------------
     ttdb = (jd - 2451545.0) / 36525.0
     eclplong = (218.32 + 481267.8813 * ttdb
-                + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+                + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
 
-    eclplat = (5.13 * np.sin((93.3 + 483202.03 * ttdb) * deg2rad)
-               + 0.28 * np.sin((228.2 + 960400.87 * ttdb) * deg2rad)
-               - 0.28 * np.sin((318.3 + 6003.18 * ttdb) * deg2rad)
-               - 0.17 * np.sin((217.6 - 407332.2 * ttdb) * deg2rad))
+    eclplat = (5.13 * math.sin((93.3 + 483202.03 * ttdb) * deg2rad)
+               + 0.28 * math.sin((228.2 + 960400.87 * ttdb) * deg2rad)
+               - 0.28 * math.sin((318.3 + 6003.18 * ttdb) * deg2rad)
+               - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
 
-    hzparal = (0.9508 + 0.0518 * np.cos((134.9 + 477198.85 * ttdb) * deg2rad)
-               + 0.0095 * np.cos((259.2 - 413335.38 * ttdb) * deg2rad)
-               + 0.0078 * np.cos((235.7 + 890534.23 * ttdb) * deg2rad)
-               + 0.0028 * np.cos((269.9 + 954397.7 * ttdb) * deg2rad))
+    hzparal = (0.9508 + 0.0518 * math.cos((134.9 + 477198.85 * ttdb) * deg2rad)
+               + 0.0095 * math.cos((259.2 - 413335.38 * ttdb) * deg2rad)
+               + 0.0078 * math.cos((235.7 + 890534.23 * ttdb) * deg2rad)
+               + 0.0028 * math.cos((269.9 + 954397.7 * ttdb) * deg2rad))
 
-    eclplong = np.fmod(eclplong * deg2rad, twopi)
-    eclplat = np.fmod(eclplat * deg2rad, twopi)
-    hzparal = np.fmod(hzparal * deg2rad, twopi)
+    eclplong = math.fmod(eclplong * deg2rad, twopi)
+    eclplat = math.fmod(eclplat * deg2rad, twopi)
+    hzparal = math.fmod(hzparal * deg2rad, twopi)
     obliquity = 23.439291 - 0.0130042 * ttdb
 
     obliquity = obliquity * deg2rad
@@ -7255,13 +7411,13 @@ def moon(jd=None, show=None):
         obliquity / deg2rad
 
     # ------------ find the geocentric direction cosines ----------
-    l = np.cos(eclplat) * np.cos(eclplong)
-    m = (np.cos(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-         - np.sin(obliquity) * np.sin(eclplat))
-    n = (np.sin(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-         + np.cos(obliquity) * np.sin(eclplat))
+    l = math.cos(eclplat) * math.cos(eclplong)
+    m = (math.cos(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+         - math.sin(obliquity) * math.sin(eclplat))
+    n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+         + math.cos(obliquity) * math.sin(eclplat))
     # ------------- calculate moon position vector ----------------
-    magr = 1.0 / np.sin(hzparal)
+    magr = 1.0 / math.sin(hzparal)
     if show == 'y':
         magr * re
 
@@ -7271,7 +7427,7 @@ def moon(jd=None, show=None):
     rmoon[2] = magr * n
     # -------------- find rt ascension and declination ------------
     rtasc = math.atan2(m, l)
-    decl = np.arcsin(n)
+    decl = math.asin(n)
     return rmoon, rtasc, decl
 
 
@@ -7353,10 +7509,10 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
 # -------------- make sure lon is within +- 180 deg -----------
-    if (lon > np.pi):
-        lon = lon - 2.0 * np.pi
+    if (lon > math.pi):
+        lon = lon - 2.0 * math.pi
 
-    if (lon < - np.pi):
+    if (lon < - math.pi):
         lon = lon + twopi
 
     try1 = 1
@@ -7377,43 +7533,43 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
         tn = uttemp
         t = tn + 10.0
         jdtemp = jdtemp + jdtempf + uttemp
-        while ((np.abs(tn - t) >= 0.008) and (i <= 5)):
+        while ((abs(tn - t) >= 0.008) and (i <= 5)):
 
             ttdb = (jdtemp + jdtempf - 2451545.0) / 36525.0
             eclplong = (218.32 + 481267.8813 * ttdb
-                        + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                        - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                        + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                        + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                        - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                        - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
-            eclplat = (5.13 * np.sin((93.3 + 483202.03 * ttdb) * deg2rad)
-                       + 0.28 * np.sin((228.2 + 960400.87 * ttdb) * deg2rad)
-                       - 0.28 * np.sin((318.3 + 6003.18 * ttdb) * deg2rad)
-                       - 0.17 * np.sin((217.6 - 407332.2 * ttdb) * deg2rad))
-            eclplong = np.fmod(eclplong * deg2rad, twopi)
-            eclplat = np.fmod(eclplat * deg2rad, twopi)
+                        + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                        - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                        + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                        + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                        - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                        - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+            eclplat = (5.13 * math.sin((93.3 + 483202.03 * ttdb) * deg2rad)
+                       + 0.28 * math.sin((228.2 + 960400.87 * ttdb) * deg2rad)
+                       - 0.28 * math.sin((318.3 + 6003.18 * ttdb) * deg2rad)
+                       - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
+            eclplong = math.fmod(eclplong * deg2rad, twopi)
+            eclplat = math.fmod(eclplat * deg2rad, twopi)
             if show == 'y':
                 print('%2d %2d ecpllon %11.7f ecllat %11.7f '
                       % (opt, try1, eclplong / deg2rad, eclplat / deg2rad))
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
             # ------- find the geocentric direction cosines -------
-            l = np.cos(eclplat) * np.cos(eclplong)
-            m = (np.cos(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-                 - np.sin(obliquity) * np.sin(eclplat))
-            n = (np.sin(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-                 + np.cos(obliquity) * np.sin(eclplat))
+            l = math.cos(eclplat) * math.cos(eclplong)
+            m = (math.cos(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+                 - math.sin(obliquity) * math.sin(eclplat))
+            n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+                 + math.cos(obliquity) * math.sin(eclplat))
             if show == 'y':
                 print('l %11.7f m %11.7f n %11.7f ' % (l, m, n))
             rtasc = math.atan2(m, l)
             # - check that rtasc is in the same quadrant as eclplong
             if (eclplong < 0.0):
                 eclplong = eclplong + twopi
-            if (np.abs(eclplong - rtasc) > np.pi * 0.5):
-                rtasc = (rtasc + 0.5 * np.pi
-                         * np.rint(0.5 + (eclplong - rtasc) / (0.5 * np.pi)))
-            decl = np.arcsin(n)
+            if (abs(eclplong - rtasc) > math.pi * 0.5):
+                rtasc = (rtasc + 0.5 * math.pi
+                         * np.rint(0.5 + (eclplong - rtasc) / (0.5 * math.pi)))
+            decl = math.asin(n)
             lst, gst = stu.lstime(lon, jdtemp + jdtempf)
             if show == 'y':
                 print('ra %8.5f dcl %8.5f lst %8.5f jdtemp %8.5f \n'
@@ -7427,12 +7583,12 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
             else:
                 dgha = (moonghan - moongha) / deltaut
             if (dgha < 0.0):
-                dgha = dgha + twopi / np.abs(deltaut)
+                dgha = dgha + twopi / abs(deltaut)
             if show == 'y':
                 print('mn gha %11.7f  dgha  %11.7f '
                       % (moonghan / deg2rad, dgha / deg2rad))
-            lhan = ((0.00233 - np.sin(latgd) * np.sin(decl))
-                    / (np.cos(latgd) * np.cos(decl)))
+            lhan = ((0.00233 - math.sin(latgd) * math.sin(decl))
+                    / (math.cos(latgd) * math.cos(decl)))
             if show == 'y':
                 print('lhan  %11.7f rad ' % (lhan))
             #fprintf('lhan  #11.7f deg \n', lhan/deg2rad)
@@ -7440,12 +7596,12 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
                 lhan = 0.0
             if (lhan < - 1.0):
                 lhan = - 1.0
-            lhan = np.arccos(lhan)
+            lhan = math.acos(lhan)
             if (opt == 1):
                 lhan = twopi - lhan
             if show == 'y':
                 print('lhan1 %11.7f ' % (lhan / deg2rad))
-            if (np.abs(dgha) > 0.0001):
+            if (abs(dgha) > 0.0001):
                 deltaut = (lhan - lha) / dgha
             else:
                 deltaut = 1.0
@@ -7453,15 +7609,15 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
             if show == 'y':
                 print('deltaut %11.7f tn  %11.7f ' % (deltaut, tn))
             t = tn
-            if (np.abs(deltaut) > 0.5):
-                if (np.abs(dgha) > 0.001):
+            if (abs(deltaut) > 0.5):
+                if (abs(dgha) > 0.001):
                     if (deltaut < 0.0):
                         deltaut = deltaut + twopi / dgha
-                        if (np.abs(deltaut) > 0.51):
+                        if (abs(deltaut) > 0.51):
                             i = 6
                     else:
                         deltaut = deltaut - twopi / dgha
-                        if (np.abs(deltaut) > 0.51):
+                        if (abs(deltaut) > 0.51):
                             i = 6
                 else:
                     error = 'error2 dgha is too small'
@@ -7478,7 +7634,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
             uttemp = 9999.99
         if (uttemp > 24.0) and (uttemp < 9999.0):
             #fprintf('rem #11.7f ', uttemp)
-            uttemp = np.fmod(uttemp, 24.0)
+            uttemp = math.fmod(uttemp, 24.0)
             #fprintf('#11.7f ', uttemp)
         if (uttemp < 0.0):
             uttemp = uttemp + 24.0
@@ -7508,22 +7664,22 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
 
     # ------------- determine phase angle of the moon -------------
     meanlong = 280.4606184 + 36000.77005361 * ttdb
-    meanlong = np.fmod(meanlong, 360.0)
+    meanlong = math.fmod(meanlong, 360.0)
     meananomaly = 357.5277233 + 35999.05034 * ttdb
-    meananomaly = np.fmod(meananomaly * deg2rad, twopi)
+    meananomaly = math.fmod(meananomaly * deg2rad, twopi)
     if (meananomaly < 0.0):
         meananomaly = twopi + meananomaly
 
-    loneclsun = (meanlong + 1.914666471 * np.sin(meananomaly)
-                 + 0.019994643 * np.sin(2.0 * meananomaly))
+    loneclsun = (meanlong + 1.914666471 * math.sin(meananomaly)
+                 + 0.019994643 * math.sin(2.0 * meananomaly))
     loneclmoon = (218.32 + 481267.8813 * ttdb
-                  + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                  - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                  + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                  + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                  - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                  - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
-    loneclmoon = np.fmod(loneclmoon, 360.0)
+                  + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                  - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                  + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                  + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                  - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                  - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+    loneclmoon = math.fmod(loneclmoon, 360.0)
     moonphaseang = loneclmoon - loneclsun
     if (moonphaseang < 0.0):
         moonphaseang = 360.0 + moonphaseang
@@ -7609,10 +7765,10 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
 # -------------- make sure lon is within +- 180 deg -----------
-    if (lon > np.pi):
-        lon = lon - 2.0 * np.pi
+    if (lon > math.pi):
+        lon = lon - 2.0 * math.pi
 
-    if (lon < - np.pi):
+    if (lon < - math.pi):
         lon = lon + twopi
 
     try1 = 1
@@ -7637,32 +7793,32 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
         ktlim = 15
         if show == 'y':
             print('   ecplon    ecllat       l          m           n       rtasc          decl        gmst       mgha      dgha    lhan     lhan1   deltaut     tn    deltaut    jd    tn \n' % ())
-        while ((np.abs(deltaut) >= 8e-05) and (i < ktlim)):
+        while ((abs(deltaut) >= 8e-05) and (i < ktlim)):
 
             ttdb = (jdtemp + jdtempf - 2451545.0) / 36525.0
             eclplong = (218.32 + 481267.8813 * ttdb
-                        + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                        - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                        + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                        + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                        - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                        - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
-            eclplat = (5.13 * np.sin((93.3 + 483202.03 * ttdb) * deg2rad)
-                       + 0.28 * np.sin((228.2 + 960400.87 * ttdb) * deg2rad)
-                       - 0.28 * np.sin((318.3 + 6003.18 * ttdb) * deg2rad)
-                       - 0.17 * np.sin((217.6 - 407332.2 * ttdb) * deg2rad))
-            eclplong = np.fmod(eclplong * deg2rad, twopi)
-            eclplat = np.fmod(eclplat * deg2rad, twopi)
+                        + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                        - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                        + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                        + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                        - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                        - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+            eclplat = (5.13 * math.sin((93.3 + 483202.03 * ttdb) * deg2rad)
+                       + 0.28 * math.sin((228.2 + 960400.87 * ttdb) * deg2rad)
+                       - 0.28 * math.sin((318.3 + 6003.18 * ttdb) * deg2rad)
+                       - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
+            eclplong = math.fmod(eclplong * deg2rad, twopi)
+            eclplat = math.fmod(eclplat * deg2rad, twopi)
             if show == 'y':
                 print('%2i %2i %11.7f %11.7f ' % (opt, i, eclplong / deg2rad, eclplat / deg2rad))
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
             # ------- find the geocentric direction cosines -------
-            l = np.cos(eclplat) * np.cos(eclplong)
-            m = (np.cos(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-                 - np.sin(obliquity) * np.sin(eclplat))
-            n = (np.sin(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-                 + np.cos(obliquity) * np.sin(eclplat))
+            l = math.cos(eclplat) * math.cos(eclplong)
+            m = (math.cos(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+                 - math.sin(obliquity) * math.sin(eclplat))
+            n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+                 + math.cos(obliquity) * math.sin(eclplat))
             if show == 'y':
                 print(' %11.7f %11.7f %11.7f ' % (l, m, n))
             rtasc = math.atan2(m, l)
@@ -7670,10 +7826,10 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 #        if (eclplong < 0.0)
 #            eclplong = eclplong + twopi
 #        end
-            if (np.abs(eclplong - rtasc) > np.pi * 0.5):
-                rtasc = rtasc + 0.5 * np.pi * np.rint(0.5 + (eclplong - rtasc)
-                                                      / (0.5 * np.pi))
-            decl = np.arcsin(n)
+            if (abs(eclplong - rtasc) > math.pi * 0.5):
+                rtasc = rtasc + 0.5 * math.pi * np.rint(0.5 + (eclplong - rtasc)
+                                                      / (0.5 * math.pi))
+            decl = math.asin(n)
             lst, gmst = stu.lstime(lon, jdtemp)
             if show == 'y':
                 print(' %d %d %d ' % (rtasc, decl, gmst / deg2rad))
@@ -7691,8 +7847,8 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 #        end
             if show == 'y':
                 print(' %11.7f  %11.7f ' % (moonghan / deg2rad, dgha / deg2rad))
-            lhan = (0.00233 - (np.sin(latgd) * np.sin(decl))
-                    / (np.cos(latgd) * np.cos(decl)))
+            lhan = (0.00233 - (math.sin(latgd) * math.sin(decl))
+                    / (math.cos(latgd) * math.cos(decl)))
             if show == 'y':
                 print(' %11.7f rad ' % (lhan))
             #fprintf('lhan  #11.7f deg \n', lhan/deg2rad)
@@ -7702,12 +7858,12 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 #       if (lhan < -1.0)
 #           lhan = -1.0
 #       end
-            if np.abs(lhan) > 1.0:
+            if abs(lhan) > 1.0:
                 deltaut = 1.0
                 uttemp = 9999.9
                 i = ktlim
             else:
-                lhan = np.arccos(lhan)
+                lhan = math.acos(lhan)
                 if (opt == 1):
                     lhan = twopi - lhan
                 if show == 'y':
@@ -7814,22 +7970,22 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 
     # ------------- determine phase angle of the moon -------------
     meanlong = 280.4606184 + 36000.77005361 * ttdb
-    meanlong = np.fmod(meanlong, 360.0)
+    meanlong = math.fmod(meanlong, 360.0)
     meananomaly = 357.5277233 + 35999.05034 * ttdb
-    meananomaly = np.fmod(meananomaly * deg2rad, twopi)
+    meananomaly = math.fmod(meananomaly * deg2rad, twopi)
     if (meananomaly < 0.0):
         meananomaly = twopi + meananomaly
 
-    loneclsun = (meanlong + 1.914666471 * np.sin(meananomaly)
-                 + 0.019994643 * np.sin(2.0 * meananomaly))
+    loneclsun = (meanlong + 1.914666471 * math.sin(meananomaly)
+                 + 0.019994643 * math.sin(2.0 * meananomaly))
     loneclmoon = (218.32 + 481267.8813 * ttdb
-                  + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                  - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                  + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                  + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                  - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                  - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
-    loneclmoon = np.fmod(loneclmoon, 360.0)
+                  + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                  - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                  + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                  + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                  - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                  - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+    loneclmoon = math.fmod(loneclmoon, 360.0)
     moonphaseang = loneclmoon - loneclsun
     if (moonphaseang < 0.0):
         moonphaseang = 360.0 + moonphaseang
@@ -7914,10 +8070,10 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
 # -------------- make sure lon is within +- 180 deg -----------
-    if (lon > np.pi):
-        lon = lon - 2.0 * np.pi
+    if (lon > math.pi):
+        lon = lon - 2.0 * math.pi
 
-    if (lon < - np.pi):
+    if (lon < - math.pi):
         lon = lon + twopi
 
     #   try1 = 1 # try another approach on the current option
@@ -7930,22 +8086,22 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
         deltaUT = 0.001
         deltaJD = 0.0
         loopCount = 1
-        while ((np.abs(deltaUT) > tolerance) and (loopCount < 10)):
+        while ((abs(deltaUT) > tolerance) and (loopCount < 10)):
 
             ttdb = (jdtemp - 2451545.0) / 36525.0
             eclplong = (218.32 + 481267.8813 * ttdb
-                        + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                        - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                        + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                        + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                        - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                        - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
-            eclplat = (5.13 * np.sin((93.3 + 483202.03 * ttdb) * deg2rad)
-                       + 0.28 * np.sin((228.2 + 960400.87 * ttdb) * deg2rad)
-                       - 0.28 * np.sin((318.3 + 6003.18 * ttdb) * deg2rad)
-                       - 0.17 * np.sin((217.6 - 407332.2 * ttdb) * deg2rad))
-            eclplong = np.fmod(eclplong * deg2rad, twopi)
-            eclplat = np.fmod(eclplat * deg2rad, twopi)
+                        + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                        - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                        + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                        + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                        - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                        - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+            eclplat = (5.13 * math.sin((93.3 + 483202.03 * ttdb) * deg2rad)
+                       + 0.28 * math.sin((228.2 + 960400.87 * ttdb) * deg2rad)
+                       - 0.28 * math.sin((318.3 + 6003.18 * ttdb) * deg2rad)
+                       - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
+            eclplong = math.fmod(eclplong * deg2rad, twopi)
+            eclplat = math.fmod(eclplat * deg2rad, twopi)
             if show == 'y':
                 print('%2i %2i%8.5f  %11.7f %11.7f ' %
                       (opt, loopCount, ttdb, eclplong / deg2rad,
@@ -7953,19 +8109,19 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
             # ------- find the geocentric direction cosines -------
-            l = np.cos(eclplat) * np.cos(eclplong)
-            m = (np.cos(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-                 - np.sin(obliquity) * np.sin(eclplat))
-            n = (np.sin(obliquity) * np.cos(eclplat) * np.sin(eclplong)
-                 + np.cos(obliquity) * np.sin(eclplat))
+            l = math.cos(eclplat) * math.cos(eclplong)
+            m = (math.cos(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+                 - math.sin(obliquity) * math.sin(eclplat))
+            n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
+                 + math.cos(obliquity) * math.sin(eclplat))
             rtasc = math.atan2(m, l)
             # - check that rtasc is in the same quadrant as eclplong
             if (eclplong < 0.0):
                 eclplong = eclplong + twopi
-            if (np.abs(eclplong - rtasc) > np.pi * 0.5):
-                rtasc = (rtasc + 0.5 * np.pi
-                         * np.rint(0.5 + (eclplong - rtasc) / (0.5 * np.pi)))
-            decl = np.arcsin(n)
+            if (abs(eclplong - rtasc) > math.pi * 0.5):
+                rtasc = (rtasc + 0.5 * math.pi
+                         * np.rint(0.5 + (eclplong - rtasc) / (0.5 * math.pi)))
+            decl = math.asin(n)
             lst, gmst = stu.lstime(lon, jdtemp)
             GHAn = gmst - rtasc
             LHA = GHAn + lon
@@ -7974,20 +8130,20 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
             else:
                 deltaGHA = ((GHAn - GHA) / deltaUT)
             if (deltaGHA < 0.0):
-                deltaGHA = deltaGHA + twopi / np.abs(deltaUT)
-            cosLHAn = ((0.00233 - np.sin(latgd) * np.sin(decl))
-                       / (np.cos(latgd) * np.cos(decl)))
+                deltaGHA = deltaGHA + twopi / abs(deltaUT)
+            cosLHAn = ((0.00233 - math.sin(latgd) * math.sin(decl))
+                       / (math.cos(latgd) * math.cos(decl)))
             if show == 'y':
                 print(' coslha %8.5f lmn %11.7f %11.7f %11.7f \n'
                       % (cosLHAn, l, m, n))
-            if (np.abs(cosLHAn) > 1.0):
+            if (abs(cosLHAn) > 1.0):
                 # No event on this day advance to the next
                 deltaUT = 1
                 if show == 'y':
                     print('nothing Advancing one day \n' % ())
                 print('a' % ())
             else:
-                LHAn = np.arccos(cosLHAn)
+                LHAn = math.acos(cosLHAn)
                 if (opt == 1):
                     LHAn = twopi - LHAn
                 #if (debugging) out.printf("LHAn - LHA = #f\n", LHAn - LHA)
@@ -8026,22 +8182,22 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
 
     # ------------- determine phase angle of the moon -------------
     meanlong = 280.4606184 + 36000.77005361 * ttdb
-    meanlong = np.fmod(meanlong, 360.0)
+    meanlong = math.fmod(meanlong, 360.0)
     meananomaly = 357.5277233 + 35999.05034 * ttdb
-    meananomaly = np.fmod(meananomaly * deg2rad, twopi)
+    meananomaly = math.fmod(meananomaly * deg2rad, twopi)
     if (meananomaly < 0.0):
         meananomaly = twopi + meananomaly
 
-    loneclsun = (meanlong + 1.914666471 * np.sin(meananomaly)
-                 + 0.019994643 * np.sin(2.0 * meananomaly))
+    loneclsun = (meanlong + 1.914666471 * math.sin(meananomaly)
+                 + 0.019994643 * math.sin(2.0 * meananomaly))
     loneclmoon = (218.32 + 481267.8813 * ttdb
-                  + 6.29 * np.sin((134.9 + 477198.85 * ttdb) * deg2rad)
-                  - 1.27 * np.sin((259.2 - 413335.38 * ttdb) * deg2rad)
-                  + 0.66 * np.sin((235.7 + 890534.23 * ttdb) * deg2rad)
-                  + 0.21 * np.sin((269.9 + 954397.7 * ttdb) * deg2rad)
-                  - 0.19 * np.sin((357.5 + 35999.05 * ttdb) * deg2rad)
-                  - 0.11 * np.sin((186.6 + 966404.05 * ttdb) * deg2rad))
-    loneclmoon = np.fmod(loneclmoon, 360.0)
+                  + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
+                  - 1.27 * math.sin((259.2 - 413335.38 * ttdb) * deg2rad)
+                  + 0.66 * math.sin((235.7 + 890534.23 * ttdb) * deg2rad)
+                  + 0.21 * math.sin((269.9 + 954397.7 * ttdb) * deg2rad)
+                  - 0.19 * math.sin((357.5 + 35999.05 * ttdb) * deg2rad)
+                  - 0.11 * math.sin((186.6 + 966404.05 * ttdb) * deg2rad))
+    loneclmoon = math.fmod(loneclmoon, 360.0)
     moonphaseang = loneclmoon - loneclsun
     if (moonphaseang < 0.0):
         moonphaseang = 360.0 + moonphaseang
@@ -8197,12 +8353,12 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
             a = 1.0 / ainv
             # elliptical orbit
             if (a > 0.0):
-                esinea1 = rdotv1 / np.sqrt(mu * a)
-                ecc = np.sqrt(ecosea1 * ecosea1 + esinea1 * esinea1)
+                esinea1 = rdotv1 / math.sqrt(mu * a)
+                ecc = math.sqrt(ecosea1 * ecosea1 + esinea1 * esinea1)
             else:
                 # hyperbolic orbit
-                esinea1 = rdotv1 / np.sqrt(mu * np.abs(- a))
-                ecc = np.sqrt(ecosea1 * ecosea1 - esinea1 * esinea1)
+                esinea1 = rdotv1 / math.sqrt(mu * abs(-a))
+                ecc = math.sqrt(ecosea1 * ecosea1 - esinea1 * esinea1)
             rp = a * (1.0 - ecc)
             if (rp < rpad):
                 hitearth = 'y'
@@ -8216,7 +8372,7 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
                     (rdotv1 > 0.0 and rdotv2 > 0.0 and ecosea1 < ecosea2) or
                     (rdotv1 < 0.0 and rdotv2 < 0.0 and ecosea1 > ecosea2)):
                 # parabola
-                if (np.abs(ainv) <= 1e-10):
+                if (abs(ainv) <= 1e-10):
                     hbar = math.cross(r1, v1t)
                     magh = smu.mag(hbar)
                     rp = magh * magh * 0.5 / mu
@@ -8226,11 +8382,11 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
                 else:
                     # for both elliptical & hyperbolic
                     a = 1.0 / ainv
-                    esinea1 = rdotv1 / np.sqrt(mu * np.abs(a))
+                    esinea1 = rdotv1 / math.sqrt(mu * abs(a))
                     if (ainv > 0.0):
-                        ecc = np.sqrt(ecosea1 * ecosea1 + esinea1 * esinea1)
+                        ecc = math.sqrt(ecosea1 * ecosea1 + esinea1 * esinea1)
                     else:
-                        ecc = np.sqrt(ecosea1 * ecosea1 - esinea1 * esinea1)
+                        ecc = math.sqrt(ecosea1 * ecosea1 - esinea1 * esinea1)
                     if (ecc < 1.0):
                         rp = a * (1.0 - ecc)
                         if (rp < rpad):
@@ -9216,8 +9372,8 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
     umb = False
     pen = False
 
-    if np.dot(reci,rsun) < 0.0:
-        ang1 = smu.angl(- rsun,reci)
+    if np.dot(reci, rsun) < 0.0:
+        ang1 = smu.angl(- rsun, reci)
         sathoriz = smu.mag(reci) * np.cos(ang1)
         satvert = smu.mag(reci) * np.sin(ang1)
         x = re / np.sin(angpen)
@@ -9230,7 +9386,7 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
             if satvert <= umbvert:
                 umb = True
 
-    #print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi,sathoriz,satvert,penvert,umbvert,umb,pen))
+    #print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi, sathoriz, satvert, penvert, umbvert, umb, pen))
 
     return pen, umb
 
@@ -9286,45 +9442,45 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
     el = 0.0
     vis = 'radar sun'
 
-    rsecef,vsecef = site(latgd,lon,alt)
-    #print('site ecef :\n',rsecef,vsecef)
+    rsecef, vsecef = site(latgd, lon, alt)
+    #print('site ecef :\n', rsecef, vsecef)
     #print()
 
     year, mon, day, hr, min, sec = stu.invjday(jdepoch)
 
-    for i in range(0,dti+1):
-        #                [reci1,veci1,error] =  kepler  ( reci,veci, i*dtsec );
+    for i in range(0, dti+1):
+        #                [reci1, veci1, error] =  kepler  ( reci, veci, i*dtsec );
     #                reci = reci';
     #                veci = veci';
         # i *dtsec input in wrong area on matlab code
-        reci1,veci1 = pkepler(reci,veci,i * dtsec,ndot,nddot)
+        reci1, veci1 = pkepler(reci, veci, i * dtsec, ndot, nddot)
         # These values are slightly off from the book
         #print(reci1)
         #print(veci1)
-        ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac \
-            = stu.convtime(year,mon,day,hr,min,sec + i * dtsec,timezone,dut1,dat)
+        ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, tdb, ttdb, jdtdb, jdtdbfrac \
+            = stu.convtime(year, mon, day, hr, min, sec + i * dtsec, timezone, dut1, dat)
          # -------------------- convert eci to ecef --------------------
         a = np.array([[0],[0],[0]])
         # What are ddpsi and ddeps supposed to be? ttt? lod?
         #if i == 106:
-        #    reci1 = [-2811.27691,3486.2632,5069.5763]
+        #    reci1 = [-2811.27691, 3486.2632, 5069.5763]
         #    veci1 = [-6.859691, -2.964792, -1.764721]
 
-        recef,vecef,aecef = sc.eci2ecef(reci1,veci1,a,ttt,jdut1 + jdut1frac,\
-                                        lod,xp,yp,terms,ddpsi,ddeps)
+        recef, vecef, aecef = sc.eci2ecef(reci1, veci1, a, ttt, jdut1 + jdut1frac,\
+                                        lod, xp, yp, terms, ddpsi, ddeps)
         #print(f'Julian Time: {jdut1 + jdut1frac}')
         #print(f'reci1 {i} x {reci1} {veci1}')
         #print(f'recef {i} x {recef} {vecef} \n')
         # ------- find ecef range vector from site to satellite -------
         rhoecef = recef - rsecef
           # ------------- convert to sez for calculations ---------------
-        tempvec = smu.rot3(rhoecef,lon)
-        rhosez = smu.rot2(tempvec,halfpi - latgd)
+        tempvec = smu.rot3(rhoecef, lon)
+        rhosez = smu.rot2(tempvec, halfpi - latgd)
 
         # if i == 106:
         #     print(jdut1 + jdut1frac)
         #     print(f'reci1 {i} x {reci1} {veci1}')
-        #     y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+        #     y, m, d, h, mn, s = stu.invjday(jdut1, jdut1frac - dut1 / 86400.0)
         #     print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
 
         # if i == 106:
@@ -9334,33 +9490,33 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
         # if i == 106:
         #     print(f'rhosez {i} x {rhosez} \n')
 
-        rho,az,el,drho,daz,del_ = sc.rv2razel(reci1,veci1,latgd,lon,alt,ttt,\
-                                    jdut1 + jdut1frac,lod,xp,yp,terms,ddpsi,ddeps)
-        # fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n',rho,az * \
-        # rad2deg,el * rad2deg,drho,daz * rad2deg,del * rad2deg );
+        rho, az, el, drho, daz, del_ = sc.rv2razel(reci1, veci1, latgd, lon, alt, ttt,\
+                                    jdut1 + jdut1frac, lod, xp, yp, terms, ddpsi, ddeps)
+        # fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n', rho, az * \
+        # rad2deg, el * rad2deg, drho, daz * rad2deg, del * rad2deg );
         if az < 0.0:
             az = az + twopi
         if rhosez[2] > 0.0:
-            rsun,rtasc,decl = sun(jdtt + jdttfrac)
+            rsun, rtasc, decl = sun(jdtt + jdttfrac)
             # if i == 106:
             #     print(f'rsun{i} {rsun} \n')
             #     print(f'rsun{i} {rsun*au} \n')
             rsun = rsun * au
-            rseci,vseci,aeci = sc.ecef2eci(rsecef,vsecef,a,ttt,jdut1 + \
-                                           jdut1frac,lod,xp,yp,terms,ddpsi, ddeps)
+            rseci, vseci, aeci = sc.ecef2eci(rsecef, vsecef, a, ttt, jdut1 + \
+                                           jdut1frac, lod, xp, yp, terms, ddpsi, ddeps)
             # if i == 106:
             #     print(f'rseci {i} x {rseci} {vseci} \n')
-            if np.dot(rsun,rseci) > 0.0:
+            if np.dot(rsun, rseci) > 0.0:
                 vis = 'radar sun'
             else:
-                rxr = np.cross(rsun,reci1)
+                rxr = np.cross(rsun, reci1)
                 magrxr = smu.mag(rxr)
                 magr = smu.mag(reci1)
                 magrsun = smu.mag(rsun)
                 zet = np.arcsin(magrxr / (magrsun * magr))
                 dist = smu.mag(reci1) * np.cos(zet - halfpi)
                 # if i == 106:
-                #     print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg,dist))
+                #     print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg, dist))
                 if dist > re:
                     vis = 'visible'
                 else:
@@ -9369,9 +9525,9 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
             vis = 'not visible'
 
         # Example 11_6 (table check)
-        # y,m,d,h,mn,s = stu.invjday(jdut1,jdut1frac - dut1 / 86400.0)
+        # y, m, d, h, mn, s = stu.invjday(jdut1, jdut1frac - dut1 / 86400.0)
         #print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
-        #      (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
+        #      (y, m, d, h, mn, s, vis, rho, az * rad2deg, el * rad2deg))
 
     jdutend = jdut1 + jdut1frac
     return jdutend, rho, az, el, vis
