@@ -1225,8 +1225,23 @@ def printdiff(strin: str, mat1: np.ndarray, mat2: np.ndarray):
 # [outvec] = matvecmult (mat, vec, sizeof)
 # ------------------------------------------------------------------------------
 
-def matvecmult(mat=None, vec=None, sizeof=None):
-    # -------------------------  implementation   -----------------
+def matvecmult(mat: np.ndarray, vec:np.ndarray, sizeof: int):
+    """this function multiplies a matrix by a vector.
+
+    Parameters
+    ----------
+    mat : ndarray
+        matrix
+    vec : ndarray
+        vector
+    sizeof : int
+        dimensions of matrix
+
+    Returns
+    -------
+    outvec: ndarray
+        unit vector
+    """
     outvec = np.zeros(sizeof)
     for i in range(sizeof):
         outvec[i] = 0.0
@@ -1238,8 +1253,19 @@ def matvecmult(mat=None, vec=None, sizeof=None):
 
 # ------- two recursion algorithms needed by the lambertbattin routine
 
-def seebatt(v=None):
-    # -------------------------  implementation   -------------------------
+def seebatt(v: float):
+    """a recursion algorithm used in the lambertbattin routine
+
+    Parameters
+    ----------
+    v : float
+        the value
+
+    Returns
+    -------
+    seebat: float
+        algorithm result
+    """
     c = np.zeros(21)
     c[0] = 0.2
     c[1] = 9.0 / 35.0
@@ -1309,18 +1335,21 @@ def seebatt(v=None):
         sum2 = c(ktr - i) * eta / term2
         term2 = 1.0 + sum2
 
-    seebatt = 8.0 * (1.0 + sqrtopv) / (3.0 +
-                                       (1.0 / (5.0 + eta
-                                               + ((9.0 / 7.0) * eta / term2))))
+    seebatt = (8.0 * (1.0 + sqrtopv)
+               / (3.0 + (1.0 / (5.0 + eta + ((9.0 / 7.0) * eta / term2)))))
     return seebatt
-
-
 
 # ------- two recursion algorithms needed by the lambertbattin routine
 
-def kbat(v=None):
+def kbat(v: float):
+    """a recursion algorithm used by the lamertbattin routine
+
+    Parameters
+    ----------
+    v : float
+        _description_
+    """
     d = np.zeros(21)
-    # -------------------------  implementation   -------------------------
     d[0] = 1.0 / 3.0
     d[1] = 4.0 / 27.0
     d[2] = 8.0 / 27.0
@@ -1380,9 +1409,6 @@ def kbat(v=None):
 #kbatt = test
     return kbatt
 
-
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function cubicspl1
@@ -1415,18 +1441,34 @@ def kbat(v=None):
 # [minfound, rootf, funrate] = cubicspl1(p1, p2, p3, p4)
 # ------------------------------------------------------------------------------
 
-def cubicspl1(p1=None, p2=None, p3=None, p4=None):
+def cubicspl1(p1: float, p2: float, p3: float, p4: float):
+    """this function performs cubic splining of an input zero crossing
+    function in order to find event times.
+
+    Parameters
+    ----------
+    p1, p2, p3, p4: float
+        function values used for blending
+
+    Returns
+    -------
+    minfound: str
+        test of success: 'y' or 'n'
+    rootf: float
+        root of the function
+    funrate: float
+        function rate
+    """
     rootf = 0.0
     funrate = 0.0
     minfound = 'n'
     # ---- check for true condition on first two points
-#       if (indx == 1) & (sign(p1) ~= sign(p2))
-#           [evt1ctr, evt1, evt2ctr, evt2] = cubicbln (ev1n, ev2n, timearr, funarr, indx)
-#           event1ctr = event1ctr + evt1ctr
-#           event1 = [event1;evt1]
-#           event2ctr = event2ctr + evt2ctr
-#           event2 = [event2;evt2]
-#         end
+    # if (indx == 1) & (sign(p1) ~= sign(p2))
+    #     [evt1ctr, evt1, evt2ctr, evt2] = cubicbln (ev1n, ev2n, timearr, funarr, indx)
+    #     event1ctr = event1ctr + evt1ctr
+    #     event1 = [event1;evt1]
+    #     event2ctr = event2ctr + evt2ctr
+    #     event2 = [event2;evt2]
 
     # ------ set up function from C-39 --------
     acu0 = p2
@@ -1498,7 +1540,20 @@ def cubicspl1(p1=None, p2=None, p3=None, p4=None):
 # ------------------------------------------------------------------------------
 
 
-def cubicspl(p1=None, p2=None, p3=None, p4=None):
+def cubicspl(p1: float, p2: float, p3: float, p4: float):
+    """this function performs cubic splining of an input zero crossing
+    function in order to find function values.
+
+    Parameters
+    ----------
+    p1, p2, p3, p4: float
+        function values used for splining
+
+    Returns
+    -------
+    acu0, acu1, acu2, acu3: float
+        splined polynomial coefficients
+    """
     # ------ set up function from C-41 --------
 #       det = t1^3*t2^2 + t1^2*t2 + t1*t2^3 - t1^3*t2 - t1^2*t2^3 - t1*t2^2
 
@@ -1541,16 +1596,17 @@ def cubicspl(p1=None, p2=None, p3=None, p4=None):
 # --------------------------------------------------------------------------- */
 
 
-def cubicinterp(p1a=None, p1b=None, p1c=None, p1d=None, p2a=None,
-                p2b=None, p2c=None, p2d=None, valuein=None):
+def cubicinterp(p1a: float, p1b: float, p1c: float, p1d: float, p2a: float,
+                p2b: float, p2c: float, p2d: float, valuein: float):
+
     # double kc0, kc1, kc2, kc3, ac0, ac1, ac2, ac3,
-#        r1r, r1i, r2r, r2i, r3r, r3i, value
+    #        r1r, r1i, r2r, r2i, r3r, r3i, value
 
     # -------- assign function points ---------
     ac0, ac1, ac2, ac3 = cubicspl(p1a, p1b, p1c, p1d)
     kc0, kc1, kc2, kc3 = cubicspl(p2a, p2b, p2c, p2d)
     # recover the original function values
-# use the normalized time first, but at an arbitrary interval
+    # use the normalized time first, but at an arbitrary interval
     r1r, r1i, r2r, r2i, r3r, r3i = cubic(kc3, kc2, kc1, kc0 - valuein, 'R')
     #fprintf(1, 'cubic #11.7f  #11.7f  #11.7f  #11.7f  #11.7f \n', ac0, ac1, kc0, r1r, r2r)
     if ((r1r >= - 1e-06) and (r1r <= 1.001)):
@@ -1603,9 +1659,21 @@ def cubicinterp(p1a=None, p1b=None, p1c=None, p1d=None, p2a=None,
 # ------------------------------------------------------------------------------
 
 
-def unit(vec=None):
-    # -------------------------  implementation   -----------------
-    small = 1e-06
+def unit(vec: np.ndarray):
+    """this function calculates a unit vector given the original vector.  if a
+    zero vector is input, the vector is set to zero.
+
+    Parameters
+    ----------
+    vec : ndarray
+        vector
+
+    Returns
+    -------
+    outved: ndarray
+        unit vector
+    """
+    small = smalle6
     magv = mag(vec)
     outvec = np.zeros(3)
     if (magv > small):
@@ -1786,22 +1854,35 @@ def cot(arg):
 # ------------------------------------------------------------------------------
 
 
-def findc2c3(znew):
+def findc2c3(znew: float):
+    """this function calculates the c2 and c3 functions for use in the universal
+    variable calculation of z.
 
-        # -------------------------  implementation   -----------------
-        if (znew > small):
-            sqrtz = math.sqrt(znew)
-            c2new = (1.0 -math.cos(sqrtz)) / znew
-            c3new = (sqrtz-math.sin(sqrtz)) / (sqrtz**3)
-        else:
-            if (znew < -small):
-                sqrtz = math.sqrt(-znew)
-                c2new = (1.0 -math.cosh(sqrtz)) / znew
-                c3new = (math.sinh(sqrtz) - sqrtz) / (sqrtz**3)
-            else:
-                c2new = 0.5
-                c3new = 1.0 /6.0
-        return c2new, c3new
+    Parameters
+    ----------
+    znew : float
+        z variable
+
+    Returns
+    -------
+    c2new: float
+        c2 function value
+    c3new: float
+        c3 function value
+    """
+
+    if (znew > small):
+        sqrtz = math.sqrt(znew)
+        c2new = (1.0 -math.cos(sqrtz)) / znew
+        c3new = (sqrtz-math.sin(sqrtz)) / (sqrtz**3)
+    elif (znew < -small):
+        sqrtz = math.sqrt(-znew)
+        c2new = (1.0 -math.cosh(sqrtz)) / znew
+        c3new = (math.sinh(sqrtz) - sqrtz) / (sqrtz**3)
+    else:
+        c2new = 0.5
+        c3new = 1.0 /6.0
+    return c2new, c3new
 
 
 
@@ -1851,73 +1932,91 @@ def findc2c3(znew):
 # ------------------------------------------------------------------------------
 
 
-def newtonm (ecc, m):
+def newtonm (ecc: float, m: float):
+    """this function performs the newton rhapson iteration to find the
+    eccentric anomaly given the mean anomaly. the true anomaly is also
+    calculated.
 
-  # -------------------------  implementation   -----------------
-  numiter = 50
+    Parameters
+    ----------
+    ecc : float
+        eccentricity
+    m : float
+        mean anomaly: -2pi to 2pi rad
 
-  # -------------------------- hyperbolic  ----------------------
-  if ((ecc-1.0) > small):
-      # -------------------  initial guess -----------------------
-      if (ecc < 1.6):
-          if (((m<0.0) and (m>-math.pi)) or (m>math.pi)):
-              e0= m - ecc
-          else:
-              e0= m + ecc
-      else:
-          if ((ecc < 3.6) and (abs(m) > math.pi)):
-              e0= m - np.sign(m)*ecc
-          else:
-              e0= m/(ecc-1.0)
-      ktr = 1
-      e1 = e0 + ((m-ecc*math.sinh(e0)+e0) / (ecc*math.cosh(e0) - 1.0))
-      while ((abs(e1-e0)>small) and (ktr<= numiter)):
-          e0= e1
-          e1 = e0 + ((m - ecc*math.sinh(e0) + e0) / (ecc*math.cosh(e0) - 1.0))
-          ktr = ktr + 1
-      # ----------------  find true anomaly  --------------------
-      sinv = -(math.sqrt(ecc*ecc-1.0) * math.sinh(e1)) / (1.0 - ecc*math.cosh(e1))
-      cosv = (math.cosh(e1) - ecc) / (1.0 - ecc*math.cosh(e1))
-      nu = math.atan2(sinv, cosv)
-  else:
-      # --------------------- parabolic -------------------------
-      if (abs(ecc-1.0) < small):
-          #                c = [ 1.0/3.0 0.0; 1.0; -m]
-          #                [r1r] = roots (c)
-          #                e0= r1r
-          s = 0.5  * (halfpi - math.atan(1.5 * m))
-          w = math.atan(math.tan(s)**(1.0 / 3.0))
-          e0 = 2.0 *cot(2.0 * w)
-          ktr = 1
-          nu = 2.0 * math.atan(e0)
-      else:
-          # -------------------- elliptical ----------------------
-          if (ecc > small):
-              # -----------  initial guess -------------
-              if (((m < 0.0) and (m > -math.pi)) or (m > math.pi)):
-                  e0 = m - ecc
-              else:
-                  e0 = m + ecc
-              #e0
-              ktr = 1
-              e1 = e0 + (m - e0 + ecc*math.sin(e0)) / (1.0 - ecc*math.cos(e0))
-              while ((abs(e1-e0) > small) and (ktr <= numiter)):
-                  ktr = ktr + 1
-                  e0 = e1
-                  e1 = e0 + (m - e0 + ecc*math.sin(e0)) / (1.0 - ecc*math.cos(e0))
-              e0 = e1
-              # -------------  find true anomaly  ---------------
-              sinv = ((math.sqrt(1.0 -ecc*ecc) * math.sin(e1))
-                      / (1.0 -ecc*math.cos(e1)))
-              cosv = (math.cos(e1)-ecc) / (1.0 - ecc*math.cos(e1))
-              nu = math.atan2(sinv, cosv)
-          else:
-              # -------------------- circular -------------------
-              ktr = 0
-              nu = m
-              e0= m
+    Returns
+    -------
+    e0 : float
+        eccentric anomaly: 0 to 2pi rad
+    nu : float
+        true anomaly: 0 to 2pi rad
+    """
 
-  return e0 , nu
+    numiter = 50
+
+    # -------------------------- hyperbolic  ----------------------
+    if ((ecc-1.0) > small):
+        # -------------------  initial guess -----------------------
+        if (ecc < 1.6):
+            if (((m < 0.0) and (m > -math.pi)) or (m > math.pi)):
+                e0 = m - ecc
+            else:
+                e0 = m + ecc
+        else:
+            if ((ecc < 3.6) and (abs(m) > math.pi)):
+                e0= m - np.sign(m)*ecc
+            else:
+                e0= m/(ecc-1.0)
+        ktr = 1
+        e1 = e0 + ((m-ecc*math.sinh(e0)+e0) / (ecc*math.cosh(e0) - 1.0))
+        while ((abs(e1-e0)>small) and (ktr<= numiter)):
+            e0= e1
+            e1 = e0 + ((m - ecc*math.sinh(e0) + e0) / (ecc*math.cosh(e0) - 1.0))
+            ktr = ktr + 1
+        # ----------------  find true anomaly  --------------------
+        sinv = -(math.sqrt(ecc*ecc-1.0) * math.sinh(e1)) / (1.0 - ecc*math.cosh(e1))
+        cosv = (math.cosh(e1) - ecc) / (1.0 - ecc*math.cosh(e1))
+        nu = math.atan2(sinv, cosv)
+
+    # --------------------- parabolic -------------------------
+    elif (abs(ecc-1.0) < small):
+        #                c = [ 1.0/3.0 0.0; 1.0; -m]
+        #                [r1r] = roots (c)
+        #                e0= r1r
+        s = 0.5  * (halfpi - math.atan(1.5 * m))
+        w = math.atan(math.tan(s)**(1.0 / 3.0))
+        e0 = 2.0 *cot(2.0 * w)
+        ktr = 1
+        nu = 2.0 * math.atan(e0)
+
+    # -------------------- elliptical ----------------------
+    elif (ecc > small):
+        # -----------  initial guess -------------
+        if (((m < 0.0) and (m > -math.pi)) or (m > math.pi)):
+            e0 = m - ecc
+        else:
+            e0 = m + ecc
+        #e0
+        ktr = 1
+        e1 = e0 + (m - e0 + ecc*math.sin(e0)) / (1.0 - ecc*math.cos(e0))
+        while ((abs(e1-e0) > small) and (ktr <= numiter)):
+            ktr = ktr + 1
+            e0 = e1
+            e1 = e0 + (m - e0 + ecc*math.sin(e0)) / (1.0 - ecc*math.cos(e0))
+        e0 = e1
+        # -------------  find true anomaly  ---------------
+        sinv = ((math.sqrt(1.0 -ecc*ecc) * math.sin(e1))
+                / (1.0 -ecc*math.cos(e1)))
+        cosv = (math.cos(e1)-ecc) / (1.0 - ecc*math.cos(e1))
+        nu = math.atan2(sinv, cosv)
+
+    # -------------------- circular -------------------
+    else:
+        ktr = 0
+        nu = m
+        e0= m
+
+    return e0 , nu
 
 
 
@@ -2157,55 +2256,70 @@ def quadric(a, b, c, opt):
 # ------------------------------------------------------------------------------
 
 
-def newtonnu (ecc, nu):
+def newtonnu (ecc: float, nu: float):
+    """this function solves keplers equation when the true anomaly is known.
+    the mean and eccentric, parabolic, or hyperbolic anomaly is also found.
+    the parabolic limit at 168 is arbitrary. the hyperbolic anomaly is also
+    limited. the hyperbolic sine is used because it's not double valued.
 
+    Parameters
+    ----------
+    ecc : float
+        eccentricity
+    nu : float
+        true anomaly: -2pi to 2pi rad
 
+    Returns
+    -------
+    e0 : float
+        eccentric anomaly: 0 to 2pi rad
+    m : float
+        mean anomaly: 0 to 2pi rad
+    """
 
-        # ---------------------  implementation   ---------------------
-        e0 = None
-        m = None
-        small = 0.00000001
-        # --------------------------- circular ------------------------
-        if (abs(ecc) < small):
-            m = -0.0
-            e0 = -0.0
-            #print("m is ", m)
-        else:
-            # ---------------------- elliptical -----------------------
-            if (ecc < 1.0 - small):
-                sine = ((math.sqrt(1.0 -ecc*ecc) * math.sin(nu))
-                       / (1.0 +ecc*math.cos(nu)))
-                cose = (ecc + math.cos(nu)) / (1.0  + ecc*math.cos(nu))
-                e0 = math.atan2(sine, cose)
-                m = e0 - ecc*math.sin(e0)
-                #print("m here is ", m)
+    e0 = None
+    m = None
+    small = 0.00000001
+    # --------------------------- circular ------------------------
+    if (abs(ecc) < small):
+        m = -0.0
+        e0 = -0.0
+        #print("m is ", m)
 
-            else:
-                # -------------------- hyperbolic  --------------------
-                if (ecc > 1.0 + small):
+    # ---------------------- elliptical -----------------------
+    elif (ecc < 1.0 - small):
+        sine = ((math.sqrt(1.0 -ecc*ecc) * math.sin(nu))
+                / (1.0 +ecc*math.cos(nu)))
+        cose = (ecc + math.cos(nu)) / (1.0  + ecc*math.cos(nu))
+        e0 = math.atan2(sine, cose)
+        m = e0 - ecc*math.sin(e0)
+        #print("m here is ", m)
 
-                    if ((ecc > 1.0) and
-                        (abs(nu)+0.00001 < math.pi-math.acos(1.0 /ecc))):
-                        #print("here?")
-                        sine = ((math.sqrt(ecc*ecc-1.0) * math.sin(nu))
-                               / (1.0  + ecc*math.cos(nu)))
-                        e0 = math.asinh(sine)
-                        m = ecc*math.sinh(e0) - e0
-                        #print("m now is ", m)
-                else:
-                    # ----------------- parabolic ---------------------
-                    if (abs(nu) < 168.0*math.pi/180.0):
-                        e0= math.tan(nu*0.5)
-                        m = e0 + (e0*e0*e0)/3.0
-                        #print("m fin is ", m)
+    # -------------------- hyperbolic  --------------------
+    elif (ecc > 1.0 + small):
+        if ((ecc > 1.0) and
+            (abs(nu)+0.00001 < math.pi-math.acos(1.0 /ecc))):
+            #print("here?")
+            sine = ((math.sqrt(ecc*ecc-1.0) * math.sin(nu))
+                    / (1.0  + ecc*math.cos(nu)))
+            e0 = math.asinh(sine)
+            m = ecc*math.sinh(e0) - e0
+            #print("m now is ", m)
 
-        if (ecc < 1.0):
-            m = np.fmod(m, 2.0 *math.pi)
-            if (m < 0.0):
-                m = m + 2.0 *math.pi
-            e0 = np.fmod(e0, 4.0 *math.pi)
-        return e0, m
+    # ----------------- parabolic ---------------------
+    else:
+        if (abs(nu) < 168.0*math.pi/180.0):
+            e0= math.tan(nu*0.5)
+            m = e0 + (e0*e0*e0)/3.0
+                #print("m fin is ", m)
 
+    if (ecc < 1.0):
+        m = np.fmod(m, 2.0 *math.pi)
+        if (m < 0.0):
+            m = m + 2.0 *math.pi
+        e0 = np.fmod(e0, 4.0 *math.pi)
+
+    return e0, m
 
 # ------------------------------------------------------------------------------
 #
@@ -2243,46 +2357,56 @@ def newtonnu (ecc, nu):
 # ------------------------------------------------------------------------------
 
 
-def newtone (ecc, e0):
+def newtone (ecc: float, e0: float):
+    """this function solves keplers equation when the eccentric, paraboic, or
+    hyperbolic anomalies are known. the mean anomaly and true anomaly are
+    calculated.
 
-        # -------------------------  implementation   -----------------
-        small = 0.00000001
+    Parameters
+    ----------
+    ecc : float
+        eccentricity
+    e0 : float
+        eccentric anomaly: -2pi to 2pi rad
 
-        # ------------------------- circular --------------------------
-        if (abs(ecc) < small):
-            m = e0
-            nu = e0
-        else:
+    Returns
+    -------
+    m : float
+        mean anomaly: 0 to 2pi rad
+    nu : float
+        true anomaly: 0 to 2pi rad
+    """
 
-            # ----------------------- elliptical ----------------------
-            if (ecc < 0.999):
-                m = e0 - ecc*math.sin(e0)
-                sinv = ((math.sqrt(1.0 -ecc*ecc) * math.sin(e0))
-                       / (1.0 -ecc*math.cos(e0)))
-                cosv = (math.cos(e0)-ecc) / (1.0  - ecc*math.cos(e0))
-                nu = math.atan2(sinv, cosv)
-            else:
+    small = 0.00000001
 
-                # ---------------------- hyperbolic  ------------------
-                if (ecc > 1.0001):
-                    m = ecc*math.sinh(e0) - e0
-                    sinv = ((math.sqrt(ecc*ecc-1.0) * math.sinh(e0))
-                           / (1.0  - ecc*math.cosh(e0)))
-                    cosv = (math.cosh(e0)-ecc) / (1.0  - ecc*math.cosh(e0))
-                    nu = math.atan2(sinv, cosv)
-                else:
-                    # -------------------- parabolic ------------------
-                    m = e0 + (1.0 /3.0)*e0*e0*e0
-                    #nu = 2.0 *datan(e0)  ###what is this? -todo
-                    nu = 2.0 *math.atan(e0)  ###what is this? -todo
+    # ------------------------- circular --------------------------
+    if (abs(ecc) < small):
+        m = e0
+        nu = e0
 
-        return m, nu
+    # ----------------------- elliptical ----------------------
+    elif (ecc < 0.999):
+        m = e0 - ecc*math.sin(e0)
+        sinv = ((math.sqrt(1.0 -ecc*ecc) * math.sin(e0))
+                / (1.0 -ecc*math.cos(e0)))
+        cosv = (math.cos(e0)-ecc) / (1.0  - ecc*math.cos(e0))
+        nu = math.atan2(sinv, cosv)
 
+    # ---------------------- hyperbolic  ------------------
+    elif (ecc > 1.0001):
+        m = ecc*math.sinh(e0) - e0
+        sinv = ((math.sqrt(ecc*ecc-1.0) * math.sinh(e0))
+                / (1.0  - ecc*math.cosh(e0)))
+        cosv = (math.cosh(e0)-ecc) / (1.0  - ecc*math.cosh(e0))
+        nu = math.atan2(sinv, cosv)
 
+    # -------------------- parabolic ------------------
+    else:
+        m = e0 + (1.0 /3.0)*e0*e0*e0
+        #nu = 2.0 *datan(e0)  ###what is this? -todo
+        nu = 2.0 * math.atan(e0)  ###what is this? -todo
 
-
-
-
+    return m, nu
 
 # ------------------------------------------------------------------------------
 #
@@ -2313,9 +2437,23 @@ def newtone (ecc, e0):
 # ----------------------------------------------------------------------------- }
 
 
-def angl(vec1, vec2):
+def angl(vec1: np.ndarray, vec2: np.ndarray):
+    """this function calculates the angle between two vectors.
 
-    small = 0.00000001
+    Parameters
+    ----------
+    vec1 : ndarray
+        vector 1
+    vec2 : ndarray
+        vector 2
+
+    Returns
+    -------
+    theta : float
+        angle between two vetors: -pi to pi, None if undefined
+    """
+
+    small = smalle8
     magv1 = mag(vec1)
     magv2 = mag(vec2)
 
@@ -2327,7 +2465,6 @@ def angl(vec1, vec2):
     else:
         theta=None
     return theta
-
 
 # ------------------------------------------------------------------------------
 #
@@ -2358,9 +2495,21 @@ def angl(vec1, vec2):
 # [outvec] = rot1 (vec, xval)
 # ----------------------------------------------------------------------------- }
 
+def rot1 (vec: np.ndarray, xval: float):
+    """this function performs a rotation about the 1st axis.
 
-def rot1 (vec, xval):
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+    xval : float
+        angle of rotation: rad
 
+    Returns
+    -------
+    outvec: ndarray
+        result vector
+    """
     temp = vec[2]
     c = math.cos(xval)
     s = math.sin(xval)
@@ -2402,9 +2551,21 @@ def rot1 (vec, xval):
 # [outvec] = rot2 (vec, xval)
 # ----------------------------------------------------------------------------- }
 
-
 def rot2 (vec, xval):
+    """this function performs a rotation about the 2nd axis.
 
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outvec: ndarray
+        result vector
+    """
     temp = vec[2]
     c = math.cos(xval)
     s = math.sin(xval)
@@ -2414,8 +2575,6 @@ def rot2 (vec, xval):
     outvec[0] = c*vec[0] - s*temp
     outvec[1] = vec[1]
     return outvec
-
-
 
 # ------------------------------------------------------------------------------
 #
@@ -2446,8 +2605,21 @@ def rot2 (vec, xval):
 # [outvec] = rot3 (vec, xval)
 # ----------------------------------------------------------------------------- }
 
-
 def rot3 (vec, xval):
+    """this function performs a rotation about the 3rd axis.
+
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outvec: ndarray
+        result vector
+    """
 
     temp = vec[1]
     c = math.cos(xval)
@@ -2458,9 +2630,6 @@ def rot3 (vec, xval):
     outvec[0] = c*vec[0] + s*temp
     outvec[2] = vec[2]
     return outvec
-
-
-
 
 # ------------------------------------------------------------------------------
 #
@@ -2489,17 +2658,28 @@ def rot3 (vec, xval):
 # mag = (vec)
 # ----------------------------------------------------------------------------- }
 
+def mag(vec: np.ndarray):
+    """this function finds the magnitude of a vector. the tolerance is set to
+    0.000001, thus the 1.0e-12 for the squared test of underflows.
 
-def mag(vec):
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+
+    Returns
+    -------
+    mag : float
+        magnitude
+    """
 
     temp = vec[0]**2 + vec[1]**2 + vec[2]**2
 
-    if abs(temp) >= 1.0e-16:
+    if abs(temp) >= smalle12:
         mag = math.sqrt(temp)
     else:
         mag = 0.0
     return mag
-
 
 # ----------------------------------------------------------------------------
 #
@@ -2536,8 +2716,28 @@ def mag(vec):
 # [pm] = polarm (xp, yp, ttt, opt)
 # ----------------------------------------------------------------------------
 
+### should swap ttt and opt so that ttt isn't necessary for '80' theory -zeg
+def polarm(xp: float, yp: float, ttt: float, opt: str):
+    """this function calulates the transformation matrix that accounts for
+    polar motion. both the 1980 and 2000 theories are handled. note that the
+    rotation order is different between 1980 and 2000.
 
-def polarm (xp, yp, ttt, opt):
+    Parameters
+    ----------
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    ttt : float, optional
+        julian centuries of tt (00 theory only): centuries
+    opt : str
+        theory: '80' for 1980, else 2000
+
+    Returns
+    -------
+    pm : ndarray
+        transformation matrix for ecef - pef/tirs
+    """
 
     cosxp = math.cos(xp)
     sinxp = math.sin(xp)
@@ -2595,9 +2795,6 @@ def polarm (xp, yp, ttt, opt):
         # pm = a3*a2*a1
     return pm
 
-
-
-
 # ----------------------------------------------------------------------------
 #
 #                           function fundarg
@@ -2637,7 +2834,17 @@ def polarm (xp, yp, ttt, opt):
 # ----------------------------------------------------------------------------
 
 
-def fundarg(ttt, opt):
+def fundarg(ttt: float, opt: str):
+    """this function calulates the delauany variables and planetary values for
+  several theories.
+
+    Parameters
+    ----------
+    ttt : float
+        julian centuries of tt: centuries
+    opt : str
+        theory: '06'(2006), '02'(2000b), '96'(1996), '80'(1980)
+    """
 
     # ---- determine coefficients for iau 2000 nutation theory ----
     ttt2 = ttt*ttt
@@ -2845,7 +3052,29 @@ def fundarg(ttt, opt):
 #    vallado       2007, 753-765
 # --------------------------------------------------------------------------- */
 
-def finitediff(pertelem=None, percentchg=None, deltaamtchg=None, xnom=None):
+def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
+               xnom: np.ndarray):
+    """this procedure perturbs the components of the state vector for processing
+    with the finite differencing for the a matrix.
+
+    Parameters
+    ----------
+    pertelem : int
+        which element to perturb
+    percentchg : float
+        amount to modify vectors by in finite differencing
+    deltaamtchg : float
+        tolerance for small matching in finite differencing
+    xnom : ndarray
+        matrix
+
+    Returns
+    -------
+    deltaamt: float
+        amount each element is perturbed
+    xnomp: ndarray
+        altered matrix
+    """
 
     #  getgravconst(whichconst, tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2)
 
