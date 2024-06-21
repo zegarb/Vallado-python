@@ -626,8 +626,6 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
             satrec['isimp'] = 1
             tc = 0.0
             inclm = satrec['inclo']
-            # changed from dscom to dpper without testing -jmb
-            # wrong number of inputs and outputs -zeg
             (sinim, cosim, sinomm, cosomm, snodm, cnodm, day, satrec['e3'],
              satrec['ee2'], em, emsq, gam, satrec['peo'], satrec['pgho'],
              satrec['pho'], satrec['pinco'], satrec['plo'], rtemsq,
@@ -8956,8 +8954,8 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
 %     and periodics subroutines.  input is provided as shown. this routine
 %     used to be called dpper, but the functions inside weren't well organized.
 %
-% Author: 
-%   Jeff Beck 
+% Author:
+%   Jeff Beck
 %   beckja@alumni.lehigh.edu
 %   1.0 (aug 7, 2006) - update for paper dav
 % original comments from Vallado C++ version:
@@ -9053,7 +9051,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
     pgho   = 0.0;
     pho    = 0.0;
     day    = epoch + 18261.5 + tc / 1440.0;
-    xnodce = np.fmod(4.5236020 - 9.2422029e-4 * day, twopi);
+    xnodce = math.fmod(4.5236020 - 9.2422029e-4 * day, twopi);
     stem   = math.sin(xnodce);
     ctem   = math.cos(xnodce);
     zcosil = 0.91375164 - 0.03568096 * ctem;
@@ -9153,8 +9151,8 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
             zsinh = snodm * zcoshl - cnodm * zsinhl;
             cc    = c1l;
 
-    zmol = np.fmod(4.7199672 + 0.22997150  * day - gam, twopi);
-    zmos = np.fmod(6.2565837 + 0.017201977 * day, twopi);
+    zmol = math.fmod(4.7199672 + 0.22997150  * day - gam, twopi);
+    zmos = math.fmod(6.2565837 + 0.017201977 * day, twopi);
 
     #% /* ------------------------ do solar terms ---------------------- */
     se2  =   2.0 * ss1 * ss6;

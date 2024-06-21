@@ -42,7 +42,8 @@ opsmode = 'a'
 #         //              start stop and delta times
 
 
-#options are c, v, m, u
+# options are c, v, m, u
+# m not implemented -zeg
 typerun = 'u'
 if (typerun == 'm'):
     # input mfe, epoch (YMDHMS), or dayofyr approach, m, e, d: ', 's')
@@ -101,7 +102,7 @@ while longstr2[-1] == '\n':
     satrec['revnum'] = 0
     if idebug:
         catno = longstr1[2:7]
-        dbgfile = open(os.path.join(directory, 'sgp4test.dbg.' + catno + '.out'), 'wt')
+        dbgfile = open(os.path.join(outdir, 'sgp4test.dbg.' + catno + '.out'), 'wt')
         dbgfile.write('this is the debug output\n\n')
     # convert the char string to sgp4 elements
     # includes initialization of sgp4
