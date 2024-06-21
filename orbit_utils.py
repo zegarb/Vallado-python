@@ -116,6 +116,8 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
            nodedot=None, xpidot=None, z1=None, z3=None, z11=None, z13=None,
            z21=None, z23=None, z31=None, z33=None, em=None, argpm=None,
            inclm=None, mm=None, nm=None, nodem=None, ecco=None, eccsq=None):
+
+
     # /* --------------------- local variables ------------------------ */
     aonv = 0.0
     q22 = 1.7891679e-06
@@ -131,8 +133,8 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     znl = 0.00015835218
     zns = 1.19459e-05
     #     // sgp4fix identify constants and allow alternate values
-# sgp4fix no longer needed, pass xke in
-#global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+    # sgp4fix no longer needed, pass xke in
+    # global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
 
     # /* -------------------- deep space initialization ------------ */
     irez = 0
@@ -167,7 +169,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     sghs = ss4 * zns * (sz31 + sz33 - 6.0)
     shs = - zns * ss2 * (sz21 + sz23)
     #   // sgp4fix for 180 deg incl
-    if ((inclm < 0.052359877) or (inclm > np.pi - 0.052359877)):
+    if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
         shs = 0.0
 
     if (sinim != 0.0):
@@ -181,7 +183,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     sghl = s4 * znl * (z31 + z33 - 6.0)
     shll = - znl * s2 * (z21 + z23)
     #   // sgp4fix for 180 deg incl
-    if ((inclm < 0.052359877) or (inclm > np.pi - 0.052359877)):
+    if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
         shll = 0.0
 
     domdt = sgs + sghl
@@ -192,26 +194,26 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
 
     # /* ----------- calculate deep space resonance effects -------- */
     dndt = 0.0
-    theta = np.fmod(gsto + tc * rptim, twopi)
+    theta = math.fmod(gsto + tc * rptim, twopi)
     em = em + dedt * t
     inclm = inclm + didt * t
     argpm = argpm + domdt * t
     nodem = nodem + dnodt * t
     mm = mm + dmdt * t
     # //   sgp4fix for negative inclinations
-# //   the following if statement should be commented out
-# //if (inclm < 0.0)
-# //  {
-# //    inclm  = -inclm;
-# //    argpm  = argpm - pi;
-# //    nodem = nodem + pi;
-# //  }
+    # //   the following if statement should be commented out
+    # //if (inclm < 0.0)
+    # //  {
+    # //    inclm  = -inclm;
+    # //    argpm  = argpm - pi;
+    # //    nodem = nodem + pi;
+    # //  }
 
     #  /* - update resonances : numerical (euler-maclaurin) integration - */
-#  /* ------------------------- epoch restart ----------------------  */
-#  //   sgp4fix for propagator problems
-#  //   the following integration works for negative time steps and periods
-#  //   the specific changes are unknown because the original code was so convoluted
+    #  /* ------------------------- epoch restart ----------------------  */
+    #  //   sgp4fix for propagator problems
+    #  //   the following integration works for negative time steps and periods
+    #  //   the specific changes are unknown because the original code was so convoluted
 
     # /* -------------- initialize the resonance terms ------------- */
     if (irez != 0):
@@ -282,7 +284,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
             temp = 2.0 * temp1 * root54
             d5421 = temp * f542 * g521
             d5433 = temp * f543 * g533
-            xlamo = np.fmod(mo + nodeo + nodeo - theta - theta, twopi)
+            xlamo = math.fmod(mo + nodeo + nodeo - theta - theta, twopi)
             xfact = mdot + dmdt + 2.0 * (nodedot + dnodt - rptim) - no
             em = emo
             emsq = emsqo
@@ -299,7 +301,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
             del2 = 2.0 * del1 * f220 * g200 * q22
             del3 = 3.0 * del1 * f330 * g300 * q33 * aonv
             del1 = del1 * f311 * g310 * q31 * aonv
-            xlamo = np.fmod(mo + nodeo + argpo - theta, twopi)
+            xlamo = math.fmod(mo + nodeo + argpo - theta, twopi)
             xfact = mdot + xpidot - rptim + dmdt + domdt + dnodt - no
         # /* ------------ for sgp4, initialize the integrator ---------- */
         xli = xlamo
@@ -308,7 +310,9 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
         nm = no + dndt
 
 
-    return em, argpm, inclm, mm, nm, nodem, irez, atime, d2201, d2211, d3210, d3222, d4410, d4422, d5220, d5232, d5421, d5433, dedt, didt, dmdt, dndt, dnodt, domdt, del1, del2, del3, xfact, xlamo, xli, xni
+    return em, argpm, inclm, mm, nm, nodem, irez, atime, d2201, d2211, d3210,\
+           d3222, d4410, d4422, d5220, d5232, d5421, d5433, dedt, didt, dmdt,\
+           dndt, dnodt, domdt, del1, del2, del3, xfact, xlamo, xli, xni
 
 # -----------------------------------------------------------------------------
 #
@@ -560,7 +564,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
         satrec['eta'] = ao * satrec['ecco'] * tsi
         etasq = satrec['eta'] * satrec['eta']
         eeta = satrec['ecco'] * satrec['eta']
-        psisq = np.abs(1.0 - etasq)
+        psisq = abs(1.0 - etasq)
         coef = qzms24 * tsi ** 4.0
         coef1 = coef / psisq ** 3.5
         cc2 = (coef1 * satrec['no']
@@ -581,7 +585,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
                                * (1.0 - 2.0 * eeta + etasq * (1.5 - 0.5 * eeta))
                                + 0.75 * satrec['x1mth2']
                                * (2.0 * etasq - eeta * (1.0 + etasq))
-                               * np.cos(2.0 * satrec['argpo']))))
+                               * math.cos(2.0 * satrec['argpo']))))
         satrec['cc5'] = (2.0 * coef1 * ao * omeosq *
                          (1.0 + 2.75 * (etasq + eeta) + eeta * etasq))
         cosio4 = cosio2 * cosio2
@@ -599,30 +603,31 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
                                        + 2.0 * temp3 * (3.0 - 7.0 * cosio2))
                              * cosio)
         xpidot = satrec['argpdot'] + satrec['nodedot']
-        satrec['omgcof'] = satrec['bstar'] * cc3 * np.cos(satrec['argpo'])
+        satrec['omgcof'] = satrec['bstar'] * cc3 * math.cos(satrec['argpo'])
         satrec['xmcof'] = 0.0
         if (satrec['ecco'] > 0.0001):
             satrec['xmcof'] = - x2o3 * coef * satrec['bstar'] / eeta
         satrec['nodecf'] = 3.5 * omeosq * xhdot1 * satrec['cc1']
         satrec['t2cof'] = 1.5 * satrec['cc1']
         # // sgp4fix for divide by zero with xinco = 180 deg
-        if (np.abs(cosio + 1.0) > 1.5e-12):
+        if (abs(cosio + 1.0) > 1.5e-12):
             satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinio
                                * (3.0 + 5.0 * cosio) / (1.0 + cosio))
         else:
             satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinio
                                * (3.0 + 5.0 * cosio) / temp4)
         satrec['aycof'] = - 0.5 * satrec['j3oj2'] * sinio
-        satrec['delmo'] = (1.0 + satrec['eta'] * np.cos(satrec['mo'])) ** 3
-        satrec['sinmao'] = np.sin(satrec['mo'])
+        satrec['delmo'] = (1.0 + satrec['eta'] * math.cos(satrec['mo'])) ** 3
+        satrec['sinmao'] = math.sin(satrec['mo'])
         satrec['x7thm1'] = 7.0 * cosio2 - 1.0
         # /* --------------- deep space initialization ------------- */
-        if ((2 * np.pi / satrec['no']) >= 225.0):
+        if ((2 * math.pi / satrec['no']) >= 225.0):
             satrec['method'] = 'd'
             satrec['isimp'] = 1
             tc = 0.0
             inclm = satrec['inclo']
             # changed from dscom to dpper without testing -jmb
+            # wrong number of inputs and outputs -zeg
             (sinim, cosim, sinomm, cosomm, snodm, cnodm, day, satrec['e3'],
              satrec['ee2'], em, emsq, gam, satrec['peo'], satrec['pgho'],
              satrec['pho'], satrec['pinco'], satrec['plo'], rtemsq,
@@ -671,12 +676,12 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
              satrec['del2'], satrec['del3'], satrec['xfact'], satrec['xlamo'],
              satrec['xli'], satrec['xni']) = \
                 dsinit(satrec['xke'], cosim, emsq, satrec['argpo'], s1, s2, s3,
-                        s4, s5, sinim, ss1, ss2, ss3, ss4, ss5, sz1, sz3, sz11,
-                          sz13, sz21, sz23, sz31, sz33, satrec['t'], tc,
-                          satrec['gsto'], satrec['mo'], satrec['mdot'],
-                          satrec['no'], satrec['nodeo'], satrec['nodedot'],
-                          xpidot, z1, z3, z11, z13, z21, z23, z31, z33, em,
-                          argpm, inclm, mm, nm, nodem, satrec['ecco'], eccsq)
+                       s4, s5, sinim, ss1, ss2, ss3, ss4, ss5, sz1, sz3, sz11,
+                       sz13, sz21, sz23, sz31, sz33, satrec['t'], tc,
+                       satrec['gsto'], satrec['mo'], satrec['mdot'],
+                       satrec['no'], satrec['nodeo'], satrec['nodedot'],
+                       xpidot, z1, z3, z11, z13, z21, z23, z31, z33, em,
+                       argpm, inclm, mm, nm, nodem, satrec['ecco'], eccsq)
         # /* ----------- set variables if not deep space ----------- */
         if (satrec['isimp'] != 1):
             cc1sq = satrec['cc1'] * satrec['cc1']
@@ -828,7 +833,7 @@ def sgp4(satrec=None, tsince=None):
     templ = satrec['t2cof'] * t2
     if (satrec['isimp'] != 1):
         delomg = satrec['omgcof'] * satrec['t']
-        delm = satrec['xmcof'] * ((1.0 + satrec['eta'] * np.cos(xmdf)) ** 3
+        delm = satrec['xmcof'] * ((1.0 + satrec['eta'] * math.cos(xmdf)) ** 3
                                   - satrec['delmo'])
         temp = delomg + delm
         mm = xmdf + temp
@@ -837,7 +842,7 @@ def sgp4(satrec=None, tsince=None):
         t4 = t3 * satrec['t']
         tempa = tempa - satrec['d2'] * t2 - satrec['d3'] * t3 - satrec['d4'] \
             * t4
-        tempe = tempe + satrec['bstar'] * satrec['cc5'] * (np.sin(mm)
+        tempe = tempe + satrec['bstar'] * satrec['cc5'] * (math.sin(mm)
                                                            - satrec['sinmao'])
         templ = templ + satrec['t3cof'] * t3 + t4 * (satrec['t4cof']
                                                      + satrec['t']
@@ -885,13 +890,13 @@ def sgp4(satrec=None, tsince=None):
     xlm = mm + argpm + nodem
     emsq = em * em
     temp = 1.0 - emsq
-    nodem = np.fmod(nodem, twopi)
-    argpm = np.fmod(argpm, twopi)
-    xlm = np.fmod(xlm, twopi)
-    mm = np.fmod(xlm - argpm - nodem, twopi)
+    nodem = math.fmod(nodem, twopi)
+    argpm = math.fmod(argpm, twopi)
+    xlm = math.fmod(xlm, twopi)
+    mm = math.fmod(xlm - argpm - nodem, twopi)
     # /* ----------------- compute extra mean quantities ------------- */
-    sinim = np.sin(inclm)
-    cosim = np.cos(inclm)
+    sinim = math.sin(inclm)
+    cosim = math.cos(inclm)
     # /* -------------------- add lunar-solar periodics -------------- */
     ep = em
     xincp = inclm
@@ -915,43 +920,43 @@ def sgp4(satrec=None, tsince=None):
                     nodep, argpp, mp, satrec['operationmode'])
         if (xincp < 0.0):
             xincp = - xincp
-            nodep = nodep + np.pi
-            argpp = argpp - np.pi
+            nodep = nodep + math.pi
+            argpp = argpp - math.pi
         if ((ep < 0.0) or (ep > 1.0)):
             # fprintf(1,'# error ep #f\n', ep);
             satrec['error'] = 3
 
     # /* -------------------- long period periodics ------------------ */
     if (satrec['method'] == 'd'):
-        sinip = np.sin(xincp)
-        cosip = np.cos(xincp)
+        sinip = math.sin(xincp)
+        cosip = math.cos(xincp)
         satrec['aycof'] = - 0.5 * satrec['j3oj2'] * sinip
         # // sgp4fix for divide by zero with xinco = 180 deg
-        if (np.abs(cosip + 1.0) > 1.5e-12):
+        if (abs(cosip + 1.0) > 1.5e-12):
             satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinip
                                * (3.0 + 5.0 * cosip) / (1.0 + cosip))
         else:
             satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinip
                                * (3.0 + 5.0 * cosip) / temp4)
 
-    axnl = ep * np.cos(argpp)
+    axnl = ep * math.cos(argpp)
     temp = 1.0 / (am * (1.0 - ep * ep))
-    aynl = ep * np.sin(argpp) + temp * satrec['aycof']
+    aynl = ep * math.sin(argpp) + temp * satrec['aycof']
     xl = mp + argpp + nodep + temp * satrec['xlcof'] * axnl
     # /* --------------------- solve kepler's equation --------------- */
-    u = np.fmod(xl - nodep, twopi)
+    u = math.fmod(xl - nodep, twopi)
     eo1 = u
     tem5 = 9999.9
     ktr = 1
     # //   sgp4fix for kepler iteration
 # //   the following iteration needs better limits on corrections
-    while ((np.abs(tem5) >= 1e-12) and (ktr <= 10)):
+    while ((abs(tem5) >= 1e-12) and (ktr <= 10)):
 
-        sineo1 = np.sin(eo1)
-        coseo1 = np.cos(eo1)
+        sineo1 = math.sin(eo1)
+        coseo1 = math.cos(eo1)
         tem5 = 1.0 - coseo1 * axnl - sineo1 * aynl
         tem5 = (u - aynl * coseo1 + axnl * sineo1 - eo1) / tem5
-        if (np.abs(tem5) >= 0.95):
+        if (abs(tem5) >= 0.95):
             if tem5 > 0.0:
                 tem5 = 0.95
             else:
@@ -971,9 +976,9 @@ def sgp4(satrec=None, tsince=None):
         v = np.array([[0],[0],[0]])
     else:
         rl = am * (1.0 - ecose)
-        rdotl = np.sqrt(am) * esine / rl
-        rvdotl = np.sqrt(pl) / rl
-        betal = np.sqrt(1.0 - el2)
+        rdotl = math.sqrt(am) * esine / rl
+        rvdotl = math.sqrt(pl) / rl
+        betal = math.sqrt(1.0 - el2)
         temp = esine / (1.0 + betal)
         sinu = am / rl * (sineo1 - aynl - axnl * temp)
         cosu = am / rl * (coseo1 - axnl + aynl * temp)
@@ -1000,12 +1005,12 @@ def sgp4(satrec=None, tsince=None):
                     + 1.5 * satrec['con41'])
                  / satrec['xke'])
         # /* --------------------- orientation vectors ------------------- */
-        sinsu = np.sin(su)
-        cossu = np.cos(su)
-        snod = np.sin(xnode)
-        cnod = np.cos(xnode)
-        sini = np.sin(xinc)
-        cosi = np.cos(xinc)
+        sinsu = math.sin(su)
+        cossu = math.cos(su)
+        snod = math.sin(xnode)
+        cnod = math.cos(xnode)
+        sini = math.sin(xinc)
+        cosi = math.cos(xinc)
         xmx = - snod * cosi
         xmy = cnod * cosi
         ux = xmx * sinsu + cnod * cossu
@@ -1101,8 +1106,8 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
     # /* ------------- calculate auxillary epoch quantities ---------- */
     eccsq = ecco * ecco
     omeosq = 1.0 - eccsq
-    rteosq = np.sqrt(omeosq)
-    cosio = np.cos(inclo)
+    rteosq = math.sqrt(omeosq)
+    cosio = math.cos(inclo)
     cosio2 = cosio * cosio
     # /* ------------------ un-kozai the mean motion ----------------- */
     ak = (xke / no_kozai) ** x2o3
@@ -1113,7 +1118,7 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
     del_ = d1 / (adel * adel)
     no_unkozai = no_kozai / (1.0 + del_)
     ao = (xke / no_unkozai) ** x2o3
-    sinio = np.sin(inclo)
+    sinio = math.sin(inclo)
     po = ao * omeosq
     con42 = 1.0 - 5.0 * cosio2
     con41 = - con42 - cosio2 - cosio2
@@ -1127,7 +1132,7 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
         gsto = stu.gstime(epoch + 2433281.5)
     else:
         # sgp4fix use old way of finding gst
-# count integer number of days from 0 jan 1970
+        # count integer number of days from 0 jan 1970
         ts70 = epoch - 7305.0
         ids70 = int(np.floor(ts70 + 1e-08))
         tfrac = ts70 - ids70
@@ -1136,7 +1141,7 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
         thgr70 = 1.7321343856509375
         fk5r = 5.075514194322695e-15
         c1p2p = c1 + twopi
-        gsto = np.fmod(thgr70 + c1 * ids70 + c1p2p * tfrac
+        gsto = math.fmod(thgr70 + c1 * ids70 + c1p2p * tfrac
                        + ts70 * ts70 * fk5r, twopi)
 
     if (gsto < 0.0):
@@ -1194,49 +1199,68 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
 # [tof] = findtof (ro, r, p)
 # ------------------------------------------------------------------------------
 
-def findtof (ro, r, p):
-        small = 0.00000001
+def findtof (ro: float, r: float, p: float):
+    """this function finds the time of flight given the initial position vectors,
+    semi-parameter, and the sine and cosine values for the change in true
+    anomaly.  the result uses p-iteration theory to analytically find the result.
 
-        # -------------------------  implementation   -----------------
-        magr = smu.mag(r)
-        magro = smu.mag(ro)
-        cosdnu = np.dot(ro, r)/(magro*magr)
-        rcrossr = np.cross(ro, r)
-        sindnu = smu.mag(rcrossr)/(magro*magr)
+    Parameters
+    ----------
+    ro : float
+        interceptor position vector: km
+    r : float
+        target position vector: km
+    p : float
+        semiparameter
 
-        k = magro * magr*(1.0 -cosdnu)
-        l = magro + magr
-        m = magro * magr*(1.0 +cosdnu)
-        a = (m*k*p) / ((2.0 *m-l*l)*p*p + 2.0 *k*l*p - k*k)
+    Returns
+    -------
+    tof: float
+        time of flight
+    """
 
-        # ------  use f and g series to find velocity vectors  --------
-        f = 1.0  - (magr/p)*(1.0 -cosdnu)
-        g = magro*magr*sindnu/math.sqrt(mu * p)
-        alpha = 1.0 /a
+    small = 0.00000001
 
-        if (alpha > small):
-            # ------------------------ elliptical ---------------------
-            dnu = math.atan2(sindnu, cosdnu)
-            fdot = math.sqrt(mu / p) * math.tan(dnu*0.5)* \
-                    (((1.0 - cosdnu) / p)-(1.0 / magro)-(1.0 / magr))
-            cosdeltae = 1.0 - (magro/a)*(1.0 -f)
-            sindeltae = (-magro*magr*fdot)/math.sqrt(mu * a)
-            deltae = math.atan2(sindeltae, cosdeltae)
-            tof = g + math.sqrt(a*a*a/mu)*(deltae-sindeltae)
-        else:
-            # ------------------------ hyperbolic ---------------------
-            if (alpha < -small):
-                deltah = math.acosh(1.0 - (magro/a) * (1.0-f))
-                tof = g + math.sqrt(-a*a*a/mu)*(math.sinh(deltah)-deltah)
-            else:
-                # -------------------- parabolic ----------------------
-                dnu = math.atan2(sindnu, cosdnu)
-                c = math.sqrt(magr*magr+magro*magro - \
-                           2.0 *magr*magro*math.cos(dnu))
-                s = (magro+magr+c) * 0.5
-                tof = (2.0 /3.0) * math.sqrt(s*s*s*0.5/mu) * \
-                           (1.0  -  ((s-c)/s)^1.5)
-        return tof
+    magr = smu.mag(r)
+    magro = smu.mag(ro)
+    cosdnu = np.dot(ro, r)/(magro*magr)
+    rcrossr = np.cross(ro, r)
+    sindnu = smu.mag(rcrossr)/(magro*magr)
+
+    k = magro * magr*(1.0 -cosdnu)
+    l = magro + magr
+    m = magro * magr*(1.0 +cosdnu)
+    a = (m*k*p) / ((2.0 *m-l*l)*p*p + 2.0 *k*l*p - k*k)
+
+    # ------  use f and g series to find velocity vectors  --------
+    f = 1.0  - (magr/p)*(1.0 -cosdnu)
+    g = magro*magr*sindnu/math.sqrt(mu * p)
+    alpha = 1.0 /a
+
+    if (alpha > small):
+        # ------------------------ elliptical ---------------------
+        dnu = math.atan2(sindnu, cosdnu)
+        fdot = math.sqrt(mu / p) * math.tan(dnu*0.5)* \
+                (((1.0 - cosdnu) / p)-(1.0 / magro)-(1.0 / magr))
+        cosdeltae = 1.0 - (magro/a)*(1.0 -f)
+        sindeltae = (-magro*magr*fdot)/math.sqrt(mu * a)
+        deltae = math.atan2(sindeltae, cosdeltae)
+        tof = g + math.sqrt(a*a*a/mu)*(deltae-sindeltae)
+
+    elif (alpha < -small):
+        # ------------------------ hyperbolic ---------------------
+        deltah = math.acosh(1.0 - (magro/a) * (1.0-f))
+        tof = g + math.sqrt(-a*a*a/mu)*(math.sinh(deltah)-deltah)
+
+    else:
+        # -------------------- parabolic ----------------------
+        dnu = math.atan2(sindnu, cosdnu)
+        c = math.sqrt(magr*magr+magro*magro - \
+                    2.0 *magr*magro*math.cos(dnu))
+        s = (magro+magr+c) * 0.5
+        tof = (2.0 /3.0) * math.sqrt(s*s*s*0.5/mu) * \
+                    (1.0  -  ((s-c)/s)^1.5)
+    return tof
 
 
 
@@ -1278,7 +1302,6 @@ def findtof (ro, r, p):
 # ------------------------------------------------------------------------------
 
 def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
-    # -------------------------  implementation   -------------------------
     error = 'ok'
 
     if (kind == 'k'):
@@ -1320,7 +1343,9 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
     outfile.write('Time (UTCG)                x (km)             y (km)       '
                   '      z (km)         vx (km/sec)     vy (km/sec)     '
                   'vz (km/sec)\n')
-    outfile.write('-------------------------    ---------------    ---------------    ---------------    ------------    ------------    ------------\n' % ())
+    outfile.write('-------------------------    ---------------    '
+                  '---------------    ---------------    ------------    '
+                  '------------    ------------\n')
     for i in range(101):
         #        dtsec = (i-1)*period/120.0
         dtsec = i * 960.0
@@ -1333,22 +1358,22 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
         elif (kind == 'j'):
             reci1, veci1 = pkeplerj4(reci, veci, dtsec, ndot, nddot)
         #        fprintf(1, 'reci1 #4i x #11.7f  #11.7f  #11.7f  #11.7f  #11.7f  #11.7f \n', i, reci1, veci1)
-#        gmst = gstime(jd+dtsec/86400.0)
-#        st(1, 1) = cos(gmst)
-#        st(1, 2) = -sin(gmst)
-#        st(1, 3) = 0.0
-#        st(2, 1) = sin(gmst)
-#        st(2, 2) = cos(gmst)
-#        st(2, 3) = 0.0
-#        st(3, 1) = 0.0
-#        st(3, 2) = 0.0
-#        st(3, 3) = 1.0
-#        recef = st'*reci1'
+        #        gmst = gstime(jd+dtsec/86400.0)
+        #        st(1, 1) = cos(gmst)
+        #        st(1, 2) = -sin(gmst)
+        #        st(1, 3) = 0.0
+        #        st(2, 1) = sin(gmst)
+        #        st(2, 2) = cos(gmst)
+        #        st(2, 3) = 0.0
+        #        st(3, 1) = 0.0
+        #        st(3, 2) = 0.0
+        #        st(3, 3) = 1.0
+        #        recef = st'*reci1'
         #         [latgc, latgd, lon, hellp] = ijk2ll (reci1, jdut1)
-#         if lon < 0.0
-#             lon =lon + 2*pi
-#         end
-#        fprintf(outfile, '#11.7f  #11.7f   1.0 \n', latgd * rad2deg, lon * rad2deg)
+        #         if lon < 0.0
+        #             lon =lon + 2*pi
+        #         end
+        #        fprintf(outfile, '#11.7f  #11.7f   1.0 \n', latgd * rad2deg, lon * rad2deg)
         h, m, s = stu.sec2hms(dtsec)
         outfile.write('1 Jun 2018 %2i:%2i:%7.4f  %16.9f  %16.9f %16.9f  %16.9f'
                       ' %16.9f  %16.9f \n'
@@ -1610,7 +1635,7 @@ def getgravc(whichconst=None):
         # ------------ wgs-72 constants ------------
         mu = 398600.8
         radiusearthkm = 6378.135
-        xke = 60.0 / np.sqrt(radiusearthkm * radiusearthkm
+        xke = 60.0 / math.sqrt(radiusearthkm * radiusearthkm
                                 * radiusearthkm / mu)
         tumin = 1.0 / xke
         j2 = 0.001082616
@@ -1622,7 +1647,7 @@ def getgravc(whichconst=None):
         # ------------ wgs-84 constants ------------
         mu = 398600.5
         radiusearthkm = 6378.137
-        xke = 60.0 / np.sqrt(radiusearthkm * radiusearthkm
+        xke = 60.0 / math.sqrt(radiusearthkm * radiusearthkm
                                 * radiusearthkm / mu)
         tumin = 1.0 / xke
         j2 = 0.00108262998905
@@ -1675,36 +1700,36 @@ def getgravc(whichconst=None):
 def pathm(llat=None, llon=None, range_=None, az=None):
     # -------------------------  implementation   -----------------
     small = 1e-08
-    az = np.fmod(az, twopi)
+    az = math.fmod(az, twopi)
     if (llon < 0.0):
         llon = twopi + llon
 
     if (range_ > twopi):
-        range_ = np.fmod(range_, twopi)
+        range_ = math.fmod(range_, twopi)
 
     # ----------------- find geocentric latitude  -----------------
-    tlat = np.arcsin(np.sin(llat) * np.cos(range_) + np.cos(llat)
-                     * np.sin(range_) * np.cos(az))
+    tlat = math.asin(math.sin(llat) * math.cos(range_) + math.cos(llat)
+                     * math.sin(range_) * math.cos(az))
     # ---- find delta n, the angle between the points -------------
-    if (((np.abs(np.cos(tlat)) > small) and (np.abs(np.cos(llat)) > small))):
-        sindn = np.sin(az) * np.sin(range_) / np.cos(tlat)
-        cosdn = ((np.cos(range_) - np.sin(tlat) * np.sin(llat))
-                 / (np.cos(tlat) * np.cos(llat)))
+    if (((abs(math.cos(tlat)) > small) and (abs(math.cos(llat)) > small))):
+        sindn = math.sin(az) * math.sin(range_) / math.cos(tlat)
+        cosdn = ((math.cos(range_) - math.sin(tlat) * math.sin(llat))
+                 / (math.cos(tlat) * math.cos(llat)))
         deltan = math.atan2(sindn, cosdn)
     else:
         # ------ case where launch is within 3nm of a pole --------
-        if (np.abs(np.cos(llat)) <= small):
-            if (((range_ > np.pi) and (range_ < twopi))):
-                deltan = az + np.pi
+        if (abs(math.cos(llat)) <= small):
+            if (((range_ > math.pi) and (range_ < twopi))):
+                deltan = az + math.pi
             else:
                 deltan = az
         # ----- case where end point is within 3nm of a pole ------
-        if (np.abs(np.cos(tlat)) <= small):
+        if (abs(math.cos(tlat)) <= small):
             deltan = 0.0
 
     tlon = llon + deltan
-    if (np.abs(tlon) > twopi):
-        tlon = np.fmod(tlon, twopi)
+    if (abs(tlon) > twopi):
+        tlon = math.fmod(tlon, twopi)
 
     if (tlon < 0.0):
         tlon = twopi + tlon
@@ -1767,31 +1792,31 @@ def satfov(incl=None, az=None, slatgd=None, slon=None, salt=None, tfov=None,
            etactr=None):
     # ------- find satellite parameters and limiting cases --------
     r = re + salt
-    etahoriz = np.arcsin(re / r)
-    rhohoriz = r * np.cos(etahoriz)
+    etahoriz = math.asin(re / r)
+    rhohoriz = r * math.cos(etahoriz)
 
     print('etahoriz %11.7f rhohoriz %11.7f km \n'
           % (etahoriz * rad2deg, rhohoriz))
     # ---------------- find ground range angle --------------------
-    lambda_ = np.arccos(re / r)
+    lambda_ = math.acos(re / r)
     print('lambda %11.7f  %11.7f km  \n' % (lambda_ * rad2deg, lambda_ * re))
     print('maximum locations \n' % ())
     # -------- for maximum, if the sensor looks off axis ----------
     fovmin = etactr + tfov * 0.5
-    gamma = np.pi - np.arcsin(r * np.sin(fovmin) / re)
+    gamma = math.pi - math.asin(r * math.sin(fovmin) / re)
 
-    rhomax = re * np.cos(gamma) + r * np.cos(fovmin)
+    rhomax = re * math.cos(gamma) + r * math.cos(fovmin)
     print('fovmin %11.7f gamma %11.7f gamma %11.7f rho %11.7f  \n'
-          % (fovmin * rad2deg, gamma * rad2deg, (np.pi - gamma) * rad2deg,
+          % (fovmin * rad2deg, gamma * rad2deg, (math.pi - gamma) * rad2deg,
              rhomax))
     # --------------------- slant range --------------------
-    lambda_ = np.arcsin(rhomax * np.sin(fovmin) / re)
+    lambda_ = math.asin(rhomax * math.sin(fovmin) / re)
     rhomin = lambda_ * re
     print('lambda %11.7f rhomin %11.7f \n' % (lambda_ * rad2deg, rhomin))
     #         end
 
     # -------------- find location of center of fov ---------------
-    if (np.abs(etactr) > 1e-05):
+    if (abs(etactr) > 1e-05):
         lat, lon = pathm(slatgd, slon, lambda_, az)
     else:
         lat = slatgd
@@ -2052,16 +2077,16 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
                     c2dot = 0.5 / psiold * (1.0 - psiold * c3new - 2.0 * c2new)
                     c3dot = 0.5 / psiold * (c2new - 3.0 * c3new)
                 else:  # case for parabolic orbit
-                    c2dot = (-1.0 / np.math.factorial(4)
-                             + 2.0 * psiold / np.math.factorial(6)
-                             - 3.0 * psiold**2 / np.math.factorial(8)
-                             + 4.0 * psiold**3 / np.math.factorial(10)
-                             - 5.0 * psiold**4 / np.math.factorial(12))
-                    c3dot = (-1.0 / np.math.factorial(5)
-                             + 2.0 * psiold / np.math.factorial(7)
-                             - 3.0 * psiold**2 / np.math.factorial(9)
-                             + 4.0 * psiold**3 / np.math.factorial(11)
-                             - 5.0 * psiold**4 / np.math.factorial(13))
+                    c2dot = (-1.0 / math.factorial(4)
+                             + 2.0 * psiold / math.factorial(6)
+                             - 3.0 * psiold**2 / math.factorial(8)
+                             + 4.0 * psiold**3 / math.factorial(10)
+                             - 5.0 * psiold**4 / math.factorial(12))
+                    c3dot = (-1.0 / math.factorial(5)
+                             + 2.0 * psiold / math.factorial(7)
+                             - 3.0 * psiold**2 / math.factorial(9)
+                             + 4.0 * psiold**3 / math.factorial(11)
+                             - 5.0 * psiold**4 / math.factorial(13))
                 dtdpsi = (xcubed * (c3dot - 3.0 * c3new * c2dot / (2.0 * c2new))
                           + 0.125*vara
                           * (3.0*c3new*math.sqrt(y)/c2new + vara/xold)) * oomu
@@ -2254,7 +2279,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
     # make sure it's not more than 1.0
-    if (np.abs(cosdeltanu) > 1.0):
+    if (abs(cosdeltanu) > 1.0):
         cosdeltanu = 1.0 * np.sign(cosdeltanu)
 
     rcrossr = np.cross(r1, r2)
@@ -2267,17 +2292,17 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     dnu = math.atan2(sindeltanu, cosdeltanu)
     # the angle needs to be positive to work for the long way
     if dnu < 0.0:
-        dnu = 2.0 * np.pi + dnu
+        dnu = 2.0 * math.pi + dnu
 
     # these are the same
-    chord = np.sqrt(magr1 * magr1 + magr2 * magr2
+    chord = math.sqrt(magr1 * magr1 + magr2 * magr2
                     - 2.0 * magr1 * magr2 * cosdeltanu)
     # chord = smu.mag(r2-r1)
 
     s = (magr1 + magr2 + chord) * 0.5
     ror = magr2 / magr1
     eps = ror - 1.0
-    lam = 1.0 / s * np.sqrt(magr1 * magr2) * np.cos(dnu * 0.5)
+    lam = 1.0 / s * math.sqrt(magr1 * magr2) * math.cos(dnu * 0.5)
     L = ((1.0 - lam) / (1.0 + lam)) ** 2
     m = 8.0 * mu * dtsec * dtsec / (s ** 3 * (1.0 + lam) ** 6)
     #        tan2w = 0.25*eps*eps / (sqrt(ror) + ror * (2.0 + sqrt(ror)))
@@ -2300,23 +2325,23 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
         xn = 1e-20
         x = 10.0
         loops = 1
-        while ((np.abs(xn - x) >= small) and (loops <= 20)):
+        while ((abs(xn - x) >= small) and (loops <= 20)):
 
             x = xn
             temp = 1.0 / (2.0 * (L - x * x))
-            temp1 = np.sqrt(x)
-            temp2 = (nrev * np.pi * 0.5 + np.arctan(temp1)) / temp1
+            temp1 = math.sqrt(x)
+            temp2 = (nrev * math.pi * 0.5 + math.atan(temp1)) / temp1
             h1 = temp * (L + x) * (1.0 + 2.0 * x + L)
             h2 = temp * m * temp1 * ((L - x * x) * temp2 - (L + x))
             b = 0.25 * 27.0 * h2 / ((temp1 * (1.0 + h1)) ** 3)
             if b < 0.0:
-                f = 2.0 * np.cos(1.0 / 3.0 * np.arccos(np.sqrt(b + 1.0)))
+                f = 2.0 * math.cos(1.0 / 3.0 * math.acos(math.sqrt(b + 1.0)))
             else:
-                A = (np.sqrt(b) + np.sqrt(b + 1.0)) ** (1.0 / 3.0)
+                A = (math.sqrt(b) + math.sqrt(b + 1.0)) ** (1.0 / 3.0)
                 f = A + 1.0 / A
-            y = 2.0 / 3.0 * temp1 * (1.0 + h1) * (np.sqrt(b + 1.0) / f + 1.0)
+            y = 2.0 / 3.0 * temp1 * (1.0 + h1) * (math.sqrt(b + 1.0) / f + 1.0)
             xn = 0.5 * ((m / (y * y) - (1.0 + L))
-                        - np.sqrt((m / (y * y) - (1.0 + L)) ** 2
+                        - math.sqrt((m / (y * y) - (1.0 + L)) ** 2
                                   - 4.0 * L))
             print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f '
                   '%11.7f \n'
@@ -2327,9 +2352,9 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
               % (loops, y, x, h1, h2, b, f))
         x = xn
         a = s * (1.0 + lam) ** 2 * (1.0 + x) * (L + x) / (8.0 * x)
-        p = ((2.0 * magr1 * magr2 * (1.0 + x) * np.sin(dnu * 0.5) ** 2)
+        p = ((2.0 * magr1 * magr2 * (1.0 + x) * math.sin(dnu * 0.5) ** 2)
              / (s * (1 + lam) ** 2 * (L + x)))
-        ecc = np.sqrt(1.0 - p / a)
+        ecc = math.sqrt(1.0 - p / a)
         v1dv, v2dv = lambhodograph(r1, v1, r2, p, ecc, dnu, dtsec)
         print('high v1t %16.8f %16.8f %16.8f \n' % (v1dv))
     else:
@@ -2338,13 +2363,13 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
         loops = 1
         y1 = 0.0
         x = 10.0
-        while ((np.abs(xn - x) >= small) and (loops <= 30)):
+        while ((abs(xn - x) >= small) and (loops <= 30)):
 
             if (nrev > 0):
                 x = xn
                 temp = 1.0 / ((1.0 + 2.0 * x + L) * (4.0 * x ** 2))
-                temp1 = (nrev * np.pi * 0.5
-                         + np.arctan(np.sqrt(x))) / np.sqrt(x)
+                temp1 = (nrev * math.pi * 0.5
+                         + math.atan(math.sqrt(x))) / math.sqrt(x)
                 h1 = (temp * (L + x) ** 2
                       * (3.0 * (1.0 + x) ** 2 * temp1 - (3.0 + 5.0 * x)))
                 h2 = (temp * m * ((x * x - x * (1.0 + L) - 3.0 * L)
@@ -2367,16 +2392,16 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #                xn = xn * (lim1/y1)
 #            end
 #            else
-            u = 0.5 * b / (1.0 + np.sqrt(1.0 + b))
+            u = 0.5 * b / (1.0 + math.sqrt(1.0 + b))
             k2 = smu.kbat(u)
-            y = (((1.0 + h1) / 3.0) * (2.0 + np.sqrt(1.0 + b)
+            y = (((1.0 + h1) / 3.0) * (2.0 + math.sqrt(1.0 + b)
                                        / (1.0 + 2.0 * u * k2 * k2)))
-            xn = (np.sqrt(((1.0 - L) * 0.5) ** 2 + m / (y * y))
+            xn = (math.sqrt(((1.0 - L) * 0.5) ** 2 + m / (y * y))
                   - (1.0 + L) * 0.5)
             #                    xn = sqrt(l*l + m/(y*y)) - (1.0 - l) alt, doesn't seem to work
 #            end
 #        end
-            y1 = np.sqrt(m / ((L + x) * (1.0 + x)))
+            y1 = math.sqrt(m / ((L + x) * (1.0 + x)))
             loops = loops + 1
             print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 '
                   '%11.7f \n'
@@ -2392,11 +2417,11 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #a = s*(1.0 + lam)^2*(1.0 + x)*(lam + x) / (8.0*x)
 # p = (2.0*magr1*magr2*(1.0 + x)*sin(dnu*0.5)^2)^2 / (s*(1 + lam)^2*(lam + x))  # loechler, not right?
             p = (2.0 * magr1 * magr2 * y * y * (1.0 + x) ** 2
-                 * np.sin(dnu * 0.5) ** 2) / (m * s * (1 + lam) ** 2)
-            ecc = np.sqrt((eps ** 2 + 4.0 * magr2 / magr1
-                           * np.sin(dnu * 0.5) ** 2 * ((L - x) / (L + x)) ** 2)
+                 * math.sin(dnu * 0.5) ** 2) / (m * s * (1 + lam) ** 2)
+            ecc = math.sqrt((eps ** 2 + 4.0 * magr2 / magr1
+                           * math.sin(dnu * 0.5) ** 2 * ((L - x) / (L + x)) ** 2)
                            / (eps ** 2 + 4.0 * magr2 / magr1
-                              * np.sin(dnu * 0.5) ** 2))
+                              * math.sin(dnu * 0.5) ** 2))
             v1dv, v2dv = lambhodograph(r1, v1, r2, p, ecc, dnu, dtsec)
             #            fprintf(1, 'oldb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dv, smu.mag(v1dv))
 #         r_180 = 0.001  # 1 meter
@@ -2404,19 +2429,19 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #         fprintf(1, 'newb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvh, smu.mag(v1dvh))
             # Battin solution to orbital parameters (and velocities)
 # thompson 2011, loechler 1988
-            if dnu > np.pi:
-                lam = - np.sqrt((s - chord) / s)
+            if dnu > math.pi:
+                lam = - math.sqrt((s - chord) / s)
             else:
-                lam = np.sqrt((s - chord) / s)
+                lam = math.sqrt((s - chord) / s)
             #      x = xn
             # loechler pg 21 seems correct!
             v1dvl = (1.0 / (lam * (1.0 + lam))
-                     * np.sqrt(mu * (1.0 + x) / (2.0 * s ** 3 * (L + x)))
+                     * math.sqrt(mu * (1.0 + x) / (2.0 * s ** 3 * (L + x)))
                      * ((r2 - r1) + s * (1.0 + lam) ** 2 * (L + x)
                         / (magr1 * (1.0 + x)) * r1))
             # added v2
             v2dvl = (1.0 / (lam * (1.0 + lam))
-                     * np.sqrt(mu * (1.0 + x) / (2.0 * s ** 3 * (L + x)))
+                     * math.sqrt(mu * (1.0 + x) / (2.0 * s ** 3 * (L + x)))
                      * ((r2 - r1) - s * (1.0 + lam) ** 2 * (L + x)
                         / (magr2 * (1.0 + x)) * r2))
             #fprintf(1, 'loe v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvl, smu.mag(v1dvl))
@@ -2453,23 +2478,23 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
-    c = np.sqrt(magr1 ** 2 + magr2 ** 2 - 2.0 * magr1 * magr2 * cosdeltanu)
+    c = math.sqrt(magr1 ** 2 + magr2 ** 2 - 2.0 * magr1 * magr2 * cosdeltanu)
     s = 0.5 * (magr1 + magr2 + c)
     aminenergy = 0.5 * s
-    alphae = np.pi
-    betae = 2.0 * np.arcsin(np.sqrt((s - c) / s))
+    alphae = math.pi
+    betae = 2.0 * math.asin(math.sqrt((s - c) / s))
     if (dm == 'L'):
-        tminenergy = (np.sqrt(aminenergy ** 3 / mu)
-                      * (2.0 * nrev * np.pi + alphae - (betae - np.sin(betae))))
+        tminenergy = (math.sqrt(aminenergy ** 3 / mu)
+                      * (2.0 * nrev * math.pi + alphae - (betae - math.sin(betae))))
         #tminabs1 = sqrt(s^3/(8.0*mu))*(alphae - (betae-sin(betae)))
     else:
-        tminenergy = (np.sqrt(aminenergy ** 3 / mu)
-                      * (2.0 * nrev * np.pi + alphae + (betae - np.sin(betae))))
+        tminenergy = (math.sqrt(aminenergy ** 3 / mu)
+                      * (2.0 * nrev * math.pi + alphae + (betae - math.sin(betae))))
         #tminabs1 = sqrt(s^3/(8.0*mu))*(alphae + (betae-sin(betae)))
 
     # find parabolic tof - this will be the minimum limit for tof
 # negative sign should be smallest
-    tminabs = 1.0 / 3.0 * np.sqrt(2.0 / mu) * (s ** 1.5 - (s - c) ** 1.5)
+    tminabs = 1.0 / 3.0 * math.sqrt(2.0 / mu) * (s ** 1.5 - (s - c) ** 1.5)
     #tminabs = 1.0/3.0*sqrt(2.0/mu)*(s^1.5+(s-c)^1.5)
 
     # if calc min velocity
@@ -2483,7 +2508,7 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
 
     v = np.zeros(3)
     for i in range(3):
-        v[i] = (np.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu)
+        v[i] = (math.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu)
                 * (r2[i] - (1.0 - magr2 / pmin * (1.0 - cosdeltanu)) * r1[i]))
 
     return v, aminenergy, tminenergy, tminabs
@@ -2533,7 +2558,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
     # make sure it's not more than 1.0
-    if (np.abs(cosdeltanu) > 1.0):
+    if (abs(cosdeltanu) > 1.0):
         cosdeltanu = 1.0 * np.sign(cosdeltanu)
 
     rcrossr = np.cross(r1, r2)
@@ -2545,23 +2570,23 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     dnu = math.atan2(sindeltanu, cosdeltanu)
     # the angle needs to be positive to work for the long way
     if (dnu < 0.0):
-        dnu = 2.0 * np.pi + dnu
+        dnu = 2.0 * math.pi + dnu
 
     # ------------- try prussing test his numbers are wrong -------
-#dnu = 75.0 / (180.0 / pi)
-#cosdeltanu = cos(dnu)
-#magr1 = 1.0
-#magr2 = 1.524
-#mu = 4.0 * pi * pi
-#dnu = 90.0 / (180.0 / pi)
-#cosdeltanu = cos(dnu)
-#magr1 = 1.0  # er
-#magr2 = 1.0
-#mu = 1.0
+    #dnu = 75.0 / (180.0 / pi)
+    #cosdeltanu = cos(dnu)
+    #magr1 = 1.0
+    #magr2 = 1.524
+    #mu = 4.0 * pi * pi
+    #dnu = 90.0 / (180.0 / pi)
+    #cosdeltanu = cos(dnu)
+    #magr1 = 1.0  # er
+    #magr2 = 1.0
+    #mu = 1.0
 
     # these are the same
 #    if (de == 'L')
-    chord = np.sqrt(magr1 * magr1 + magr2 * magr2
+    chord = math.sqrt(magr1 * magr1 + magr2 * magr2
                     - 2.0 * magr1 * magr2 * cosdeltanu)
     #    else
 #    chord = -sqrt(magr1 * magr1 + magr2 * magr2 - 2.0 * magr1 * magr2 * cosdeltanu)
@@ -2572,53 +2597,53 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     xi = 0.0
     eta = 0.0
     # ------------- calc tmin parabolic tof to see if the orbit is possible
-# ----- no ellitpical orbits exist below this --------
+    # ----- no ellitpical orbits exist below this --------
     if (dm == 'S'):
-        tminp = ((1.0 / 3.0) * np.sqrt(2.0 / mu)
+        tminp = ((1.0 / 3.0) * math.sqrt(2.0 / mu)
                  * ((s ** 1.5) - (s - chord) ** 1.5))
     else:
-        tminp = ((1.0 / 3.0) * np.sqrt(2.0 / mu)
+        tminp = ((1.0 / 3.0) * math.sqrt(2.0 / mu)
                  * ((s ** 1.5) + (s - chord) ** 1.5))
 
     # could do this just for nrev cases, but you can also find these for any nrev if (nrev > 0)
-# ------------- this is the min energy ellipse tof
+    # ------------- this is the min energy ellipse tof
     amin = 0.5 * s
     #alpha = pi
-    beta = 2.0 * np.arcsin(np.sqrt((s - chord) / s))
+    beta = 2.0 * math.asin(math.sqrt((s - chord) / s))
     if (dm == 'S'):
         tminenergy = ((amin ** 1.5)
-                      * ((2.0 * nrev + 1.0) * np.pi - beta + np.sin(beta))
-                      / np.sqrt(mu))
+                      * ((2.0 * nrev + 1.0) * math.pi - beta + math.sin(beta))
+                      / math.sqrt(mu))
     else:
         tminenergy = ((amin ** 1.5)
-                      * ((2.0 * nrev + 1.0) * np.pi + beta - np.sin(beta))
-                      / np.sqrt(mu))
+                      * ((2.0 * nrev + 1.0) * math.pi + beta - math.sin(beta))
+                      / math.sqrt(mu))
 
     # -------------- calc min tof ellipse (prussing 1992 aas, 2000 jas, stern 1964 pg 230)
     an = 1.001 * amin
     fa = 10.0
     i = 1
-    while (np.abs(fa) > 1e-05 and i <= 20):
+    while (abs(fa) > 1e-05 and i <= 20):
 
         a = an
         alp = 1.0 / a
-        alpha = 2.0 * np.arcsin(np.sqrt(0.5 * s * alp))
+        alpha = 2.0 * math.asin(math.sqrt(0.5 * s * alp))
         if (de == 'L'):
-            beta = 2.0 * np.arcsin(np.sqrt(0.5 * (s - chord) * alp))
+            beta = 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
         else:
-            beta = - 2.0 * np.arcsin(np.sqrt(0.5 * (s - chord) * alp))
+            beta = - 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
         xi = alpha - beta
-        eta = np.sin(alpha) - np.sin(beta)
-        fa = ((6.0 * nrev * np.pi + 3.0 * xi - eta) * (np.sin(xi) + eta)
-              - 8.0 * (1.0 - np.cos(xi)))
-        fadot = (((6.0 * nrev * np.pi + 3.0 * xi - eta)
-                  * (np.cos(xi) + np.cos(alpha)) + (3.0 - np.cos(alpha))
-                  * (np.sin(xi) + eta) - 8.0 * np.sin(xi))
-                 * (- alp * np.tan(0.5 * alpha))
-                 + ((6.0 * nrev * np.pi + 3.0 * xi - eta)
-                    * (- np.cos(xi) - np.cos(alpha)) + (- 3.0 - np.cos(beta))
-                    * (np.sin(xi) + eta) + 8.0 * np.sin(xi))
-                 * (- alp * np.tan(0.5 * beta)))
+        eta = math.sin(alpha) - math.sin(beta)
+        fa = ((6.0 * nrev * math.pi + 3.0 * xi - eta) * (math.sin(xi) + eta)
+              - 8.0 * (1.0 - math.cos(xi)))
+        fadot = (((6.0 * nrev * math.pi + 3.0 * xi - eta)
+                  * (math.cos(xi) + math.cos(alpha)) + (3.0 - math.cos(alpha))
+                  * (math.sin(xi) + eta) - 8.0 * math.sin(xi))
+                 * (- alp * math.tan(0.5 * alpha))
+                 + ((6.0 * nrev * math.pi + 3.0 * xi - eta)
+                    * (- math.cos(xi) - math.cos(alpha)) + (- 3.0 - math.cos(beta))
+                    * (math.sin(xi) + eta) + 8.0 * math.sin(xi))
+                 * (- alp * math.tan(0.5 * beta)))
         del_ = fa / fadot
         an = a - del_
         #        fprintf(1, '#2i #8.4f #11.5f #11.5f  #11.5f  #11.5f  #11.5f  #11.5f  #11.5f \n', i, dnu * rad2deg, alpha * rad2deg, beta * rad2deg, xi, eta, fa, fadot, an)
@@ -2628,11 +2653,11 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     print('iter %2i ' % (i))
     # could update beta one last time with alpha too????
     if (dm == 'S'):
-        tmin = (an ** 1.5) * (2.0 * np.pi * nrev + xi - eta) / np.sqrt(mu)
+        tmin = (an ** 1.5) * (2.0 * math.pi * nrev + xi - eta) / math.sqrt(mu)
     else:
-        tmin = (an ** 1.5) * (2.0 * np.pi * nrev + xi + eta) / np.sqrt(mu)
+        tmin = (an ** 1.5) * (2.0 * math.pi * nrev + xi + eta) / math.sqrt(mu)
 
-    #      dm = 'S'
+#      dm = 'S'
 #      de = 'L'
 #      nrev = 0
 #      blair
@@ -2644,7 +2669,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
 #      v1 = [ 2.376641, 1.139677, 7.078097]
 #      r2 = [ -1078.007289, 8796.641859, 1890.7135 ]
 
-    #      [tmin, tminp, tminenergy] = lambertminT(r1, r2, dm, de, nrev)
+#      [tmin, tminp, tminenergy] = lambertminT(r1, r2, dm, de, nrev)
 
     print('%c  %c %i  %f  %f  %f  \n'
           % (dm, de, nrev, tmin, tminp, tminenergy))
@@ -2666,13 +2691,27 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
 #    nrev = 1, 2, 3, ...
 #
 
-def lambertumins(r1=None, r2=None, nrev=None, dm=None):
+def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
+    """find the minimum psi values for the universal variable lambert problem
+       for multi-rev cases
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    r2 : ndarray
+        ijk position vector 2: km
+    nrev : int
+        max # of revolutions: 0, 1, 2 ...
+    dm : str
+        direction of motion: 'L', 'S'
+    """
     small = 1e-08
     mu = 398600.4418
 
-    oomu = 1.0 / np.sqrt(mu)
+    oomu = 1.0 / math.sqrt(mu)
 
-    sqrtmu = np.sqrt(mu)
+    sqrtmu = math.sqrt(mu)
     numiter = 20
 
     # ---- find parameters that are constant for the intiial geometry
@@ -2680,17 +2719,17 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
     if (dm == 'L'):
-        vara = - np.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
+        vara = - math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
     else:
-        vara = np.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
+        vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
 
     # ------------ find the minimum time for a nrev transfer --------------
 #   nrev = 0
 #   for zz = 0: 4
 #       nrev = nrev + 1
-# ---- get outer bounds for each nrev case
-    lower = 4.0 * nrev ** 2 * np.pi * np.pi
-    upper = 4.0 * (nrev + 1.0) ** 2 * np.pi * np.pi
+    # ---- get outer bounds for each nrev case
+    lower = 4.0 * nrev ** 2 * math.pi * math.pi
+    upper = 4.0 * (nrev + 1.0) ** 2 * math.pi * math.pi
     # ---- streamline since we know it's near the center
     upper = lower + (upper - lower) * 0.6
     lower = lower + (upper - lower) * 0.3
@@ -2699,18 +2738,18 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
     c2, c3 = smu.findc2c3(psiold)
     loops = 0
     dtdpsi = 200.0
-    while ((np.abs(dtdpsi) >= 0.1) and (loops < numiter)):
+    while ((abs(dtdpsi) >= 0.1) and (loops < numiter)):
 
-        if (np.abs(c2) > small):
-            y = magr1 + magr2 - (vara * (1.0 - psiold * c3) / np.sqrt(c2))
+        if (abs(c2) > small):
+            y = magr1 + magr2 - (vara * (1.0 - psiold * c3) / math.sqrt(c2))
         else:
             y = magr1 + magr2
-        if (np.abs(c2) > small):
-            x = np.sqrt(y / c2)
+        if (abs(c2) > small):
+            x = math.sqrt(y / c2)
         else:
             x = 0.0
-        sqrty = np.sqrt(y)
-        if np.abs(psiold) > 1e-05:
+        sqrty = math.sqrt(y)
+        if abs(psiold) > 1e-05:
             c2dot = 0.5 / psiold * (1.0 - psiold * c3 - 2.0 * c2)
             c3dot = 0.5 / psiold * (c2 - 3.0 * c3)
             c2ddot = (1.0 / (4.0 * psiold ** 2)
@@ -2718,16 +2757,16 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
             c3ddot = (1.0 / (4.0 * psiold ** 2)
                       * ((15.0 - psiold) * c3 - 7.0 * c2 + 1.0))
         else:
-            c2dot = (-2.0 / np.math.factorial(4)
-                     + 2.0 * psiold / np.math.factorial(6)
-                     - 3.0 * psiold ** 2 / np.math.factorial(8)
-                     + 4.0 * psiold ** 3 / np.math.factorial(10)
-                     - 5.0 * psiold ** 4 / np.math.factorial(12))
-            c3dot = (-1.0 / np.math.factorial(5)
-                     + 2.0 * psiold / np.math.factorial(7)
-                     - 3.0 * psiold ** 2 / np.math.factorial(9)
-                     + 4.0 * psiold ** 3 / np.math.factorial(11)
-                     - 5.0 * psiold ** 4 / np.math.factorial(13))
+            c2dot = (-2.0 / math.factorial(4)
+                     + 2.0 * psiold / math.factorial(6)
+                     - 3.0 * psiold ** 2 / math.factorial(8)
+                     + 4.0 * psiold ** 3 / math.factorial(10)
+                     - 5.0 * psiold ** 4 / math.factorial(12))
+            c3dot = (-1.0 / math.factorial(5)
+                     + 2.0 * psiold / math.factorial(7)
+                     - 3.0 * psiold ** 2 / math.factorial(9)
+                     + 4.0 * psiold ** 3 / math.factorial(11)
+                     - 5.0 * psiold ** 4 / math.factorial(13))
             c2ddot = 0.0
             c3ddot = 0.0
         # now solve this for dt = 0.0
@@ -2735,7 +2774,7 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
         dtdpsi = (x ** 3 * (c3dot - 3.0 * c3 * c2dot / (2.0 * c2))
                   * oomu + 0.125 * vara
                   * (3.0 * c3 * sqrty / c2 + vara / x) * oomu)
-        q = 0.25 * vara * np.sqrt(c2) - x ** 2 * c2dot
+        q = 0.25 * vara * math.sqrt(c2) - x ** 2 * c2dot
         s1 = - 24.0 * q * x ** 3 * c2 * sqrty * c3dot
         s2 = (36.0 * q * x ** 3 * sqrty * c3 * c2dot
               - 16.0 * x ** 5 * sqrty * c3ddot * c2 ** 2)
@@ -2744,7 +2783,7 @@ def lambertumins(r1=None, r2=None, nrev=None, dm=None):
               - 6.0 * vara * c3dot * y * c2 * x ** 2)
         s4 = (- 0.75 * vara ** 2 * c3 * c2 ** 1.5 * x ** 2
               + 6.0 * vara * c3 * y * c2dot * x ** 2
-              + (vara ** 2 * c2 * (0.25 * vara * np.sqrt(c2) - x ** 2 * c2))
+              + (vara ** 2 * c2 * (0.25 * vara * math.sqrt(c2) - x ** 2 * c2))
               * sqrty / x)
         dtdpsi2 = (- (s1 + s2 + s3 + s4)
                    / (16.0 * sqrtmu * (c2 ** 2 * sqrty * x ** 2)))
@@ -2830,33 +2869,33 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
     if b <= 0.0:
         x1 = 0.0
     else:
-        x1 = - np.sqrt(b)
+        x1 = - math.sqrt(b)
 
     # 180 deg, and multiple 180 deg transfers
-    if np.abs(np.sin(dnu)) < eps:
+    if abs(math.sin(dnu)) < eps:
         nvec = np.cross(r1, v1) / smu.mag(np.cross(r1, v1))
         if ecc < 1.0:
-            ptx = twopi * np.sqrt(p ** 3 / (mu * (1.0 - ecc ** 2) ** 3))
+            ptx = twopi * math.sqrt(p ** 3 / (mu * (1.0 - ecc ** 2) ** 3))
             if (np.mod(dtsec, ptx) > ptx * 0.5):
                 x1 = - x1
         print('less than\n' % ())
     else:
         # more common path?
-        y2a = mu / p - x1 * np.sin(dnu) + a * np.cos(dnu)
-        y2b = mu / p + x1 * np.sin(dnu) + a * np.cos(dnu)
-        if np.abs(mu / magr2 - y2b) < np.abs(mu / magr2 - y2a):
+        y2a = mu / p - x1 * math.sin(dnu) + a * math.cos(dnu)
+        y2b = mu / p + x1 * math.sin(dnu) + a * math.cos(dnu)
+        if abs(mu / magr2 - y2b) < abs(mu / magr2 - y2a):
             x1 = - x1
         # depending on the cross product, this will be normal or in plane,
 # or could even be a fan
         nvec = np.cross(r1, r2) / smu.mag(np.cross(r1, r2))
-        if (np.mod(dnu, twopi) > np.pi):
+        if (np.mod(dnu, twopi) > math.pi):
             nvec = - nvec
         #       fprintf(1, 'gtr than\n')
 
-    v1t = (np.sqrt(mu * p) / magr1) * ((x1 / mu) * r1
+    v1t = (math.sqrt(mu * p) / magr1) * ((x1 / mu) * r1
                                        + np.cross(nvec, r1) / magr1)
-    x2 = x1 * np.cos(dnu) + a * np.sin(dnu)
-    v2t = (np.sqrt(mu * p) / magr2) * ((x2 / mu) * r2
+    x2 = x1 * math.cos(dnu) + a * math.sin(dnu)
+    v2t = (math.sqrt(mu * p) / magr2) * ((x2 / mu) * r2
                                        + np.cross(nvec, r2) / magr2)
     return v1t, v2t
 
@@ -2922,7 +2961,29 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
 # ------------------------------------------------------------------------------
 
 
-def kepler(ro, vo, dtseco):
+def kepler(ro: np.ndarray, vo: np.ndarray, dtseco: float):
+    """this function solves keplers problem for orbit determination and returns a
+    future geocentric equatorial (ijk) position and velocity vector.  the
+    solution uses universal variables.
+
+    Parameters
+    ----------
+    ro : ndarray
+        ijk position vector - initial: km
+    vo : ndarray
+        ijk velocity vector - initial: km/s
+    dtseco : float
+        length of time to propogate: sec
+
+    Returns
+    -------
+    r: ndarray
+        ijk position vector
+    v: ndarray
+        ijk velocity vector
+    errork: str
+        error flag: 'ok', 'knotconv', 'fandg'
+    """
 
     # set constants and intermediate printouts
     velkmps = math.sqrt(mu / re)
@@ -2940,7 +3001,7 @@ def kepler(ro, vo, dtseco):
     ktr = 0
     xold = 0.0
     znew = 0.0
-    errork = '      ok'
+    errork = 'ok'
     dtsec = dtseco
     nrev = 0
     sqmu = math.sqrt(mu)
@@ -2979,23 +3040,22 @@ def kepler(ro, vo, dtseco):
                 dtsec = math.fmod(dtseco, period)
                 nrev = math.floor(dtseco/period)
             xold = sqmu *dtsec * alpha
-        else:
+        elif (abs(alpha) < small):
             # --------------------  parabola  ---------------------
-            if (abs(alpha) < small):
-                h = np.cross(ro, vo)
-                magh = smu.mag(h)
-                p = magh*magh/mu
-                s = 0.5 * (halfpi - math.atan(3.0 * math.sqrt(mu / (p*p*p))
-                                              * dtsec))
-                w = math.atan(math.tan(s) ** (1.0 / 3.0))
-                xold = math.sqrt(p) * (2.0 * math.cot(2.0 * w))
-                alpha = 0.0
-            else:
-                # ------------------  hyperbola  ------------------
-                temp = -2.0 * mu * dtsec / \
-                    (a*(rdotv + np.sign(dtsec)*math.sqrt(-mu*a)* \
-                    (1.0 -magro*alpha)))
-                xold = np.sign(dtsec) * math.sqrt(-a) *math.log(temp)
+            h = np.cross(ro, vo)
+            magh = smu.mag(h)
+            p = magh*magh/mu
+            s = 0.5 * (halfpi - math.atan(3.0 * math.sqrt(mu / (p*p*p))
+                                            * dtsec))
+            w = math.atan(math.tan(s) ** (1.0 / 3.0))
+            xold = math.sqrt(p) * (2.0 * math.cot(2.0 * w))
+            alpha = 0.0
+        else:
+            # ------------------  hyperbola  ------------------
+            temp = -2.0 * mu * dtsec / \
+                (a*(rdotv + np.sign(dtsec)*math.sqrt(-mu*a)* \
+                (1.0 -magro*alpha)))
+            xold = np.sign(dtsec) * math.sqrt(-a) *math.log(temp)
 
         ktr = 1
         dtnew = -10.0
@@ -3085,9 +3145,6 @@ def kepler(ro, vo, dtseco):
 
     return r, v, errork
 
-
-
-
 # ------------------------------------------------------------------------------
 #
 #                           function pkepler
@@ -3144,7 +3201,31 @@ def kepler(ro, vo, dtseco):
 # ----------------------------------------------------------------------------- }
 
 
-def pkepler(ro, vo, dtsec, ndot, nddot):
+def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
+            nddot: float):
+    """this function propagates a satellite's position and velocity vector over
+    a given time period accounting for perturbations caused by j2.
+
+    Parameters
+    ----------
+    ro : ndarray
+        original position vector: km
+    vo : ndarray
+        original velocity vector: km
+    dtsec : float
+        change in time: sec
+    ndot : float
+        time rate change of n: rad/s
+    nddot : float
+        time accel change of n: rad/s2
+
+    Returns
+    -------
+    r: ndarray
+        updated position vector: km
+    v: ndarray
+        updated velocity vector: km/s
+    """
 
     p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper \
         = sc.rv2coe(ro, vo)
@@ -3158,7 +3239,7 @@ def pkepler(ro, vo, dtsec, ndot, nddot):
 
      # ------------- find the value of j2 perturbations -------------
     j2op2 = (n * 1.5 * re**2 * j2) / (p * p)
-#     nbar = n*(1.0 + j2op2*sqrt(1.0-ecc*ecc)* (1.0 - 1.5*sin(incl)*sin(incl)))
+    # nbar = n*(1.0 + j2op2*sqrt(1.0-ecc*ecc)* (1.0 - 1.5*sin(incl)*sin(incl)))
     raandot = -j2op2 * math.cos(incl)
     argpdot = j2op2 * (2.0 - 2.5 * math.sin(incl)**2)
     mdot = n
@@ -3181,8 +3262,8 @@ def pkepler(ro, vo, dtsec, ndot, nddot):
             arglatdot = argpdot + mdot
             arglat = arglat + arglatdot * dtsec
             arglat = math.fmod(arglat, twopi)
-          # -- elliptical, parabolic, hyperbolic equatorial ---
     elif (incl < small) or (abs(incl-math.pi) < small):
+        # -- elliptical, parabolic, hyperbolic equatorial ---
         lonperdot = raandot + argpdot
         lonper = lonper + lonperdot * dtsec
         lonper = math.fmod(lonper, twopi)
@@ -3283,15 +3364,15 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
 #     fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f\n', ...
 #             p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg, ...
 #             arglat * rad2deg, truelon * rad2deg, lonper * rad2deg)
-    n = np.sqrt(mu / (a * a * a))
-    cosargp = np.cos(argp)
-    sinargp = np.sin(argp)
-    cosi = np.cos(incl)
-    sini = np.sin(incl)
-    cosraan = np.cos(raan)
-    sinraan = np.sin(raan)
+    n = math.sqrt(mu / (a * a * a))
+    cosargp = math.cos(argp)
+    sinargp = math.sin(argp)
+    cosi = math.cos(incl)
+    sini = math.sin(incl)
+    cosraan = math.cos(raan)
+    sinraan = math.sin(raan)
     beta2 = (1.0 - ecc ** 2)
-    sqrtbeta = np.sqrt(beta2)
+    sqrtbeta = math.sqrt(beta2)
     # ------------- find the value of j2 perturbations -------------
 # merson approach
 #     nndot = 0.75*j2*n*(re/p)^2*sqrtbeta*(2.0 - 3.0*sini^2)...
@@ -3374,39 +3455,39 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     # ----- update the orbital elements for each orbit type --------
     if ecc < small:
         # -------------  circular equatorial  ----------------
-        if (incl < small) or (np.abs(incl - np.pi) < small):
+        if (incl < small) or (abs(incl - math.pi) < small):
             truelondot = raandot + argpdot + mdot
             truelon = truelon + truelondot * dtsec
-            truelon = np.fmod(truelon, twopi)
+            truelon = math.fmod(truelon, twopi)
             print('circ equat\n')
         else:
             # -------------  circular inclined    --------------
             raan = raan + raandot * dtsec
-            raan = np.fmod(raan, twopi)
+            raan = math.fmod(raan, twopi)
             arglatdot = argpdot + mdot
             arglat = arglat + arglatdot * dtsec
-            arglat = np.fmod(arglat, twopi)
+            arglat = math.fmod(arglat, twopi)
             print('circ incl\n')
     else:
         # -- elliptical, parabolic, hyperbolic equatorial ---
-        if (incl < small) or (np.abs(incl - np.pi) < small):
+        if (incl < small) or (abs(incl - math.pi) < small):
             lonperdot = raandot + argpdot
             lonper = lonper + lonperdot * dtsec
-            lonper = np.fmod(lonper, twopi)
+            lonper = math.fmod(lonper, twopi)
             m = m + mdot * dtsec + ndot * dtsec * dtsec \
                 + nddot * dtsec * dtsec * dtsec
-            m = np.fmod(m, twopi)
+            m = math.fmod(m, twopi)
             e0, nu = smu.newtonm(ecc, m)
             print('other equat\n' % ())
         else:
             # --- elliptical, parabolic, hyperbolic inclined --
             raan = raan + raandot * dtsec
-            raan = np.fmod(raan, twopi)
+            raan = math.fmod(raan, twopi)
             argp = argp + argpdot * dtsec
-            argp = np.fmod(argp, twopi)
+            argp = math.fmod(argp, twopi)
             m = m + mdot * dtsec + ndot * dtsec * dtsec \
                 + nddot * dtsec * dtsec * dtsec
-            m = np.fmod(m, twopi)
+            m = math.fmod(m, twopi)
             e0, nu = smu.newtonm(ecc, m)
 
     # ------------- use coe2rv to find new vectors ---------------
@@ -3714,34 +3795,34 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     los3[1] = math.cos(decl3) * math.sin(rtasc3)
     los3[2] = math.sin(decl3)
     # topo to body fixed (ecef)
-#     latgd = 40.0/rad
-#     lon = -110.0/rad
-#     l1
-#     outv = rot2(l1, -pi + latgd)
-#     l1 = rot3(outv, -lon)
-#     outv = rot2(l2, -pi + latgd)
-#     l2 = rot3(outv, -lon)
-#     outv = rot2(l3, -pi + latgd)
-#     l3 = rot3(outv, -lon)
-#     l1
+    #     latgd = 40.0/rad
+    #     lon = -110.0/rad
+    #     l1
+    #     outv = rot2(l1, -pi + latgd)
+    #     l1 = rot3(outv, -lon)
+    #     outv = rot2(l2, -pi + latgd)
+    #     l2 = rot3(outv, -lon)
+    #     outv = rot2(l3, -pi + latgd)
+    #     l3 = rot3(outv, -lon)
+    #     l1
 
     #     # take the middle trans from eecef to eci
-#     tm = [-0.830668624503591  -0.556765707115059   0.001258429966118...
-#    0.556766123167794  -0.830669298539751  -0.000023583565998...
-#    0.001058469658016   0.000681061045186   0.999999207898604]
+    #     tm = [-0.830668624503591  -0.556765707115059   0.001258429966118...
+    #    0.556766123167794  -0.830669298539751  -0.000023583565998...
+    #    0.001058469658016   0.000681061045186   0.999999207898604]
 
 
     # l1 = tm*l1'
-# l2 =tm*l2'
-# l3 =tm*l3'
+    # l2 =tm*l2'
+    # l3 =tm*l3'
 
     # ------------- find l matrix and determinant -----------------
     los1
     vs = np.transpose(np.array([0, 0, 0]))
     aecef = np.transpose(np.array([0, 0, 0]))
     #[l1eci, vs3, aeci] = ecef2eci(l1', vs, aecef, (jd1-2451545.0)/36525.0, jd1, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
-#[l2eci, vs3, aeci] = ecef2eci(l2', vs, aecef, (jd2-2451545.0)/36525.0, jd2, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
-#[l3eci, vs3, aeci] = ecef2eci(l3', vs, aecef, (jd3-2451545.0)/36525.0, jd3, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
+    #[l2eci, vs3, aeci] = ecef2eci(l2', vs, aecef, (jd2-2451545.0)/36525.0, jd2, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
+    #[l3eci, vs3, aeci] = ecef2eci(l3', vs, aecef, (jd3-2451545.0)/36525.0, jd3, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
 
     l1eci = los1
     l2eci = los2
@@ -4361,8 +4442,8 @@ def gibbs(r1=None, r2=None, r3=None):
     w = np.cross(r1, r2)
     pn = smu.unit(p)
     r1n = smu.unit(r1)
-    copa = np.arcsin(np.dot(pn, r1n))
-    if (np.abs(copa) > 0.017452406):
+    copa = math.asin(np.dot(pn, r1n))
+    if (abs(copa) > 0.017452406):
         error = 'not coplanar'
 
     # --------------- | don't continue processing --------------
@@ -4475,8 +4556,8 @@ def gibbsh(r1=None, r2=None, r3=None, re=None, mu=None):
     w = np.cross(r1, r2)
     pn = np.linalg.norm(p)
     r1n = np.linalg.norm(r1)
-    copa = np.arcsin(np.dot(pn, r1n))
-    if (np.abs(np.dot(r1n, pn)) > 0.017452406):
+    copa = math.asin(np.dot(pn, r1n))
+    if (abs(np.dot(r1n, pn)) > 0.017452406):
         error = 'not coplanar'
 
     # --------------- | don't continue processing --------------
@@ -4579,8 +4660,8 @@ def hgibbs(r1=None, r2=None, r3=None, jd1=None, jd2=None, jd3=None):
     p = np.cross(r2, r3)
     pn = smu.unit(p)
     r1n = smu.unit(r1)
-    copa = np.arcsin(np.dot(pn, r1n))
-    if (np.abs(copa) > 0.017452406):
+    copa = math.asin(np.dot(pn, r1n))
+    if (abs(copa) > 0.017452406):
         error = 'not coplanar'
 
     # --------------------------------------------------------------
@@ -5101,23 +5182,23 @@ def nodeonly(iinit=None, ecc=None, deltaomega=None, vinit=None, fpa=None,
              incl=None):
     if ecc > 1e-07:
         # ------------------------- elliptical --------------------- }
-        theta = np.arctan(np.sin(iinit) * np.tan(deltaomega))
-        ifinal = np.arcsin(np.sin(theta) / np.sin(deltaomega))
-        deltav = 2.0 * vinit * np.cos(fpa) * np.sin(0.5 * theta)
-        arglat = np.pi * 0.5
-        arglat1 = np.arccos(np.cos(incl) * np.sin(incl)
-                            * (1.0 - np.cos(deltaomega)) / np.sin(theta))
+        theta = math.atan(math.sin(iinit) * math.tan(deltaomega))
+        ifinal = math.asin(math.sin(theta) / math.sin(deltaomega))
+        deltav = 2.0 * vinit * math.cos(fpa) * math.sin(0.5 * theta)
+        arglat = math.pi * 0.5
+        arglat1 = math.acos(math.cos(incl) * math.sin(incl)
+                            * (1.0 - math.cos(deltaomega)) / math.sin(theta))
     else:
         # -------------------------- circular ---------------------- }
         ifinal = incl
-        theta = np.arccos(np.cos(iinit) * np.cos(iinit)
-                          + np.sin(iinit) * np.sin(iinit) * np.cos(deltaomega))
-        deltav = 2.0 * vinit * np.sin(0.5 * theta)
-        arglat = np.arccos(np.tan(iinit)
-                           * (np.cos(deltaomega) - np.cos(theta))
-                           / np.sin(theta))
-        arglat1 = np.arccos(np.cos(incl) * np.sin(incl)
-                            * (1.0 - np.cos(deltaomega)) / np.sin(theta))
+        theta = math.acos(math.cos(iinit) * math.cos(iinit)
+                          + math.sin(iinit) * math.sin(iinit) * math.cos(deltaomega))
+        deltav = 2.0 * vinit * math.sin(0.5 * theta)
+        arglat = math.acos(math.tan(iinit)
+                           * (math.cos(deltaomega) - math.cos(theta))
+                           / math.sin(theta))
+        arglat1 = math.acos(math.cos(incl) * math.sin(incl)
+                            * (1.0 - math.cos(deltaomega)) / math.sin(theta))
 
     print(' theta   %11.7f deg \n' % (theta * rad2deg))
     print(' arglat   %11.7f  %11.7f  \n' % (arglat * rad2deg, arglat1 * rad2deg))
@@ -5151,7 +5232,7 @@ def nodeonly(iinit=None, ecc=None, deltaomega=None, vinit=None, fpa=None,
 # ----------------------------------------------------------------------------- }
 
 def ionlychg(deltai=None, vinit=None, fpa=None):
-    deltavionly = 2.0 * vinit * np.cos(fpa) * np.sin(0.5 * deltai)
+    deltavionly = 2.0 * vinit * math.cos(fpa) * math.sin(0.5 * deltai)
     return deltavionly
 
 
@@ -5209,28 +5290,28 @@ def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
     deltavb = 0.0
     dttu = 0.0
     ratio = rinit / rfinal
-    if np.abs(nuinit) < 0.01:
-        etran = ((ratio - 1.0) / (np.cos(nutran) - ratio))
-        etran = ((- rfinal + rinit) / (rfinal * np.cos(nutran) - rinit))
+    if abs(nuinit) < 0.01:
+        etran = ((ratio - 1.0) / (math.cos(nutran) - ratio))
+        etran = ((- rfinal + rinit) / (rfinal * math.cos(nutran) - rinit))
         eainit = 0.0
     else:
-        etran = ((ratio - 1.0) / (np.cos(nutran) + ratio))
-        etran = ((- rfinal + rinit) / (rfinal * np.cos(nutran) + rinit))
-        eainit = np.pi
+        etran = ((ratio - 1.0) / (math.cos(nutran) + ratio))
+        etran = ((- rfinal + rinit) / (rfinal * math.cos(nutran) + rinit))
+        eainit = math.pi
 
     if etran >= 0.0:
-        ainit = (rinit * (1.0 + einit * np.cos(nuinit))) / (1.0 - einit * einit)
-        afinal = (rfinal * (1.0 + efinal * np.cos(nutran))) / (1.0 - efinal * efinal)
+        ainit = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
+        afinal = (rfinal * (1.0 + efinal * math.cos(nutran))) / (1.0 - efinal * efinal)
         # nutran is used since it = nufinal!! }
         #    fprintf(1, ' ainti and final   #11.7f  #11.7f km \n', ainit*re, afinal*re)
         #ainit = rinit
         #afinal = rfinal
         if abs(etran - 1.0) > 1e-06:
             if abs(nuinit) < 0.01:
-                atran = ((rinit * (1.0 + etran * np.cos(nuinit)))
+                atran = ((rinit * (1.0 + etran * math.cos(nuinit)))
                          / (1.0 - etran * etran))
             else:
-                atran = ((rinit * (1.0 + etran * np.cos(nuinit)))
+                atran = ((rinit * (1.0 + etran * math.cos(nuinit)))
                          / (1.0 + etran * etran))
                 atran = rinit / (1.0 + etran)
         else:
@@ -5328,9 +5409,9 @@ def hohmann(rinit=None, rfinal=None, einit=None, efinal=None,
     # --------------------  initialize values   ------------------- }
     mu = 1.0
 
-    ainit = (rinit * (1.0 + einit * np.cos(nuinit))) / (1.0 - einit * einit)
+    ainit = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
     atran = (rinit + rfinal) / 2.0
-    afinal = ((rfinal * (1.0 + efinal * np.cos(nufinal)))
+    afinal = ((rfinal * (1.0 + efinal * math.cos(nufinal)))
               / (1.0 - efinal * efinal))
     deltava = 0.0
     deltavb = 0.0
@@ -5553,7 +5634,7 @@ def iau06era(jdut1=None):
     # julian centuries of ut1
     tut1d = jdut1 - 2451545.0
     era = twopi * (0.779057273264 + 1.0027378119113546 * tut1d)
-    era = np.fmod(era, twopi)
+    era = math.fmod(era, twopi)
     if sh.iauhelp == 'y':
         print('era%11.7f  \n' % (era * 180 / math.pi))
 
@@ -5626,7 +5707,7 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
     epsa = (84381.406 - 46.836769 * ttt - 0.0001831 * ttt2
             + 0.0020034 * ttt3 - 5.76e-07 * ttt4 - 4.34e-08 * ttt5)
 
-    epsa = np.fmod(epsa / 3600.0, 360.0)
+    epsa = math.fmod(epsa / 3600.0, 360.0)
 
     epsa = epsa * deg2rad
 
@@ -5658,7 +5739,7 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
     #  earth rotation angle
     tut1d = jdut1 - 2451545.0
     era = twopi * (0.779057273264 + 1.0027378119113546 * tut1d)
-    era = np.fmod(era, twopi)
+    era = math.fmod(era, twopi)
 
     #  greenwich mean sidereal time, iau 2000.
     gmst2000 = era + (0.014506 + 4612.156534 * ttt + 1.3915817 * ttt2
@@ -7082,17 +7163,17 @@ def sunalmanac(jd):
     print('tut1 %14.9f \n' % tut1)
 
     meanlong = 280.460 + 36000.771285*tut1
-    meanlong = np.fmod(meanlong, 360.0)  #deg
+    meanlong = math.fmod(meanlong, 360.0)  #deg
 
     ttdb = tut1
     meananomaly = 357.528 + 35999.050957 * ttdb
-    meananomaly = np.fmod(meananomaly*deg2rad, twopi)  #rad
+    meananomaly = math.fmod(meananomaly*deg2rad, twopi)  #rad
     if (meananomaly < 0.0):
         meananomaly = twopi + meananomaly
 
     eclplong = meanlong + 1.915 * math.sin(meananomaly) \
                 + 0.020 * math.sin(2.0 *meananomaly) #deg
-    eclplong = np.fmod(eclplong, 360.0)  #deg
+    eclplong = math.fmod(eclplong, 360.0)  #deg
 
     obliquity = 23.439 - 0.01461 * ttdb  #deg
 
@@ -7267,12 +7348,12 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
         meanlonsun = 280.4606184 + 36000.77005361 * tut1
         #            meanlonsun = 280.460 + 36000.770 * tut1
         meananomalysun = 357.5277233 + 35999.05034 * tut1
-        meananomalysun = np.fmod(meananomalysun * deg2rad, twopi)
+        meananomalysun = math.fmod(meananomalysun * deg2rad, twopi)
         if (meananomalysun < 0.0):
             meananomalysun = meananomalysun + twopi
         lonecliptic = (meanlonsun + 1.914666471 * math.sin(meananomalysun)
                        + 0.019994643 * math.sin(2.0 * meananomalysun))
-        lonecliptic = np.fmod(lonecliptic * deg2rad, twopi)
+        lonecliptic = math.fmod(lonecliptic * deg2rad, twopi)
         if (lonecliptic < 0.0):
             lonecliptic = lonecliptic + twopi
         obliquity = 23.439291 - 0.0130042 * tut1
@@ -7306,7 +7387,7 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
             gst = (1.75336855923327 + 628.331970688841 * tut1
                    + 6.77071394490334e-06 * tut1 * tut1
                    - 4.50876723431868e-10 * tut1 * tut1 * tut1)
-            gst = np.fmod(gst, twopi)
+            gst = math.fmod(gst, twopi)
             if (gst < 0.0):
                 gst = gst + twopi
             print('lha %11.7f gst %11.7f  \n' % (lha * rad2deg, (gst - twopi) * rad2deg))
@@ -7315,7 +7396,7 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
                   % (gst * rad2deg, uttemp * rad2deg,
                      (twopi + uttemp) * rad2deg))
             uttemp = uttemp * rad2deg / 15.0
-            uttemp = np.fmod(uttemp, 24.0)
+            uttemp = math.fmod(uttemp, 24.0)
             if (uttemp < 0.0):
                 uttemp = uttemp + 24.0
                 error = 'day before'
@@ -7931,7 +8012,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
             uttemp = 9999.99
         #if (uttemp > 24.0) && (uttemp < 9999.0)
 # fprintf('rem #11.7f ', uttemp)
-        #  uttemp = np.fmod(uttemp, 24.0)
+        #  uttemp = math.fmod(uttemp, 24.0)
 # fprintf('#11.7f ', uttemp)
 #end
 #        if (uttemp < 0.0)
@@ -8413,24 +8494,24 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
     # Semi-Parameter
     p = a * (1.0 - ecc ** 2)
     # Eccentric Anomaly:
-    sinE = (np.sin(np.pi/180*nu) * np.sqrt(1 - ecc ** 2)) / (1 + ecc * np.cos(np.pi/180*nu))
-    cosE = (ecc + np.cos(np.pi/180*nu)) / (1 + ecc * np.cos(np.pi/180*nu))
+    sinE = (math.sin(math.pi/180*nu) * math.sqrt(1 - ecc ** 2)) / (1 + ecc * math.cos(math.pi/180*nu))
+    cosE = (ecc + math.cos(math.pi/180*nu)) / (1 + ecc * math.cos(math.pi/180*nu))
     # (5.3)
-    Px = (np.cos(np.pi/180*raan) * np.cos(np.pi/180*argp)
-          - np.sin(np.pi/180*raan) * np.sin(np.pi/180*argp)
-          * np.cos(np.pi/180*incl))
-    Py = (np.cos(np.pi/180*raan) * np.sin(np.pi/180*argp)
-          + np.sin(np.pi/180*raan) * np.cos(np.pi/180*argp)
-          * np.cos(np.pi/180*incl))
-    Pz = np.sin(np.pi/180*raan) * np.sin(np.pi/180*incl)
+    Px = (math.cos(math.pi/180*raan) * math.cos(math.pi/180*argp)
+          - math.sin(math.pi/180*raan) * math.sin(math.pi/180*argp)
+          * math.cos(math.pi/180*incl))
+    Py = (math.cos(math.pi/180*raan) * math.sin(math.pi/180*argp)
+          + math.sin(math.pi/180*raan) * math.cos(math.pi/180*argp)
+          * math.cos(math.pi/180*incl))
+    Pz = math.sin(math.pi/180*raan) * math.sin(math.pi/180*incl)
     P_ = np.array([Px, Py, Pz])
-    Qx = (- np.sin(np.pi/180*raan) * np.cos(np.pi/180*argp)
-          - np.cos(np.pi/180*raan) * np.sin(np.pi/180*argp)
-          * np.cos(np.pi/180*incl))
-    Qy = (- np.sin(np.pi/180*raan) * np.sin(np.pi/180*argp)
-          + np.cos(np.pi/180*raan) * np.cos(np.pi/180*argp)
-          * np.cos(np.pi/180*incl))
-    Qz = np.cos(np.pi/180*raan) * np.sin(np.pi/180*incl)
+    Qx = (- math.sin(math.pi/180*raan) * math.cos(math.pi/180*argp)
+          - math.cos(math.pi/180*raan) * math.sin(math.pi/180*argp)
+          * math.cos(math.pi/180*incl))
+    Qy = (- math.sin(math.pi/180*raan) * math.sin(math.pi/180*argp)
+          + math.cos(math.pi/180*raan) * math.cos(math.pi/180*argp)
+          * math.cos(math.pi/180*incl))
+    Qz = math.cos(math.pi/180*raan) * math.sin(math.pi/180*incl)
     Q_ = np.array([Qx, Qy, Qz])
     # (5.6)
     beta = np.dot(P_, RSun) / np.linalg.norm(RSun)
@@ -8452,27 +8533,27 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
     r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
     nu = np.zeros(4)
     check = np.zeros(4)
-    nu[0] = np.degrees(np.arccos(r1r))
-    nu[1] = np.degrees(np.arccos(r2r))
-    nu[2] = np.degrees(np.arccos(r3r))
-    nu[3] = np.degrees(np.arccos(r4r))
+    nu[0] = np.degrees(math.acos(r1r))
+    nu[1] = np.degrees(math.acos(r2r))
+    nu[2] = np.degrees(math.acos(r3r))
+    nu[3] = np.degrees(math.acos(r4r))
     k = 1
     for incl in range(np.size(nu)):
-        check[incl] = (beta * np.cos(np.pi/180*nu[incl])
-                       + zeta * np.sin(np.pi/180*nu[incl]))
+        check[incl] = (beta * math.cos(math.pi/180*nu[incl])
+                       + zeta * math.sin(math.pi/180*nu[incl]))
         if check[incl] < 0:
             nugood = nu[incl]
             k = k + 1
             print('----------------------------------------------------------------------')
             print('Valid Eccentric Anomaly (beta*cos(nu) + zeta*sin(nu) < 0): ', str(nu[incl]))
-            before = (A0 * np.cos(np.pi/180*nugood - 0.01) ** 4
-                      + A1 * np.cos(np.pi/180*nugood - 0.01) ** 3
-                      + A2 * np.cos(np.pi/180*nugood - 0.01) ** 2
-                      + A3 * np.cos(np.pi/180*nugood - 0.01) + A4)
-            after = (A0 * np.cos(np.pi/180*nugood + 0.01) ** 4
-                     + A1 * np.cos(np.pi/180*nugood + 0.01) ** 3
-                     + A2 * np.cos(np.pi/180*nugood + 0.01) ** 2
-                     + A3 * np.cos(np.pi/180*nugood + 0.01) + A4)
+            before = (A0 * math.cos(math.pi/180*nugood - 0.01) ** 4
+                      + A1 * math.cos(math.pi/180*nugood - 0.01) ** 3
+                      + A2 * math.cos(math.pi/180*nugood - 0.01) ** 2
+                      + A3 * math.cos(math.pi/180*nugood - 0.01) + A4)
+            after = (A0 * math.cos(math.pi/180*nugood + 0.01) ** 4
+                     + A1 * math.cos(math.pi/180*nugood + 0.01) ** 3
+                     + A2 * math.cos(math.pi/180*nugood + 0.01) ** 2
+                     + A3 * math.cos(math.pi/180*nugood + 0.01) + A4)
             if before < 0 and after > 0:
                 print('Entering Shadow for This Eccentric Anomaly')
                 Een = nu[incl]
@@ -8585,7 +8666,7 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
     step2 = 259200.0
     # /* ----------- calculate deep space resonance effects ----------- */
     dndt = 0.0
-    theta = np.fmod(gsto + tc * rptim, twopi)
+    theta = math.fmod(gsto + tc * rptim, twopi)
     em = em + dedt * t
     inclm = inclm + didt * t
     argpm = argpm + domdt * t
@@ -8611,7 +8692,7 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
     ft = 0.0
     if (irez != 0):
         # sgp4fix streamline check
-        if ((atime == 0.0) or (t * atime <= 0.0) or (np.abs(t) < np.abs(atime))):
+        if ((atime == 0.0) or (t * atime <= 0.0) or (abs(t) < abs(atime))):
             atime = 0.0
             xni = no
             xli = xlamo
@@ -8627,44 +8708,44 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
             # /* ------------------- dot terms calculated ------------- */
 # /* ----------- near - synchronous resonance terms ------- */
             if (irez != 2):
-                xndt = (del1 * np.sin(xli - fasx2)
-                        + del2 * np.sin(2.0 * (xli - fasx4))
-                        + del3 * np.sin(3.0 * (xli - fasx6)))
+                xndt = (del1 * math.sin(xli - fasx2)
+                        + del2 * math.sin(2.0 * (xli - fasx4))
+                        + del3 * math.sin(3.0 * (xli - fasx6)))
                 xldot = xni + xfact
-                xnddt = (del1 * np.cos(xli - fasx2)
-                         + 2.0 * del2 * np.cos(2.0 * (xli - fasx4))
-                         + 3.0 * del3 * np.cos(3.0 * (xli - fasx6)))
+                xnddt = (del1 * math.cos(xli - fasx2)
+                         + 2.0 * del2 * math.cos(2.0 * (xli - fasx4))
+                         + 3.0 * del3 * math.cos(3.0 * (xli - fasx6)))
                 xnddt = xnddt * xldot
             else:
                 # /* --------- near - half-day resonance terms -------- */
                 xomi = argpo + argpdot * atime
                 x2omi = xomi + xomi
                 x2li = xli + xli
-                xndt = (d2201 * np.sin(x2omi + xli - g22)
-                        + d2211 * np.sin(xli - g22)
-                        + d3210 * np.sin(xomi + xli - g32)
-                        + d3222 * np.sin(- xomi + xli - g32)
-                        + d4410 * np.sin(x2omi + x2li - g44)
-                        + d4422 * np.sin(x2li - g44)
-                        + d5220 * np.sin(xomi + xli - g52)
-                        + d5232 * np.sin(- xomi + xli - g52)
-                        + d5421 * np.sin(xomi + x2li - g54)
-                        + d5433 * np.sin(- xomi + x2li - g54))
+                xndt = (d2201 * math.sin(x2omi + xli - g22)
+                        + d2211 * math.sin(xli - g22)
+                        + d3210 * math.sin(xomi + xli - g32)
+                        + d3222 * math.sin(- xomi + xli - g32)
+                        + d4410 * math.sin(x2omi + x2li - g44)
+                        + d4422 * math.sin(x2li - g44)
+                        + d5220 * math.sin(xomi + xli - g52)
+                        + d5232 * math.sin(- xomi + xli - g52)
+                        + d5421 * math.sin(xomi + x2li - g54)
+                        + d5433 * math.sin(- xomi + x2li - g54))
                 xldot = xni + xfact
-                xnddt = (d2201 * np.cos(x2omi + xli - g22)
-                         + d2211 * np.cos(xli - g22)
-                         + d3210 * np.cos(xomi + xli - g32)
-                         + d3222 * np.cos(- xomi + xli - g32)
-                         + d5220 * np.cos(xomi + xli - g52)
-                         + d5232 * np.cos(- xomi + xli - g52)
-                         + 2.0 * (d4410 * np.cos(x2omi + x2li - g44)
-                                  + d4422 * np.cos(x2li - g44)
-                                  + d5421 * np.cos(xomi + x2li - g54)
-                                  + d5433 * np.cos(- xomi + x2li - g54)))
+                xnddt = (d2201 * math.cos(x2omi + xli - g22)
+                         + d2211 * math.cos(xli - g22)
+                         + d3210 * math.cos(xomi + xli - g32)
+                         + d3222 * math.cos(- xomi + xli - g32)
+                         + d5220 * math.cos(xomi + xli - g52)
+                         + d5232 * math.cos(- xomi + xli - g52)
+                         + 2.0 * (d4410 * math.cos(x2omi + x2li - g44)
+                                  + d4422 * math.cos(x2li - g44)
+                                  + d5421 * math.cos(xomi + x2li - g54)
+                                  + d5433 * math.cos(- xomi + x2li - g54)))
                 xnddt = xnddt * xldot
             # /* ----------------------- integrator ------------------- */
 # sgp4fix move end checks to end of routine
-            if (np.abs(t - atime) >= stepp):
+            if (abs(t - atime) >= stepp):
                 iret = 0
                 iretn = 381
             else:
@@ -8780,10 +8861,10 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
     if (init == 'y'):
         zm = zmos
 
-    zf = zm + 2.0 * zes * np.sin(zm)
-    sinzf = np.sin(zf)
+    zf = zm + 2.0 * zes * math.sin(zm)
+    sinzf = math.sin(zf)
     f2 = 0.5 * sinzf * sinzf - 0.25
-    f3 = - 0.5 * sinzf * np.cos(zf)
+    f3 = - 0.5 * sinzf * math.cos(zf)
     ses = se2 * f2 + se3 * f3
     sis = si2 * f2 + si3 * f3
     sls = sl2 * f2 + sl3 * f3 + sl4 * sinzf
@@ -8793,10 +8874,10 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
     if (init == 'y'):
         zm = zmol
 
-    zf = zm + 2.0 * zel * np.sin(zm)
-    sinzf = np.sin(zf)
+    zf = zm + 2.0 * zel * math.sin(zm)
+    sinzf = math.sin(zf)
     f2 = 0.5 * sinzf * sinzf - 0.25
-    f3 = - 0.5 * sinzf * np.cos(zf)
+    f3 = - 0.5 * sinzf * math.cos(zf)
     sel = ee2 * f2 + e3 * f3
     sil = xi2 * f2 + xi3 * f3
     sll = xl2 * f2 + xl3 * f3 + xl4 * sinzf
@@ -8816,8 +8897,8 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
         ph = ph - pho
         inclp = inclp + pinc
         ep = ep + pe
-        sinip = np.sin(inclp)
-        cosip = np.cos(inclp)
+        sinip = math.sin(inclp)
+        cosip = math.cos(inclp)
         # /* ----------------- apply periodics directly ------------ */
 #   //  sgp4fix for lyddane choice
 #   //  strn3 used original inclination - this is technically feasible
@@ -8834,17 +8915,17 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
             mp = mp + pl
         else:
             # /* ---- apply periodics with lyddane modification ---- */
-            sinop = np.sin(nodep)
-            cosop = np.cos(nodep)
+            sinop = math.sin(nodep)
+            cosop = math.cos(nodep)
             alfdp = sinip * sinop
             betdp = sinip * cosop
             dalf = ph * cosop + pinc * cosip * sinop
             dbet = - ph * sinop + pinc * cosip * cosop
             alfdp = alfdp + dalf
             betdp = betdp + dbet
-            nodep = np.fmod(nodep, twopi)
+            nodep = math.fmod(nodep, twopi)
             # sgp4fix for afspc written intrinsic functions
-# nodep used without a trigonometric function ahead
+            # nodep used without a trigonometric function ahead
             if ((nodep < 0.0) and (opsmode == 'a')):
                 nodep = nodep + twopi
             xls = mp + argpp + cosip * nodep
@@ -8853,10 +8934,10 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
             xnoh = nodep
             nodep = math.atan2(alfdp, betdp)
             # sgp4fix for afspc written intrinsic functions
-# nodep used without a trigonometric function ahead
+            # nodep used without a trigonometric function ahead
             if ((nodep < 0.0) and (opsmode == 'a')):
                 nodep = nodep + twopi
-            if (np.abs(xnoh - nodep) > np.pi):
+            if (abs(xnoh - nodep) > math.pi):
                 if (nodep < xnoh):
                     nodep = nodep + twopi
                 else:
@@ -8905,12 +8986,12 @@ def sunill(jd=None, lat=None, lon=None, sunaz=None, sunel=None):
 
     lst, gst = stu.lstime(lon, jd)
     lha = lst - srtasc
-    sunel = (np.arcsin(np.sin(sdecl) * np.sin(lat)
-                       + np.cos(sdecl) * np.cos(lat) * np.cos(lha)))
-    sinv = (- np.sin(lha) * np.cos(sdecl)
-            * np.cos(lat) / (np.cos(sunel) * np.cos(lat)))
-    cosv = ((np.sin(sdecl) - np.sin(sunel) * np.sin(lat))
-            / (np.cos(sunel) * np.cos(lat)))
+    sunel = (math.asin(math.sin(sdecl) * math.sin(lat)
+                       + math.cos(sdecl) * math.cos(lat) * math.cos(lha)))
+    sinv = (- math.sin(lha) * math.cos(sdecl)
+            * math.cos(lat) / (math.cos(sunel) * math.cos(lat)))
+    cosv = ((math.sin(sdecl) - math.sin(sunel) * math.sin(lat))
+            / (math.cos(sunel) * math.cos(lat)))
     sunaz = math.atan2(sinv, cosv)
     sunel = sunel / deg2rad
     if (sunel > - 18.01):
@@ -9189,21 +9270,21 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
         elif 1 == (currobsrec['obstype']):
             b[0, 0] = currobsrec['az'] - aznom
             #fix for 0-360...
-            if (np.abs(b[0, 0]) > np.pi):
-                b[0, 0] = b[0, 0] - math.sgn(b[0, 0]) * 2.0 * np.pi
+            if (abs(b[0, 0]) > math.pi):
+                b[0, 0] = b[0, 0] - math.sgn(b[0, 0]) * 2.0 * math.pi
             b[1, 0] = currobsrec['el'] - elnom
         elif 2 == (currobsrec['obstype']):
             b[0, 0] = currobsrec['rng'] - rngnom
             b[1, 0] = currobsrec['az'] - aznom
             # fix for 0-360...
-            if np.abs(b[1, 0]) > np.pi:
-                b[1, 0] = b[1, 0] - np.sign(b[1, 0]) * 2.0 * np.pi
+            if abs(b[1, 0]) > math.pi:
+                b[1, 0] = b[1, 0] - np.sign(b[1, 0]) * 2.0 * math.pi
             b[2, 0] = currobsrec['el'] - elnom
         elif 3 == (currobsrec['obstype']):
             b[0, 0] = currobsrec['trtasc'] - trtascnom
             # fix for 0-360...
-            if (np.abs(b[0, 0]) > np.pi):
-                b[0, 0] = b[0, 0] - np.sign(b[0, 0]) * 2.0 * np.pi
+            if (abs(b[0, 0]) > math.pi):
+                b[0, 0] = b[0, 0] - np.sign(b[0, 0]) * 2.0 * math.pi
             b[1, 0] = currobsrec['tdecl'] - tdeclnom
         #printf("rnom #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f #8.3f \n",
 #              rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
@@ -9374,19 +9455,19 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 
     if np.dot(reci, rsun) < 0.0:
         ang1 = smu.angl(- rsun, reci)
-        sathoriz = smu.mag(reci) * np.cos(ang1)
-        satvert = smu.mag(reci) * np.sin(ang1)
-        x = re / np.sin(angpen)
-        penvert = np.tan(angpen) * (x + sathoriz)
+        sathoriz = smu.mag(reci) * math.cos(ang1)
+        satvert = smu.mag(reci) * math.sin(ang1)
+        x = re / math.sin(angpen)
+        penvert = math.tan(angpen) * (x + sathoriz)
 
         if satvert <= penvert:
             pen = True
-            y = re / np.sin(angumb)
-            umbvert = np.tan(angumb) * (y - sathoriz)
+            y = re / math.sin(angumb)
+            umbvert = math.tan(angumb) * (y - sathoriz)
             if satvert <= umbvert:
                 umb = True
 
-    #print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / np.pi, sathoriz, satvert, penvert, umbvert, umb, pen))
+    #print(' %11.7f  %11.4f  %11.4f  %11.4f  %11.4f U %r  P %r \n' % (ang1 * 180.0 / math.pi, sathoriz, satvert, penvert, umbvert, umb, pen))
 
     return pen, umb
 
@@ -9513,8 +9594,8 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
                 magrxr = smu.mag(rxr)
                 magr = smu.mag(reci1)
                 magrsun = smu.mag(rsun)
-                zet = np.arcsin(magrxr / (magrsun * magr))
-                dist = smu.mag(reci1) * np.cos(zet - halfpi)
+                zet = math.asin(magrxr / (magrsun * magr))
+                dist = smu.mag(reci1) * math.cos(zet - halfpi)
                 # if i == 106:
                 #     print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg, dist))
                 if dist > re:
