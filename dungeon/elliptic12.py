@@ -44,7 +44,7 @@ def elliptic12(u, m, tol = None):
     if tol == None:
         tol = sys.float_info.epsilon
 
-    if not (np.isreal(u)).all() or not (np.isreal(m)).all():
+    if not np.isreal(u).all() or not np.isreal(m).all():
         raise Exception('Input arguments must be real. Use ELLIPTIC12i for complex arguments.')
 
     if len(m) == 1:
@@ -67,8 +67,9 @@ def elliptic12(u, m, tol = None):
         raise Exception('M must be in the range 0 <= M <= 1.')
 
     # cdav change for small eccentricities
-    # if np.abs(m) < 1e-07:
-    #     m = 1e-07
+    # for i in range(len(m)):
+    #     if abs(m[i]) < 1e-07:
+    #         m[i] = 1e-07
 
     I = np.nonzero(np.logical_and(m != 1, m != 0))[0]
     if len(I):
