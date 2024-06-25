@@ -5448,7 +5448,7 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
              ttt: float, jdut1: float, lod: float, xp: float, yp: float,
              eqeterms: int, ddpsi: float, ddeps: float):
     """this function transforms a vector from the earth fixed (itrf) frame, to
-    the mean of date (mod) frame.
+    the true of date (tod) frame.
 
     Parameters
     ----------
@@ -5510,8 +5510,8 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
              ttt: float, jdut1: float, lod: float, xp: float, yp: float,
              eqeterms: int, ddpsi: float, ddeps: float):
-    """this function transforms a vector from the earth fixed (itrf) frame, to
-    the mean of date (mod) frame.
+    """this function transforms a vector from the true of date (tod) frame, to
+    the earth fixed (itrf) frame.
 
     Parameters
     ----------
@@ -5547,6 +5547,7 @@ def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
     aecef: ndarray
         acceleration vector ecef: km/s2
     """
+
     # ---- find matrices - note nut is only needed for st argument inputs
     deltapsi, _, meaneps, omega, _ = obu.nutation(ttt, ddpsi, ddeps)
 
@@ -7174,7 +7175,7 @@ def mod2eci(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray, ttt: float):
     veci = prec@vmod
     aeci = prec@amod
 
-    return reci.T, veci.T, aeci.T
+    return reci, veci, aeci
 
 
 # ----------------------------------------------------------------------------

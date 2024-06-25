@@ -26,6 +26,7 @@
 # ------------------------------------------------------------------------------
 
 import numpy as np
+import math
 from space_constants import *
 
 # def repeatgt(r = None):
@@ -77,7 +78,7 @@ def repeatgt(rev2rep,day2rep,ecc,incl):
 
     for i in range(10):
         p = a * (1 - ecc**2)
-        raandot = -1.5 * j2 * (re/p)**2 *cos(incl)
+        raandot = -1.5 * j2 * (re/p)**2 * math.cos(incl)
         lonshiftperiod = (2*np.pi*raandot) / n
         londelta = lonshiftrev + lonshiftperiod
         # Another 2pi? yes or no?
