@@ -2,9 +2,9 @@
 #
 #                           function repeatgt
 #
-#  these subroutine calculates repeat ground tracks
+#  This subroutine calculates repeat ground tracks.
 #
-#  author        : david vallado                  719-573-2600   10 feb 2006
+#  author        : david vallado                  719-573-2600   2013
 #
 #  revisions
 #
@@ -25,10 +25,29 @@
 # [a] = repeatgt ( b );
 # ------------------------------------------------------------------------------
 
-import numpy as np
+from space_constants import mu, re, j2
 import math
-from space_constants import *
 
+def repeatgt(rev2rep, day2rep, ecc, incl):
+    revpday = rev2rep/day2rep
+    n = revpday * 2 * math.pi / 86400.0
+    a = (mu * (1 / n) ** 2) ** 0.33333
+    lonshiftrev = (2 * math.pi * day2rep)/rev2rep
+
+    for i in range(10):
+        p = a * (1 - ecc**2)
+        raandot = -1.5 * j2 * (re / p)**2 * math.cos(incl)
+        lonshiftperiod = (2 * math.pi*raandot) / n
+        londelta = lonshiftrev + lonshiftperiod
+        # Another 2pi? yes or no?
+        n = (4 * math.pi * math.pi / 86400.0) / londelta
+        #n = (2 * math.pi / 86400.0) / londelta
+        a = (mu * (1 / n) ** 2) ** 0.33333
+
+    return a
+
+
+# Old Code
 # def repeatgt(r = None):
 
 #     a = 6400.0
@@ -69,22 +88,3 @@ from space_constants import *
 
 
 #     return latgd
-
-def repeatgt(rev2rep,day2rep,ecc,incl):
-    revpday = rev2rep/day2rep
-    n = revpday * 2 * np.pi / 86400.0
-    a = (mu * (1 / n) ** 2) ** 0.33333
-    lonshiftrev = (2 * np.pi * day2rep)/rev2rep
-
-    for i in range(10):
-        p = a * (1 - ecc**2)
-        raandot = -1.5 * j2 * (re/p)**2 * math.cos(incl)
-        lonshiftperiod = (2*np.pi*raandot) / n
-        londelta = lonshiftrev + lonshiftperiod
-        # Another 2pi? yes or no?
-        #n = (4 * np.pi * np.pi / 86400.0) / londelta
-        n = (2 * np.pi / 86400.0) / londelta
-        a = (mu * (1 / n) ** 2) ** 0.33333
-
-    return a
-
