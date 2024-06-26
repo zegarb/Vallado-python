@@ -1,36 +1,50 @@
 from space_constants import *
 import spacemath_utils as smu
 
+
+
 class Planet:
     def __init__(self):
-        self.abbr = None
+        self.abbr = None #Planet abbrevation
 
+    # Approximates semi-major axis given number of centuries (ttdb) from year 2000 using
+    # planetary ephemerides listed in appendix D of Vallado (2013, pgs 1046-1048)
     def approxcalc_a(self, ttdb):
         print("Approximating semi-major axis")
         return None
 
+    # Approximates eccentricity given number of centuries (ttdb) from year 2000 using
+    # planetary ephemerides listed in appendix D of Vallado (2013, pgs 1046-1048)
     def approxcalc_ecc(self, ttdb):
         print("Approximating eccentricity")
         return None
 
+    # Approximates inclination given number of centuries (ttdb) from year 2000 using
+    # planetary ephemerides listed in appendix D of Vallado (2013, pgs 1046-1048)
     def approxcalc_incl(self, ttdb):
         print("Approximating inclination")
         return None
 
+    # Approximates omega (right ascension) given number of centuries (ttdb) from year 2000 using
+    # planetary ephemerides listed in appendix D of Vallado (2013, pgs 1046-1048)
     def approxcalc_omega(self, ttdb):
         print("Approximating right ascension of ascending node")
         return None
 
+    # Approximates longitude of periapsis given number of centuries (ttdb) from year 2000 using
+    # planetary ephemerides listed in appendix D of Vallado (2013, pgs 1046-1048)
     def approxcalc_argp1(self, ttdb):
         print("Approximating longitude of periapsis")
         return None
 
+    # Approximates mean longitude given number of centuries (ttdb) from year 2000 using
+    # planetary ephemerides listed in appendix D of Vallado (2013, pgs 1046-1048)
     def approxcalc_lonmean(self, ttdb):
         print("Approximating mean longitude")
         return None
 
-    # To approximate heliocentric orbital elements for the mean equator
-    # using IAU-76/FK5 (J-2000)
+    # To approximate heliocentric orbital elements (coes) referenced to the
+    # mean equator and mean equinox of J2000 (IAU-76/FK5)
     def approxcalc_coe(self, ttdb):
         if ttdb < -2.0 or ttdb > 0.5:
             print("Error: Only accurate between 1800 and 2050")
@@ -50,9 +64,70 @@ class Planet:
 
             return p, ecc, incl, omega, argp, nu
 
+class Mercury(Planet):
+    def __init__(self):
+        self.abbr = "me"
+
+
+    # All approx calculations: From Meeus (1991:202–204), the ecliptic orbital
+    # elements of the planets, referenced to the mean equator and mean equinox
+    # # of J2000, are as follows.
+
+    def approxcalc_a(self, ttdb):
+        if ttdb < -2.0 or ttdb > 0.5:
+            print("Error: Only accurate between 1800 and 2050")
+            return None
+        else:
+            return 0.387098310 * au
+
+    def approxcalc_ecc(self, ttdb):
+        if ttdb < -2.0 or ttdb > 0.5:
+            print("Error: Only accurate between 1800 and 2050")
+            return None
+        else:
+            return 0.20563175 + 2.0406e-05 * ttdb - 2.84e-08 * ttdb**2 \
+                     - 1.7e-10 * ttdb**3
+
+    def approxcalc_incl(self, ttdb):
+        if ttdb < -2.0 or ttdb > 0.5:
+            print("Error: Only accurate between 1800 and 2050")
+            return None
+        else:
+            return (7.004986 - 0.0059516 * ttdb + 8.1e-07 * ttdb**2
+            + 4.1e-08 * ttdb**3) * deg2rad
+
+    def approxcalc_omega(self, ttdb):
+        if ttdb < -2.0 or ttdb > 0.5:
+            print("Error: Only accurate between 1800 and 2050")
+            return None
+        else:
+            return (48.330893 - 0.1254229 * ttdb - 8.833e-05 * ttdb**2
+            - 1.96e-07 * ttdb**3) * deg2rad
+
+    def approxcalc_argp1(self, ttdb):
+        if ttdb < -2.0 or ttdb > 0.5:
+            print("Error: Only accurate between 1800 and 2050")
+            return None
+        else:
+            return (77.456119 + 0.1588643 * ttdb - 1.343e-05 * ttdb**2
+            + 3.9e-08 * ttdb**3) * deg2rad
+
+    def approxcalc_lonmean(self, ttdb):
+        if ttdb < -2.0 or ttdb > 0.5:
+            print("Error: Only accurate between 1800 and 2050")
+            return None
+        else:
+            return (252.250906 + 149472.674635 * ttdb - 5.35e-06 * ttdb**2
+            + 2.0e-09 * ttdb**3) * deg2rad
+
 class Jupiter(Planet):
     def __init__(self):
         self.abbr = "j"
+
+
+    # All approx calculations: From Meeus (1991:202–204), the ecliptic orbital
+    # elements of the planets, referenced to the mean equator and mean equinox
+    # # of J2000, are as follows.
 
     def approxcalc_a(self, ttdb):
         if ttdb < -2.0 or ttdb > 0.5:
@@ -66,68 +141,37 @@ class Jupiter(Planet):
             print("Error: Only accurate between 1800 and 2050")
             return None
         else:
-            return 0.04849485 + 0.000163244 * ttdb - 4.719e-07 * ttdb ** 2 \
-            - 1.97e-9 * ttdb ** 3
+            return 0.04849485 + 0.000163244 * ttdb - 4.719e-07 * ttdb**2 \
+            - 1.97e-9 * ttdb**3
 
     def approxcalc_incl(self, ttdb):
         if ttdb < -2.0 or ttdb > 0.5:
             print("Error: Only accurate between 1800 and 2050")
             return None
         else:
-            return (1.30327 - 0.0019872 * ttdb + 3.318e-05 * ttdb ** 2
-            + 9.2e-08 * ttdb ** 3) * deg2rad
+            return (1.30327 - 0.0019872 * ttdb + 3.318e-05 * ttdb**2
+            + 9.2e-08 * ttdb**3) * deg2rad
 
     def approxcalc_omega(self, ttdb):
         if ttdb < -2.0 or ttdb > 0.5:
             print("Error: Only accurate between 1800 and 2050")
             return None
         else:
-            return (100.464441 + 0.1766828 * ttdb + 0.000903877 * ttdb ** 2
-            - 7.032e-06 * ttdb ** 3) * deg2rad
+            return (100.464441 + 0.1766828 * ttdb + 0.000903877 * ttdb**2
+            - 7.032e-06 * ttdb**3) * deg2rad
 
     def approxcalc_argp1(self, ttdb):
         if ttdb < -2.0 or ttdb > 0.5:
             print("Error: Only accurate between 1800 and 2050")
             return None
         else:
-            return (14.331309 + 0.2155525 * ttdb + 0.00072252 * ttdb ** 2
-            - 4.59e-06 * ttdb ** 3) * deg2rad
+            return (14.331309 + 0.2155525 * ttdb + 0.00072252 * ttdb**2
+            - 4.59e-06 * ttdb**3) * deg2rad
 
     def approxcalc_lonmean(self, ttdb):
         if ttdb < -2.0 or ttdb > 0.5:
             print("Error: Only accurate between 1800 and 2050")
             return None
         else:
-            return (34.351484 + 3034.9056746 * ttdb - 8.501e-05 * ttdb ** 2
-            + 4e-09 * ttdb ** 3) * deg2rad
-
-
-# Finds semi-major axis
-# Only accurate between 1800-2050 AD
-
-def approxcalc_a(self, ttdb):
-
-    print(ttdb)
-
-    if self.abbr == 'me':
-        return 0.387098310 * au
-    elif self.abbr == 'v':
-        return 0.723329820 * au
-    elif self.abbr == 'e':
-        return 1.000001018 * au
-    elif self.abbr == 'ma':
-        return 1.523679342 * au
-    elif self.abbr == 'j':
-        return (5.202603191 + 0.0000001913 * ttdb) * au
-    elif self.abbr == 's':
-        return (9.554909596 - 0.0000021389 * ttdb) * au
-    elif self.abbr == 'u':
-        return (19.218466062 - 0.0000000372 * ttdb + \
-                0.00000000098 * ttdb ** 2) * au
-    elif self.abbr == 'n':
-        return (30.110386869 - 0.0000001663 * ttdb + \
-                0.00000000069 * ttdb ** 2) * au
-    else:
-        print("planet unknown")
-        return None
-
+            return (34.351484 + 3034.9056746 * ttdb - 8.501e-05 * ttdb**2
+            + 4e-09 * ttdb**3) * deg2rad

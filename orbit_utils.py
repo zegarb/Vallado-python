@@ -9886,6 +9886,8 @@ def planetrv(abbr, jd):
 
     if abbr  == 'j':
         planet = planets.Jupiter()
+    elif abbr == 'me':
+        planet = planets.Mercury()
     else:
         print("Error: Invalid planet type")
         return None

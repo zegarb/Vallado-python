@@ -80,6 +80,7 @@ print('v  %11.6f %11.6f %11.6f  AU/day \n' % (v[0], v[1], v[2]))
 print('coes %11.4f %11.4f %11.7f %11.5f %11.5f ' % (p / au, a, ecc, incl * rad2deg,
                                                     omega * rad2deg))
 print('%11.5f %11.5f %11.5f\n' % (argp * rad2deg, nu * rad2deg, mean * rad2deg))
+# Less precise eps (why values slightly differ from book to function)
 eps = 23.440021 * deg2rad
 reci = smu.rot1(r, - eps)
 veci = smu.rot1(v, - eps)
@@ -93,7 +94,18 @@ print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci[0] * au / 86400,
                                                veci[2] * au / 86400))
 #mag(veci * au / 86400)
 
-#Modularized the code above and made function for all planets
+#Modularized the code above and made classes/function for planets
+
+print("Function Test: Mercury\n")
+reci2, veci2 = obu.planetrv('me', jdut1 + jdut1frac)
+print('reci  %11.6f %11.6f %11.6f  AU \n' % (reci2[0], reci2[1], reci2[2]))
+print('veci  %11.6f %11.6f %11.6f  AU/day \n' % (veci2[0], veci2[1], veci2[2]))
+# now in km and km/s
+print('reci  %11.1f %11.1f %11.1f  km \n' % (reci2[0] * au, reci2[1] * au,
+                                             reci2[2] * au))
+print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci2[0] * au / 86400,
+                                               veci2[1] * au / 86400,
+                                               veci2[2] * au / 86400))
 
 print("Function Test: Jupiter\n")
 reci2, veci2 = obu.planetrv('j', jdut1 + jdut1frac)
