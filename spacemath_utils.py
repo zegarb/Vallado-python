@@ -2658,6 +2658,9 @@ def rot3 (vec, xval):
 # mag = (vec)
 # ----------------------------------------------------------------------------- }
 
+# Note: numpy has a "norm" function to take the magnitude of a vector
+# mag = np.linalg.norm(x)
+
 def mag(vec: np.ndarray):
     """this function finds the magnitude of a vector. the tolerance is set to
     0.000001, thus the 1.0e-12 for the squared test of underflows.
