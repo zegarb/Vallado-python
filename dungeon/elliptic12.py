@@ -71,7 +71,7 @@ def elliptic12(u, m, tol = None):
     #     if abs(m[i]) < 1e-07:
     #         m[i] = 1e-07
 
-    I = np.nonzero(np.logical_and(m != 1, m != 0))[0]
+    I = np.nonzero((m != 1) & (m != 0))[0]
     if len(I):
         # mu, J, K = unique(m(I))
         mu, K = np.unique(m[I], False, True)
@@ -99,8 +99,8 @@ def elliptic12(u, m, tol = None):
             a[i, :] = 0.5 * (a[i - 1, :] + b[i - 1, :])
             b[i, :] = np.sqrt(a[i - 1, :] * b[i - 1, :])
             c[i, :] = 0.5 * (a[i - 1, :] - b[i - 1, :])
-            in_ = np.nonzero(np.logical_and((abs(c[i, :]) <= tol),
-                                            (abs(c[i - 1, :]) > tol)))[0]
+            in_ = np.nonzero((abs(c[i, :]) <= tol)
+                             & (abs(c[i - 1, :]) > tol))[0]
             if len(in_):
                 n[in_] = i
 
