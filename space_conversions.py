@@ -2416,63 +2416,80 @@ def rv2adbar(reci: np.ndarray, veci: np.ndarray):
 #  printcov(covin, covtype, cu, anom)
 # ----------------------------------------------------------------------------
 
-def printcov(covin=None, covtype=None, cu=None, anom=None):
+def printcov(covin: np.ndarray, covtype: str, cu: str, anom: str):
+    """this function prints a covariance matrix.
+
+    Parameters
+    ----------
+    covin : ndarray
+        6x6 input covariance matrix
+    covtype : str
+        type of covariance: 'cl', 'ct', 'fl', 'sp', 'eq'
+    cu : str
+        covariance units: 't' or 'm'
+    anom : str
+        anomaly: 'mean' or 'true' or 'tau'
+    """
     print("in printcov, anom is ", anom)
-    if (str(anom) == str('truea')) or (str(anom) == str('meana')):
+    if (anom == 'truea') or (anom == 'meana'):
         semi = 'a m  '
-    else:
-        if (str(anom) == str('truen')) or (str(anom) == str('meann')):
-            semi = 'n rad'
+    elif (anom == 'truen') or (anom == 'meann'):
+        semi = 'n rad'
 
-    if str(covtype) == str('ct'):
-        print('cartesian covariance \n' % ())
-        print('        x  m            y m             z  m           xdot  m/s       ydot  m/s       zdot  m/s  \n' % ())
+    if covtype == 'ct':
+        print('cartesian covariance \n')
+        print('        x  m            y m             z  m           '
+              'xdot  m/s       ydot  m/s       zdot  m/s  \n')
 
-    if str(covtype) == str('cl'):
-        print('classical covariance \n' % ())
+    if covtype == 'cl':
+        print('classical covariance \n')
         if (cu == 'm'):
-            print('          %s          ecc           incl rad      raan rad         argp rad        ' % (semi))
-            if (str(anom) == str('meana')) or (str(anom) == str('meann')):
-                print(' m rad \n' % ())
-            else:
-                if (str(anom) == str('truea')) or (str(anom) == str('truen')):
-                    print(' nu rad \n' % ())
+            print('          %s          ecc           incl rad      '
+                  'raan rad         argp rad        ' % (semi))
+            if (anom == 'meana') or (anom == 'meann'):
+                print(' m rad \n')
+            elif (anom == 'truea') or (anom == 'truen'):
+                print(' nu rad \n')
         else:
-            print('          %s           ecc           incl deg      raan deg         argp deg        ' % (semi))
-            if (str(anom) == str('meana')) or (str(anom) == str('meann')):
-                print(' m deg \n' % ())
-            else:
-                if (str(anom) == str('truea')) or (str(anom) == str('truen')):
-                    print(' nu deg \n' % ())
+            print('          %s           ecc           incl deg      '
+                  'raan deg         argp deg        ' % (semi))
+            if (anom == 'meana') or (anom == 'meann'):
+                print(' m deg \n')
+            elif (anom == 'truea') or (anom == 'truen'):
+                print(' nu deg \n')
 
-    if str(covtype) == str('eq'):
-        print('equinoctial covariance \n' % ())
+    if covtype == 'eq':
+        print('equinoctial covariance \n')
         #            if (cu == 'm')
-        if (str(anom) == str('meana')) or (str(anom) == str('meann')):
-            print('         %5s           af              ag           chi             psi         meanlonM rad\n' % (semi))
-        else:
-            if (str(anom) == str('truea')) or (str(anom) == str('truen')):
-                print('         %5s           af              ag           chi             psi         meanlonNu rad\n' % (semi))
+        if (anom == 'meana') or (anom == 'meann'):
+            print('         %5s           af              ag           '
+                  'chi             psi         meanlonM rad\n' % (semi))
+        elif (anom == 'truea') or (anom == 'truen'):
+            print('         %5s           af              ag           '
+                  'chi             psi         meanlonNu rad\n' % (semi))
 
-    if str(covtype) == str('fl'):
-        print('flight covariance \n' % ())
+    if covtype == 'fl':
+        print('flight covariance \n')
         if (cu == 'm'):
-            print('       lon  rad      latgc rad        fpa rad         az rad           r  m           v  m/s  \n' % ())
+            print('       lon  rad      latgc rad        fpa rad         '
+                  'az rad           r  m           v  m/s  \n')
         else:
-            print('       lon  deg      latgc deg        fpa deg         az deg           r  m           v  m/s  \n' % ())
+            print('       lon  deg      latgc deg        fpa deg         '
+                  'az deg           r  m           v  m/s  \n')
 
-    if str(covtype) == str('sp'):
-        print('spherical covariance \n' % ())
+    if covtype == 'sp':
+        print('spherical covariance \n')
         if (cu == 'm'):
-            print('      rtasc rad       decl rad        fpa rad         az rad           r  m           v  m/s  \n' % ())
+            print('      rtasc rad       decl rad        fpa rad         '
+                  'az rad           r  m           v  m/s  \n')
         else:
-            print('      rtasc deg       decl deg        fpa deg         az deg           r  m           v  m/s  \n' % ())
+            print('      rtasc deg       decl deg        fpa deg         '
+                  'az deg           r  m           v  m/s  \n')
 
     print("covin:")
     print(covin)
     #        print('#16e#16e#16e#16e#16e#16e\n', covin')
-    print('covin transpose\n', (np.transpose(covin)))
-
+    print('covin transpose\n', (covin.T))
 
 # ----------------------------------------------------------------------------
 #
@@ -2516,10 +2533,10 @@ def printcov(covin=None, covtype=None, cu=None, anom=None):
 #                                           ttt, jdut1, lod, xp, yp, terms, printopt, anom)
 # ----------------------------------------------------------------------------
 
-def setcov(reci=None, veci=None, year=None, mon=None, day=None,
-           hr=None, min=None, sec=None, dut1=None, dat=None, ttt=None,
-           jdut1=None, lod=None, xp=None, yp=None, terms=None,
-           printopt=None, anom=None, anom1=None, ddpsi=None, ddeps=None):
+def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
+           jdut1: float, lod: float, xp: float, yp: float, terms: int,
+           printopt: str, anom: str, anom1: str, ddpsi: float, ddeps: float):
+
     fr = 1.0
     cartstate = np.array([[reci[0]], [reci[1]], [reci[2]],
                           [veci[0]], [veci[1]], [veci[2]]])
@@ -2528,27 +2545,26 @@ def setcov(reci=None, veci=None, year=None, mon=None, day=None,
     print(veci)
 
     # -------- convert to a classical orbit state
-    p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = rv2coe(reci, veci)
+    p, a, ecc, incl, omega, argp, nu, m, _, _, _ = rv2coe(reci, veci)
     classstate = np.zeros(6)
     classstate[0] = a * 1000
     classstate[1] = ecc
     classstate[2] = incl
     classstate[3] = omega
     classstate[4] = argp
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         classstate[5] = m
-    else:
-        if (str(anom) == str('truea')) or (str(anom) == str('truen')):
-            classstate[5] = nu
+    elif (anom == 'truea') or (anom == 'truen'):
+        classstate[5] = nu
 
     # -------- convert to a flight orbit state
-    lon, latgc, rtasc, decl, fpa, az, magr, magv = rv2flt(reci, veci, ttt, jdut1, lod,
-                                                   xp, yp, terms, ddpsi, ddeps)
+    lon, latgc, rtasc, decl, fpa, az, magr, magv = \
+        rv2flt(reci, veci, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
     flstate = np.zeros(6)
-    if str(anom1) == str('radec'):
+    if anom1 == 'radec':
         flstate[0] = rtasc
         flstate[1] = decl
-    elif str(anom1) == str('latlon'):
+    elif anom1 == 'latlon':
         flstate[0] = lon
         flstate[1] = latgc
 
@@ -2558,64 +2574,62 @@ def setcov(reci=None, veci=None, year=None, mon=None, day=None,
 
     flstate[5] = magv * 1000
     # test position and velocity going back
-    avec = np.array([[0.0], [0.0], [0.0]])
-    recef, vecef, aecef = eci2ecef(reci, veci, avec, ttt, jdut1,
-                                 lod, xp, yp, terms, ddpsi, ddeps)
-    vx = magv * (- np.cos(lon) * np.sin(latgc) * np.cos(az) * np.cos(fpa)
-                 - np.sin(lon) * np.sin(az) * np.cos(fpa)
-                 + np.cos(lon) * np.cos(latgc) * np.sin(fpa))
-    vy = magv * (- np.sin(lon) * np.sin(latgc) * np.cos(az) * np.cos(fpa)
-                 + np.cos(lon) * np.sin(az) * np.cos(fpa)
-                 + np.sin(lon) * np.cos(latgc) * np.sin(fpa))
-    vz = magv * (np.sin(latgc) * np.sin(fpa)
-                 + np.cos(latgc) * np.cos(az) * np.cos(fpa))
-    # correct:
-    ve1 = magv * (- np.cos(rtasc) * np.sin(decl) * np.cos(az) * np.cos(fpa)
-                  - np.sin(rtasc) * np.sin(az) * np.cos(fpa)
-                  + np.cos(rtasc) * np.cos(decl) * np.sin(fpa))
+    # avec = np.array([[0.0], [0.0], [0.0]])
+    # recef, vecef, aecef = eci2ecef(reci, veci, avec, ttt, jdut1,
+    #                              lod, xp, yp, terms, ddpsi, ddeps)
 
-    ve2 = magv * (- np.sin(rtasc) * np.sin(decl) * np.cos(az) * np.cos(fpa)
-                  + np.cos(rtasc) * np.sin(az) * np.cos(fpa)
-                  + np.sin(rtasc) * np.cos(decl) * np.sin(fpa))
-    ve3 = magv * (np.sin(decl) * np.sin(fpa)
-                  + np.cos(decl) * np.cos(az) * np.cos(fpa))
+    # sinlon, coslon, sinlat, coslat,
+    sinaz, cosaz, sinfpa, cosfpa, sinrta, cosrta, sindec, cosdec = \
+        smu.getsincos(az, fpa, rtasc, decl)
+
+    # vx = magv * (-coslon * sinlat * cosaz * cosfpa - sinlon * sinaz * cosfpa
+    #              + coslon * coslat * sinfpa)
+    # vy = magv * (-sinlon * sinlat * cosaz * cosfpa + coslon * sinaz * cosfpa
+    #              + sinlon * coslat * sinfpa)
+    # vz = magv * (sinlat * sinfpa + coslat * cosaz * cosfpa)
+
+    # correct:
+    ve1 = magv * (-cosrta * sindec * cosaz * cosfpa - sinrta * sinaz * cosfpa
+                  + cosrta * cosdec * sinfpa)
+    ve2 = magv * (-sinrta * sindec * cosaz * cosfpa + cosrta * sinaz * cosfpa
+                  + sinrta * cosdec * sinfpa)
+    ve3 = magv * (sindec * sinfpa + cosdec * cosaz * cosfpa)
+
     # -------- convert to an equinoctial orbit state
     a, n, af, ag, chi, psi, meanlonM, meanlonNu, fr = rv2eq(reci, veci)
     eqstate = np.zeros(6)
-    if (str(anom) == str('meana')) or (str(anom) == str('truea')):
+    if (anom == 'meana') or (anom == 'truea'):
         eqstate[0] = a
-    else:
-        if (str(anom) == str('meann')) or (str(anom) == str('truen')):
-            eqstate[0] = n
+    elif (anom == 'meann') or (anom == 'truen'):
+        eqstate[0] = n
 
     eqstate[1] = af
     eqstate[2] = ag
     eqstate[3] = chi
     eqstate[4] = psi
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         eqstate[5] = meanlonM
-    else:
-        if (str(anom) == str('truea')) or (str(anom) == str('truen')):
-            eqstate[5] = meanlonNu
+    elif (anom == 'truea') or (anom == 'truen'):
+        eqstate[5] = meanlonNu
 
     if printopt == 'y':
         # --------------------- write out input data --------------------------
-# test velocity prints
-        vtecef = np.array([vx, vy, vz])
+        # test velocity prints
+        # vtecef = np.array([vx, vy, vz])
         vteci = np.array([ve1, ve2, ve3])
 
         if smu.mag(vteci - np.transpose(veci)) > 0.01:
             print('ERROR in test of vel in setcov %11.7f \n'
-                  % (smu.mag(vteci - np.transpose(veci))))
+                  % (smu.mag(vteci - veci.T)))
         print('input data \n' % ())
         print(' re %8.6f km  \n' % (re))
         print(' mu %14.8f km3/s2  \n' % (mu))
-        print('year %5i ' % (year))
-        print('mon %4i ' % (mon))
-        print('day %3i ' % (day))
-        print('hr %3i:%2i:%8.6f\n' % (hr, min, sec))
-        print('dut1 %8.6f s' % (dut1))
-        print(' dat %3i s' % (dat))
+        # print('year %5i ' % (year))
+        # print('mon %4i ' % (mon))
+        # print('day %3i ' % (day))
+        # print('hr %3i:%2i:%8.6f\n' % (hr, min, sec))
+        # print('dut1 %8.6f s' % (dut1))
+        # print(' dat %3i s' % (dat))
         print(' xp %8.6f "' % (xp))
         print(' yp %8.6f "' % (yp))
         print(' lod %8.6f s\n' % (lod))
@@ -2623,24 +2637,26 @@ def setcov(reci=None, veci=None, year=None, mon=None, day=None,
         print(reci)
         print('v :')
         print(veci)
-        print('          p km       a km      ecc      incl deg    ' % ())
-        print(' raan deg     argp deg      nu deg      m deg \n' % ())
+        print('          p km       a km      ecc      incl deg    ')
+        print(' raan deg     argp deg      nu deg      m deg \n')
         print('coes %11.4f %11.4f %11.7f %11.5f %11.5f'
               % (p, a, ecc, incl * rad2deg, omega * rad2deg))
-        print('%11.5f %11.5f %11.5f\n' % (argp * rad2deg, nu * rad2deg, m * rad2deg))
-        print('          a (km)       af           ag' % ())
-        print('           chi        psi            meanlonM     meanLonNu   fr\n' % ())
+        print('%11.5f %11.5f %11.5f\n'
+              % (argp * rad2deg, nu * rad2deg, m * rad2deg))
+        print('          a (km)       af           ag')
+        print('           chi        psi            meanlonM     '
+              'meanLonNu   fr\n')
         print('eq   %14.7f %14.7f %14.7f %15.7f %14.7f %14.7f %14.7f %2.0f\n'
-              % (a, af, ag, chi, psi, meanlonM * rad2deg, meanlonNu * rad2deg, fr))
-        print('       lon deg       latgc deg     rtasc deg      decl deg      fpa deg       ' % ())
-        print(' az deg       magr km      magv km/s\n' % ())
+              % (a, af, ag, chi, psi, meanlonM * rad2deg, meanlonNu * rad2deg,
+                 fr))
+        print('       lon deg       latgc deg     rtasc deg      '
+              'decl deg      fpa deg       ')
+        print(' az deg       magr km      magv km/s\n')
         print('flt  %14.7f%14.7f%14.7f%14.7f%14.7f%15.7f%14.7f%14.7f\n'
               % (lon * rad2deg, latgc * rad2deg, rtasc * rad2deg, decl
                  * rad2deg, fpa * rad2deg, az * rad2deg, magr, magv))
 
     return cartstate, classstate, flstate, eqstate, fr
-
-
 
 # ----------------------------------------------------------------------------
 #
@@ -2688,11 +2704,11 @@ def setcov(reci=None, veci=None, year=None, mon=None, day=None,
 #   [cartcov, tm] = covcl2ct(classcov, classstate, anom)
 # ----------------------------------------------------------------------------
 
-def covcl2ctnew(classcov=None, classstate=None, anom=None):
+def covcl2ctnew(classcov, classstate, anom):
     # -------- define gravitational constant
 
     # --------- determine which set of variables is in use ---------
-# ---- parse the input vector into the classical elements -----
+    # ---- parse the input vector into the classical elements -----
     a = classstate[0]
 
     n = np.sqrt(mum / a ** 3)
@@ -2701,45 +2717,49 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     raan = classstate[3]
     argp = classstate[4]
     # -------- if mean anomaly is used, convert to true anomaly
-# -------- eccentric anomaly (e) is needed for both
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    # -------- eccentric anomaly (e) is needed for both
+    if (anom == 'meana') or (anom == 'meann'):
         mean = classstate[5]
         e, nu = smu.newtonm(ecc, mean)
-    elif (str(anom) == str('truea')) or (str(anom) == str('truen')):
+    elif (anom == 'truea') or (anom == 'truen'):
         # note that mean is not used in the partials, but nu is!
         nu = classstate[5]
         e, mean = smu.newtonnu(ecc, nu)
 
     p = a * (1 - ecc ** 2) / 1000
 
-    r, v = coe2rv(p, ecc, incl, raan, argp, nu, 0.0, 0.0, 0.0)
-    rx = r[0] * 1000
-    ry = r[1] * 1000
-    rz = r[2] * 1000
-    vx = v[0] * 1000
-    vy = v[1] * 1000
-    vz = v[2] * 1000
+    # r, v = coe2rv(p, ecc, incl, raan, argp, nu, 0.0, 0.0, 0.0)
+    # rx = r[0] * 1000
+    # ry = r[1] * 1000
+    # rz = r[2] * 1000
+    # vx = v[0] * 1000
+    # vy = v[1] * 1000
+    # vz = v[2] * 1000
+
     # assign trig values for efficiency
-    sin_inc = np.sin(incl)
-    cos_inc = np.cos(incl)
-    sin_raan = np.sin(raan)
-    cos_raan = np.cos(raan)
-    sin_w = np.sin(argp)
-    cos_w = np.cos(argp)
-    sin_nu = np.sin(nu)
-    cos_nu = np.cos(nu)
+    # sin_inc = np.sin(incl)
+    # cos_inc = np.cos(incl)
+    # sin_raan = np.sin(raan)
+    # cos_raan = np.cos(raan)
+    # sin_w = np.sin(argp)
+    # cos_w = np.cos(argp)
+    # sin_nu = np.sin(nu)
+    # cos_nu = np.cos(nu)
+    sin_inc, cos_inc, sin_raan, cos_raan, sin_w, cos_w, sin_nu, cos_nu = \
+        smu.getsincos(incl, raan, argp, nu)
+
     # assign elements of PQW to ECI transformation (pg 168)
     p11 = cos_raan * cos_w - sin_raan * sin_w * cos_inc
-    p12 = - cos_raan * sin_w - sin_raan * cos_w * cos_inc
+    p12 = -cos_raan * sin_w - sin_raan * cos_w * cos_inc
     p13 = sin_raan * sin_inc
     p21 = sin_raan * cos_w + cos_raan * sin_w * cos_inc
-    p22 = - sin_raan * sin_w + cos_raan * cos_w * cos_inc
-    p23 = - cos_raan * sin_inc
+    p22 = -sin_raan * sin_w + cos_raan * cos_w * cos_inc
+    p23 = -cos_raan * sin_inc
     p31 = sin_w * sin_inc
     p32 = cos_w * sin_inc
-    p33 = cos_inc
+    # p33 = cos_inc
     # assign constants for efficiency
-    p0 = np.sqrt(mum / (a * (1.0 - ecc * ecc)))
+    p0 = math.sqrt(mum / (a * (1.0 - ecc * ecc)))
     p1 = (1.0 - ecc * ecc) / (1.0 + ecc * cos_nu)
     p2 = 1.0 / (2.0 * a) * p0
     p3 = ((2.0 * a * ecc + a * cos_nu + a * cos_nu * ecc * ecc)
@@ -2754,13 +2774,13 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
             / ((ecc * np.cos(nu) + 1.0) ** 2 * np.sqrt(1 - ecc ** 2)))
 
     # does the sign() work for all cases? reduced form from Fabian
-# dMde1 = -sin(nu)*((ecc*cos(nu) + 1)*sign(ecc+cos(nu)) + 1.0 - 2.0*ecc**2 - ecc**3*cos(nu)) / ((ecc*cos(nu) + 1.0)**2 * sqrt(1-ecc**2))  # dm/de
-# dMdnu = (1.0 - ecc**2)**1.5 / ((1.0 + ecc*cos(nu))**2)  # dm/dv
-# dMde = -sin(nu)*((ecc*cos(nu) + 1)*(ecc+cos(nu))/sqrt((ecc + cos(nu))**2) + 1.0 - 2.0*ecc**2 - ecc**3*cos(nu)) / ((ecc*cos(nu) + 1.0)**2 * sqrt(1-ecc**2))  # dm/de
+    # dMde1 = -sin(nu)*((ecc*cos(nu) + 1)*sign(ecc+cos(nu)) + 1.0 - 2.0*ecc**2 - ecc**3*cos(nu)) / ((ecc*cos(nu) + 1.0)**2 * sqrt(1-ecc**2))  # dm/de
+    # dMdnu = (1.0 - ecc**2)**1.5 / ((1.0 + ecc*cos(nu))**2)  # dm/dv
+    # dMde = -sin(nu)*((ecc*cos(nu) + 1)*(ecc+cos(nu))/sqrt((ecc + cos(nu))**2) + 1.0 - 2.0*ecc**2 - ecc**3*cos(nu)) / ((ecc*cos(nu) + 1.0)**2 * sqrt(1-ecc**2))  # dm/de
 
     # ---------------- calculate matrix elements ------------------
-# ---- partials of (a ecc incl node argp nu) wrt rx
-# same
+    # ---- partials of (a ecc incl node argp nu) wrt rx
+    # same
     tm = np.zeros((6, 6))
     tm[0, 0] = p1 * (p11 * cos_nu + p12 * sin_nu)
     #tm[0, 0] = rx/a # alternate approach if vectors available
@@ -2769,15 +2789,15 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     tm[0, 4] = - p5 * (p21 * cos_nu + p22 * sin_nu)
     tm[0, 5] = p5 * (p12 * cos_nu - p11 * sin_nu)
     # true anomaly same
-# p10 = a * (ecc**2 - 1.0) / (ecc*cos_nu + 1.0)**2
-# tm[0, 5] = p10 * (ecc*cos(raan)*sin(argp) + cos(raan)*cos(argp)*sin(nu) + ...
-#           cos(raan)*sin(argp)*cos_nu + ecc*cos(incl)*sin(raan)*cos(argp) + ...
-#           cos(incl)*sin(raan)*cos(argp)*cos(nu) - cos(incl)*sin(raan)*sin(argp)*sin(nu))
+    # p10 = a * (ecc**2 - 1.0) / (ecc*cos_nu + 1.0)**2
+    # tm[0, 5] = p10 * (ecc*cos(raan)*sin(argp) + cos(raan)*cos(argp)*sin(nu) + ...
+    #           cos(raan)*sin(argp)*cos_nu + ecc*cos(incl)*sin(raan)*cos(argp) + ...
+    #           cos(incl)*sin(raan)*cos(argp)*cos(nu) - cos(incl)*sin(raan)*sin(argp)*sin(nu))
     tm[0, 5] = p6 * (- p11 * sin_nu + p12 * (ecc + cos_nu))
     #atm = tm[0, 5]
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         #tm[0, 5] = tm[0, 5] / dMdnu + tm[0, 1] / dMde
-#tm[0, 1] = tm[0, 5] * dMde - dMde*atm/dMdnu
+        #tm[0, 1] = tm[0, 5] * dMde - dMde*atm/dMdnu
         tm[0, 5] = tm[0, 5] / dMdnu
         tm[0, 1] = tm[0, 1] - tm[0, 5] * dMde
 
@@ -2789,15 +2809,15 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     tm[1, 4] = p5 * (p11 * cos_nu + p12 * sin_nu)
     tm[1, 5] = p5 * (p22 * cos_nu - p21 * sin_nu)
     # true anomaly, same
-#  p10 = a * (ecc**2 - 1.0) / (ecc*cos(nu) + 1.0)**2
-#  tm[1, 5] = p10 * (ecc*sin(raan)*sin(argp) + sin(raan)*cos(argp)*sin(nu) + ...
-#          sin(raan)*sin(argp)*cos(nu) - ecc*cos(incl)*cos(raan)*cos(argp) - ...
-#           cos(incl)*cos(raan)*cos(argp)*cos(nu)+ cos(incl)*cos(raan)*sin(argp)*sin(nu))
+    #  p10 = a * (ecc**2 - 1.0) / (ecc*cos(nu) + 1.0)**2
+    #  tm[1, 5] = p10 * (ecc*sin(raan)*sin(argp) + sin(raan)*cos(argp)*sin(nu) + ...
+    #          sin(raan)*sin(argp)*cos(nu) - ecc*cos(incl)*cos(raan)*cos(argp) - ...
+    #           cos(incl)*cos(raan)*cos(argp)*cos(nu)+ cos(incl)*cos(raan)*sin(argp)*sin(nu))
     tm[1, 5] = p6 * (- p21 * sin_nu + p22 * (ecc + cos_nu))
     #atm = tm[1, 5]
-    if ((str(anom) == str('meana')) or (str(anom) == str('meann'))):
+    if ((anom == 'meana') or (anom == 'meann')):
         #tm[1, 5] = tm[1, 5] / dMdnu + tm[1, 1] / dMde
-#tm[1, 1] = tm[1, 5] * dMde - dMde*atm/dMdnu
+        #tm[1, 1] = tm[1, 5] * dMde - dMde*atm/dMdnu
         tm[1, 5] = tm[1, 5] / dMdnu
         tm[1, 1] = tm[1, 1] - tm[1, 5] * dMde
 
@@ -2809,12 +2829,12 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     tm[2, 4] = 0.0
     tm[2, 5] = p5 * sin_inc * (cos_w * cos_nu - sin_w * sin_nu)
     #  p10 = -a * (ecc**2 - 1.0) / (ecc*cos(nu) + 1.0)**2
-#  tm[2, 5] = p10 * sin(incl)*(cos(argp+nu)+ecc*cos(argp))
+    #  tm[2, 5] = p10 * sin(incl)*(cos(argp+nu)+ecc*cos(argp))
     tm[2, 5] = p6 * (- p31 * sin_nu + p32 * (ecc + cos_nu))
     #atm = tm[2, 5]
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         #tm[2, 5] = tm[2, 5] / dMdnu + tm[2, 1] / dMde
-#tm[2, 1] = tm[2, 5] * dMde - dMde*atm/dMdnu
+        #tm[2, 1] = tm[2, 5] * dMde - dMde*atm/dMdnu
         tm[2, 5] = tm[2, 5] / dMdnu
         tm[2, 1] = tm[2, 1] - tm[2, 5] * dMde
 
@@ -2826,13 +2846,13 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     tm[3, 3] = p0 * (p21 * sin_nu - p22 * (ecc + cos_nu))
     tm[3, 4] = - p0 * (p12 * sin_nu + p11 * (ecc + cos_nu))
     # same
-# p10 = sqrt(-mum/(a*(ecc**2-1.0)))
-# tm[3, 5] = p10 * (cos(raan)*sin(argp)*sin(nu)-cos(raan)*cos(argp)*cos(nu)+cos(incl)*sin(raan)*cos(argp)*sin(nu)+cos(incl)*sin(raan)*sin(argp)*cos(nu))
+    # p10 = sqrt(-mum/(a*(ecc**2-1.0)))
+    # tm[3, 5] = p10 * (cos(raan)*sin(argp)*sin(nu)-cos(raan)*cos(argp)*cos(nu)+cos(incl)*sin(raan)*cos(argp)*sin(nu)+cos(incl)*sin(raan)*sin(argp)*cos(nu))
     tm[3, 5] = - p0 * (p11 * cos_nu + p12 * sin_nu)
     #atm = tm[3, 5]
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         #tm[3, 5] = tm[3, 5] / dMdnu + tm[3, 1] / dMde
-#tm[3, 1] = tm[3, 5] * dMde - dMde*atm/dMdnu
+        #tm[3, 1] = tm[3, 5] * dMde - dMde*atm/dMdnu
         tm[3, 5] = tm[3, 5] / dMdnu
         tm[3, 2] = tm[3, 2] - tm[3, 5] * dMde
 
@@ -2844,17 +2864,17 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     tm[4, 3] = p0 * (- p11 * sin_nu + p12 * (ecc + cos_nu))
     tm[4, 4] = - p0 * (p22 * sin_nu + p21 * (ecc + cos_nu))
     #  p10 = sqrt(-mum/(a*(ecc**2-1.0)))
-#  tm[4, 5] = -p10 * (sin(raan)*cos(argp)*cos(nu)-sin(raan)*sin(argp)*sin(nu)+cos(incl)*cos(raan)*cos(argp)*sin(nu)+cos(incl)*cos(raan)*sin(argp)*cos(nu))
+    #  tm[4, 5] = -p10 * (sin(raan)*cos(argp)*cos(nu)-sin(raan)*sin(argp)*sin(nu)+cos(incl)*cos(raan)*cos(argp)*sin(nu)+cos(incl)*cos(raan)*sin(argp)*cos(nu))
     tm[4, 5] = - p0 * (p21 * cos_nu + p22 * sin_nu)
     #atm = tm[4, 5]
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         #tm[4, 5] = tm[4, 5] / dMdnu + tm[4, 1] / dMde
-#tm[4, 1] = tm[4, 5] * dMde - dMde*atm/dMdnu
+    #tm[4, 1] = tm[4, 5] * dMde - dMde*atm/dMdnu
         tm[4, 5] = tm[4, 5] / dMdnu
         tm[4, 1] = tm[4, 1] - tm[4, 5] * dMde
 
     # ---- partials of (a ecc incl node argp nu) wrt vz
-# same
+    # same
     tm[5, 0] = p2 * (p31 * sin_nu - p32 * (ecc + cos_nu))
     # tm[5, 0] = -vz/(2.0*a)
     tm[5, 1] = - p4 * (p31 * sin_nu - p32 * (ecc + cos_nu)) + p32 * p0
@@ -2862,18 +2882,18 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
     tm[5, 3] = 0.0
     tm[5, 4] = - p0 * (p32 * sin_nu + p31 * (ecc + cos_nu))
     # same
-# p10 = sqrt(-mum/(a*(ecc**2-1.0)))
-# atm[5, 5] = p10 * (-sin(incl)*sin(argp+nu))
+    # p10 = sqrt(-mum/(a*(ecc**2-1.0)))
+    # atm[5, 5] = p10 * (-sin(incl)*sin(argp+nu))
     tm[5, 5] = - p0 * (p31 * cos_nu + p32 * sin_nu)
     #atm = tm[5, 5]
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         #tm[5, 5] = tm[5, 5] / dMdnu + tm[5, 1] / dMde
-#tm[5, 1] = tm[5, 5] * dMde - dMde*atm/dMdnu
+        #tm[5, 1] = tm[5, 5] * dMde - dMde*atm/dMdnu
         tm[5, 5] = tm[5, 5] / dMdnu
         tm[5, 1] = tm[5, 1] - tm[5, 5] * dMde
 
     # ---------- calculate the output covariance matrix -----------
-    cartcov = tm @ classcov @ np.transpose(tm)
+    cartcov = tm @ classcov @ tm.T
     return cartcov, tm
 
 # ----------------------------------------------------------------------------
@@ -2927,9 +2947,7 @@ def covcl2ctnew(classcov=None, classstate=None, anom=None):
 #   [classcov, tm] = covct2cl(cartcov, cartstate, anom)
 # ----------------------------------------------------------------------------
 
-def covct2clnew(cartcov=None, cartstate=None, anom=None):
-    # -------- define gravitational constant
-
+def covct2clnew(cartcov, cartstate, anom):
     # -------- parse the input vectors into cartesian and classical components
     rx = cartstate[0, 0] * 1000.0
     ry = cartstate[1, 0] * 1000.0
@@ -2937,56 +2955,58 @@ def covct2clnew(cartcov=None, cartstate=None, anom=None):
     vx = cartstate[3, 0] * 1000.0
     vy = cartstate[4, 0] * 1000.0
     vz = cartstate[5, 0] * 1000.0
-    reci = np.array([rx / 1000, ry / 1000, rz / 1000])
 
+    reci = np.array([rx / 1000, ry / 1000, rz / 1000])
     veci = np.array([vx / 1000, vy / 1000, vz / 1000])
+
     # -------- convert to a classical orbit state for ease of computation
-    p, a, ecc, incl, omega, argp, nu, mean, arglat, truelon, lonper = rv2coe(reci, veci)
+    p, a, ecc, _, _, _, nu, _, _, _, _ = rv2coe(reci, veci)
     p = p * 1000.0
     a = a * 1000.0
-    n = np.sqrt(mum / a ** 3)
+    n = math.sqrt(mum / a ** 3)
     # -------- calculate common quantities
-    sqrt1me2 = np.sqrt(1.0 - ecc * ecc)
-    magr = np.sqrt(rx ** 2 + ry ** 2 + rz ** 2)
+    # sqrt1me2 = np.sqrt(1.0 - ecc * ecc)
+    magr = math.sqrt(rx ** 2 + ry ** 2 + rz ** 2)
     magr3 = magr ** 3
-    magv = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
+    magv = math.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
     # ----------  form pqw position and velocity vectors ----------
     r_dot_v = np.dot(reci, veci) * 1000 * 1000
     ecc_term = magv * magv - mum / magr
     ecc_x = (ecc_term * rx - r_dot_v * vx) / mum
     ecc_y = (ecc_term * ry - r_dot_v * vy) / mum
     ecc_z = (ecc_term * rz - r_dot_v * vz) / mum
-    ecc_vec = np.transpose(np.array([ecc_x, ecc_y, ecc_z]))
+    ecc_vec = np.array([ecc_x, ecc_y, ecc_z]).T
     hx = ry * vz - rz * vy
     hy = rz * vx - rx * vz
     hz = rx * vy - ry * vx
-    h_vec = np.transpose(np.array([hx, hy, hz]))
+    h_vec = np.array([hx, hy, hz]).T
     h = smu.mag(h_vec)
     h_squared = h * h
-    nx = - hy
+    nx = -hy
     ny = hx
     nz = 0.0
-    node_vec = np.transpose(np.array([nx, ny, nz]))
+    node_vec = np.array([nx, ny, nz]).T
     node = smu.mag(node_vec)
     n_squared = node * node
     n_dot_e = np.dot(node_vec, ecc_vec)
-    sign_anode = np.sign(ny)
-    cos_anode = nx / node
-    omega = sign_anode * np.arccos(cos_anode)
+    # sign_anode = np.sign(ny)
+    # cos_anode = nx / node
+    # omega = sign_anode * np.arccos(cos_anode)
     sign_w = np.sign((magv ** 2 - mum / magr) * rz - r_dot_v * vz)
     cos_w = n_dot_e / (ecc * node)
-    argp = sign_w * np.arccos(cos_w)
+    # argp = sign_w * np.arccos(cos_w)
     w_scale = - sign_w / np.sqrt(1 - cos_w * cos_w)
     r_dot_e = np.dot(reci, ecc_vec) * 1000
     cos_nu = r_dot_e / (magr * ecc)
     sign_nu = np.sign(r_dot_v)
     nu = sign_nu * np.arccos(cos_nu)
     nu_scale = - sign_nu / np.sqrt(1 - cos_nu * cos_nu)
-    px, ax, eccx, inclx, nodex, argpx, nux, mx, arglatx, truelonx, lonperx = rv2coe(reci, veci)
+    _, ax, eccx, inclx, nodex, argpx, nux, mx, _, _, _ = rv2coe(reci, veci)
     print(' %14.6f %8.6f %10.5f %10.5f %10.5f %10.5f %10.5f \n'
-          % (ax, eccx, inclx * rad2deg, nodex * rad2deg, argpx * rad2deg, nux * rad2deg, mx * rad2deg))
+          % (ax, eccx, inclx * rad2deg, nodex * rad2deg, argpx * rad2deg,
+             nux * rad2deg, mx * rad2deg))
     # ---------------- calculate matrix elements ------------------
-# ---- partials of a wrt (rx ry rz vx vy vz)
+    # ---- partials of a wrt (rx ry rz vx vy vz)
     p0 = 2.0 * a ** 2 / magr ** 3
     p1 = 2.0 / (n ** 2 * a)
     tm = np.zeros((6, 6))
@@ -2998,46 +3018,46 @@ def covct2clnew(cartcov=None, cartstate=None, anom=None):
     tm[0, 5] = p1 * vz
     # ---- partials of ecc wrt (rx ry rz vx vy vz)
     p0 = 1.0 / (mum * ecc)
-    tm[1, 0] = - p0 * (((vx * vy - mum * rx * ry / magr3) * ecc_y)
+    tm[1, 0] = -p0 * (((vx * vy - mum * rx * ry / magr3) * ecc_y)
                       + ((vx * vz - mum * rx * rz / magr3) * ecc_z)
                       - (vy * vy + vz * vz - mum / magr + mum * rx * rx / magr3)
                       * ecc_x)
-    tm[1, 1] = - p0 * (((vx * vy - mum * rx * ry / magr3) * ecc_x)
-                      + ((vy * vz - mum * ry * rz / magr3) * ecc_z)
-                      - (vx * vx + vz * vz - mum / magr + mum * ry * ry / magr3)
-                      * ecc_y)
-    tm[1, 2] = - p0 * (((vx * vz - mum * rx * rz / magr3) * ecc_x)
-                      + ((vy * vz - mum * ry * rz / magr3) * ecc_y)
-                      - (vy * vy + vx * vx - mum / magr + mum * rz * rz / magr3)
-                      * ecc_z)
-    tm[1, 3] = - p0 * ((rx * vy - 2 * ry * vx) * ecc_y
-                      + (ry * vy + rz * vz) * ecc_x
-                      + (rx * vz - 2 * rz * vx) * ecc_z)
-    tm[1, 4] = - p0 * ((ry * vx - 2 * rx * vy) * ecc_x
-                      + (rx * vx + rz * vz) * ecc_y
-                      + (ry * vz - 2 * rz * vy) * ecc_z)
-    tm[1, 5] = - p0 * ((rx * vx + ry * vy) * ecc_z
+    tm[1, 1] = -p0 * (((vx * vy - mum * rx * ry / magr3) * ecc_x)
+                     + ((vy * vz - mum * ry * rz / magr3) * ecc_z)
+                     - (vx * vx + vz * vz - mum / magr + mum * ry * ry / magr3)
+                     * ecc_y)
+    tm[1, 2] = -p0 * (((vx * vz - mum * rx * rz / magr3) * ecc_x)
+                     + ((vy * vz - mum * ry * rz / magr3) * ecc_y)
+                     - (vy * vy + vx * vx - mum / magr + mum * rz * rz / magr3)
+                     * ecc_z)
+    tm[1, 3] = -p0 * ((rx * vy - 2 * ry * vx) * ecc_y
+                     + (ry * vy + rz * vz) * ecc_x
+                     + (rx * vz - 2 * rz * vx) * ecc_z)
+    tm[1, 4] = -p0 * ((ry * vx - 2 * rx * vy) * ecc_x
+                     + (rx * vx + rz * vz) * ecc_y
+                     + (ry * vz - 2 * rz * vy) * ecc_z)
+    tm[1, 5] = -p0 * ((rx * vx + ry * vy) * ecc_z
                       + (rz * vx - 2 * rx * vz) * ecc_x
                       + (rz * vy - 2 * ry * vz) * ecc_y)
     # ---- partials of incl wrt (rx ry rz vx vy vz)
     p3 = 1.0 / node
-    tm[2, 0] = - p3 * (vy - hz * (vy * hz - vz * hy) / h_squared)
+    tm[2, 0] = -p3 * (vy - hz * (vy * hz - vz * hy) / h_squared)
     tm[2, 1] = p3 * (vx - hz * (vx * hz - vz * hx) / h_squared)
-    tm[2, 2] = - p3 * (hz * (vy * hx - vx * hy) / h_squared)
+    tm[2, 2] = -p3 * (hz * (vy * hx - vx * hy) / h_squared)
     tm[2, 3] = p3 * (ry - hz * (ry * hz - rz * hy) / h_squared)
-    tm[2, 4] = - p3 * (rx - hz * (rx * hz - rz * hx) / h_squared)
+    tm[2, 4] = -p3 * (rx - hz * (rx * hz - rz * hx) / h_squared)
     tm[2, 5] = p3 * (hz * (ry * hx - rx * hy) / h_squared)
 
     # ---- partials of node wrt (rx ry rz vx vy vz)
     p4 = 1.0 / n_squared
-    tm[3, 0] = - p4 * vz * ny
+    tm[3, 0] = -p4 * vz * ny
     tm[3, 1] = p4 * vz * nx
     tm[3, 2] = p4 * (vx * ny - vy * nx)
     tm[3, 3] = p4 * rz * ny
-    tm[3, 4] = - p4 * rz * nx
+    tm[3, 4] = -p4 * rz * nx
     tm[3, 5] = p4 * (ry * nx - rx * ny)
     # ---- partials of argp wrt (rx ry rz vx vy vz)
-    p5 = 1.0 / (node * a * a)
+    # p5 = 1.0 / (node * a * a)
     temp = - hy * (vy * vy + vz * vz - mum / magr + mum * rx * rx / magr3)
     temp = temp - hx * (vx * vy - mum * rx * ry / magr3) + vz * mum * ecc_x
     temp = (temp / (mum * node * ecc)
@@ -3128,16 +3148,16 @@ def covct2clnew(cartcov=None, cartstate=None, anom=None):
 #       tm[5, 4] = p9 * (p8 * (h*ry + r_dot_v*(rx*hz - rz*hx)/h) - r_dot_v*h*(2*vy*magr**2 - 2*r_dot_v*ry))
 #       tm[5, 5] = p9 * (p8 * (h*rz + r_dot_v*(ry*hx - rx*hy)/h) - r_dot_v*h*(2*vz*magr**2 - 2*r_dot_v*rz))
 
-    if (str(anom) == str('meana')) or (str(anom) == str('meann')):
+    if (anom == 'meana') or (anom == 'meann'):
         # ---- partials of (rx ry rz vx vy vz) wrt mean anomaly
-# then update for mean anomaly
+        # then update for mean anomaly
         ecc = smu.mag(ecc_vec)
-        dMdnu = (1.0 - ecc ** 2) ** 1.5 / ((1.0 + ecc * np.cos(nu)) ** 2)
-        dMde = (-np.sin(nu) * ((ecc * np.cos(nu) + 1)
-                               * (ecc + np.cos(nu))
-                               / np.sqrt((ecc + np.cos(nu)) ** 2)
-                               + 1.0 - 2.0 * ecc ** 2 - ecc ** 3 * np.cos(nu))
-                / ((ecc * np.cos(nu) + 1.0) ** 2 * np.sqrt(1 - ecc ** 2)))
+        dMdnu = (1.0 - ecc ** 2) ** 1.5 / ((1.0 + ecc * math.cos(nu)) ** 2)
+        dMde = (-math.sin(nu) * ((ecc * math.cos(nu) + 1)
+                               * (ecc + math.cos(nu))
+                               / math.sqrt((ecc + math.cos(nu)) ** 2)
+                               + 1.0 - 2.0 * ecc ** 2 - ecc ** 3 * math.cos(nu))
+                / ((ecc * math.cos(nu) + 1.0) ** 2 * math.sqrt(1 - ecc ** 2)))
         # p6 = -sin(nu)*(sign((ecc*cos(nu) + 1)) + 1.0 - 2.0*ecc**2 - ecc**3*cos(nu)) / ((ecc*cos(nu) + 1.0)**2 * sqrt(1-ecc**2))  # dm/de
         tm[5, 0] = tm[5, 0] * dMdnu + tm[1, 0] * dMde
         tm[5, 1] = tm[5, 1] * dMdnu + tm[1, 1] * dMde
@@ -3147,7 +3167,7 @@ def covct2clnew(cartcov=None, cartstate=None, anom=None):
         tm[5, 5] = tm[5, 5] * dMdnu + tm[1, 5] * dMde
 
     # ---------- calculate the output covariance matrix -----------
-    classcov = tm * cartcov * np.transpose(tm)
+    classcov = tm @ cartcov @ tm.T
     return classcov, tm
 
 #
@@ -3186,7 +3206,7 @@ def covct2clnew(cartcov=None, cartstate=None, anom=None):
 #  [covopntw, tm] = covct2ntw(cartcov, cartstate)
 # ----------------------------------------------------------------------------
 
-def covct2ntw(cartcov=None, cartstate=None):
+def covct2ntw(cartcov, cartstate):
     x = cartstate[0, 0]
     y = cartstate[1, 0]
     z = cartstate[2, 0]
@@ -3219,7 +3239,7 @@ def covct2ntw(cartcov=None, cartstate=None):
     tm[5, 3] = wv[0]
     tm[5, 4] = wv[1]
     tm[5, 5] = wv[2]
-    covntw = tm * cartcov * np.transpose(tm)
+    covntw = tm @ cartcov @ tm.T
     return covntw, tm
 
 
@@ -3259,7 +3279,7 @@ def covct2ntw(cartcov=None, cartstate=None):
 #  [covopntw, tm] = covct2o2(cartcov, cartstate)
 # ----------------------------------------------------------------------------
 
-def covct2o2(cartcov=None, cartstate=None):
+def covct2o2(cartcov, cartstate):
     x = cartstate[0, 0]
     y = cartstate[1, 0]
     z = cartstate[2, 0]
@@ -3292,7 +3312,7 @@ def covct2o2(cartcov=None, cartstate=None):
     tm[5, 3] = wv[0]
     tm[5, 4] = wv[1]
     tm[5, 5] = wv[2]
-    covopntw = tm * cartcov * np.transpose(tm)
+    covopntw = tm @ cartcov @ tm.T
     return covopntw, tm
 
 
@@ -3332,7 +3352,7 @@ def covct2o2(cartcov=None, cartstate=None):
 #  [covoprsw, tm] = covct2rsw(cartcov, cartstate)
 # ----------------------------------------------------------------------------
 
-def covct2rsw(cartcov=None, cartstate=None):
+def covct2rsw(cartcov, cartstate):
     print("cartstate:")
     print(cartstate)
     x = cartstate[0, 0]
@@ -3367,7 +3387,7 @@ def covct2rsw(cartcov=None, cartstate=None):
     tm[5, 3] = wv[0]
     tm[5, 4] = wv[1]
     tm[5, 5] = wv[2]
-    covoprsw = tm * cartcov * np.transpose(tm)
+    covoprsw = tm @ cartcov @ tm.T
     return covoprsw, tm
 
 
@@ -3406,7 +3426,7 @@ def covct2rsw(cartcov=None, cartstate=None):
 #  [cartcov, tm] = covo22ct(covopntw, cartstate)
 # ----------------------------------------------------------------------------
 
-def covo22ct(covopntw=None, cartstate=None):
+def covo22ct(covopntw, cartstate):
     x = cartstate[0, 0]
     y = cartstate[1, 0]
     z = cartstate[2, 0]
@@ -3439,8 +3459,8 @@ def covo22ct(covopntw=None, cartstate=None):
     tm[5, 3] = wv[0]
     tm[5, 4] = wv[1]
     tm[5, 5] = wv[2]
-    tm = np.transpose(tm)
-    cartcov = tm * covopntw * np.transpose(tm)
+    tm = tm.T
+    cartcov = tm @ covopntw @ tm.T
     return cartcov, tm
 
 
@@ -4717,7 +4737,7 @@ def rv2coeh(r=None, v=None, re=None, mu=None):
         else:
             raan=None
         # ---------------- find argument of perigee ---------------
-        if str(typeorbit) == str('ei'):
+        if typeorbit == 'ei':
             argp = smu.angl(nbar, ebar)
             if (ebar[2] < 0.0):
                 argp = twopi - argp
@@ -4732,7 +4752,7 @@ def rv2coeh(r=None, v=None, re=None, mu=None):
             nu=None
         # ----  find argument of latitude - circular inclined -----
 # -- find in general cases too
-        if (str(typeorbit) == 'ci') or (str(typeorbit) == 'ei'):
+        if (typeorbit == 'ci') or (typeorbit == 'ei'):
             arglat = smu.angl(nbar, r)
             if (r[2] < 0.0):
                 arglat = twopi - arglat
@@ -4740,7 +4760,7 @@ def rv2coeh(r=None, v=None, re=None, mu=None):
         else:
             arglat=None
         # -- find longitude of perigee - elliptical equatorial ----
-        if (ecc > small) and (str(typeorbit) == 'ee'):
+        if (ecc > small) and (typeorbit == 'ee'):
             temp = ebar[0] / ecc
             if (np.abs(temp) > 1.0):
                 temp = np.sign(temp)
@@ -4752,7 +4772,7 @@ def rv2coeh(r=None, v=None, re=None, mu=None):
         else:
             lonper=None
         # -------- find true longitude - circular equatorial ------
-        if (magr > small) and (str(typeorbit) == 'ce'):
+        if (magr > small) and (typeorbit == 'ce'):
             temp = r[0] / magr
             if (np.abs(temp) > 1.0):
                 temp = np.sign(temp)
@@ -9357,7 +9377,53 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
                         satrec['mo'], satrec['no_kozai'],satrec['nodeo'])
     return startmfe, stopmfe, deltamin, satrec
 
+# textbook ver. 4 is out of date, will come back to this later -zeg
+# def eqcm2eci(rtgt, vtgt, x, y, z, dx, dy, dz):
+#     rrsw1, vrsw1 = rv2rsw(rtgt, vtgt)
+#     rmag = smu.mag(rrsw1)
+#     vmag = smu.mag(vrsw1)
+
+#     #eq 2-78
+#     etgt = ((vmag**2 - mu / rmag) * rrsw1 - np.dot(rrsw1, vrsw1) * vrsw1) / mu
+#     eunit = smu.unit(etgt)
+
+#     ptgt, a, ecc, _, _, _, nu2 = rv2coe(rrsw1, vrsw1)
+#     lambdap = math.atan(eunit[1] / eunit[0])
+#     nu1 = -lambdap
+
+#     cosnu2 = math.cos(nu2)
+#     sinnu2 = math.sin(nu2)
+
+#     rpqw2 = np.array([(ptgt * cosnu2) / (1 + ecc * cosnu2),
+#                       (ptgt * sinnu2) / (1 + ecc * cosnu2),
+#                       0])
+#     vpqw2 = np.array([(-math.sqrt(mu / ptgt) * sinnu2),
+#                       math.sqrt(mu / ptgt) * (ecc + cosnu2),
+#                       0])
+
+#     rrsw2, vrsw2 = rv2rsw(rpqw2, vpqw2)
+#     dphi = math.asin(z / smu.mag(rrsw2))
+#     dlambda = nu2 - nu1
+
+#     sindphi = math.sin(dphi)
+#     cosdphi = math.cos(dphi)
+#     sindlambda = math.sin(dlambda)
+#     cosdlambda = math.cos(dlambda)
+
+#     rintrsw1unit = np.array([sindphi,
+#                              cosdphi * sindlambda,
+#                              cosdphi * cosdlambda])
+
+#     rsw2sez = np.ndarray([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
+#                           [-sindphi, cosdlambda, 0],
+#                           [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
+#     rintsez2 = rsw2sez @ rintrsw1unit
+
+#     rintsez2[2] = x + rrsw2[0]
+#     rscale = rintsez2[2] / rintrsw1unit[]
 
 
 
-
+# def eci2eqcm(rtgt, vtgt, rint, vint):
+#     rtgtrsw, vtgtrsw = rv2rsw(rtgt, vtgt)
+#     rintrsw, vintrsw = rv2rsw(rint, vint)

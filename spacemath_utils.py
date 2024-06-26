@@ -3099,6 +3099,12 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
     # printf(" \n")
     return deltaamt, xnomp
 
+def getsincos(*args):
+    results = []
+    for arg in args:
+        results.append(math.sin(arg))
+        results.append(math.cos(arg))
+    return results
 
 def legPoly(x=None, i=None):
     # LEGPOLY calculates the legendre polynomial of i-th order in x

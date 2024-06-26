@@ -49,7 +49,7 @@
 |  47  |  pg 387 (414)  | Low Thrust Transfer                          | lowthrust()                          | ex6_12.py & ex6_13.py           | pg 381 (408) & 388 (415)   |   -   |
 |  48  |  pg 396 (423)  | Hill's Equation                              | hillsr(), hillsv()                   | ex6_14.py and ex6_15.py         | pg 397 (424) & 410 (437)   |   Y   |
 |  49  |  pg 414 (441)  | HillEQCM to ECI                              | EQCM_to_ECI_RTN_sal()  (dungeon)     | EQCM_to_ECI_RTN_sal.py          |           -                |   N   |
-|  50  |  pg 415 (442)  | ECI to JillEQCM                              | ECI_to_EQCM_RTN_sal()  (dungeon)     | ECI_to_EQCM_RTN_sal.py          |           -                |   N   |
+|  50  |  pg 415 (442)  | ECI to HillEQCM                              | ECI_to_EQCM_RTN_sal()  (dungeon)     | ECI_to_EQCM_RTN_sal.py          |           -                |   N   |
 |  51  |  pg 430 (457)  | Site-Track                                   | site()                               | ex7_1.py                        | pg 431 (458)               |   -   |
 |  52  |  pg 442 (469)  | Angles-Only Gauss                            | anglesg()                            | ex7_2.py                        | pg 447 (474)               |   N   |
 |  53  |  pg 460 (487)  | Angles-Double-R                              | anglesdr()                           | ex7_2.py                        | pg 447 (474)               |   N   |
