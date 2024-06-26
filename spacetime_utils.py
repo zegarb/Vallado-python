@@ -820,15 +820,16 @@ def convtime(year: int, mon: int, day: int, hr: int, min: int, sec: float,
     '''
 
 
-    me = 357.53  + 0.98560028 * (jdtt - 2451545.0)
-    me = np.remainder(me, 360.0 ) ###not quite equivalent to matlab mod command, but close
-    me = me * deg2rad
-    dlje = 246.11 + 0.90251792*(jdtt - 2451545.0)
-    tdb2 = tt + 0.001657  * math.sin(me) + 0.000022 *math.sin(dlje)
-    [hrtemp, mintemp, sectemp] = sec2hms(tdb2)
-    [jdtdb2, jdtdb2frac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
-    ttdb2 = (jdtdb2 + jdtdb2frac - 2451545.0 )/ 36525.0
- #       fprintf(1, 'asta tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb2, ttdb2, jdtdb2, jdtdb2frac)
+    # me = 357.53  + 0.98560028 * (jdtt - 2451545.0)
+    # me = np.remainder(me, 360.0 ) ###not quite equivalent to matlab mod command, but close
+    # me = me * deg2rad
+    # dlje = 246.11 + 0.90251792*(jdtt - 2451545.0)
+    # tdb2 = tt + 0.001657  * math.sin(me) + 0.000022 *math.sin(dlje)
+    # [hrtemp, mintemp, sectemp] = sec2hms(tdb2)
+    # [jdtdb2, jdtdb2frac] = jday(year, mon, day, hrtemp, mintemp, sectemp)
+    # ttdb2 = (jdtdb2 + jdtdb2frac - 2451545.0 )/ 36525.0
+    # fprintf(1, 'asta tdb %8.6f ttdb  %16.12f jdtdb  %18.11f %18.11f \n', tdb2, ttdb2, jdtdb2, jdtdb2frac)
+
     # usno circular approach
     tdb = tt + 0.001657*math.sin(628.3076*ttt+6.2401) \
             + 0.000022*math.sin(575.3385*ttt+4.2970) \

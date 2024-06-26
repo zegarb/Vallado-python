@@ -6,6 +6,7 @@ from space_constants import sethelp as sh
 import spacetime_utils as stu
 import spacemath_utils as smu
 import space_conversions as sc
+import planets
 
 # this could be done much easier with the pandas package, but i wanted to maintain
 # less packages (fwf =fixed width file)
@@ -9721,7 +9722,7 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 #  this function predicts look angles from site to satellite over a given
 #  time period.
 #
-#  author        : david vallado                  719-573-2600    date?
+#  author        : david vallado                  719-573-2600
 #
 #  inputs          description                              range / units
 #    reci        - original ijk position vector             km
@@ -9855,6 +9856,72 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
     jdutend = jdut1 + jdut1frac
     return jdutend, rho, az, el, vis
 
+# ------------------------------------------------------------------------------
+#
+#                           function plantrv
+#
+#  this function approximates the position and velocity vectors of a planet
+#  with respect to the sun using the mean equator, equinox of IAU-76/FK5 (J2000)
+#
+#  note: this function uses the assumption TDB = UTC = UT1 and DE-245
+#  from the Jet Propulsion Laboratory thus only valid from 1900 to 2050
+#
+#  author        : david vallado                  719-573-2600
+#
+#  inputs          description              range / units
+#    abbr          - planet abbreviation    'me','v','e','ma','j','s','u','n'
+#    jd            - julian date (UTC)       days from 4713 bc
+#
+#  outputs       :
+#    reci          - position rel to sun    au
+#    veci          - velocity rel to sun    au/day
+#
+#  references    :  pg 296-298 Vallado (2013)
+#    vallado
+#
+# ------------------------------------------------------------------------------
+
+def planetrv(abbr, jd):
+    planet = None
+
+    if abbr  == 'j':
+        planet = planets.Jupiter()
+    else:
+        print("Error: Invalid planet type")
+        return None
+
+    yr, mon, day, hr, min, sec = stu.invjday(jd)
+    if yr < 1900 or yr > 2050:
+        print("Error: Date out of bounds")
+        return None
+
+    timezone = 0
+    dut1 = 0.0
+    dat = 0
+
+    # Used to find the julian centuries from year 2000
+    ttdb = stu.convtime(yr, mon, day, hr, min, sec, timezone, dut1, dat)[11]
+
+    # approx orbital element of the given planet using Tabel D.4 (pg 1046)
+    p, ecc, incl, omega, argp, nu = planet.approxcalc_coe(ttdb)
+    # vectors in km and km/s
+    r, v = sc.coe2rvh(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
+
+    # r in au because of large number
+    r = r / au
+    # v in au/days because of large number
+    v = (v / au) * 86400
+
+    # Obliquity of the ecliptic that changes due to Earth precession
+    eps = (23.439279 - 0.0130102*ttdb - 5.086e-8*ttdb**2 + 5.565e-7*ttdb**3 \
+        + 1.6e-10*ttdb**4 + 1.21e-11*ttdb**5) * deg2rad
+
+    # Rotation changes the reference to the mean equator and
+    # mean equinox of IAU-76/FK5
+    reci = smu.rot1(r, - eps)
+    veci = smu.rot1(v, - eps)
+
+    return reci, veci
 
 
 ##############################################################################################################

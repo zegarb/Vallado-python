@@ -24,9 +24,10 @@
 #     *****************************************************************
 
 import spacetime_utils as stu
-import space_conversions as scc
+import space_conversions as sc
 from space_constants import au, rad2deg, deg2rad
 import spacemath_utils as smu
+import orbit_utils as obu
 
 year = 1994
 mon = 5
@@ -36,17 +37,15 @@ min = 0
 sec = 0.0
 dut1 = 0.0
 dat = 0
-xp = 0.0
-yp = 0.0
-lod = 0.0
 timezone = 0
-terms = 2
-order = 106
+
+
 #, tcg, jdtcg, jdtcgfrac, tcb, jdtcb, jdtcbfrac
 ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, tdb, ttdb, \
 jdtdb, jdtdbfrac = stu.convtime(year, mon, day, hr, min, sec, timezone, dut1,
                                 dat)
-ttdb
+
+
 # find coes for Jupiter
 a = 5.202603191 + 1.913e-07 * ttdb
 
@@ -71,7 +70,7 @@ p = a * (1.0 - ecc * ecc) * au
 musun = 132712428000.0
 
 # answer in km/s
-r, v = scc.coe2rvh(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
+r, v = sc.coe2rvh(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
 # r in au
 r = r / au
 # v in au/day
@@ -93,3 +92,16 @@ print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci[0] * au / 86400,
                                                veci[1] * au / 86400,
                                                veci[2] * au / 86400))
 #mag(veci * au / 86400)
+
+#Modularized the code above and made function for all planets
+
+print("Function Test: Jupiter\n")
+reci2, veci2 = obu.planetrv('j', jdut1 + jdut1frac)
+print('reci  %11.6f %11.6f %11.6f  AU \n' % (reci2[0], reci2[1], reci2[2]))
+print('veci  %11.6f %11.6f %11.6f  AU/day \n' % (veci2[0], veci2[1], veci2[2]))
+# now in km and km/s
+print('reci  %11.1f %11.1f %11.1f  km \n' % (reci2[0] * au, reci2[1] * au,
+                                             reci2[2] * au))
+print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci2[0] * au / 86400,
+                                               veci2[1] * au / 86400,
+                                               veci2[2] * au / 86400))
