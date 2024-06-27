@@ -2070,6 +2070,8 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
         rsw position vector: km
     vrsw: ndarray
         rsw velocity vector: km/s
+    transmat: ndarray
+        transformation matrix used to rotate vectors
     """
     # each of the components must be unit vectors
     # radial component
@@ -9377,53 +9379,173 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
                         satrec['mo'], satrec['no_kozai'],satrec['nodeo'])
     return startmfe, stopmfe, deltamin, satrec
 
-# textbook ver. 4 is out of date, will come back to this later -zeg
-# def eqcm2eci(rtgt, vtgt, x, y, z, dx, dy, dz):
-#     rrsw1, vrsw1 = rv2rsw(rtgt, vtgt)
-#     rmag = smu.mag(rrsw1)
-#     vmag = smu.mag(vrsw1)
 
-#     #eq 2-78
-#     etgt = ((vmag**2 - mu / rmag) * rrsw1 - np.dot(rrsw1, vrsw1) * vrsw1) / mu
-#     eunit = smu.unit(etgt)
+def hillleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
+                  z: float, dx: float, dy: float, dz: float):
+    """this function takes the position and velocity of a target orbit, and the
+    relative position and velocity of the interceptor to get the inertial
+    position and velocity of the interceptor
 
-#     ptgt, a, ecc, _, _, _, nu2 = rv2coe(rrsw1, vrsw1)
-#     lambdap = math.atan(eunit[1] / eunit[0])
-#     nu1 = -lambdap
+    Parameters
+    ----------
+    rtgt : ndarray
+        target position: km
+    vtgt : ndarray
+        target velocity: km/s
+    x, y, z : float
+        relative position of interceptor: km
+    dx, dy, dz : float
+        relative velocity of interceptor: km/s
 
-#     cosnu2 = math.cos(nu2)
-#     sinnu2 = math.sin(nu2)
+    Returns
+    -------
+    reqcm: ndarray
+        interceptor position: km
+    veqcm: ndarray
+        interceptor velocity: km/s
+    """
+    rrsw1, vrsw1, transmat1 = rv2rsw(rtgt, vtgt)
+    rmag = smu.mag(rrsw1)
+    vmag = smu.mag(vrsw1)
 
-#     rpqw2 = np.array([(ptgt * cosnu2) / (1 + ecc * cosnu2),
-#                       (ptgt * sinnu2) / (1 + ecc * cosnu2),
-#                       0])
-#     vpqw2 = np.array([(-math.sqrt(mu / ptgt) * sinnu2),
-#                       math.sqrt(mu / ptgt) * (ecc + cosnu2),
-#                       0])
-
-#     rrsw2, vrsw2 = rv2rsw(rpqw2, vpqw2)
-#     dphi = math.asin(z / smu.mag(rrsw2))
-#     dlambda = nu2 - nu1
-
-#     sindphi = math.sin(dphi)
-#     cosdphi = math.cos(dphi)
-#     sindlambda = math.sin(dlambda)
-#     cosdlambda = math.cos(dlambda)
-
-#     rintrsw1unit = np.array([sindphi,
-#                              cosdphi * sindlambda,
-#                              cosdphi * cosdlambda])
-
-#     rsw2sez = np.ndarray([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
-#                           [-sindphi, cosdlambda, 0],
-#                           [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
-#     rintsez2 = rsw2sez @ rintrsw1unit
-
-#     rintsez2[2] = x + rrsw2[0]
-#     rscale = rintsez2[2] / rintrsw1unit[]
+    # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
+    ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rrsw1, rrsw2)
+    ebar = ((vmag**2 - mu / rmag) * rrsw1 - (rrsw1 @ vrsw1) * vrsw1) / mu
+    eunit = ebar / ecc
+    lambdap = math.atan(eunit[1] / eunit[0])
+    nu1 = -lambdap
 
 
+    arclength = y
+    ea1, _ = smu.newtonnu(ecc, nu1)
+    if abs(arclength) > 0.001:
+        DE = arclength / atgt
+        deltaea = inverselliptic2(DE, ecc **2)
+        F1, E1 = elliptic12(ea1, ecc **2)
+        ea2e = ea1 + deltaea
+        i = 1
+        arclength1a = arclength + 10
+        while (i < 10) and (abs(arclength1a - arclength) > 0.001):
+            F2, E2 = elliptic12(ea2e, ecc**2)
+            arclength1a = atgt * (E2 - E1)
+            corr = arclength / (ea2e - ea1)
+            i = i + 1
+        _, nu2 = smu.newtone(ecc, ea2e)
 
-# def eci2eqcm(rtgt, vtgt, rint, vint):
-#     rtgtrsw, vtgtrsw = rv2rsw(rtgt, vtgt)
-#     rintrsw, vintrsw = rv2rsw(rint, vint)
+    cosnu2 = math.cos(nu2)
+    sinnu2 = math.sin(nu2)
+
+    rpqw2 = np.array([(ptgt * cosnu2) / (1 + ecc * cosnu2),
+                      (ptgt * sinnu2) / (1 + ecc * cosnu2),
+                      0])
+    vpqw2 = np.array([(-math.sqrt(mu / ptgt) * sinnu2),
+                      math.sqrt(mu / ptgt) * (ecc + cosnu2),
+                      0])
+
+    rrsw2, vrsw2, transmat2 = rv2rsw(rpqw2, vpqw2)
+    dphi = z / smu.mag(rrsw2)
+    dlambda = nu2 - nu1
+
+    sindphi = math.sin(dphi)
+    cosdphi = math.cos(dphi)
+    sindlambda = math.sin(dlambda)
+    cosdlambda = math.cos(dlambda)
+
+    rintrsw1unit = np.array([cosdphi * cosdlambda,
+                             cosdphi * sindlambda,
+                             sindphi])
+
+    rsw2sez = np.ndarray([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
+                          [-sindphi, cosdlambda, 0],
+                          [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
+    rintsez = rsw2sez @ rintrsw1unit
+
+    rintsez[2] = x + rrsw2[0]
+    rscale = rintsez[2] / rintrsw1unit[2]
+    rintrsw1 = rscale * rintrsw1unit
+
+    # rtgt2 unknown -zeg
+    vintsez = [-(dz/rtgt2) * rscale,
+               (dy + vrsw1[1]) * rscale * (cosdphi/rtgt2),
+               dx + vrsw2[0]]
+    vintrsw1 = rsw2sez.T @ vintsez
+    transmat1t = transmat1.T
+    rinteqcm = transmat1t @ rintrsw1
+    vinteqcm = transmat1t @ vintrsw1
+    return rinteqcm, vinteqcm
+
+
+
+def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
+                 vint: np.ndarray):
+    """this function takes the eci position and velocity vectors of
+    a target and interceptor, and returns the relative eqcm position of the
+    interceptor
+
+    Parameters
+    ----------
+    rtgt : ndarray
+        position vector of the target: km
+    vtgt : ndarray
+        velocity vector of the target: km/s
+    rint : ndarray
+        positionv vector of interceptor: km
+    vint : ndarray
+        velocity vector of interceptor: km/s
+
+    Returns
+    -------
+    rinteqcm: ndarray
+        relative position of interceptor: km
+    vinteqcm: ndarray
+        relative velocity of interceptor: km/s
+    """
+    rtgtrsw1, vtgtrsw1, transmat1 = rv2rsw(rtgt, vtgt)
+    rintrsw1 = transmat1 @ rint
+    vintrsw1 = transmat1 @ vint
+
+    # ed. 5 has mag(rtgtrsw2). Error? -zeg
+    dphi = math.asin(rtgtrsw1[2] / smu.mag(rtgtrsw1))
+    dlambda = math.atan(rintrsw1[1] / rintrsw1[0])
+
+    # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
+    ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rtgtrsw1, vtgtrsw1)
+    rmag = smu.mag(rtgtrsw1)
+    vmag = smu.mag(vtgtrsw1)
+    ebar = ((vmag**2 - mu / rmag) * rtgtrsw1
+            - (rtgtrsw1 @ vtgtrsw1) * vtgtrsw1) / mu
+    eunit = smu.unit(ebar)
+    lambdap = math.atan(eunit[1]/ eunit[0])
+    v1 = -lambdap
+    v2 = dlambda - lambdap
+
+    sinv2, cosv2, sindphi, cosdphi, sindlambda, cosdlambda = \
+        smu.getsincos(v2, dphi, dlambda)
+    rtgtpqw2 = np.array([(ptgt * cosv2) / (1 + ecc * cosv2),
+                         (ptgt * sinv2) / (1 + ecc * cosv2),
+                         0])
+    vtgtpqw2 = np.array([-math.sqrt(mu / ptgt) * sinv2,
+                         math.sqrt(mu/ptgt) * (ecc + cosv2),
+                         0])
+    rtgtrsw2, vtgtrsw2, transmat2 = rv2rsw(rtgtrsw2, vtgtpqw2)
+
+    rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
+                        [-sindlambda, cosdlambda, 0],
+                        [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
+    rintsez = rsw2sez @ rintrsw1
+    vintsez = rsw2sez @ vintrsw1
+
+    # no idea. -zeg
+    arc1 = IEISK((E1, E2), ecc**2)
+
+    #rtgt2 still unknown
+    rinteqcm = np.array([rintsez[2] - rtgtrsw2[0],
+                         arc1,
+                         dphi * rtgt2])
+    dotlambda = vintsez[1] / (rmag * cosdphi)
+    dotphi = -vintsez[0] / rmag
+    vinteqcm = np.ndarray([vintsez[2] - vtgtrsw2[0],
+                           dotlambda * rtgt2 - abs(vtgtrsw1[1]),
+                           dotphi * rtgt2])
+    return rinteqcm, vinteqcm
+
