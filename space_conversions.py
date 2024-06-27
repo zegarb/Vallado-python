@@ -9516,11 +9516,11 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
             - (rtgtrsw1 @ vtgtrsw1) * vtgtrsw1) / mu
     eunit = smu.unit(ebar)
     lambdap = math.atan(eunit[1]/ eunit[0])
-    v1 = -lambdap
-    v2 = dlambda - lambdap
+    nu1 = -lambdap
+    nu2 = dlambda - lambdap
 
     sinv2, cosv2, sindphi, cosdphi, sindlambda, cosdlambda = \
-        smu.getsincos(v2, dphi, dlambda)
+        smu.getsincos(nu2, dphi, dlambda)
     rtgtpqw2 = np.array([(ptgt * cosv2) / (1 + ecc * cosv2),
                          (ptgt * sinv2) / (1 + ecc * cosv2),
                          0])
