@@ -9527,7 +9527,7 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
     vtgtpqw2 = np.array([-math.sqrt(mu / ptgt) * sinnu2,
                          math.sqrt(mu/ptgt) * (ecc + cosnu2),
                          0])
-    rtgtrsw2, vtgtrsw2, transmat2 = rv2rsw(rtgtrsw2, vtgtpqw2)
+    rtgtrsw2, vtgtrsw2, transmat2 = rv2rsw(rtgtpqw2, vtgtpqw2)
 
     rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
                         [-sindlambda, cosdlambda, 0],
