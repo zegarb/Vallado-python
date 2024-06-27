@@ -107,6 +107,39 @@ print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci2[0] * au / 86400,
                                                veci2[1] * au / 86400,
                                                veci2[2] * au / 86400))
 
+print("Function Test: Venus\n")
+reci2, veci2 = obu.planetrv('v', jdut1 + jdut1frac)
+print('reci  %11.6f %11.6f %11.6f  AU \n' % (reci2[0], reci2[1], reci2[2]))
+print('veci  %11.6f %11.6f %11.6f  AU/day \n' % (veci2[0], veci2[1], veci2[2]))
+# now in km and km/s
+print('reci  %11.1f %11.1f %11.1f  km \n' % (reci2[0] * au, reci2[1] * au,
+                                             reci2[2] * au))
+print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci2[0] * au / 86400,
+                                               veci2[1] * au / 86400,
+                                               veci2[2] * au / 86400))
+
+print("Function Test: Earth\n")
+reci2, veci2 = obu.planetrv('e', jdut1 + jdut1frac)
+print('reci  %11.6f %11.6f %11.6f  AU \n' % (reci2[0], reci2[1], reci2[2]))
+print('veci  %11.6f %11.6f %11.6f  AU/day \n' % (veci2[0], veci2[1], veci2[2]))
+# now in km and km/s
+print('reci  %11.1f %11.1f %11.1f  km \n' % (reci2[0] * au, reci2[1] * au,
+                                             reci2[2] * au))
+print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci2[0] * au / 86400,
+                                               veci2[1] * au / 86400,
+                                               veci2[2] * au / 86400))
+
+print("Function Test: Mars\n")
+reci2, veci2 = obu.planetrv('ma', jdut1 + jdut1frac)
+print('reci  %11.6f %11.6f %11.6f  AU \n' % (reci2[0], reci2[1], reci2[2]))
+print('veci  %11.6f %11.6f %11.6f  AU/day \n' % (veci2[0], veci2[1], veci2[2]))
+# now in km and km/s
+print('reci  %11.1f %11.1f %11.1f  km \n' % (reci2[0] * au, reci2[1] * au,
+                                             reci2[2] * au))
+print('veci  %11.5f %11.5f %11.5f  km/s \n' % (veci2[0] * au / 86400,
+                                               veci2[1] * au / 86400,
+                                               veci2[2] * au / 86400))
+
 print("Function Test: Jupiter\n")
 reci2, veci2 = obu.planetrv('j', jdut1 + jdut1frac)
 print('reci  %11.6f %11.6f %11.6f  AU \n' % (reci2[0], reci2[1], reci2[2]))

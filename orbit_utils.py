@@ -9884,10 +9884,23 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
 def planetrv(abbr, jd):
     planet = None
 
-    if abbr  == 'j':
-        planet = planets.Jupiter()
-    elif abbr == 'me':
+    if abbr == 'me':
         planet = planets.Mercury()
+    elif abbr == 'v':
+        planet = planets.Venus()
+    elif abbr == 'e':
+        planet = planets.Earth()
+    elif abbr == 'ma':
+        planet = planets.Mars()
+    elif abbr  == 'j':
+        planet = planets.Jupiter()
+    # Not complete
+    # elif abbr == 's':
+    #     planet = planets.Saturn()
+    # elif abbr == 'u':
+    #     planet = planets.Uranus()
+    # elif abbr == 'n':
+    #     planet = planets.Neptune()
     else:
         print("Error: Invalid planet type")
         return None
