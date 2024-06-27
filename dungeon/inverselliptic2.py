@@ -102,14 +102,14 @@ def inverselliptic2(E: np.ndarray, m: np.ndarray, tol: float = None):
     # complete integral initialization
     # E1 = special.ellipe(m, tol)
     u = np.full(m.shape, np.pi / 2)
-    __, E1 = elliptic12(u, m)
+    __, E1, _ = elliptic12(u, m)
     zeta = 1 - z / E1
     r = np.sqrt(zeta * zeta + mu * mu)
     theta = np.arctan(mu / (z + sys.float_info.epsilon))
     # Empirical initialization [1]
     invE = np.pi / 2 + np.sqrt(r) * (theta - (np.pi / 2))
     for _ in range(4):
-        __, E = elliptic12(invE, m, tol)
+        __, E, _ = elliptic12(invE, m, tol)
         invE = invE -(E - z) / np.sqrt(1 - m * np.sin(invE) ** 2)
 
     return invE
