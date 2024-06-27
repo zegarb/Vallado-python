@@ -1,6 +1,5 @@
 import sys
 import numpy as np
-from scipy import special
 from elliptic12 import elliptic12
 # INVERSELLIPTIC2 evaluates the value of the INVERSE Incomplete Elliptic Integrals
 # of the Second Kind.
@@ -67,7 +66,7 @@ from elliptic12 import elliptic12
 # ELLIPTIC PROJECT: http://elliptic.googlecode.com
 # Group:
 
-def inverselliptic2(E, m, tol = None):
+def inverselliptic2(E: np.ndarray, m: np.ndarray, tol: float = None):
     if tol == None:
         tol = sys.float_info.epsilon
 
@@ -101,7 +100,9 @@ def inverselliptic2(E, m, tol = None):
     z = E
     mu = 1 - m
     # complete integral initialization
-    E1 = special.ellipe(m, tol)
+    # E1 = special.ellipe(m, tol)
+    u = np.full(m.shape, np.pi / 2)
+    __, E1 = elliptic12(u, m)
     zeta = 1 - z / E1
     r = np.sqrt(zeta * zeta + mu * mu)
     theta = np.arctan(mu / (z + sys.float_info.epsilon))
