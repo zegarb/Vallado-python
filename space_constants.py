@@ -95,7 +95,6 @@ uarcsec2rad = 1e-06 * arcsec2rad
 #  coupling      :
 #    none.
 #
-# constastro
 # ------------------------------------------------------------------------------
 
 
@@ -172,7 +171,7 @@ angpenearth = 0.004609804797371252 #rad
 % ------------------------------------------------------------------------------
 '''
 class sethelp():
-  iauhelp = 'n';
-  iaupnhelp = 'y';
-  show = 'n';
+  iauhelp = False;
+  iaupnhelp = True;
+  show = False;
 

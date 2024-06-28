@@ -26,8 +26,8 @@ import spacemath_utils as smu
 import space_conversions as sc
 print('------------------------------------------------ initial accuracy ----------------------------- \n' % ())
 # now test the ability to convert eci - hills and back
-constmath
-constastro
+#constmath
+#constastro
 casenumo = 1
 
 casetest = 7

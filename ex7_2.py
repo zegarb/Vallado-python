@@ -357,7 +357,7 @@ print('v2     %11.7f   %11.7f  %11.7f er/tu %11.7f  %11.7f  %11.7f km/s\n'
 #        fprintf(1, 'v2 ans #11.7f   #11.7f  #11.7f er/tu #11.7f  #11.7f  #11.7f km/s\n', v2ans/velkmps, v2ans);
 
 p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-    sc.rv2coeh(r2, v2, re, mu)
+    sc.rv2coe(r2, v2, mu)
 print('         p km          a km         ecc       incl deg     raan deg    '
       'argp deg     nu deg      m deg  \n')
 print('coes p=%11.4f\n' % (p))
@@ -409,7 +409,7 @@ print('v2     %11.7f   %11.7f  %11.7f er/tu %11.7f  %11.7f  %11.7f km/s\n'
 #        fprintf(1, 'v2 ans #11.7f   #11.7f  #11.7f er/tu #11.7f  #11.7f  #11.7f km/s\n', v2ans/velkmps, v2ans);
 
 p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-    sc.rv2coeh(r2, v2, re, mu)
+    sc.rv2coe(r2, v2, mu)
 print('         p km          a km         ecc       incl deg     raan deg    '
       'argp deg     nu deg      m deg  \n')
 print('coes p=%11.4f\n' % (p))
@@ -465,7 +465,7 @@ if v2.all(): print('v2     %11.7f   %11.7f  %11.7f er/tu %11.7f  %11.7f  '
 
 if r2.all() and v2.all():
   p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-    sc.rv2coeh(r2, v2, re, mu)
+    sc.rv2coe(r2, v2, mu)
   print('         p km          a km         ecc       incl deg     '
         'raan deg    argp deg     nu deg      m deg  \n')
   if p: print('coes p=%11.4f\n' % (p))
@@ -505,14 +505,14 @@ if r2.all() and v2.all():
 #         fprintf(1, 'v2     #11.7f   #11.7f  #11.7f er/tu #11.7f  #11.7f  #11.7f km/s\n', v2/velkmps, v2);
 #         #        fprintf(1, 'v2 ans #11.7f   #11.7f  #11.7f er/tu #11.7f  #11.7f  #11.7f km/s\n', v2ans/velkmps, v2ans);
 
-#         [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coeh (r2, v2, re, mu);
+#         [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe(r2, v2, mu);
 #         fprintf(1, '         p km          a km         ecc       incl deg     raan deg    argp deg     nu deg      m deg  \n');
 #         fprintf(1, 'coes #11.4f #11.4f #13.9f #13.7f #11.5f #11.5f #11.5f #11.5f \n', ...
 #             p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg );
 
 #         fprintf(1, '#s \n', answ );
 
-#         [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coeh (r2ans, v2ans, re, mu);
+#         [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe(r2ans, v2ans, mu);
 #         fprintf(1, '         p km          a km         ecc       incl deg     raan deg    argp deg     nu deg      m deg  \n');
 #         fprintf(1, 'coes #11.4f #11.4f #13.9f #13.7f #11.5f #11.5f #11.5f #11.5f \n', ...
 #             p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg );

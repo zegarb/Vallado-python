@@ -2988,7 +2988,7 @@ def kepler(ro: np.ndarray, vo: np.ndarray, dtseco: float):
     velkmps = math.sqrt(mu / re)
     numiter = 50
 
-    if sh.show =='y':
+    if sh.show:
         print(' ro %16.8f %16.8f %16.8f km \n'% (ro[0], ro[1], ro[2]))
         print(' vo %16.8f %16.8f %16.8f km/s \n'% (vo[0], vo[1], vo[2]))
         print(' ro %16.8f %16.8f %16.8f ER \n'
@@ -3021,7 +3021,7 @@ def kepler(ro: np.ndarray, vo: np.ndarray, dtseco: float):
         if (abs(alpha) < small):   # parabola
             alpha = 0.0
 
-        if sh.show =='y':
+        if sh.show:
             print(' sme %16.8f  a %16.8f alp  %16.8f ER \n'
                     % (sme/(mu/re), a/re, alpha*re))
             print(' sme %16.8f  a %16.8f alp  %16.8f km \n' % (sme, a, alpha))
@@ -3082,7 +3082,7 @@ def kepler(ro: np.ndarray, vo: np.ndarray, dtseco: float):
             if (xnew < 0.0 and dtsec > 0.0):
                 xnew = xold*0.5
 
-            if sh.show =='y':
+            if sh.show:
                 print('kep %3i %11.7f %11.7f %11.7f %11.7f %11.7f \n' \
                     % (ktr, xold, znew, rval, xnew, dtnew*tmp))
                 print('%3i %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n' \
@@ -3120,7 +3120,7 @@ def kepler(ro: np.ndarray, vo: np.ndarray, dtseco: float):
             if (abs(temp-1.0) > 0.00001):
                 errork = 'fandg'
 
-            if sh.show =='y':
+            if sh.show:
                 print('f %16.8f g %16.8f fdot %16.8f gdot %16.8f \n'
                       % (f, g, fdot, gdot))
                 tusec = math.sqrt(re**3/mu)
@@ -3566,7 +3566,6 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
              rtasc2=None, rtasc3=None, jd1=None, jdf1=None,
              jd2=None, jdf2=None, jd3=None, jdf3=None,
              rsite1=None, rsite2=None, rsite3=None, re=None, mu=None):
-#   constastro
 
     # for sun
 #re = 149597870.0
@@ -3613,7 +3612,7 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
         g = tau32 - math.sqrt(a**3 / mu) * (deltae32 - math.sin(deltae32))
         v2 = (r3 - f * r2) / g
         p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-            sc.rv2coeh(r2, v2, re, mu)
+            sc.rv2coe(r2, v2, mu)
         ###print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
         # -------------- re-calculate f1 and f2 with r1 = r1 + delta r1
         magr1o = magr1in
@@ -3993,14 +3992,14 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         if ((str(error) == str('          ok')) and
                 ((abs(theta) < 1.0 * deg2rad) or (abs(theta1) < 1.0 * deg2rad))):
             p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-                sc.rv2coeh(r2, v2, re, mu)
+                sc.rv2coe(r2, v2, mu)
             ###print('coes init ans %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
             # --- hgibbs to get middle vector ----
             v2, theta, theta1, copa, error = \
                 hgibbs(r1, r2, r3, jd1 + jdf1, jd2 + jdf2, jd3 + jdf3)
             print('using hgibbs: ' % ())
         p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
-            sc.rv2coeh(r2, v2, re, mu)
+            sc.rv2coe(r2, v2, mu)
         ###print('coes init ans %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
         #fprintf(1, 'dr #11.7f m #11.7f m/s \n', 1000*smu.mag(r2-r2ans), 1000*smu.mag(v2-v2ans))
         if (ll <= 8):
@@ -5026,7 +5025,7 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
     # --------------------  initialize values   ------------------- }
     mu = 1.0 # canonical
 
-    if sh.show == 'y':
+    if sh.show:
         print('rinit %11.7f %11.7f  rfinal %11.7f  %11.7f \n'
               % (rinit, rinit*6378.137 , rfinal, rfinal*6378.137))
 
@@ -5036,7 +5035,7 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
     sme1 = -mu / (2.0*ainit)
     sme2 = -mu / (2.0*atran)
 
-    if sh.show == 'y':
+    if sh.show:
         print('ainit %11.7f %11.7f \n' % (ainit, ainit*6378.1363))
         print('atran %11.7f %11.7f \n' % (atran, atran*6378.1363))
         print('afinal %11.7f %11.7f \n'% (afinal, afinal*6378.1363))
@@ -5055,7 +5054,7 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
     #     fpa2b = math.atan((e2*math.sin(nu2b)) / (1.0 + e2*math.cos(nu2b)))
     #     fpa3 = math.atan((efinal*math.sin(nufinal)) / (1.0 + efinal*math.cos(nufinal)))
 
-    if sh.show == 'y':
+    if sh.show:
         vkmps = 7.905366149846074
         print('vinit %11.7f %11.7f  vfinal %11.7f  %11.7f \n'
               % (vinit, vinit*vkmps, vfinal, vfinal*vkmps))
@@ -5069,7 +5068,7 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
     # ----------------- this is the approximate approach ------------------
     ratio = rfinal/rinit
     s = 1.0/deltai * math.atan(math.sin(deltai)/(ratio**1.5 + math.cos(deltai)))
-    if sh.show == 'y':
+    if sh.show:
         print(' s %11.7f \n' % s)
     deltai1 = s*deltai
     deltai2 = (1.0-s)*deltai
@@ -5634,7 +5633,7 @@ def iau06era(jdut1=None):
     tut1d = jdut1 - 2451545.0
     era = twopi * (0.779057273264 + 1.0027378119113546 * tut1d)
     era = math.fmod(era, twopi)
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('era%11.7f  \n' % (era * 180 / math.pi))
 
     # transformation matrix
@@ -5747,7 +5746,7 @@ def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
 
     gst = gmst2000 + ee2000
 
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('meanobl %11.7f getsum %11.7f %11.7f eect %11.7f  \n'
               % (epsa * 180 / math.pi, gstsum0 * 180 / math.pi,
                  gstsum1 * 180 / math.pi, eect2000 * 180 / math.pi))
@@ -5868,7 +5867,7 @@ def iau06pna(ttt=None):
     deltapsi = pnsum + pplnsum
 
     deltaeps = ensum + eplnsum
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     # iau2006 approach - does not seem to be correct, close though
@@ -5908,12 +5907,12 @@ def iau06pna(ttt=None):
     deltapsi = deltapsi + deltapsi * (4.697e-07 + j2d)
 
     deltaeps = deltaeps + deltaeps * j2d
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('dpsi %11.7f deltaeps %11.7f \n'
               % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     prec, psia, wa, ea, xa = precess(ttt, '06')
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('prec iau 06 \n' % ())
         print((prec))
 
@@ -5934,7 +5933,7 @@ def iau06pna(ttt=None):
     a9 = smu.rot2mat(0.041775 * math.sin(oblo) * arcsec2rad)
     # a9 = smu.rot2mat(0.0166170*arcsec2rad)
     a10 = smu.rot3mat(0.0146 * arcsec2rad)
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('p e %11.7f  %11.7f  \n'
               % (pnsum * deg2rad, ensum * deg2rad))
         print('p e %11.7f  %11.7f  \n'
@@ -5960,17 +5959,17 @@ def iau06pna(ttt=None):
 
     pnb = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4 @ a3 @ a2 @ a1
     prec = a7 @ a6 @ a5 @ a4
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('prec iau 06a alt \n' % ())
         print((prec))
 
     nut = a3 @ a2 @ a1
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('nut iau 06a \n' % ())
         print((nut))
 
     frb = a10 @ a9 @ a8
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('frb iau 06a \n' % ())
         print((frb))
 
@@ -6119,7 +6118,7 @@ def iau06pnb(ttt=None):
     pnb = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4 @ a3 @ a2 @ a1
     prec = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4
     nut = a3 @ a2 @ a1
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('p e %11.7f  %11.7f  \n' % (pnsum * 180 / math.pi, ensum * 180 / math.pi))
         print('dpsi %11.7f deps %11.7f  \n'
               % (deltapsi * 180 / math.pi, deltaeps * 180 / math.pi))
@@ -6128,7 +6127,7 @@ def iau06pnb(ttt=None):
                  xa * 180 / math.pi))
 
     # -------------- these are extra not needed for pnb
-    if (sh.iaupnhelp == 'y'):
+    if sh.iaupnhelp:
         p = psia + (deltapsi * math.sin(ea) * math.cos(xa)
                     - deltaeps * math.sin(xa)) / math.sin(wa)
         w = wa + deltapsi * math.sin(ea) * math.sin(xa) + deltaeps * math.cos(xa)
@@ -6177,7 +6176,7 @@ def iau06pnb(ttt=None):
              - 0.07257409 * ttt3 + 2.77e-05 * ttt4 + 1.561e-05 * ttt5)
         s = (- x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2
              + ssum3 * ttt3 + ssum4 * ttt4)
-        if sh.iauhelp == 'y':
+        if sh.iauhelp:
             print('00pnb  x  %14.12f" y  %14.12f" s %14.12f" a %14.12fdeg \n'
                   % (x * rad2arcsec, y * rad2arcsec,
                      s * rad2arcsec, a * rad2deg))
@@ -6320,7 +6319,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
 
     x = x * arcsec2rad + xsum0 + xsum1 * ttt + xsum2 * ttt2 + xsum3 * ttt3 + xsum4 * ttt4
 
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('xys x %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n' % (xsum0 / deg2rad, xsum1 / deg2rad, xsum2 / deg2rad, xsum3 / deg2rad, xsum4 / deg2rad))
 
     # ---------------- now find y
@@ -6388,7 +6387,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     y = (y * arcsec2rad + ysum0 + ysum1 * ttt + ysum2 * ttt2
          + ysum3 * ttt3 + ysum4 * ttt4)
 
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('xys y %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
               % (ysum0 / deg2rad, ysum1 / deg2rad, ysum2 / deg2rad,
                  ysum3 / deg2rad, ysum4 / deg2rad))
@@ -6459,7 +6458,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     # + 0.00000984*ttt2*sin(2.0*(f+omega)) - 0.00000885*ttt2*sin(2.0*omega)
     s = - x * y * 0.5 + s * arcsec2rad + ssum0 + ssum1 * ttt + ssum2 * ttt2 + ssum3 * ttt3 + ssum4 * ttt4
 
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('06xys before x  %14.12f y  %14.12f s %14.12f rad \n'
               % (x, y, s))
         print('xys s %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
@@ -6472,7 +6471,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     # ---------------- now find a
     a = 0.5 + 0.125 * (x * x + y * y)
 
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
       print('06xys  x  %14.12f y  %14.12f s %14.12f a %14.12f rad \n'
           % (x, y, s, a))
       print('06xys  x  %14.12f y  %14.12f s %14.12f a %14.12f deg \n'
@@ -6783,7 +6782,7 @@ def precess(ttt, opt):
     zeta = zeta  * arcsec2rad
     theta = theta * arcsec2rad
     z = z     * arcsec2rad
-    if (sh.iauhelp == 'y'):
+    if sh.iauhelp:
         print('pr %11.7f  %11.7f  %11.7f %11.7fdeg \n'
               % (psia*180/math.pi, wa*180/math.pi, ea*180/math.pi,
                  xa*180/math.pi))
@@ -6977,7 +6976,7 @@ def sun(jd):
     # -------------------  initialize values   --------------------
     tut1 = (jd - 2451545.0) / 36525.0
 
-    if sh.show == 'y':
+    if sh.show:
         print('tut1 %14.9f \n' % tut1)
 
     meanlong = 280.460 + 36000.77 * tut1
@@ -7008,7 +7007,7 @@ def sun(jd):
     rsun[1] = magr*math.cos(obliquity)*math.sin(eclplong)
     rsun[2] = magr*math.sin(obliquity)*math.sin(eclplong)
 
-    if sh.show == 'y':
+    if sh.show:
         print('meanlon %11.6f meanan %11.6f eclplon %11.6f obli %11.6f \n'
               % (meanlong, meananomaly/deg2rad, eclplong/deg2rad,
                  obliquity/deg2rad))
@@ -7427,6 +7426,7 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
 #
 #  inputs          description                    range / units
 #    jd          - julian date                    days from 4713 bc
+#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    rmoon       - ijk position vector of moon    er
@@ -7456,7 +7456,7 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
 # [rmoon, rtasc, decl] = moon (jd, show)
 # ------------------------------------------------------------------------------
 
-def moon(jd=None, show=None):
+def moon(jd=None, show=False):
 
     # -------------------------  implementation   -----------------
     ttdb = (jd - 2451545.0) / 36525.0
@@ -7484,7 +7484,7 @@ def moon(jd=None, show=None):
     obliquity = 23.439291 - 0.0130042 * ttdb
 
     obliquity = obliquity * deg2rad
-    if show == 'y':
+    if show:
         360 + eclplong / deg2rad
         eclplat / deg2rad
         hzparal / deg2rad
@@ -7498,7 +7498,7 @@ def moon(jd=None, show=None):
          + math.cos(obliquity) * math.sin(eclplat))
     # ------------- calculate moon position vector ----------------
     magr = 1.0 / math.sin(hzparal)
-    if show == 'y':
+    if show:
         magr * re
 
     rmoon = np.zeros(3)
@@ -7527,6 +7527,7 @@ def moon(jd=None, show=None):
 #    jd          - julian date                    days from 4713 bc
 #    latgd       - site latitude (south -)        -65 to 65 rad
 #    lon         - site longitude (west -)        -2pi to 2pi rad
+#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    utmoonrise  - universal time of moonrise     hrs
@@ -7584,7 +7585,7 @@ def moon(jd=None, show=None):
 # [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise(jd=None, latgd=None, lon=None, show=None):
+def moonrise(jd=None, latgd=None, lon=None, show=False):
     # ------------------------  implementation   ------------------
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
@@ -7629,7 +7630,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
                        - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
             eclplong = math.fmod(eclplong * deg2rad, twopi)
             eclplat = math.fmod(eclplat * deg2rad, twopi)
-            if show == 'y':
+            if show:
                 print('%2d %2d ecpllon %11.7f ecllat %11.7f '
                       % (opt, try1, eclplong / deg2rad, eclplat / deg2rad))
             obliquity = 23.439291 - 0.0130042 * ttdb
@@ -7640,7 +7641,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
                  - math.sin(obliquity) * math.sin(eclplat))
             n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
                  + math.cos(obliquity) * math.sin(eclplat))
-            if show == 'y':
+            if show:
                 print('l %11.7f m %11.7f n %11.7f ' % (l, m, n))
             rtasc = math.atan2(m, l)
             # - check that rtasc is in the same quadrant as eclplong
@@ -7651,7 +7652,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
                          * np.rint(0.5 + (eclplong - rtasc) / (0.5 * math.pi)))
             decl = math.asin(n)
             lst, gst = stu.lstime(lon, jdtemp + jdtempf)
-            if show == 'y':
+            if show:
                 print('ra %8.5f dcl %8.5f lst %8.5f jdtemp %8.5f \n'
                       % (rtasc / deg2rad, decl / deg2rad, lst / deg2rad,
                          jdtemp + jdtempf))
@@ -7664,12 +7665,12 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
                 dgha = (moonghan - moongha) / deltaut
             if (dgha < 0.0):
                 dgha = dgha + twopi / abs(deltaut)
-            if show == 'y':
+            if show:
                 print('mn gha %11.7f  dgha  %11.7f '
                       % (moonghan / deg2rad, dgha / deg2rad))
             lhan = ((0.00233 - math.sin(latgd) * math.sin(decl))
                     / (math.cos(latgd) * math.cos(decl)))
-            if show == 'y':
+            if show:
                 print('lhan  %11.7f rad ' % (lhan))
             #fprintf('lhan  #11.7f deg \n', lhan/deg2rad)
             if (lhan > 1.0):
@@ -7679,14 +7680,14 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
             lhan = math.acos(lhan)
             if (opt == 1):
                 lhan = twopi - lhan
-            if show == 'y':
+            if show:
                 print('lhan1 %11.7f ' % (lhan / deg2rad))
             if (abs(dgha) > 0.0001):
                 deltaut = (lhan - lha) / dgha
             else:
                 deltaut = 1.0
                 error = 'error1 dgha is too small'
-            if show == 'y':
+            if show:
                 print('deltaut %11.7f tn  %11.7f ' % (deltaut, tn))
             t = tn
             if (abs(deltaut) > 0.5):
@@ -7705,7 +7706,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
             jdtemp = jdtemp + jdtempf - uttemp + tn
             i = i + 1
             moongha = moonghan
-            if show == 'y':
+            if show:
                 print('deltaut %11.7f  jd  %14.4f  tn  %11.7f \n'
                       % (deltaut, jdtemp + jdtempf, tn))
 
@@ -7728,7 +7729,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
         # update the iteration and check for solution
         try1 = try1 + 1
         if ((i > 5) and (try1 < 3)):
-            if show == 'y':
+            if show:
                 print('try1 #2 %4d' % (opt))
         else:
             if ((i > 5) and (try1 > 2)):
@@ -7783,6 +7784,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
 #    jd          - julian date                    days from 4713 bc
 #    latgd       - site latitude (south -)        -65 to 65 rad
 #    lon         - site longitude (west -)        -2pi to 2pi rad
+#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    utmoonrise  - universal time of moonrise     hrs
@@ -7840,7 +7842,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=None):
 # [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise2(jd=None, latgd=None, lon=None, show=None):
+def moonrise2(jd=None, latgd=None, lon=None, show=False):
     # ------------------------  implementation   ------------------
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
@@ -7871,7 +7873,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
         jdtemp = jdtemp + jdtempf + uttemp
         deltaut = 10.0
         ktlim = 15
-        if show == 'y':
+        if show:
             print('   ecplon    ecllat       l          m           n       rtasc          decl        gmst       mgha      dgha    lhan     lhan1   deltaut     tn    deltaut    jd    tn \n' % ())
         while ((abs(deltaut) >= 8e-05) and (i < ktlim)):
 
@@ -7889,7 +7891,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
                        - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
             eclplong = math.fmod(eclplong * deg2rad, twopi)
             eclplat = math.fmod(eclplat * deg2rad, twopi)
-            if show == 'y':
+            if show:
                 print('%2i %2i %11.7f %11.7f ' % (opt, i, eclplong / deg2rad, eclplat / deg2rad))
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
@@ -7899,7 +7901,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
                  - math.sin(obliquity) * math.sin(eclplat))
             n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
                  + math.cos(obliquity) * math.sin(eclplat))
-            if show == 'y':
+            if show:
                 print(' %11.7f %11.7f %11.7f ' % (l, m, n))
             rtasc = math.atan2(m, l)
             # - check that rtasc is in the same quadrant as eclplong
@@ -7911,7 +7913,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
                                                       / (0.5 * math.pi))
             decl = math.asin(n)
             lst, gmst = stu.lstime(lon, jdtemp)
-            if show == 'y':
+            if show:
                 print(' %d %d %d ' % (rtasc, decl, gmst / deg2rad))
             moonghan = gmst - rtasc
             #cdav
@@ -7925,11 +7927,11 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
             #        if (dgha < 0.0)
 #            dgha = dgha + twopi / abs(deltaut)
 #        end
-            if show == 'y':
+            if show:
                 print(' %11.7f  %11.7f ' % (moonghan / deg2rad, dgha / deg2rad))
             lhan = (0.00233 - (math.sin(latgd) * math.sin(decl))
                     / (math.cos(latgd) * math.cos(decl)))
-            if show == 'y':
+            if show:
                 print(' %11.7f rad ' % (lhan))
             #fprintf('lhan  #11.7f deg \n', lhan/deg2rad)
 #       if (lhan > 1.0)
@@ -7946,10 +7948,10 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
                 lhan = math.acos(lhan)
                 if (opt == 1):
                     lhan = twopi - lhan
-                if show == 'y':
+                if show:
                     print(' %11.7f ' % (lhan / deg2rad))
                 deltaut = (lhan - lha) / dgha
-                if show == 'y':
+                if show:
                     print(' % 11.7f  %11.7f ' % (deltaut, tn))
                 #                if (abs(deltaut) > 0.5)
 #                    if (abs(dgha) > 0.001)
@@ -8001,7 +8003,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
             jdtemp = jdtemp + jdtempf + deltaut
             uttemp = uttemp + deltaut
             tn = uttemp
-            if show == 'y':
+            if show:
                 print(' % 11.7f  %14.4f  %11.7f \n'
                       % (deltaut, jdtemp + jdtempf, tn))
 
@@ -8028,7 +8030,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
         # update the iteration and check for solution
         try1 = try1 + 1
         if ((i > ktlim - 1) and (try1 < 3)):
-            if show == 'y':
+            if show:
                 print('try1 #2 %4d \n' % (opt))
                 print(' uttemp  %11.7f  hrs \n' % (uttemp))
         else:
@@ -8042,7 +8044,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 #                     uttemp = 9997.99
 #                 end
 #             end
-            if show == 'y':
+            if show:
                 print(' uttemp  %11.7f  hrs \n' % (uttemp))
             opt = opt + 1
             try1 = 1
@@ -8088,6 +8090,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 #    jd          - julian date                    days from 4713 bc
 #    latgd       - site latitude (south -)        -65 to 65 rad
 #    lon         - site longitude (west -)        -2pi to 2pi rad
+#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    utmoonrise  - universal time of moonrise     hrs
@@ -8145,7 +8148,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=None):
 # [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise3(jd=None, latgd=None, lon=None, show=None):
+def moonrise3(jd=None, latgd=None, lon=None, show=False):
     # ------------------------  implementation   ------------------
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
@@ -8182,7 +8185,7 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
                        - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
             eclplong = math.fmod(eclplong * deg2rad, twopi)
             eclplat = math.fmod(eclplat * deg2rad, twopi)
-            if show == 'y':
+            if show:
                 print('%2i %2i%8.5f  %11.7f %11.7f ' %
                       (opt, loopCount, ttdb, eclplong / deg2rad,
                        eclplat / deg2rad))
@@ -8213,13 +8216,13 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
                 deltaGHA = deltaGHA + twopi / abs(deltaUT)
             cosLHAn = ((0.00233 - math.sin(latgd) * math.sin(decl))
                        / (math.cos(latgd) * math.cos(decl)))
-            if show == 'y':
+            if show:
                 print(' coslha %8.5f lmn %11.7f %11.7f %11.7f \n'
                       % (cosLHAn, l, m, n))
             if (abs(cosLHAn) > 1.0):
                 # No event on this day advance to the next
                 deltaUT = 1
-                if show == 'y':
+                if show:
                     print('nothing Advancing one day \n' % ())
                 print('a' % ())
             else:
@@ -8236,13 +8239,13 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
                 if (deltaJD + deltaUT < 0.0):
                     deltaUT = deltaUT + 1
                     print('A' % ())
-                    if show == 'y':
+                    if show:
                         print('Advancing one day \n' % ())
                 GHA = GHAn
             jdtemp = jdtemp + deltaUT
             deltaJD = deltaJD + deltaUT
             loopCount = loopCount + 1
-            if show == 'y':
+            if show:
                 print('%2i %2i %11.7f hrs %8.5f '
                       % (opt, loopCount, deltaUT * 24, deltaJD * 24))
                 print('rtasc %11.7f  decl %8.5f gmst %8.5f GHAn %8.5f dGHA %8.5f  LHAn %8.5f jdtemp %8.5f\n'
@@ -8255,7 +8258,7 @@ def moonrise3(jd=None, latgd=None, lon=None, show=None):
         if opt == 2:
             utmoonset = deltaJD * 24
 
-    if show == 'y':
+    if show:
         print('rise %11.7f  set %11.7f  \n' % (utmoonrise, utmoonset))
 
 
@@ -8401,7 +8404,7 @@ def moonill(f=None, moonel=None):
 
 def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
     # --------------------------  implementation   -----------------
-    show = 'n'
+    show = False
     mu = 398600.4418
     hitearth = 'n'
     hitearthstr = 'no'
@@ -8415,7 +8418,7 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
         # hitting earth already at start or stop point
         hitearth = 'y'
         hitearthstr = hitearth + ' initradii'
-        if show == 'y':
+        if show:
             print('hitearth? %s \n' % (hitearthstr))
     else:
         rdotv1 = np.dot(r1, v1t)
@@ -8480,7 +8483,7 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
                                 hitearth = 'y'
                                 hitearthstr = hitearth + ' Sub_Earth_hyp'
                     #   fprintf(1, 'hitearth? #s rp #11.7f  #11.7f km \n', hitearthstr, rp*6378.137, rpad*6378.137)
-            if show == 'y':
+            if show:
                 print('hitearth? %s rp %11.7f km \n' % (hitearth, rp * 6378.0))
 
     return hitearth, hitearthstr
@@ -8532,6 +8535,8 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
     r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
     nu = np.zeros(4)
     check = np.zeros(4)
+    print('test')
+    print(r1r)
     nu[0] = np.degrees(math.acos(r1r))
     nu[1] = np.degrees(math.acos(r2r))
     nu[2] = np.degrees(math.acos(r3r))

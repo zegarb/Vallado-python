@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from space_conversions import coe2rv, rv2coe, rv2coeS, eq2rv, rv2eq
+from space_conversions import coe2rv, rv2coe, eq2rv, rv2eq
 from spacemath_utils import mag
 from space_constants import *
 
@@ -45,21 +45,6 @@ print('start %15.9f %15.9f %15.9f' % (r[0], r[1], r[2]))
 print(' v %15.10f %15.10f %15.10f\n' % (v[0], v[1], v[2]))
 
 # --------  rv2coe   - position and velocity vectors to classical elements
-
-p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = rv2coeS(r, v)
-
-ideg = incl * rad2deg if incl else -0.0
-odeg = omega * rad2deg if omega else -0.0
-adeg = argp * rad2deg if argp else -0.0
-ndeg = nu * rad2deg if nu else -0.0
-mdeg = m * rad2deg if m else -0.0
-argdeg = arglat * rad2deg if arglat else -0.0
-tdeg = truelon * rad2deg if truelon else -0.0
-ldeg = lonper * rad2deg if lonper else -0.0
-
-print('rv2coeS: p km        a km         ecc            incl deg     raan deg     argp deg    nu deg       m deg     arglat       truelon     lonper')
-print('coes    %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f\n'
-       % (p, a, ecc, ideg, odeg, adeg, ndeg, mdeg, argdeg, tdeg, ldeg))
 
 p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = rv2coe(r, v)
 
