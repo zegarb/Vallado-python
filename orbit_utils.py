@@ -8558,16 +8558,29 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
     print(coeffA)
     print(np.roots(coeffA))
     r1r, r2r, r3r, r4r = np.real(np.roots(coeffA))
+    print(r1r)
+    print(r2r)
+    print(r3r)
+    print(r4r)
 
     # Quartic funciton does not work
-    #r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
+    r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
+    rr = np.array[r1r,r2r,r3r,r4r]
+    print('test 2')
+    print(r1r)
+    print(r2r)
+    print(r3r)
+    print(r4r)
+
 
     nu = np.zeros(4)
     check = np.zeros(4)
-    nu[0] = math.acos(r1r)
-    nu[1] = math.acos(r2r)
-    nu[2] = math.acos(r3r)
-    nu[3] = math.acos(r4r)
+    for i in range(np.size(rr)):
+        if rr[i] > 1 or rr[i] < -1:
+            nu[i] = None
+        else:
+            nu[i] = math.acos(rr[i])
+
     print('test')
     print(nu)
     k = 1
