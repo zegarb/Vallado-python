@@ -151,36 +151,3 @@ def elliptic12(u, m, tol = None):
     return F, E, Z
 
 
-answers = np.array([.0005, -.0005, .002, .001, .001, 7.36358/math.pi,
-                    48.4422411 / math.pi])
-a = np.array([1, 1, 1, 1, 1, 5, 5])
-b = np.array([.5, .5, 2, .5, 2, 10, 10])
-ab = np.zeros(len(a))
-theta0 = np.array([.001, .002, .001, .5 - .002, .5 - .002, .1, 0])
-theta1 = np.array([.002, .001, .002, .5 - .001, .5 - .001, .5, 2])
-theta0 = theta0 * math.pi
-theta1 = theta1 * math.pi
-theta0a = np.zeros(len(a))
-theta1a = np.zeros(len(a))
-for i in range(len(a)):
-    if a[i] < b[i]:
-        ab[i] = 1 - (a[i] / b[i]) ** 2
-        theta0a[i] = theta0[i]
-        theta1a[i] = theta1[i]
-    elif a[i] > b[i]:
-        ab[i] =  1 - (b[i] / a[i]) ** 2
-        theta0a[i] = math.pi / 2 - theta0[i]
-        theta1a[i] = math.pi / 2 - theta1[i]
-
-F1, E1, Z1 = elliptic12(theta1a, ab)
-F0, E0, Z0 = elliptic12(theta0a, ab)
-
-arclength = np.zeros(len(a))
-for i in range(len(a)):
-    if a[i] < b[i]:
-        arclength[i] = b[i] * (E1[i] - E0[i])
-    elif a[i] > b[i]:
-        arclength[i] = a[i] * (E0[i] - E1[i])
-print(f'{answers}')
-print(f'{arclength / math.pi}')
-print(f'{(arclength / math.pi) / answers}')
