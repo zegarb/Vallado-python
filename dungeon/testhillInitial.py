@@ -24,10 +24,8 @@ from space_constants import *
 import os
 import spacemath_utils as smu
 import space_conversions as sc
-print('------------------------------------------------ initial accuracy ----------------------------- \n' % ())
+print('------------------------------------------------ initial accuracy ----------------------------- \n')
 # now test the ability to convert eci - hills and back
-constmath
-constastro
 casenumo = 1
 
 casetest = 7
@@ -96,24 +94,24 @@ for ktr in range(1, 11):
                                          0.0, 0.0, 0.0, 0.0)
             circ = 'y'
         case 5:
-            rtgteci = np.array([-605.7904308,- 5870.230407, 3493.052004]).T
-            vtgteci = np.array([- 1.568251615,- 3.702348353,- 6.479484915]).T
+            rtgteci = np.array([-605.7904308,- 5870.230407, 3493.052004])
+            vtgteci = np.array([- 1.568251615,- 3.702348353,- 6.479484915])
             circ = 'n'
         case 6:
-            rtgteci = np.array([- 761.24075519, 22699.40899449, 13644.176032]).T
-            vtgteci = np.array([- 2.630715586, 1.396719096,- 2.491891]).T
+            rtgteci = np.array([- 761.24075519, 22699.40899449, 13644.176032])
+            vtgteci = np.array([- 2.630715586, 1.396719096,- 2.491891])
             circ = 'n'
         case 7:
-            rtgteci = np.array([- 40588.150362,- 11462.167028, 27.147649]).T
-            vtgteci = np.array([0.834787457,- 2.958305691,- 0.001173016]).T
+            rtgteci = np.array([- 40588.150362,- 11462.167028, 27.147649])
+            vtgteci = np.array([0.834787457,- 2.958305691,- 0.001173016])
             circ = 'n'
         case 8:
-            rtgteci = np.array([- 5551.898646,- 2563.049696, 3257.756165]).T
-            vtgteci = np.array([2.149073,- 7.539457,- 2.185709]).T
+            rtgteci = np.array([- 5551.898646,- 2563.049696, 3257.756165])
+            vtgteci = np.array([2.149073,- 7.539457,- 2.185709])
             circ = 'n'
         case 9:
-            rtgteci = np.array([9668.14551571, 6999.07240705, 4041.43303674]).T
-            vtgteci = np.array([- 3.65292306, 0.64966519,- 5.82123516]).T
+            rtgteci = np.array([9668.14551571, 6999.07240705, 4041.43303674])
+            vtgteci = np.array([- 3.65292306, 0.64966519,- 5.82123516])
             circ = 'n'
         case 10:
             a = 8164.7188
