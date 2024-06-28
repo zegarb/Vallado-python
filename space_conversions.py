@@ -9464,9 +9464,9 @@ def hillleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     rscale = rintsez[2] / rintrsw1unit[2]
     rintrsw1 = rscale * rintrsw1unit
 
-    # rtgt2 unknown -zeg
-    vintsez = [-(dz/rtgt2) * rscale,
-               (dy + vrsw1[1]) * rscale * (cosdphi/rtgt2),
+    magrtgt2 = smu.mag(rpqw2)
+    vintsez = [-(dz/magrtgt2) * rscale,
+               (dy + vrsw1[1]) * rscale * (cosdphi/magrtgt2),
                dx + vrsw2[0]]
     vintrsw1 = rsw2sez.T @ vintsez
     transmat1t = transmat1.T
@@ -9538,14 +9538,14 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
     # no idea. -zeg
     arc1 = IEISK((E1, E2), ecc**2)
 
-    #rtgt2 still unknown
+    magrtgt2 = smu.mag(rtgtpqw2)
     rinteqcm = np.array([rintsez[2] - rtgtrsw2[0],
                          arc1,
-                         dphi * rtgt2])
+                         dphi * magrtgt2])
     dotlambda = vintsez[1] / (rmag * cosdphi)
     dotphi = -vintsez[0] / rmag
     vinteqcm = np.ndarray([vintsez[2] - vtgtrsw2[0],
-                           dotlambda * rtgt2 - abs(vtgtrsw1[1]),
-                           dotphi * rtgt2])
+                           dotlambda * magrtgt2 - abs(vtgtrsw1[1]),
+                           dotphi * magrtgt2])
     return rinteqcm, vinteqcm
 
