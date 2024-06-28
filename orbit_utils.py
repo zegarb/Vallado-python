@@ -8489,6 +8489,8 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
     return hitearth, hitearthstr
 
 
+
+# ALL angles in radians
 def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
                     raan=None, argp=None, nu=None, mu=None):
     Een = 0.0
@@ -8496,77 +8498,105 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
     # Semi-Parameter
     p = a * (1.0 - ecc ** 2)
     # Eccentric Anomaly:
-    sinE = (math.sin(math.pi/180*nu) * math.sqrt(1 - ecc ** 2)) / (1 + ecc * math.cos(math.pi/180*nu))
-    cosE = (ecc + math.cos(math.pi/180*nu)) / (1 + ecc * math.cos(math.pi/180*nu))
+    #sinE = (math.sin(nu) * math.sqrt(1 - ecc ** 2)) / (1 + ecc * math.cos(nu))
+    #cosE = (ecc + math.cos(nu)) / (1 + ecc * math.cos(nu))
+
     # (5.3)
-    Px = (math.cos(math.pi/180*raan) * math.cos(math.pi/180*argp)
-          - math.sin(math.pi/180*raan) * math.sin(math.pi/180*argp)
-          * math.cos(math.pi/180*incl))
-    Py = (math.cos(math.pi/180*raan) * math.sin(math.pi/180*argp)
-          + math.sin(math.pi/180*raan) * math.cos(math.pi/180*argp)
-          * math.cos(math.pi/180*incl))
-    Pz = math.sin(math.pi/180*raan) * math.sin(math.pi/180*incl)
+    # Raan = Omega here
+    # IJK to PQW matrix
+    # I believe raan and argp were mixed up on the matlab code -mjc
+    Px = (math.cos(raan) * math.cos(argp)
+          - math.sin(raan) * math.sin(argp) * math.cos(incl))
+    Py = (math.sin(raan) * math.cos(argp)
+          + math.cos(raan) * math.sin(argp) * math.cos(incl))
+    Pz = math.sin(argp) * math.sin(incl)
     P_ = np.array([Px, Py, Pz])
-    Qx = (- math.sin(math.pi/180*raan) * math.cos(math.pi/180*argp)
-          - math.cos(math.pi/180*raan) * math.sin(math.pi/180*argp)
-          * math.cos(math.pi/180*incl))
-    Qy = (- math.sin(math.pi/180*raan) * math.sin(math.pi/180*argp)
-          + math.cos(math.pi/180*raan) * math.cos(math.pi/180*argp)
-          * math.cos(math.pi/180*incl))
-    Qz = math.cos(math.pi/180*raan) * math.sin(math.pi/180*incl)
+    Qx = (- math.cos(raan) * math.sin(argp)
+          - math.sin(raan) * math.cos(argp) * math.cos(incl))
+    Qy = (- math.sin(raan) * math.sin(argp)
+          + math.cos(raan) * math.cos(argp) * math.cos(incl))
+    Qz = math.cos(argp) * math.sin(incl)
     Q_ = np.array([Qx, Qy, Qz])
+
+
+    # PQW to IJK matrix
+    # Ix = (math.cos(raan) * math.cos(argp)
+    #       - math.sin(raan) * math.sin(argp) * math.cos(incl))
+    # Iy = (-math.cos(raan) * math.sin(argp)
+    #       - math.sin(raan) * math.cos(argp) * math.cos(incl))
+    # Iz = math.sin(argp) * math.sin(incl)
+    # I_ = np.array([Px, Py, Pz])
+    # Jx = (math.sin(raan) * math.cos(argp)
+    #       + math.cos(raan) * math.sin(argp) * math.cos(incl))
+    # Jy = (- math.sin(raan) * math.sin(argp)
+    #       + math.cos(raan) * math.cos(argp) * math.cos(incl))
+    # Jz = - math.cos(raan) * math.sin(incl)
+    # J_ = np.array([Qx, Qy, Qz])
+
     # (5.6)
-    beta = np.dot(P_, RSun) / np.linalg.norm(RSun)
-    zeta = np.dot(Q_, RSun) / np.linalg.norm(RSun)
-    A0 = (((rp / p) ** 4) * (ecc ** 4)
-          - 2 * ((rp / p) ** 2) * (zeta ** 2 - beta ** 2) * ecc ** 2
-          + (beta ** 2 + zeta ** 2) ** 2)
-    A1 = (4 * ((rp / p) ** 4) * ecc ** 3
-          - 4 * ((rp / p) ** 2) * (zeta ** 2 - beta ** 2) * ecc)
-    A2 = (6 * ((rp / p) ** 4) * ecc ** 2
-          - 2 * ((rp / p) ** 2) * (zeta ** 2 - beta ** 2)
-          - 2 * ((rp / p) ** 2) * (1 - zeta ** 2) * ecc ** 2
-          + 2 * (zeta ** 2 - beta ** 2) * (1 - zeta ** 2)
-          - 4 * (beta ** 2) * (zeta ** 2))
-    A3 = (4 * ((rp / p) ** 4) * ecc
-          - 4 * ((rp / p) ** 2) * (1 - zeta ** 2) * ecc)
-    A4 = ((rp / p) ** 4 - 2 * ((rp / p) ** 2) * (1 - zeta ** 2)
-          + (1 - zeta ** 2) ** 2)
-    r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
+    beta1 = np.dot(P_, RSun) / np.linalg.norm(RSun)
+    beta2 = np.dot(Q_, RSun) / np.linalg.norm(RSun)
+    alpha = rp / p
+
+    A0 = (((alpha) ** 4) * (ecc ** 4)
+          - 2 * ((alpha) ** 2) * (beta2 ** 2 - beta1 ** 2) * ecc ** 2
+          + (beta1 ** 2 + beta2 ** 2) ** 2)
+    A1 = (4 * ((alpha) ** 4) * ecc ** 3
+          - 4 * ((alpha) ** 2) * (beta2 ** 2 - beta1 ** 2) * ecc)
+    A2 = (6 * ((alpha) ** 4) * ecc ** 2
+          - 2 * ((alpha) ** 2) * (beta2 ** 2 - beta1 ** 2)
+          - 2 * ((alpha) ** 2) * (1 - beta2 ** 2) * ecc ** 2
+          + 2 * (beta2 ** 2 - beta1 ** 2) * (1 - beta2 ** 2)
+          - 4 * (beta2 ** 2) * (beta1 ** 2))
+    A3 = (4 * ((alpha) ** 4) * ecc
+          - 4 * ((alpha) ** 2) * (1 - beta2 ** 2) * ecc)
+    A4 = ((alpha ** 4) - 2 * ((alpha) ** 2) * (1 - beta2 ** 2)
+          + (1 - beta2 ** 2) ** 2)
+
+    coeffA = [A0, A1, A2, A3, A4]
+    print('test 1')
+    print(coeffA)
+    print(np.roots(coeffA))
+    r1r, r2r, r3r, r4r = np.real(np.roots(coeffA))
+
+    # Quartic funciton does not work
+    #r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
+
     nu = np.zeros(4)
     check = np.zeros(4)
+    nu[0] = math.acos(r1r)
+    nu[1] = math.acos(r2r)
+    nu[2] = math.acos(r3r)
+    nu[3] = math.acos(r4r)
     print('test')
-    print(r1r)
-    nu[0] = np.degrees(math.acos(r1r))
-    nu[1] = np.degrees(math.acos(r2r))
-    nu[2] = np.degrees(math.acos(r3r))
-    nu[3] = np.degrees(math.acos(r4r))
+    print(nu)
     k = 1
-    for incl in range(np.size(nu)):
-        check[incl] = (beta * math.cos(math.pi/180*nu[incl])
-                       + zeta * math.sin(math.pi/180*nu[incl]))
-        if check[incl] < 0:
-            nugood = nu[incl]
+    for i in range(np.size(nu)):
+        check[i] = (beta1 * math.cos(nu[i]) + beta2 * math.sin(nu[i]))
+        print('check i %f', check[i])
+        if check[i] < 0:
+            nugood = nu[i]
             k = k + 1
             print('----------------------------------------------------------------------')
-            print('Valid Eccentric Anomaly (beta*cos(nu) + zeta*sin(nu) < 0): ', str(nu[incl]))
-            before = (A0 * math.cos(math.pi/180*nugood - 0.01) ** 4
-                      + A1 * math.cos(math.pi/180*nugood - 0.01) ** 3
-                      + A2 * math.cos(math.pi/180*nugood - 0.01) ** 2
-                      + A3 * math.cos(math.pi/180*nugood - 0.01) + A4)
-            after = (A0 * math.cos(math.pi/180*nugood + 0.01) ** 4
-                     + A1 * math.cos(math.pi/180*nugood + 0.01) ** 3
-                     + A2 * math.cos(math.pi/180*nugood + 0.01) ** 2
-                     + A3 * math.cos(math.pi/180*nugood + 0.01) + A4)
+            print('Valid Eccentric Anomaly (beta1*cos(nu) + beta2*sin(nu) < 0): ', str(nu[i]))
+            before = (A0 * math.cos(nugood - 0.01 * deg2rad) ** 4
+                      + A1 * math.cos(nugood - 0.01 * deg2rad) ** 3
+                      + A2 * math.cos(nugood - 0.01 * deg2rad) ** 2
+                      + A3 * math.cos(nugood - 0.01 * deg2rad) + A4)
+            after = (A0 * math.cos(nugood + 0.01 * deg2rad) ** 4
+                     + A1 * math.cos(nugood + 0.01 * deg2rad) ** 3
+                     + A2 * math.cos(nugood + 0.01 * deg2rad) ** 2
+                     + A3 * math.cos(nugood + 0.01 * deg2rad) + A4)
+            print(before)
+            print(after)
             if before < 0 and after > 0:
                 print('Entering Shadow for This Eccentric Anomaly')
-                Een = nu[incl]
+                Een = nu[i]
+            elif before > 0 and after < 0:
+                print('Exiting Shadow for This Eccentric Anomaly')
+                Eex = nu[i]
             else:
-                if before > 0 and after < 0:
-                    print('Exiting Shadow for This Eccentric Anomaly')
-                    Eex = nu[incl]
-                else:
-                    print('Error - whether entering or exiting is not clear')
+                print('Error - whether entering or exiting is not clear')
 
     return Een, Eex
 
@@ -10052,8 +10082,8 @@ if __name__ == '__main__':
   arglat = 0.0
   truelon = 0.0
   lonper = 0.0
-  raan = 80.0
-  rp = 1.0
+  raan = 80.0 * deg2rad
+  rp = re
 
   x, y, z = makeorbitrv(2455545.0, 'k',
                       [5003.400903511, -3817.812007872, 4720.200666830],
