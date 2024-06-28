@@ -8,8 +8,8 @@
 |  6   |  pg 77 (104)   | Anomaly to v                                 | newtone()                            | ex2_2.py                        |           -                |   Y   |
 |  7   |  pg 81 (108)   | KeplerCOE                                    | N/A                                  |                -                |           -                |   -   |
 |  8   |  pg 93 (120)   | Kepler                                       | kepler()                             | ex2_4.py                        | pg 94 (121)                |   Y   |
-|  9   |  pg 113 (140)  | RV2COE                                       | rv2coe(), rv2coeh(), rv2coeS()       | ex2_5.py                        | pg 114 (141)               |   Y   |
-|  10  |  pg 118 (145)  | COE2RV                                       | coe2rv(), coe2rvh(), coe2rvS()       | ex2_6.py                        | pg 119 (146)               |   Y   |
+|  9   |  pg 113 (140)  | RV2COE                                       | rv2coe()                             | ex2_5.py                        | pg 114 (141)               |   Y   |
+|  10  |  pg 118 (145)  | COE2RV                                       | coe2rv(), coe2rvh()                  | ex2_6.py                        | pg 119 (146)               |   Y   |
 |  11  |  pg 126 (153)  | FindTOF                                      | findtof()                            |                -                |           -                |   N   |
 |  12  |  pg 172 (199)  | ECEF To LatLon                               | ecef2ll()                            | ex3_3.py                        | pg 173 (200)               |   Y   |
 |  13  |  pg 173 (200)  | ECEF To LatLon (B)                           | ecef2llb()                           | ex3_3.py                        | pg 173 (200)               |   Y   |

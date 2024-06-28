@@ -49,6 +49,7 @@ print('coes %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5
 
 # --------  coe2rv       - classical elements to position and velocity
 
+# coe2rvS was deleted and replaced by coe2rv
 ### coe2rvS.m is incomplete and only just replaces || with |. -jmb
 #r, v = coe2rvS(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
 #print('r    %15.9f %15.9f %15.9f' % (r[0], r[1], r[2]))

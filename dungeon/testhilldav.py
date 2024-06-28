@@ -20,8 +20,8 @@
 import numpy as np
 print('------------------------------------------------ initial accuracy ----------------------------- \n' % ())
 # now test the ability to convert eci - hills and back
-constmath
-constastro
+#constmath
+#constastro
 casenumo = 1
 
 casetest = 7

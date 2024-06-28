@@ -2963,7 +2963,7 @@ def fundarg(ttt: float, opt: str):
     lonnep = np.fmod(lonnep, 360.0) * deg2rad
     precrate = np.fmod(precrate, 360.0) * deg2rad
 
-    if sh.iauhelp == 'y':
+    if sh.iauhelp:
         print('fa %11.7f  %11.7f  %11.7f  %11.7f  %11.7f deg \n'
                 % (l*180/math.pi, l1*180/math.pi, f*180/math.pi,
                     d*180/math.pi, omega*180/math.pi))

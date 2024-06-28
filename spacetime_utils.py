@@ -359,7 +359,6 @@ def sec2hms(utsec: float):
 #    hr          - universal time hour            0 .. 23
 #    min         - universal time min             0 .. 59
 #    sec         - universal time sec             0.0 .. 59.999
-#    whichtype   - julian .or. gregorian calender   'j' .or. 'g'
 #
 #  outputs       :
 #    jd          - julian date                    days from 4713 bc
@@ -434,6 +433,7 @@ def jday(yr: int, mon: int, day: int, hr: int, min: int, sec: float):
 #
 #  inputs          description                    range / units
 #    jd          - julian date                    days from 4713 bc
+#    jdfrac      - julian date fraction of a day  0.0 to 1.0
 #
 #  outputs       :
 #    year        - year                           1900 .. 2100
@@ -540,7 +540,7 @@ def invjday (jd: float, jdfrac: float = None):
 #    mon         - month                          1 .. 12
 #    day         - day                            1 .. 28, 29, 30, 31
 #    hr          - hour                           0 .. 23
-#    minute      - minute                         0 .. 59
+#    min         - minute                         0 .. 59
 #    sec         - second                         0.0 .. 59.999
 #
 #  locals        :
@@ -575,7 +575,7 @@ def days2mdh (year: int, days: float):
         day: 1 to 31
     hr : int
         hour: 0 to 23
-    minute : int
+    min : int
         minutes: 0 to 59
     sec: float
         seconds: 0 to 59.99
@@ -609,15 +609,15 @@ def days2mdh (year: int, days: float):
     temp = (days - dayofyr)*24.0
     hr = np.fix(temp)
     temp = (temp-hr) * 60.0
-    minute = np.fix(temp)
-    sec = (temp-minute) * 60.0
+    min = np.fix(temp)
+    sec = (temp-min) * 60.0
     sec = round(sec, 3)
     if (sec == 60.0):
         sec = 0.0
-        minute = minute + 1
+        min = min + 1
 
 
-    return mon, day, hr, minute, sec
+    return mon, day, hr, min, sec
 
 
 # -----------------------------------------------------------------------------
@@ -692,43 +692,41 @@ def lstime(lon: float, jd: float):
 #    vallado     - add tcg, tcb, etc                              6 oct 2005
 #    vallado     - fix documentation for dut1                     8 oct 2002
 #
-#  inputs          description                    range / units
-#    year        - year                           1900 .. 2100
-#    mon         - month                          1 .. 12
-#    day         - day                            1 .. 28, 29, 30, 31
-#    hr          - universal time hour            0 .. 23
-#    min         - universal time min             0 .. 59
-#    sec         - universal time sec (utc)            0.0  .. 59.999
-#    timezone    - offset to utc from local site  0 .. 23 hr
-#    dut1        - delta of ut1 - utc             sec
-#    dat         - delta of tai - utc             sec
+#  inputs          description                              range / units
+#    year        - year                                     1900 .. 2100
+#    mon         - month                                    1 .. 12
+#    day         - day                                      1 .. 28, 29, 30, 31
+#    hr          - universal time hour                      0 .. 23
+#    min         - universal time min                       0 .. 59
+#    sec         - universal time sec (utc)                 0.0  .. 59.999
+#    timezone    - offset to utc from local site            0 .. 23 hr
+#    dut1        - delta of ut1 - utc                       sec
+#    dat         - delta of tai - utc                       sec
 #
 #  outputs       :
-#    ut1         - universal time                 sec
+#    ut1         - universal time                           sec
 #    tut1        - julian centuries of ut1
-#    jdut1       - julian date (days only)           days from 4713 bc
-#    jdut1Frac   - julian date (fraction of a day)   days from 0 hr of the day
-#    utc         - coordinated universal time     sec
-#    tai         - atomic time                    sec
-#    tdt         - terrestrial dynamical time     sec
-#    ttdt        - julian centuries of tdt
-#    jdtt        - julian date (days only)           days from 4713 bc
-#    jdttFrac    - julian date (fraction of a day)   days from 0 hr of the day
-#    tdb         - terrestrial barycentric time   sec
+#    jdut1       - julian date (days only)                  days from 4713 bc
+#    jdut1frac   - julian date (fraction of a day)          days from 0 hr of the day
+#    utc         - coordinated universal time               sec
+#    tai         - atomic time                              sec
+#    tt          - terrestrial time                         sec
+#    ttt         - julian centuries of tt
+#    jdtt        - julian date (days only)                  days from 4713 bc
+#    jdttfrac    - julian date (fraction of a day)          days from 0 hr of the day
+#    tdb         - terrestrial barycentric dynamical time   sec
 #    ttdb        - julian centuries of tdb
-#    jdtdb       - julian date of tdb             days from 4713 bc
-#    tcb         - celestial barycentric time     sec
-#    tcg         - celestial geocentric time      sec
-#    jdtdb       - julian date (days only)           days from 4713 bc
-#    jdtdbFrac   - julian date (fraction of a day)   days from 0 hr of the day
+#    jdtdb       - julian date of tdb                       days from 4713 bc
+#    jdtdb       - julian date (days only)                  days from 4713 bc
+#    jdtdbfrac   - julian date (fraction of a day)          days from 0 hr of the day
 #
 #  locals        :
-#    hrtemp      - temporary hours                hr
-#    mintemp     - temporary minutes              min
-#    sectemp     - temporary seconds              sec
-#    localhr     - difference to local time       hr
-#    jd          - julian date of request         days from 4713 bc
-#    me          - mean anomaly of the earth      rad
+#    hrtemp      - temporary hours                          hr
+#    mintemp     - temporary minutes                        min
+#    sectemp     - temporary seconds                        sec
+#    localhr     - difference to local time                 hr
+#    jd          - julian date of request                   days from 4713 bc
+#    me          - mean anomaly of the earth                rad
 #
 #  coupling      :
 #    hms_2_sec   - conversion between hr-min-sec .and. seconds
@@ -738,7 +736,10 @@ def lstime(lon: float, jd: float):
 #    vallado       2007, 201, alg 16, ex 3-7
 #
 #  leave out for now...
-#  , tcg, jdtcg, jdtcgfrac, tcb, jdtcb, jdtcbfrac
+#    tcb         - celestial barycentric time               sec
+#    tcg         - celestial geocentric time                sec
+#    (as well as jdtcg, jdtcgfrac, jdtcb, jdtcbfrac)
+#
 # [ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, ...
 #  tdb, ttdb, jdtdb, jdtdbfrac] ...
 # = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
@@ -969,7 +970,7 @@ def gstime(jdut1: float):
 #    year        - year                           1998, 1999, etc.
 #
 #  outputs       :
-#    gst  0      - greenwich sidereal time        0 to 2pi rad
+#    gst0        - greenwich sidereal time        0 to 2pi rad
 #
 #  locals        :
 #    jd          - julian date                    days from 4713 bc
@@ -1193,17 +1194,16 @@ def jd2sse(jd: float):
 #  revisions
 #                -
 #
-#  inputs          description                    range / units
-#    year        - year                           1900 .. 2100
-#    mon         - month                          1 .. 12
-#    day         - day                            1 .. 28, 29, 30, 31
-#    hr          - hour                           0 .. 23
-#    min         - minute                         0 .. 59
-#    sec         - second                         0.0 .. 59.999
+#  inputs          description                              range / units
+#    year        - year                                     1900 .. 2100
+#    mon         - month                                    1 .. 12
+#    day         - day                                      1 .. 28, 29, 30, 31
+#    hr          - hour                                     0 .. 23
+#    min         - minute                                   0 .. 59
+#    sec         - second                                   0.0 .. 59.999
 #
 #  outputs       :
-#    days        - day of year plus fraction of a
-#                    day                          days
+#    days        - day of year plus fraction of a day       days
 #
 #  locals        :
 #    lmonth      - length of months of year

@@ -489,20 +489,17 @@ print('adbar2rv:')
 print(r)
 print(v)
 
-p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper = rv2coeS(r, v)
-print('rv2coeS:')
-print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
-        truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
+# rv2coeS was deleted and replaced by rv2coe
+# p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper = rv2coeS(r, v)
+# print('rv2coeS:')
+# print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
+#         truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
 
-r, v = coe2rvS(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper)
-print('coe2rvS:')
-print(r)
-print(v)
-
-p,a,ecc,incl,raan,argp,nu,m,arglat,truelon,lonper = rv2coeh(r, v, re, mu)
-print('rv2coeh:')
-print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
-        truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
+# rv2coeh was combined with rv2coe
+# p,a,ecc,incl,raan,argp,nu,m,arglat,truelon,lonper = rv2coeh(r, v, re, mu)
+# print('rv2coeh:')
+# print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
+#         truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
 
 r, v = coe2rvh(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper, mu)
 print('coe2rvh:')
