@@ -375,11 +375,11 @@ for ktr in range(1, 13):
         ephtool.Export('d:\STKFiles Educational Files\Hills\tgt.txt')
         print('case %i, set maually \n' % (casenumo))
         #     pause;
-#          fprintf(1,'done with setting stk sats  \n' );
+        #          fprintf(1,'done with setting stk sats  \n' );
         # goto compiled program!!
         print('\n\n------------------------------- done in stk, go to compiled program? ---------------------------------------- \n' % ())
         #pause;
-# donot change tgt/int here  old 1-2-3-4
+        # donot change tgt/int here  old 1-2-3-4
         res1 = readdote('d:\STKFiles Educational Files\Hills\int.txt')
         res2 = readdote('d:\STKFiles Educational Files\Hills\inthpop.txt')
         res3 = readdote('d:\STKFiles Educational Files\Hills\tgt.txt')

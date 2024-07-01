@@ -62,17 +62,19 @@ for i in range(10):
     x = np.array([ro, vo]).T
     g = np.zeros((6, 6))
     #             g(1, 1) = -mu/(2.0*magro^3);
-#             g(2, 2) = -mu/(2.0*magro^3);
-#             g(3, 3) = -mu/(2.0*magro^3);
+    #             g(2, 2) = -mu/(2.0*magro^3);
+    #             g(3, 3) = -mu/(2.0*magro^3);
     g[0, 3] = 1.0
     g[1, 4] = 1.0
     g[2, 5] = 1.0
     g[3, 0] = - mu / magro ** 3
     g[4, 1] = - mu / magro ** 3
     g[5, 2] = - mu / magro ** 3
-    stm = np.eye(6) + g * dt + 0.5 * g * g * dt ** 2 + 1.0 / 6.0 * g * g * g * dt ** 3 + 1.0 / 24.0 * g * g * g * g * dt ** 4
-    if i == 1:
-        stm
+    stm = (np.eye(6) + g * dt + 0.5 * g * g * dt ** 2
+           + 1.0 / 6.0 * g * g * g * dt ** 3
+           + 1.0 / 24.0 * g * g * g * g * dt ** 4)
+    # if i == 1:
+    #     stm
     x1 = stm * x
     r[1] = x1(1)
     r[2] = x1(2)
@@ -91,8 +93,8 @@ for i in range(10):
     x = np.array([ro, vo]).T
     g = np.zeros((6, 6))
     #             g(1, 1) = -mu/(2.0*magro^3);
-#             g(2, 2) = -mu/(2.0*magro^3);
-#             g(3, 3) = -mu/(2.0*magro^3);
+    #             g(2, 2) = -mu/(2.0*magro^3);
+    #             g(3, 3) = -mu/(2.0*magro^3);
     g[0, 3] = 1.0
     g[1, 4] = 1.0
     g[2, 5] = 1.0
@@ -101,8 +103,8 @@ for i in range(10):
     g[5, 2] = - mu / magro ** 3
     stm = (np.eye(6) + g * dt + 0.5 * g * g * dt ** 2 + 1.0 / 6.0
            * g * g * g * dt ** 3 + 1.0 / 24.0 * g * g * g * g * dt ** 4)
-    if i == 1:
-        stm
+    # if i == 1:
+    #     stm
     x1 = stm * x
     r[0] = x1[0]
     r[1] = x1[1]
@@ -140,8 +142,8 @@ for i in range(10):
     stm[4, 1] = - mu * dt / magro ** 3
     stm[5, 2] = - mu * dt / magro ** 3
     #stm = (eye(6) + g*dt + 0.5*g*g*dt^2); # + 1.0/6.0 * g*g*g*dt^3);
-    if i == 1:
-        stm
+    # if i == 1:
+    #     stm
     x1 = stm * x
     r[0] = x1[0]
     r[1] = x1[1]
@@ -175,8 +177,8 @@ for i in range(10):
     stm[4, 1] = - mu * dt / magro ** 3
     stm[5, 2] = - mu * dt / magro ** 3
     #stm = (eye(6) + g*dt + 0.5*g*g*dt^2); # + 1.0/6.0 * g*g*g*dt^3);
-    if i == 1:
-        stm
+    # if i == 1:
+    #     stm
     x1 = stm * x
     r[0] = x1[0]
     r[1] = x1[1]
@@ -196,12 +198,11 @@ outfile.write('---- case 3: simple euler x = xo + xdot*dt + xdot*dt2/2\n' % ())
 outfile.write('at least %3.2f sec step size for accuracy \n' % (dt))
 ro = rorig
 vo = vorig
-x = np.array([ro, vo]).T
 for i in range(10):
     stmv, stma = stm3(ro, vo)
-    if i == 1:
-        stmv
-        stma
+    # if i == 1:
+    #     stmv
+    #     stma
     dt = i * 100
     x = np.array([ro, vo]).T
     x1 = stmv * dt + 0.5 * stma * dt * dt
@@ -301,8 +302,8 @@ for i in range(10):
                   '%9.4f km\n' % (dt, x1, smu.mag(dr)))
 
 stm = np.zeros((6, 6))
-print('---- case 4a: step by step pg 110 escobal f and g series \n' % ())
-outfile.write('---- case 4a: step by step pg 110 escobal f and g series \n' % ())
+print('---- case 4a: step by step pg 110 escobal f and g series \n')
+outfile.write('---- case 4a: step by step pg 110 escobal f and g series \n')
 outfile.write('at least %3.2f sec step size for accuracy \n' % (dt))
 ro = rorig
 vo = vorig
