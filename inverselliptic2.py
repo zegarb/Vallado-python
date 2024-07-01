@@ -67,20 +67,26 @@ from elliptic12 import elliptic12
 # Group:
 
 def inverselliptic2(E: np.ndarray, m: np.ndarray, tol: float = None):
+    if not isinstance(E, np.ndarray):
+        E = np.array([E])
+
+    if not isinstance(m, np.ndarray):
+        m = np.array([m])
+
     if tol == None:
         tol = sys.float_info.epsilon
 
-    if not np.isreal(E).all()  or not np.isreal(m).all() :
+    if not np.isreal(E).all() or not np.isreal(m).all() :
         raise Exception('Input arguments must be real.')
 
-    if len(m) == 1:
-        m = m(np.ones(E.shape))
+    # if len(m) == 1:
+    #     m = m(np.ones(E.shape))
 
-    if len(E) == 1:
-        E = E(np.ones(m.shape))
+    # if len(E) == 1:
+    #     E = E(np.ones(m.shape))
 
-    if not m.shape == E.shape:
-        raise Exception('E and M must be the same size.')
+    # if not m.shape == E.shape:
+    #     raise Exception('E and M must be the same size.')
 
     invE = np.zeros(E.shape)
     # make a row vector

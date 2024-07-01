@@ -40,21 +40,27 @@ import sys
 # 1-dimensional and random arrays remark call of the function unique(.)
 # and edit further code.
 
-def elliptic12(u, m, tol = None):
+def elliptic12(u: np.ndarray, m: np.ndarray, tol: np.ndarray = None):
+    if not isinstance(u, np.ndarray):
+        u = np.array([u])
+
+    if not isinstance(m, np.ndarray):
+        m = np.array([m])
+
     if tol == None:
         tol = sys.float_info.epsilon
 
     if not np.isreal(u).all() or not np.isreal(m).all():
         raise Exception('Input arguments must be real. Use ELLIPTIC12i for complex arguments.')
 
-    if len(m) == 1:
-        m = m(np.ones(u.shape))
+    # if len(m) == 1:
+    #     m = m(np.ones(u.shape))
 
-    if len(u) == 1:
-        u = u(np.ones(m.shape))
+    # if len(u) == 1:
+    #     u = u(np.ones(m.shape))
 
-    if not m.shape == u.shape:
-        raise Exception('U and M must be the same size.')
+    # if not m.shape == u.shape:
+    #     raise Exception('U and M must be the same size.')
 
     F = np.zeros(u.shape)
     E = F.copy()

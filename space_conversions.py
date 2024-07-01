@@ -7,6 +7,9 @@ import spacemath_utils as smu
 import spacetime_utils as stu
 import orbit_utils as obu
 from space_constants import sethelp as sh
+from arclength_ellipse import arclength_ellipse
+from elliptic12 import elliptic12
+from inverselliptic2 import inverselliptic2
 
 # ------------------------------------------------------------------------------
 #
@@ -8890,7 +8893,7 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
     return startmfe, stopmfe, deltamin, satrec
 
 
-def hillleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
+def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
                   z: float, dx: float, dy: float, dz: float):
     """this function takes the position and velocity of a target orbit, and the
     relative position and velocity of the interceptor to get the inertial
@@ -8919,7 +8922,7 @@ def hillleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     vmag = smu.mag(vrsw1)
 
     # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
-    ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rrsw1, rrsw2)
+    ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rrsw1, vrsw1)
     ebar = ((vmag**2 - mu / rmag) * rrsw1 - (rrsw1 @ vrsw1) * vrsw1) / mu
     eunit = ebar / ecc
     lambdap = math.atan(eunit[1] / eunit[0])
@@ -8931,12 +8934,12 @@ def hillleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     if abs(arclength) > 0.001:
         DE = arclength / atgt
         deltaea = inverselliptic2(DE, ecc **2)
-        F1, E1 = elliptic12(ea1, ecc **2)
+        F1, E1, _ = elliptic12(ea1, ecc **2)
         ea2e = ea1 + deltaea
         i = 1
         arclength1a = arclength + 10
         while (i < 10) and (abs(arclength1a - arclength) > 0.001):
-            F2, E2 = elliptic12(ea2e, ecc**2)
+            F2, E2, _ = elliptic12(ea2e, ecc**2)
             arclength1a = atgt * (E2 - E1)
             corr = arclength / (ea2e - ea1)
             i = i + 1
@@ -8965,7 +8968,7 @@ def hillleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
                              cosdphi * sindlambda,
                              sindphi])
 
-    rsw2sez = np.ndarray([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
+    rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
                           [-sindphi, cosdlambda, 0],
                           [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
     rintsez = rsw2sez @ rintrsw1unit
@@ -9045,17 +9048,67 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
     rintsez = rsw2sez @ rintrsw1
     vintsez = rsw2sez @ vintrsw1
 
-    # no idea. -zeg
-    arc1 = IEISK((E1, E2), ecc**2)
+
+    # arc1 = IEISK((E1, E2), ecc**2)
+    btgt = math.sqrt(atgt * ptgt)
+    ea1,_ = smu.newtonnu(ecc,nu1)
+    ea2,_ = smu.newtonnu(ecc,nu2)
+
+    if np.abs(ea2 - ea1) > np.pi:
+        if ea1 < 0.0:
+            ea1 = 2.0 * np.pi + ea1
+        else:
+            ea1 = 2.0 * np.pi - ea1
+
+    arc1 = arclength_ellipse(atgt,btgt,ea1,ea2)
+    #print("testing arclength func: %f", arc1)
+
+    # F1, E1, _ = elliptic12(ea1, ecc ** 2)
+    # F2, E2, _ = elliptic12(ea2, ecc ** 2)
+
+    # fixit = 0.0
+    # if E2 - E1 < 0.0:
+    #     fixit = np.pi
+
+    # arc1 = atgt * (E2 - E1 + fixit)
+    # print("testing elliptic12 func: %f", arc1)
 
     magrtgt2 = smu.mag(rtgtpqw2)
     rinteqcm = np.array([rintsez[2] - rtgtrsw2[0],
-                         arc1,
+                         arc1[0],
                          dphi * magrtgt2])
     dotlambda = vintsez[1] / (rmag * cosdphi)
     dotphi = -vintsez[0] / rmag
-    vinteqcm = np.ndarray([vintsez[2] - vtgtrsw2[0],
+    vinteqcm = np.array([vintsez[2] - vtgtrsw2[0],
                            dotlambda * magrtgt2 - abs(vtgtrsw1[1]),
                            dotphi * magrtgt2])
+
     return rinteqcm, vinteqcm
 
+if __name__ == '__main__':
+    x = 10.0
+    y = 10.0
+    z = 10.0
+    xd = 0.01
+    yd = 0.01
+    zd = 0.01
+    hro1 = np.zeros(3)
+    hvo1 = np.zeros(3)
+    hro1[0] = x / 1000.0
+    hro1[1] = y / 1000.0
+    hro1[2] = z / 1000.0
+    hrokm = hro1.T
+    hvo1[0] = xd / 1000.0
+    hvo1[1] = yd / 1000.0
+    hvo1[2] = zd / 1000.0
+    hvokm = hvo1.T
+
+    rtgteci = np.array([-605.7904308,- 5870.230407, 3493.052004])
+    vtgteci = np.array([- 1.568251615,- 3.702348353,- 6.479484915])
+
+    rintecix, vintecix = hilleqcm2eci(rtgteci, vtgteci, x, y, z, xd, yd, zd)
+    print(rintecix)
+    print(vintecix)
+    rhillx, vhillx = eci2hilleqcm(rtgteci, vtgteci, rintecix, vintecix)
+    print(rhillx)
+    print(vhillx)

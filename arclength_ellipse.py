@@ -89,6 +89,19 @@ from elliptic12 import elliptic12
 
 def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
                       theta1: np.ndarray = None):
+
+    if not isinstance(a, np.ndarray):
+        a = np.array([a])
+
+    if not isinstance(b, np.ndarray):
+        b = np.array([b])
+
+    if not isinstance(theta0, np.ndarray):
+        theta0 = np.array([theta0])
+
+    if not isinstance(theta1, np.ndarray):
+        theta1 = np.array([theta1])
+
     arclength = a * (theta1 - theta0)
 
     if not theta0.any() or not theta1.any():
@@ -124,20 +137,20 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
 
     return arclength
 
+if __name__ == '__main__':
+    # test input arrays. 0-4 is tests from lines 78-82, 5 is "MATLAB test 1",
+    # and 6 is "MATLAB test 2." All outputs match the answers except MATLAB test 2.
+    answers = np.array([.0005, -.0005, .002, .001, .001, 48.4422411 / math.pi,
+                        7.36358/math.pi])
+    a = np.array([1, 1, 1, 1, 1, 5, 5])
+    b = np.array([.5, .5, 2, .5, 2, 10, 10])
+    theta0 = np.array([.001, .002, .001, .5 - .002, .5 - .002, 0, 0.1])
+    theta1 = np.array([.002, .001, .002, .5 - .001, .5 - .001, 2, 0.5])
+    theta0 = theta0 * math.pi
+    theta1 = theta1 * math.pi
 
-# test input arrays. 0-4 is tests from lines 78-82, 5 is "MATLAB test 1",
-# and 6 is "MATLAB test 2." All outputs match the answers except MATLAB test 2.
-answers = np.array([.0005, -.0005, .002, .001, .001, 48.4422411 / math.pi,
-                    7.36358/math.pi])
-a = np.array([1, 1, 1, 1, 1, 5, 5])
-b = np.array([.5, .5, 2, .5, 2, 10, 10])
-theta0 = np.array([.001, .002, .001, .5 - .002, .5 - .002, 0, 0.1])
-theta1 = np.array([.002, .001, .002, .5 - .001, .5 - .001, 2, 0.5])
-theta0 = theta0 * math.pi
-theta1 = theta1 * math.pi
+    arclength = arclength_ellipse(a, b, theta0, theta1)
 
-arclength = arclength_ellipse(a, b, theta0, theta1)
-
-print(f'{answers}')
-print(f'{arclength / math.pi}')
-print(f'{(arclength / math.pi) / answers}')
+    print(f'{answers}')
+    print(f'{arclength / math.pi}')
+    print(f'{(arclength / math.pi) / answers}')
