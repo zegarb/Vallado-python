@@ -8502,40 +8502,24 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
     #cosE = (ecc + math.cos(nu)) / (1 + ecc * math.cos(nu))
 
     # (5.3)
-    # Raan = Omega here
-    # IJK to PQW matrix
-    # I believe raan and argp were mixed up on the matlab code -mjc
-    Px = (math.cos(raan) * math.cos(argp)
-          - math.sin(raan) * math.sin(argp) * math.cos(incl))
-    Py = (math.sin(raan) * math.cos(argp)
-          + math.cos(raan) * math.sin(argp) * math.cos(incl))
+    # Raan = Big Omega and argp = Little Omega
+    # PQW unit vectors
+    Px = (math.cos(argp) * math.cos(raan)
+          - math.sin(argp) * math.sin(raan) * math.cos(incl))
+    Py = (math.cos(argp) * math.sin(raan)
+          + math.sin(argp) * math.cos(raan) * math.cos(incl))
     Pz = math.sin(argp) * math.sin(incl)
     P_ = np.array([Px, Py, Pz])
-    Qx = (- math.cos(raan) * math.sin(argp)
-          - math.sin(raan) * math.cos(argp) * math.cos(incl))
-    Qy = (- math.sin(raan) * math.sin(argp)
-          + math.cos(raan) * math.cos(argp) * math.cos(incl))
+    Qx = (- math.sin(argp) * math.cos(raan)
+          - math.cos(argp) * math.sin(raan) * math.cos(incl))
+    Qy = (- math.sin(argp) * math.sin(raan)
+          + math.cos(argp) * math.cos(raan) * math.cos(incl))
     Qz = math.cos(argp) * math.sin(incl)
     Q_ = np.array([Qx, Qy, Qz])
 
-
-    # PQW to IJK matrix
-    # Ix = (math.cos(raan) * math.cos(argp)
-    #       - math.sin(raan) * math.sin(argp) * math.cos(incl))
-    # Iy = (-math.cos(raan) * math.sin(argp)
-    #       - math.sin(raan) * math.cos(argp) * math.cos(incl))
-    # Iz = math.sin(argp) * math.sin(incl)
-    # I_ = np.array([Px, Py, Pz])
-    # Jx = (math.sin(raan) * math.cos(argp)
-    #       + math.cos(raan) * math.sin(argp) * math.cos(incl))
-    # Jy = (- math.sin(raan) * math.sin(argp)
-    #       + math.cos(raan) * math.cos(argp) * math.cos(incl))
-    # Jz = - math.cos(raan) * math.sin(incl)
-    # J_ = np.array([Qx, Qy, Qz])
-
     # (5.6)
-    beta1 = np.dot(P_, RSun) / np.linalg.norm(RSun)
-    beta2 = np.dot(Q_, RSun) / np.linalg.norm(RSun)
+    beta1 = np.dot(RSun, P_) / np.linalg.norm(RSun)
+    beta2 = np.dot(RSun, Q_) / np.linalg.norm(RSun)
     alpha = rp / p
 
     A0 = (((alpha) ** 4) * (ecc ** 4)
@@ -8554,42 +8538,40 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
           + (1 - beta2 ** 2) ** 2)
 
     coeffA = [A0, A1, A2, A3, A4]
-    print('test 1')
-    print(coeffA)
-    print(np.roots(coeffA))
-    r1r, r2r, r3r, r4r = np.real(np.roots(coeffA))
-    print(r1r)
-    print(r2r)
-    print(r3r)
-    print(r4r)
 
-    # Quartic funciton does not work
     r1r, __, r2r, __, r3r, __, r4r, __ = smu.quartic(A0, A1, A2, A3, A4, 'R')
-    rr = np.array[r1r,r2r,r3r,r4r]
-    print('test 2')
-    print(r1r)
-    print(r2r)
-    print(r3r)
-    print(r4r)
+    rr = np.array([r1r,r2r,r3r,r4r])
+
+
+    if sh.show:
+        print('test 1')
+        print(coeffA)
+        #r1r, r2r, r3r, r4r = np.real(np.roots(coeffA))
+        print(r1r)
+        print(r2r)
+        print(r3r)
+        print(r4r)
+
 
 
     nu = np.zeros(4)
     check = np.zeros(4)
     for i in range(np.size(rr)):
-        if rr[i] > 1 or rr[i] < -1:
+        if rr[i] < -1 or rr[i] > 1:
             nu[i] = None
         else:
             nu[i] = math.acos(rr[i])
 
-    print('test')
-    print(nu)
-    k = 1
+    if sh.show:
+        print('test 2')
+        print(nu)
+
     for i in range(np.size(nu)):
         check[i] = (beta1 * math.cos(nu[i]) + beta2 * math.sin(nu[i]))
-        print('check i %f', check[i])
+        if sh.show:
+            print('check i %f', check[i])
         if check[i] < 0:
             nugood = nu[i]
-            k = k + 1
             print('----------------------------------------------------------------------')
             print('Valid Eccentric Anomaly (beta1*cos(nu) + beta2*sin(nu) < 0): ', str(nu[i]))
             before = (A0 * math.cos(nugood - 0.01 * deg2rad) ** 4
