@@ -10169,73 +10169,104 @@ def mincomb(rinit: float, rfinal: float, einit: float, efinal: float,
 
 if __name__ == '__main__':
 
-  jd = 60206
 
-  sunillum = sunill(jd, 30.0, 45.0, 10.0, 20.0)
-  print("sunill returned: ", sunillum)
+    jd = 60206
 
-  a = 6860.7631
-  ecc = 0.75
-  p = a*(1.0 - ecc**2)
-  incl = 15 * deg2rad #97.65184/rad
-  omega = 79.54701 * deg2rad
-  argp = 83.86041 * deg2rad
-  nu = 65.21303 * deg2rad
-  arglat = 0.0
-  truelon = 0.0
-  lonper = 0.0
-  raan = 80.0 * deg2rad
-  rp = re
+    sunillum = sunill(jd, 30.0, 45.0, 10.0, 20.0)
+    print("sunill returned: ", sunillum)
 
-  x, y, z = makeorbitrv(2455545.0, 'k',
-                      [5003.400903511, -3817.812007872, 4720.200666830],
-                      [5.489294908, 3.005055561, -3.39013016])
-  print("makeorbitrv returned ", x, y, z)
+    a = 6860.7631
+    ecc = 0.75
+    p = a*(1.0 - ecc**2)
+    incl = 15 * deg2rad #97.65184/rad
+    omega = 79.54701 * deg2rad
+    argp = 83.86041 * deg2rad
+    nu = 65.21303 * deg2rad
+    arglat = 0.0
+    truelon = 0.0
+    lonper = 0.0
+    raan = 80.0 * deg2rad
+    rp = re
 
-  rsun, rtasc, decl = sun(jd)
-  print(rsun, rtasc, decl)
-  Een, Eex = ShadowEntryExit(rsun, rp, a, ecc, incl, raan, argp, nu, mu)
+    x, y, z = makeorbitrv(2455545.0, 'k',
+                        [5003.400903511, -3817.812007872, 4720.200666830],
+                        [5.489294908, 3.005055561, -3.39013016])
+    print("makeorbitrv returned ", x, y, z)
 
-  r1 = np.array([4e6, 5e6, 6e6])
-  r2 = np.array([1e6, 2e6, 3e6])
-  v1 = np.array([5.0, -15.0,  -2.0])
-  v2 = np.array([4.0, -10.0,  -3.0])
+    rsun, rtasc, decl = sun(jd)
+    print(rsun, rtasc, decl)
+    Een, Eex = ShadowEntryExit(rsun, rp, a, ecc, incl, raan, argp, nu, mu)
 
-  # these seem to have old versions of kepler and lambertu and dnw -jmb
-  #r, v = target(r1, v1, r2, v2, 'L', 'k', 30, 2, 1)
-  #print("target returned: ", r, v)
-  #r, v = target(r1, v1, r2, v2, 'L', 'p', 30, 2, 1)
-  #print("target returned: ", r, v)
+    r1 = np.array([4e6, 5e6, 6e6])
+    r2 = np.array([1e6, 2e6, 3e6])
+    v1 = np.array([5.0, -15.0,  -2.0])
+    v2 = np.array([4.0, -10.0,  -3.0])
 
-  v1t = np.array([1e3, 1e3, 99e3])
-  v2t = np.array([1e3, 50e3, 50e3])
-  altpad = 10.
+    # these seem to have old versions of kepler and lambertu and dnw -jmb
+    #r, v = target(r1, v1, r2, v2, 'L', 'k', 30, 2, 1)
+    #print("target returned: ", r, v)
+    #r, v = target(r1, v1, r2, v2, 'L', 'p', 30, 2, 1)
+    #print("target returned: ", r, v)
 
-  hitearth, hitearthstr = checkhitearth (altpad, r1, v1t, r2, v2t, 3)
-  print("checkhitearth returned ", hitearth, hitearthstr)
+    v1t = np.array([1e3, 1e3, 99e3])
+    v2t = np.array([1e3, 50e3, 50e3])
+    altpad = 10.
 
-  axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()
-  print(axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti)
+    hitearth, hitearthstr = checkhitearth(altpad, r1, v1t, r2, v2t, 3)
+    print("checkhitearth returned ", hitearth, hitearthstr)
+
+    axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()
+    print(axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti)
 
 
-  st = iau06era (jd)
-  print(st)
+    st = iau06era (jd)
+    print(st)
 
-  ttt = (jd - 2451545.0)/ 36525.0  #0.34698738576
-  ddpsi = math.pi
-  ddeps = math.pi
+    ttt = (jd - 2451545.0)/ 36525.0  #0.34698738576
+    ddpsi = math.pi
+    ddeps = math.pi
 
-  #prec, psia, wa, ea, xa = precess (ttt, "50")
-  #print("precess : " , prec, psia, wa, ea, xa)
+    #prec, psia, wa, ea, xa = precess (ttt, "50")
+    #print("precess : " , prec, psia, wa, ea, xa)
 
-  #deltapsi, trueeps, meaneps, omega, nut = nutation (ttt, ddpsi, ddeps)
-  #print("nutation: " , deltapsi, trueeps, meaneps, omega, nut)
+    #deltapsi, trueeps, meaneps, omega, nut = nutation (ttt, ddpsi, ddeps)
+    #print("nutation: " , deltapsi, trueeps, meaneps, omega, nut)
 
-  #los = sight(r1, r2, 's')
-  #print("los is ", los)
+    #los = sight(r1, r2, 's')
+    #print("los is ", los)
 
-  #lit = light(r1, jd, 's')
-  #print("lit is ", lit)
+    #lit = light(r1, jd, 's')
+    #print("lit is ", lit)
+
+
+    # Shadow Function Test
+    # calculate algorithm 34 quantities
+    # au is mean earth distance from the sun
+    angumb = np.arctan((sunradius - re) / au)
+    angpen = np.arctan((sunradius + re) / au)
+
+
+    reci1 = np.array([- 41221.79149309,8864.59854079,0.0])
+    veci1 = np.array([- 0.646416796,- 3.005940793,- 0.0])
+    # +50 and -80 seem to work here to get the proper angles
+    dtsec = 21000
+    reci,veci,error = kepler(reci1,veci1,dtsec)
+    year = 2008
+    mon = 3
+    day = 16
+    hr = 6
+    min = 13
+    sec = 0.0
+    jd,jdfrac = stu.jday(year,mon,day,hr,min,sec)
+    rsun,rtasc,decl = sun(jd + jdfrac)
+
+    # Changed rsun to units of km (doesn't effect math)
+    # now for algorithm 34
+    pen,umb = shadow(reci, rsun*au, angumb, angpen)
+
+    print('U %r, P %r' % (pen,umb))
+    #s = 2.0 * smu.mag(reci) * ang1
+    #print(' %11.7f  %11.7f \n' % (s,(s / smu.mag(veci)) / 60.0))
 
 
 
