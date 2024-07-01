@@ -2082,9 +2082,11 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
     # each of the components must be unit vectors
     # radial component
     rvec = smu.unit(reci)
+
     # cross-track component
     wvec = np.cross(reci, veci)
     wvec = smu.unit(wvec)
+
     # along-track component
     svec = np.cross(wvec, rvec)
     svec = smu.unit(svec)
@@ -8917,13 +8919,15 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     veqcm: ndarray
         interceptor velocity: km/s
     """
+
     rrsw1, vrsw1, transmat1 = rv2rsw(rtgt, vtgt)
-    rmag = smu.mag(rrsw1)
-    vmag = smu.mag(vrsw1)
+
+    rmag1 = smu.mag(rrsw1)
+    vmag1 = smu.mag(vrsw1)
 
     # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
     ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rrsw1, vrsw1)
-    ebar = ((vmag**2 - mu / rmag) * rrsw1 - (rrsw1 @ vrsw1) * vrsw1) / mu
+    ebar = ((vmag1**2 - mu / rmag1) * rrsw1 - (rrsw1 @ vrsw1) * vrsw1) / mu
     eunit = ebar / ecc
     lambdap = math.atan(eunit[1] / eunit[0])
     nu1 = -lambdap
@@ -8970,12 +8974,14 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
                              cosdphi * sindlambda,
                              sindphi])
 
+    #a few dphi and dlambda mixed up - mjc
     rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
-                          [-sindphi, cosdlambda, 0],
-                          [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
+                          [-sindlambda, cosdlambda, 0],
+                          [cosdphi * cosdlambda, cosdphi * sindlambda, sindphi]])
     rintsez = rsw2sez @ rintrsw1unit
 
     rintsez[2] = x + rrsw2[0]
+
     rscale = rintsez[2] / rintrsw1unit[0]
     rintrsw1 = rscale * rintrsw1unit
 
@@ -8983,10 +8989,12 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     vintsez = [-(dz/magrtgt2) * rscale,
                (dy + vrsw1[1]) * rscale * (cosdphi/magrtgt2),
                dx + vrsw2[0]]
+
     vintrsw1 = rsw2sez.T @ vintsez
-    transmat1t = transmat1.T
-    rinteqcm = transmat1t @ rintrsw1
-    vinteqcm = transmat1t @ vintrsw1
+
+    rinteqcm = transmat1.T @ rintrsw1
+    vinteqcm = transmat1.T @ vintrsw1
+
     return rinteqcm, vinteqcm
 
 
@@ -9021,28 +9029,36 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
 
     # ed. 5 has mag(rtgtrsw2). Error? -zeg
     dphi = math.asin(rtgtrsw1[2] / smu.mag(rtgtrsw1))
+
     dlambda = math.atan(rintrsw1[1] / rintrsw1[0])
 
     # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
     ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rtgtrsw1, vtgtrsw1)
-    rmag = smu.mag(rtgtrsw1)
-    vmag = smu.mag(vtgtrsw1)
-    ebar = ((vmag**2 - mu / rmag) * rtgtrsw1
+    rtgtmag1 = smu.mag(rtgtrsw1)
+    vtgtmag1 = smu.mag(vtgtrsw1)
+    ebar = ((vtgtmag1**2 - mu / rtgtmag1) * rtgtrsw1
             - (rtgtrsw1 @ vtgtrsw1) * vtgtrsw1) / mu
+    print('ebar')
+    print(ebar)
     eunit = smu.unit(ebar)
     lambdap = math.atan(eunit[1]/ eunit[0])
     nu1 = -lambdap
     nu2 = dlambda - lambdap
 
-    sinnu2, cosnu2, sindphi, cosdphi, sindlambda, cosdlambda = \
-        smu.getsincos(nu2, dphi, dlambda)
+    sinnu2, cosnu2, sindlambda, cosdlambda = \
+        smu.getsincos(nu2, dlambda)
     rtgtpqw2 = np.array([(ptgt * cosnu2) / (1 + ecc * cosnu2),
                          (ptgt * sinnu2) / (1 + ecc * cosnu2),
                          0])
+
     vtgtpqw2 = np.array([-math.sqrt(mu / ptgt) * sinnu2,
                          math.sqrt(mu/ptgt) * (ecc + cosnu2),
                          0])
     rtgtrsw2, vtgtrsw2, transmat2 = rv2rsw(rtgtpqw2, vtgtpqw2)
+
+    #What the book says to use but I am not sure this is right - mjc
+    #dphi = math.asin(rtgtrsw1[2] / smu.mag(rtgtrsw2))
+    sindphi, cosdphi = smu.getsincos(dphi)
 
     rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
                         [-sindlambda, cosdlambda, 0],
@@ -9079,8 +9095,8 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
     rinteqcm = np.array([rintsez[2] - rtgtrsw2[0],
                          arc1[0],
                          dphi * magrtgt2])
-    dotlambda = vintsez[1] / (rmag * cosdphi)
-    dotphi = -vintsez[0] / rmag
+    dotlambda = vintsez[1] / (rtgtmag1 * cosdphi)
+    dotphi = -vintsez[0] / rtgtmag1
     vinteqcm = np.array([vintsez[2] - vtgtrsw2[0],
                            dotlambda * magrtgt2 - abs(vtgtrsw1[1]),
                            dotphi * magrtgt2])
