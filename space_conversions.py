@@ -8942,7 +8942,9 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
             F2, E2, _ = elliptic12(ea2e, ecc**2)
             arclength1a = atgt * (E2 - E1)
             corr = arclength / (ea2e - ea1)
+            ea2e = ea2e - (arclength1a - arclength) / corr
             i = i + 1
+
         _, nu2 = smu.newtone(ecc, ea2e)
 
     cosnu2 = math.cos(nu2)
@@ -8956,7 +8958,7 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
                       0])
 
     rrsw2, vrsw2, transmat2 = rv2rsw(rpqw2, vpqw2)
-    dphi = z / smu.mag(rrsw2)
+    dphi = math.asin(z / smu.mag(rrsw2))
     dlambda = nu2 - nu1
 
     sindphi = math.sin(dphi)
@@ -8974,7 +8976,7 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     rintsez = rsw2sez @ rintrsw1unit
 
     rintsez[2] = x + rrsw2[0]
-    rscale = rintsez[2] / rintrsw1unit[2]
+    rscale = rintsez[2] / rintrsw1unit[0]
     rintrsw1 = rscale * rintrsw1unit
 
     magrtgt2 = smu.mag(rpqw2)
@@ -9008,9 +9010,9 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
 
     Returns
     -------
-    rinteqcm: ndarray
+    x, y, z: float
         relative position of interceptor: km
-    vinteqcm: ndarray
+    dx, dy, dz: float
         relative velocity of interceptor: km/s
     """
     rtgtrsw1, vtgtrsw1, transmat1 = rv2rsw(rtgt, vtgt)
@@ -9083,32 +9085,23 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
                            dotlambda * magrtgt2 - abs(vtgtrsw1[1]),
                            dotphi * magrtgt2])
 
-    return rinteqcm, vinteqcm
+    return rinteqcm[0], rinteqcm[1], rinteqcm[2], \
+        vinteqcm[0], vinteqcm[1], vinteqcm[2]
 
 if __name__ == '__main__':
-    x = 10.0
-    y = 10.0
-    z = 10.0
+    x = 10
+    y = 10
+    z = 10
     xd = 0.01
     yd = 0.01
     zd = 0.01
-    hro1 = np.zeros(3)
-    hvo1 = np.zeros(3)
-    hro1[0] = x / 1000.0
-    hro1[1] = y / 1000.0
-    hro1[2] = z / 1000.0
-    hrokm = hro1.T
-    hvo1[0] = xd / 1000.0
-    hvo1[1] = yd / 1000.0
-    hvo1[2] = zd / 1000.0
-    hvokm = hvo1.T
 
-    rtgteci = np.array([-605.7904308,- 5870.230407, 3493.052004])
-    vtgteci = np.array([- 1.568251615,- 3.702348353,- 6.479484915])
+    rtgteci = np.array([-605.7904308, -5870.230407, 3493.052004])
+    vtgteci = np.array([-1.568251615, -3.702348353, -6.479484915])
 
     rintecix, vintecix = hilleqcm2eci(rtgteci, vtgteci, x, y, z, xd, yd, zd)
     print(rintecix)
     print(vintecix)
-    rhillx, vhillx = eci2hilleqcm(rtgteci, vtgteci, rintecix, vintecix)
-    print(rhillx)
-    print(vhillx)
+    x, y, z, dx, dy, dz = eci2hilleqcm(rtgteci, vtgteci, rintecix, vintecix)
+    print(x, y, z)
+    print(dx, dy, dz)
