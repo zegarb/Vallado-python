@@ -2,7 +2,7 @@
 #
 #                              prob7_1.m
 #
-#  this file demonstrates example 7-1.
+#  this file demonstrates problem 7-1.
 #
 #                          companion code for
 #             fundamentals of astrodynamics and applications
