@@ -1086,7 +1086,7 @@ def sidereal(jdut1: float, deltapsi: float, meaneps: float, omega: float,
     omega : float
         longitude of ascending node of moon: rad
     lod : float
-        length od day: sec
+        length of day: sec
     eqeterms : int
         terms for ast calculation: 0, 2
     """

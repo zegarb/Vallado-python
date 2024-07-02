@@ -34,20 +34,28 @@ if testnum == 3:
     #reci = np.array([6585.038266,1568.184321,9.116355])
     #veci = np.array([- 1.1157766,4.6316816,6.0149576])
     #aeci = np.array([0.001,0.002,0.003])
-    year = 1997
-    mon = 4
-    day = 1
-    hr = 21 #UTC (EST = 16)
-    min = 36
-    sec = 0.0
+    # April 1, 1997, 4:36 pm ET
+    year1 = 1997
+    mon1 = 4
+    day1 = 1
+    hr1 = 21 #UTC (ET = 16)
+    min1 = 36
+    sec1 = 0.0
     dut1 = - 0.2913774
+    # April 2, 1997 at 1:08:0.00 UTC
+    year2 = year1
+    mon2 = mon1
+    day2 = 2
+    hr2 = 1
+    min2 = 8
+    sec2 = 0.0
     dat = 32
     # Missing arcsec2rad conversion in matlab code
     xp = - 0.19108 * arcsec2rad
-    #year 1997.25 from IERS
+    #year1 1997.25 from IERS
     #xp = - 0.189116 * arcsec2rad
     yp = 0.329624 * arcsec2rad
-    #year 1997.25 from IERS
+    #year1 1997.25 from IERS
     #yp = 0.331998 * arcsec2rad
     lod = 0.0
     terms = 0
@@ -57,10 +65,10 @@ print('\nreci', end='')
 print (reci)
 print('veci', end='')
 print(veci)
-print('year %5i ' % (year))
-print('mon %4i ' % (mon))
-print('day %3i ' % (day))
-print('hr %3i:%2i:%8.6f UTC\n' % (hr,min,sec))
+print('year1 %5i ' % (year1))
+print('mon1 %4i ' % (mon1))
+print('day1 %3i ' % (day1))
+print('hr1 %3i:%2i:%8.6f UTC\n' % (hr1,min1,sec1))
 print('dut1 %8.6f s' % (dut1))
 print(' dat %3i s' % (dat))
 print(' xp %8.6f "' % (xp*rad2arcsec))
@@ -80,13 +88,24 @@ lon = - 71.13 * deg2rad
 alt = 0.024 #km (24m)
 dtsec = 120.0
 # timezone = 0 Assumming Epoch time (UTC)
-jdepoch,jdepochf = stu.jday(year,mon,day,hr,min,sec)
+jdepoch,jdepochf = stu.jday(year1,mon1,day1,hr1,min1,sec1)
+jend, jendf = stu.jday(year2,mon2,day2,hr2,min2,sec2)
 
-# Was 119 iterations (106 gets the example problem in book - Table 11-4)
-jdutend, rho, az, el, vis = obu.predict(reci, veci, jdepoch+jdepochf, \
-                                latgd, lon, alt, dtsec, 119, dut1, dat, xp, yp)
-
+# 106 iterations gets the 1:08:0.00 UTC example (pg 913)
+jdutend, rho, az, el, vis = obu.predict(reci, veci, jdepoch+jdepochf,jend+jendf,
+                                        latgd, lon, alt, dtsec, dut1, dat, xp, yp)
 
 y,m,d,h,mn,s = stu.invjday(jdutend - (dut1 / 86400.0))
 print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
               (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
+
+jend, jendf = stu.jday(year2,mon2,day2,hr2,min2+26,sec2)
+
+
+# more iterations to complete the table (Vallado 4th edition pg 914, Table 11-4)
+jdutend, rho, az, el, vis = obu.predict(reci, veci, jdepoch+jdepochf, jend+jendf,
+                                        latgd, lon, alt, dtsec, dut1, dat, xp, yp)
+y,m,d,h,mn,s = stu.invjday(jdutend - (dut1 / 86400.0))
+print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
+              (y,m,d,h,mn,s,vis,rho,az * rad2deg,el * rad2deg))
+

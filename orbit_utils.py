@@ -9776,19 +9776,86 @@ def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
 #  outputs       :
 #    jdutend      - Julian end date                         days
 #    rho          - range from site to sat                  km
-#    az           - azimuth                                 deg
-#    el           - elevation                               deg
+#    az           - azimuth                                 rad
+#    el           - elevation                               rad
 #    vis          - visual indicator                        visible, not visible
 #                                                           radar sun, radar night
 #
-#  references    :
-#    vallado
+#  locals        : ...
 #
-# ------------------------------------------------------------------------------
+#  coupling      :
+#       site
+#       invjday
+#       pkelper
+#       convtime
+#       eci2ecef
+#       rv2razel
+#       sun
+#
+#  references    :
+#    vallado (4th ed), pg 911-913
+#
+# -----------------------------------------------------------------------------
 
+def predict(reci:np.ndarray, veci:np.ndarray, jdepoch:float, jdend:float,
+            latgd:float, lon:float, alt:float, dtsec:float, dut1:float,
+            dat: float, xp: float, yp:float, ddpsi=0.0, ddeps=0.0,
+            lod=0.0, terms=0, timezone=0):
 
-def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
-            dat, xp, yp, ddpsi=0, ddeps=0, lod=0, terms=0, timezone=0):
+    """this function predicts look angles from site to satellite over a given
+    time period.
+
+    Parameters
+    ----------
+    reci : ndarray
+        original ijk eci position vector: km
+    veci : ndarray
+        original ijk eci velocity vector: km/s
+    jdepoch : float
+        Julian date start: days (from 4713 bc)
+    latgd : float
+        geodetic latitude of site: -pi/2 to pi/2 rad
+    lon : float
+        longitude of site: -2pi to 2pi rad
+    alt : float
+        altitude of site: km
+    dtsec : float
+        change in time between predictions: sec
+    dti : int
+        number of dtsec iterations
+    dut1 : float
+        delta of ut1 - utc: sec
+    dat : float
+        delta of tai - utc: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    ddpsi : float, optional
+        delta psi correction to gcrf: rad
+    ddeps : float, optional
+        delta eps correction to gcrf: rad
+    lod : float, optional
+        excess length of day: sec
+    terms : int, optional
+        # of terms for ast calculation: 0 or 2
+   timezone : int, optional
+        offset to utc from local site: 0 to 23 hr
+
+    Returns
+    -------
+    jdutend: float
+        Julian end date: days (from 4713 bc)
+    rho: float
+        range from site to sat: km
+    az: float
+        azimuth from site to sat: rad
+    el: float
+        elevation from site to sat: rad
+    vis: str
+        visual indicator: 'visible', 'not visible'
+        'radar sun', 'radar night'
+    """
     ndot = 0.0
     nddot = 0.0
     rho = 0.0
@@ -9823,6 +9890,10 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
     #print()
 
     year, mon, day, hr, min, sec = stu.invjday(jdepoch)
+
+    # How many delta time (dtsec) iterations to reach Julian date end
+    dti = round((jdend-jdepoch) * (86400 / dtsec))
+    print(dti)
 
     for i in range(0, dti+1):
         # i *dtsec input in wrong area on matlab code
