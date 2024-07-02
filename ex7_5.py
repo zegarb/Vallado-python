@@ -91,6 +91,8 @@ v1t, v2t, errorl = obu.lambertu(r1, v1, r2, 'L', 'H', 0, dtwait, dtsec, tbiru, f
 print(' v1t \n',  (v1t))
 print(' v2t \n',  (v2t))
 print(' TEST ------------------ S  L  1 rev \n' % ())
+
+# Not working
 v1t, v2t, errorl = obu.lambertu(r1, v1, r2, 'S', 'L', 1, dtwait, dtsec, tbidu, fid)
 print('uv1t \n',  (v1t))
 print(' v2t \n',  (v2t))

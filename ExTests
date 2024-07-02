@@ -64,8 +64,7 @@ NameError: name 'lowthrust' is not defined
 7_2: inconsistent input data ranges
 
 
-7_5: Think it's fixed, had to copy check for -y to before xold calculation
-     (labertu(), line 1845) to prevent imaginary dtold.
+7_5: Not working
 
 7_34: Y
 10_1: Y
