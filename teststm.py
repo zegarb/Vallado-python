@@ -11,7 +11,6 @@ import orbit_utils as obu
 
 directory = os.path.join(os.path.dirname(__file__), "testoutput")
 outfile = open(os.path.join(directory, 'teststm.out'),'wt')
-mu = 398600.4418
 rorig = np.array([-605.7922166, -5870.22951108, 3493.05319896])
 vorig = np.array([-1.56825429, -3.70234891, -6.47948395])
 #     ro = [-4550.4256  2220.1946  5090.3547];
@@ -35,7 +34,7 @@ vo = vorig
 for i in range(10):
     ebar = np.zeros(3)
     rans = np.zeros((10, 3))
-    dtseco = i * 100
+    dtseco = i * 100 + 100
     r, v, _ = obu.kepler(ro, vo, dtseco)
     magv = smu.mag(v)
     c1 = magv * magv - mu / smu.mag(r)
@@ -46,64 +45,64 @@ for i in range(10):
     if (rdotv < 0.0):
         nu1 = 2 * np.pi - nu1
     edotr = np.dot(ebar, r)
-    outfile.write('%11.7f  %11.7f  %11.7f' % (nu1 * rad2deg, rdotv, edotr))
+    outfile.write('%11.7f  %11.7f  %11.7f\n' % (nu1 * rad2deg, rdotv, edotr))
     rans[i,:] = r
-    outfile.write('%6f r %11.7f  %11.7f  %11.7f  %11.7f  %11.7f  %11.7f   \n'
-                  % (dtseco, r, v))
+    outfile.write(f'{dtseco:6} r {r}  {v}\n')
 
 stm = np.zeros((6, 6))
-print('---- case 1: pg 813 last eq epoch, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n' % ())
-outfile.write('---- case 1: pg 813 last eq epoch, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n' % ())
+print('---- case 1: pg 813 last eq epoch, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n')
+outfile.write('---- case 1: pg 813 last eq epoch, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n')
 ro = rorig
 vo = vorig
 magro = smu.mag(ro)
 for i in range(10):
-    dt = i * 100
-    x = np.array([ro, vo]).T
+    dt = i * 100 + 100
+    x = np.concatenate([ro, vo])
     g = np.zeros((6, 6))
     #             g(1, 1) = -mu/(2.0*magro^3);
-#             g(2, 2) = -mu/(2.0*magro^3);
-#             g(3, 3) = -mu/(2.0*magro^3);
+    #             g(2, 2) = -mu/(2.0*magro^3);
+    #             g(3, 3) = -mu/(2.0*magro^3);
     g[0, 3] = 1.0
     g[1, 4] = 1.0
     g[2, 5] = 1.0
-    g[3, 0] = - mu / magro ** 3
-    g[4, 1] = - mu / magro ** 3
-    g[5, 2] = - mu / magro ** 3
-    stm = np.eye(6) + g * dt + 0.5 * g * g * dt ** 2 + 1.0 / 6.0 * g * g * g * dt ** 3 + 1.0 / 24.0 * g * g * g * g * dt ** 4
-    if i == 1:
-        stm
-    x1 = stm * x
-    r[1] = x1(1)
-    r[2] = x1(2)
-    r[3] = x1(3)
+    g[3, 0] = -mu / magro ** 3
+    g[4, 1] = -mu / magro ** 3
+    g[5, 2] = -mu / magro ** 3
+    stm = (np.eye(6) + g * dt + 0.5 * g**2 * dt**2
+           + 1.0 / 6.0 * g**3 * dt**3 + 1.0 / 24.0 * g**4 * dt**4)
+    # if i == 1:
+    #     stm
+    x1 = stm @ x
+    r[0] = x1[0]
+    r[1] = x1[1]
+    r[2] = x1[2]
     dr = rans[i,:] - r
-    outfile.write('%6i x %14.7f  %14.7f  %14.7f  %14.7f  %14.7f  %14.7f dr %9.4f km\n' % (dt, x1, smu.mag(dr)))
+    outfile.write(f'{dt:6} x {x1} dr {smu.mag(dr):9.4} km\n')
 
 stm = np.zeros((6, 6))
-print('---- case 1a: pg 813 last eq step by step, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n' % ())
-outfile.write('---- case 1a: pg 813 last eq step by step, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n' % ())
+print('---- case 1a: pg 813 last eq step by step, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n')
+outfile.write('---- case 1a: pg 813 last eq step by step, i + fdt  + f2dt2/2 + f3dt3/6 + f4dt4/24 \n')
 ro = rorig
 vo = vorig
 magro = smu.mag(ro)
 for i in range(10):
-    dt = 100
-    x = np.array([ro, vo]).T
+    dt = i * 100 + 100
+    x = np.concatenate([ro, vo])
     g = np.zeros((6, 6))
     #             g(1, 1) = -mu/(2.0*magro^3);
-#             g(2, 2) = -mu/(2.0*magro^3);
-#             g(3, 3) = -mu/(2.0*magro^3);
+    #             g(2, 2) = -mu/(2.0*magro^3);
+    #             g(3, 3) = -mu/(2.0*magro^3);
     g[0, 3] = 1.0
     g[1, 4] = 1.0
     g[2, 5] = 1.0
-    g[3, 0] = - mu / magro ** 3
-    g[4, 1] = - mu / magro ** 3
-    g[5, 2] = - mu / magro ** 3
-    stm = (np.eye(6) + g * dt + 0.5 * g * g * dt ** 2 + 1.0 / 6.0
-           * g * g * g * dt ** 3 + 1.0 / 24.0 * g * g * g * g * dt ** 4)
-    if i == 1:
-        stm
-    x1 = stm * x
+    g[3, 0] = -mu / magro ** 3
+    g[4, 1] = -mu / magro ** 3
+    g[5, 2] = -mu / magro ** 3
+    stm = (np.eye(6) + g * dt + 0.5 * g**2 * dt**2
+           + 1.0 / 6.0 * g**3 * dt**3 + 1.0 / 24.0 * g**4  * dt**4)
+    # if i == 1:
+    #     stm
+    x1 = stm @ x
     r[0] = x1[0]
     r[1] = x1[1]
     r[2] = x1[2]
@@ -113,19 +112,18 @@ for i in range(10):
     dr = rans[i,:] - r
     ro = r
     vo = v
-    outfile.write('%6i x %14.7f  %14.7f  %14.7f  %14.7f  %14.7f  %14.7f dr '
-                  '%9.4f km\n' % (dt, x1, smu.mag(dr)))
+    outfile.write(f'{dt} x {x1} dr {smu.mag(dr):9.4} km\n')
 
 stm = np.zeros((6, 6))
-print('---- case 2: pg 813 eq 10-46 epoch state x = stm*xo \n' % ())
-outfile.write('---- case 2: pg 813 eq 10-46 epoch state x = stm*xo \n' % ())
+print('---- case 2: pg 813 eq 10-46 epoch state x = stm*xo \n')
+outfile.write('---- case 2: pg 813 eq 10-46 epoch state x = stm*xo \n')
 ro = rorig
 vo = vorig
 magro = smu.mag(ro)
 for i in range(10):
     #          stm = stm2(ro, dt);
-    dt = i * 100
-    x = np.array([ro, vo]).T
+    dt = i * 100 + 100
+    x = np.concatenate([ro, vo])
     stm = np.zeros((6, 6))
     stm[0, 3] = dt
     stm[1, 4] = dt
@@ -140,16 +138,14 @@ for i in range(10):
     stm[4, 1] = - mu * dt / magro ** 3
     stm[5, 2] = - mu * dt / magro ** 3
     #stm = (eye(6) + g*dt + 0.5*g*g*dt^2); # + 1.0/6.0 * g*g*g*dt^3);
-    if i == 1:
-        stm
-    x1 = stm * x
+    # if i == 1:
+    #     stm
+    x1 = stm @ x
     r[0] = x1[0]
     r[1] = x1[1]
     r[2] = x1[2]
     dr = rans[i,:] - r
-    outfile.write('%6i x %14.7f  %14.7f  %14.7f  %14.7f  %14.7f  %14.7f dr '
-                  '%9.4f km\n'
-                  % (dt, x1, smu.mag(dr)))
+    outfile.write(f'{dt:6} x {x1} dr {smu.mag(dr):9.4} km\n')
 
 stm = np.zeros((6, 6))
 print('---- case 2a: pg 813 eq 10-46 step by step state x = stm*xo \n')
@@ -159,8 +155,8 @@ vo = vorig
 magro = smu.mag(ro)
 for i in range(10):
     #          stm = stm2(ro, dt);
-    dt = 100
-    x = np.array([ro, vo]).T
+    dt = i * 100 + 100
+    x = np.concatenate([ro, vo])
     stm = np.zeros((6, 6))
     stm[0, 3] = dt
     stm[1, 4] = dt
@@ -175,9 +171,9 @@ for i in range(10):
     stm[4, 1] = - mu * dt / magro ** 3
     stm[5, 2] = - mu * dt / magro ** 3
     #stm = (eye(6) + g*dt + 0.5*g*g*dt^2); # + 1.0/6.0 * g*g*g*dt^3);
-    if i == 1:
-        stm
-    x1 = stm * x
+    # if i == 1:
+    #     stm
+    x1 = stm @ x
     r[0] = x1[0]
     r[1] = x1[1]
     r[2] = x1[2]
@@ -187,8 +183,7 @@ for i in range(10):
     dr = rans[i,:] - r
     ro = r
     vo = v
-    outfile.write('%6i x %14.7f  %14.7f  %14.7f  %14.7f  %14.7f  %14.7f dr '
-                  '%9.4f km\n' % (dt, x1, smu.mag(dr)))
+    outfile.write(f'{dt:6} x {x1} dr {smu.mag(dr):9.4} km\n')
 
 # stm = np.zeros((6, 6))
 # print('---- case 3: simple euler x = xo + xdot*dt + xdot*dt2/2\n' % ())
@@ -218,16 +213,16 @@ ro = rorig
 vo = vorig
 magro = smu.mag(ro)
 x = np.array([ro, vo]).T
-outfile.write('  0 x %11.7f  %11.7f  %11.7f  %11.7f  %11.7f  %11.7f   \n' % (x))
+outfile.write(f'  0 x {x}   \n')
 for i in range(10):
-    dt = i * 100
-    x = np.array([ro, vo]).T
+    dt = i * 100 + 100
+    x = np.concatenate([ro, vo])
     u = mu / magro ** 3
     p = np.dot(ro, vo) / magro ** 2
     q = (smu.mag(vo) ** 2 - magro ** 2 * u) / magro ** 2
-    f = (1.0 - 0.5 * u * dt ** 2 + 0.5 * u * p * dt ** 3 + 1.0 / 24.0
-         * (3 * u * q - 15 * u * p ** 2 + u ** 2) * dt ** 4 + 1.0 / 8.0
-         * (7 * u * p ** 3 - 3 * u * p * q - u ** 2 * p) * dt ** 5
+    f = (1.0 - 0.5 * u * dt ** 2 + 0.5 * u * p * dt ** 3
+         + 1.0 / 24.0 * (3 * u * q - 15 * u * p ** 2 + u ** 2) * dt ** 4
+         + 1.0 / 8.0 * (7 * u * p ** 3 - 3 * u * p * q - u ** 2 * p) * dt ** 5
          + 1.0 / 720.0
          * (630 * u * p ** 2 * q - 24 * u ** 2 * q - u ** 3 - 45 * u * q ** 2
             - 945 * u * p ** 4 + 210 * u ** 2 * p ** 2)
@@ -241,8 +236,8 @@ for i in range(10):
             - 42525 * u * p ** 2 * q ** 2 + 155925 * u * p ** 4 * q
             + 1575 * u * q ** 3 + 117 * u ** 3 * q - 135135 * u * p ** 6
             + u ** 4) * dt ** 8)
-    g = (dt - 1 / 6 * u * dt ** 3 + 0.25 * u * p * dt ** 4 + 1 / 120
-         * (9 * u * q - 45 * u * p ** 2 + u ** 2) * dt ** 5
+    g = (dt - 1 / 6 * u * dt ** 3 + 0.25 * u * p * dt ** 4
+         + 1 / 120 * (9 * u * q - 45 * u * p ** 2 + u ** 2) * dt ** 5
          + 1 / 360 * (210 * u * p ** 3 - 90 * u * p * q - 15 * u ** 2 * p)
          * dt ** 6 + 1 / 5040
          * (3150 * u * p ** 2 * q - 54 * u ** 2 * q - 225 * u * q ** 2
@@ -290,28 +285,27 @@ for i in range(10):
     stm[3, 3] = gdot
     stm[4, 4] = gdot
     stm[5, 5] = gdot
-    if i == 1:
-        stm
-    x1 = stm * x
+    # if i == 1:
+    #     stm
+    x1 = stm @ x
     r[0] = x1[0]
     r[1] = x1[1]
     r[2] = x1[2]
     dr = rans[i,:] - r
-    outfile.write('%6i x %14.7f  %14.7f  %14.7f  %14.7f  %14.7f  %14.7f dr '
-                  '%9.4f km\n' % (dt, x1, smu.mag(dr)))
+    outfile.write(f'{dt} x {x1} dr {smu.mag(dr):9.4} km\n')
 
 stm = np.zeros((6, 6))
-print('---- case 4a: step by step pg 110 escobal f and g series \n' % ())
-outfile.write('---- case 4a: step by step pg 110 escobal f and g series \n' % ())
+print('---- case 4a: step by step pg 110 escobal f and g series \n')
+outfile.write('---- case 4a: step by step pg 110 escobal f and g series \n')
 outfile.write('at least %3.2f sec step size for accuracy \n' % (dt))
 ro = rorig
 vo = vorig
 magro = smu.mag(ro)
 x = np.array([ro, vo]).T
-outfile.write('  0 x %11.7f  %11.7f  %11.7f  %11.7f  %11.7f  %11.7f   \n' % (x))
+outfile.write(f'  0 x {x}   \n')
 for i in range(10):
-    dt = 100
-    x = np.array([ro, vo]).T
+    dt = i * 100 + 100
+    x = np.concatenate([ro, vo])
     u = mu / magro ** 3
     p = np.dot(ro, vo) / magro ** 2
     q = (smu.mag(vo) ** 2 - magro ** 2 * u) / magro ** 2
@@ -379,14 +373,14 @@ for i in range(10):
     stm[3, 3] = gdot
     stm[4, 4] = gdot
     stm[5, 5] = gdot
-    if i == 1:
-        stm
-    x1 = stm * x
+    # if i == 1:
+    #     stm
+    x1 = stm @ x
     r[0] = x1[0]
     r[1] = x1[1]
     r[2] = x1[2]
     dr = rans[i,:] - r
-    outfile.write('%6i x %14.7f  %14.7f  %14.7f  %14.7f  %14.7f  %14.7f dr %9.4f km\n' % (dt, x1, smu.mag(dr)))
+    outfile.write(f'{dt} x {x1} dr {smu.mag(dr):9.4} km\n')
     ro[0] = x1[0]
     ro[1] = x1[1]
     ro[2] = x1[2]
@@ -444,7 +438,9 @@ for i in range(36):
         #partr2wpartv1;
         np.linalg.det(partr2wpartv1)
         pdf = v1 / np.linalg.det(partr2wpartv1)
-        outfile.write('lat %11.7f  lon %11.7f  dt %11.3f  v %11.7g  %11.7g  %11.7g \n' % (lat * rad2deg, lon * rad2deg, dtsec, pdf(1), pdf(2), pdf(3)))
+        outfile.write('lat %11.7f  lon %11.7f  dt %11.3f  v %11.7g  %11.7g  %11.7g \n'
+                      % (lat * rad2deg, lon * rad2deg, dtsec,
+                         pdf[0], pdf[1], pdf[2]))
 
 #1999 1 15  0  0  0   -4550.425600     2220.194600    5090.354700     -4.9750060      -5.2371094      -2.1181103
 #1999 1 15  0 10  0   -6497.271839    -1139.240286    2948.222193     -1.3168059      -5.5987678      -4.7836404
