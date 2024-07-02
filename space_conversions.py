@@ -8998,6 +8998,337 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     return rinteci, vinteci
 
 
+# ----------------------------------------------------------------------------
+#
+#                           function fk4
+#
+#    This function converts vectors from b1950 to j2000 epochs.
+#    be aware that this process is not exact. there are different secular rates
+#    for each system, and there are differences in the central location. the
+#    matrices are multiplied directly for speed.
+#
+#  author        : david vallado                  719-573-2600   21 jun 2002
+#
+#  revisions     : michael courville                             2 jul 2024
+#                -
+#
+#  inputs          description                              range / units
+#    rb1950      - b1950 eci position vector (optional)      er, km, etc
+#    vb1950      - b1950 eci velocity vector (optional)      er/s, km/s, etc
+#                  (Note: If only trying to find vj2000,
+#                  input an empty numpy list for rb1950)
+#    option      - systems tool kit, original,              'stk' (default)
+#                  or 6 dimension approach                  'org', '6d'
+#                  (Note: if only trying to only return
+#                  trans martix, input an empty numpy list
+#                  for rb1950 and vb1950)
+#
+#  outputs       :
+#    rj2000      - j2000 eci position vector                er, km, etc
+#                - 3x3 -> 3x1 [rx, ry, rz]
+#                - 6x6 -> 6x1 [rx, ry, rz, rxdot, rydot, rzdot]
+#    vj2000      - j2000 eci velocity vector                er/s, km/s, etc
+#                - 3x3 -> 3x1 [vx, vy, vz]
+#                - 6x6 -> 6x1 [vx, vy, vz, vxdot, vydot, vzdot]
+#    fk4m        - conversion matrix b1950 to j2000
+#
+#  locals        :
+#
+#  coupling      :
+#
+#  references    :
+#    vallado       2001, 227-228
+#
+# rj2000 = fk4m * rb1950;
+# ----------------------------------------------------------------------------
+def fk4(rb1950: np.ndarray = np.array([]), vb1950: np.ndarray = np.array([]),
+        option: str ='org'):
+    """This function converts vectors from b1950 to j2000 epochs.
+    be aware that this process is not exact. there are different secular rates
+    for each system, and there are differences in the central location. the
+    matrices are multiplied directly for speed.
+
+    Parameters
+    ----------
+    rb1950 : np.ndarray, optional
+        b1950 eci position vector, by default np.array([]): er, km, etc
+    vb1950 : np.ndarray, optional
+        b1950 eci velocity vector, by default np.array([]): er/s, km/s, etc
+    option : str, optional
+        transformation approach (systems tool kit, original, or 6 dimension), \
+        by default 'org': 'org','stk','6d'
+
+    Note: if only trying to only return transformation martix, input an empty \
+        numpy array for rb1950 and vb1950
+
+    Returns
+    -------
+    rj2000: np.ndarray
+        j2000 eci position vector: er, km, etc
+    vj2000: np.ndarray
+        j2000 eci velocity vector: er/s, km/s, etc
+    fk4m: np.ndarray
+        conversion matrix for provided option
+    """
+
+    # Default Empty Outputs
+    rj2000 = np.array([])
+    vj2000 = np.array([])
+    fk4m = np.array([])
+
+    # Input Error Check:
+    if not isinstance(rb1950, np.ndarray) or not isinstance(vb1950, np.ndarray):
+        print('\nError: Position and velocity vectors must be numpy arrays\n')
+        print('Returning empty arrays')
+        return rj2000, vj2000, fk4m
+    elif not isinstance(option, str):
+        print('\nError: Invalid option\n')
+        print('Returning empty arrays')
+        return rj2000, vj2000, fk4m
+    elif option not in ['org','stk','6d']:
+        print('\nError: Invalid option\n')
+        print('Returning empty arrays')
+        return rj2000, vj2000, fk4m
+
+
+    # Transformation martrix options:
+     # in book (original)
+    # 1950 - 2000 (Vallado 4th edition, pages 234-235)
+    if option == 'org':
+        fk4m = np.array([[0.9999256794956877, -0.0111814832204662, -0.0048590038153592],
+                            [0.0111814832391717, 0.9999374848933135, -0.0000271625947142],
+                            [0.0048590037723143, -0.0000271702937440, 0.9999881946043742]])
+    # stk approach (the difference is about 5 m between the various approaches)
+    # New way is formed by multiplying the matrices on pages
+    # 173 and 174 and adding in the correction to equinox given
+    # on page 168 of the supplement to the astronomical almanac
+    # 1950 - 2000
+    elif option == 'stk':
+        fk4m = np.array([[0.999925678612394, -0.011181874556714, -0.004858284812600],
+                            [0.011181874524964, 0.999937480517880, -0.000027169816135],
+                            [0.004858284884778, -0.000027156932874, 0.999988198095508]])
+    # from Exp supp to Ast Almanac pg 185 6x6
+    # 1950 - 2000
+    elif option == '6d' or (rb1950.size == 6 or vb1950.size == 6):
+        fk4m = np.array([[0.9999256782, -0.0111820611, -0.0048579477,
+                            0.00000242395018, -0.00000002710663, -0.00000001177656],
+                            [0.0111820610, 0.9999374784, -0.0000271765,
+                            0.00000002710663, 0.00000242397878, -0.00000000006587],
+                            [0.0048579479, -0.0000271474, 0.9999881997,
+                            0.00000001177656, -0.00000000006582, 0.00000242410173],
+                            [-0.000551, -0.238565, 0.435739,
+                            0.99994704, -0.01118251, -0.00485767],
+                            [0.238514, -0.002667, -0.008541,
+                            0.01118251, 0.99995883, -0.00002718],
+                            [-0.435623, 0.012254, 0.002117,
+                            0.00485767, -0.00002714, 1.00000956]])
+
+    # Matrix size verification:
+    if rb1950.size == 0 and vb1950.size == 0:
+        print('\nWarning: Position and velocity input are empty\n')
+        print('Returning empty position/velocity arrays')
+        print('Returning b1950 to j2000 transformation matrix for', option, 'option')
+        return rj2000, vj2000, fk4m
+    # Position matrix is size 0 if only trying to find velocity
+    elif (rb1950.size != 3 and rb1950.size != 0) and (option == 'stk' or option == 'org'):
+        print('\nError: Position matrix is not size 3\n')
+        print('Returning empty position/velocity arrays')
+        print('Returning b1950 to j2000 transformation matrix for', option, 'option')
+        return rj2000, vj2000, fk4m
+    # Velocity matrix is size 0 if only trying to find velocity
+    elif (vb1950.size != 3 and vb1950.size != 0) and (option == 'stk' or option == 'org'):
+        print('\nError: Velocity matrix is not size 3\n')
+        print('Returning empty position/velocity arrays')
+        print('Returning b1950 to j2000 transformation matrix for', option, 'option')
+        return rj2000, vj2000, fk4m
+    # Position matrix is size 0 if only trying to find velocity
+    elif (rb1950.size != 6 and rb1950.size != 0) and option == '6d':
+        print('\nError: Position matrix is not size 6\n')
+        print('Returning empty position/velocity arrays')
+        print('Returning b1950 to j2000 transformation matrix for', option, 'option')
+        return rj2000, vj2000, fk4m
+    # Velocity matrix is size 0 if only trying to find velocity
+    elif (vb1950.size != 6 and vb1950.size != 0) and option == '6d':
+        print('\nError: Velocity matrix is not size 6\n')
+        print('Returning empty position/velocity arrays')
+        print('Returning b1950 to j2000 transformation matrix for', option, 'option')
+        return rj2000, vj2000, fk4m
+
+    # Final transformation:
+    else:
+        if rb1950.size != 0:
+            rj2000 = rb1950 @ fk4m
+        if vb1950.size != 0:
+            vj2000 = vb1950 @ fk4m
+
+    return rj2000, vj2000, fk4m
+
+
+# ----------------------------------------------------------------------------
+#
+#                           function fk4i
+#
+#    This function converts vectors from j2000 to b1950 epochs (i = inverse)
+#    be aware that this process is not exact. there are different secular rates
+#    for each system, and there are differences in the central location. the
+#    matrices are multiplied directly for speed.
+#
+#  author        : david vallado                  719-573-2600   21 jun 2002
+#
+#  revisions     : michael courville                             2 jul 2024
+#                -
+#
+#  inputs          description                              range / units
+#    rj2000i      - j2000 eci position vector (optional)      er, km, etc
+#    vj2000i      - j2000 eci velocity vector (optional)      er/s, km/s, etc
+#                  (Note: If only trying to find vb1950i,
+#                  input an empty numpy list for rj2000i)
+#    option      - systems tool kit, original,              'stk' (default)
+#                  or 6 dimension approach                  'org', '6d'
+#                  (Note: if only trying to return trans
+#                  matrix, input an empty numpy list for
+#                  rj2000i and vj2000i)
+#
+#  outputs       :
+#    rb1950i      - b1950 eci position vector                er, km, etc
+#                - 3x3 -> 3x1 [rx, ry, rz]
+#                - 6x6 -> 6x1 [rx, ry, rz, rxdot, rydot, rzdot]
+#    vb1950i      - b1950 eci velocity vector                er/s, km/s, etc
+#                - 3x3 -> 3x1 [vx, vy, vz]
+#                - 6x6 -> 6x1 [vx, vy, vz, vxdot, vydot, vzdot]
+#    fk4mi       - conversion matrix j2000 to b1950
+#
+#  locals        :
+#
+#  coupling      :
+#
+#  references    :
+#    vallado       2001, 227-228
+#
+# rb1950i = fk4mi * rj2000i;
+# ----------------------------------------------------------------------------
+def fk4i(rj2000i: np.ndarray = np.array([]), vj2000i: np.ndarray = np.array([]),
+         option: str ='org'):
+    """This function converts vectors from j2000 to b1950 epochs (i = inverse)
+    be aware that this process is not exact. there are different secular rates
+    for each system, and there are differences in the central location. the
+    matrices are multiplied directly for speed.
+
+    Parameters
+    ----------
+    rj2000i : np.ndarray, optional
+        j2000 eci position vector, by default np.array([]): er, km, etc
+    vj2000i : np.ndarray, optional
+        j2000 eci velocity vector, by default np.array([]): er/s, km/s, etc
+    option : str, optional
+        transformation approach (systems tool kit, original, or 6 dimension), \
+        by default 'org': 'org','stk','6d'
+
+    Note: if only trying to return transformation martix, input an empty \
+        numpy array for rj2000i and vj2000i
+
+    Returns
+    -------
+    rb1950i: np.ndarray
+        b1950 eci position vector: er, km, etc
+    vb1950i: np.ndarray
+        b1950 eci velocity vector: er/s, km/s, etc
+    fk4mi: np.ndarray
+        conversion matrix for provided option
+    """
+    # Default Empty Outputs
+    rb1950i = np.array([])
+    vb1950i = np.array([])
+    fk4mi = np.array([])
+
+    # Input Error Check:
+    if not isinstance(rj2000i, np.ndarray) or not isinstance(vj2000i, np.ndarray):
+        print('\nError: Position and velocity vectors must be numpy arrays\n')
+        print('Returning empty arrays')
+        return rb1950i, vb1950i, fk4mi
+    elif not isinstance(option, str):
+        print('\nError: Invalid option\n')
+        print('Returning empty arrays')
+        return rb1950i, vb1950i, fk4mi
+    elif option not in ['org','stk','6d']:
+        print('\nError: Invalid option\n')
+        print('Returning empty arrays')
+        return rb1950i, vb1950i, fk4mi
+
+    # Transformation martrix options:
+    # in book (original) (Vallado 4th edition, pages 234-235)
+    # 1950 - 2000
+    if option == 'org':
+        fk4mi = np.array([[9.99925679e-01, 1.11814832e-02, 4.85900377e-03],
+                        [-1.11814832e-02, 9.99937485e-01, -2.71702937e-05],
+                        [-4.85900382e-03, -2.71625947e-05, 9.99988195e-01]])
+    # stk approach (the difference is about 5 m between the various approaches)
+    # New way is formed by multiplying the matrices on pages
+    # 173 and 174 and adding in the correction to equinox given
+    # on page 168 of the supplement to the astronomical almanac
+    # 1950 - 2000
+    elif option == 'stk':
+        fk4mi = np.array([[9.99925679e-01, 1.11818745e-02, 4.85828488e-03],
+                        [-1.11818746e-02,  9.99937481e-01, -2.71569329e-05],
+                        [-4.85828481e-03, -2.71698161e-05,  9.99988198e-01]])
+    # from Exp supp to Ast Almanac pg 185 6x6
+    # 1950 - 2000
+    elif option == '6d' or (rj2000i.size == 6 or vj2000i.size == 6):
+        fk4m = np.array([[0.9999256782, -0.0111820611, -0.0048579477,
+                        0.00000242395018, -0.00000002710663, -0.00000001177656],
+                        [0.0111820610, 0.9999374784, -0.0000271765,
+                        0.00000002710663, 0.00000242397878, -0.00000000006587],
+                        [0.0048579479, -0.0000271474, 0.9999881997,
+                        0.00000001177656, -0.00000000006582, 0.00000242410173],
+                        [-0.000551, -0.238565, 0.435739,
+                        0.99994704, -0.01118251, -0.00485767],
+                        [0.238514, -0.002667, -0.008541,
+                        0.01118251, 0.99995883, -0.00002718],
+                        [-0.435623, 0.012254, 0.002117,
+                        0.00485767, -0.00002714, 1.00000956]])
+        fk4mi = np.linalg.inv(fk4m)
+
+    # Matrix size verification:
+    if rj2000i.size == 0 and vj2000i.size == 0:
+        print('\nWarning: Position and velocity input are empty\n')
+        print('Returning empty position/velocity arrays')
+        print (' Returning j2000 to b1950 transformation matrix for', option, 'option')
+        return rb1950i, vb1950i, fk4mi
+    # Position matrix is size 0 if only trying to find velocity
+    elif (rj2000i.size != 3 and rj2000i.size != 0) and (option == 'stk' or option == 'org'):
+        print('\nError: Position matrix is not size 3\n')
+        print('Returning empty position/velocity arrays')
+        print (' Returning j2000 to b1950 transformation matrix for', option, 'option')
+        return rb1950i, vb1950i, fk4mi
+    # Velocity matrix is size 0 if only trying to find velocity
+    elif (vj2000i.size != 3 and vj2000i.size != 0) and (option == 'stk' or option == 'org'):
+        print('\nError: Velocity matrix is not size 3\n')
+        print('Returning empty position/velocity arrays')
+        print (' Returning j2000 to b1950 transformation matrix for', option, 'option')
+        return rb1950i, vb1950i, fk4mi
+    # Position matrix is size 0 if only trying to find velocity
+    elif (rj2000i.size != 6 and rj2000i.size != 0) and option == '6d':
+        print('\nError: Position matrix is not size 6\n')
+        print('Returning empty position/velocity arrays')
+        print (' Returning j2000 to b1950 transformation matrix for', option, 'option')
+        return rb1950i, vb1950i, fk4mi
+    # Velocity matrix is size 0 if only trying to find velocity
+    elif (vj2000i.size != 6 and vj2000i.size != 0) and option == '6d':
+        print('\nError: Velocity matrix is not size 6\n')
+        print('Returning empty position/velocity arrays')
+        print (' Returning j2000 to b1950 transformation matrix for', option, 'option')
+        return rb1950i, vb1950i, fk4mi
+
+    # Final transformation:
+    else:
+        if rj2000i.size != 0:
+            rb1950i = rj2000i @ fk4mi
+        if vj2000i.size != 0:
+            vb1950i = vj2000i @ fk4mi
+
+    return rb1950i, vb1950i, fk4mi
+
+
 
 def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
                  vint: np.ndarray):
@@ -9026,8 +9357,6 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
     rtgtrsw1, vtgtrsw1, transmat1 = rv2rsw(rtgt, vtgt)
     rintrsw1 = transmat1 @ rint
     vintrsw1 = transmat1 @ vint
-
-
 
     # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
     ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rtgtrsw1, vtgtrsw1)
@@ -9102,6 +9431,8 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
         vinteqcm[0], vinteqcm[1], vinteqcm[2]
 
 if __name__ == '__main__':
+
+    print('hill to ecqm and ecqm to hill conversion test\n')
     x = 10
     y = 10
     z = 10
@@ -9118,3 +9449,58 @@ if __name__ == '__main__':
     x, y, z, dx, dy, dz = eci2hilleqcm(rtgteci, vtgteci, rintecix, vintecix)
     print(x, y, z)
     print(dx, dy, dz)
+
+    print('\nConversion Function fk4 and fk4i Testing (Explanatory Supplement Astronomical Almanac, 1992)\n')
+    print('Original fk4 Test (Vallado)')
+    r1, v1, m1 = fk4(np.array([1,2,3]), np.array([4,5,6]), 'org')
+    print('r1')
+    print(r1)
+    print('v1')
+    print (v1)
+    print('m1')
+    print(m1)
+
+    r2, v2, m2 = fk4i(r1, v1, 'org')
+    print('r2')
+    print(r2)
+    print('v2')
+    print (v2)
+    print('m2')
+    print(m2)
+
+    print('STK fk4 Test')
+    r1, v1, m1 = fk4(np.array([1,2,3]), np.array([4,5,6]),'stk')
+    print('r1')
+    print(r1)
+    print('v1')
+    print (v1)
+    print('m1')
+    print(m1)
+
+    r2, v2, m2 = fk4i(r1, v1,'stk')
+    print('r2')
+    print(r2)
+    print('v2')
+    print (v2)
+    print('m2')
+    print(m2)
+
+    print('6 dimensional fk4 Test (Explanatory Supplement Astronomical \
+          Almanac, 1992)')
+    r1, v1, m1 = fk4(np.array([1,2,3,4,5,6]), np.array([7,8,9,10,11,12]), '6d')
+    print('r1')
+    print(r1)
+    print('v1')
+    print (v1)
+    print('m1')
+    print(m1)
+
+    r2, v2, m2 = fk4i(r1, v1, '6d')
+    print('r2')
+    print(r2)
+    print('v2')
+    print (v2)
+    print('m2')
+    print(m2)
+
+
