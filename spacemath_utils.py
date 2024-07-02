@@ -3104,6 +3104,19 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
 
 # A quick function to shorten all of the sine and cosine calls made. -zeg
 def getsincos(*args):
+    """a function that takes any number of angles in radians and returns
+    the sine and cosine values.
+
+    Parameters
+    ----------
+    arg1, arg2, arg3...
+        any number of angles in radians
+
+    Returns
+    -------
+    sin_arg1, cos_arg1, sin_arg2, cos_arg2, sin_arg3, cos_arg3...
+        the sine and cosine values of the arguments
+    """
     results = []
     for arg in args:
         results.append(math.sin(arg))
