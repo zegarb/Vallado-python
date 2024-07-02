@@ -9796,70 +9796,77 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
     el = 0.0
     vis = 'radar sun'
 
+    if sh.show:
+        print('reci: ', reci)
+        print('veci: ', veci)
+        print('jdepoch: ', jdepoch)
+        print('latgd: ', latgd)
+        print('lon: ', lon)
+        print('alt: ', alt)
+        print('dtsec: ', dtsec)
+        print('dti: ', dti)
+        print('dat: ', dat)
+        print('xp: ', xp)
+        print('yp: ', yp)
+        print('ddeps: ', ddeps)
+        print('lod: ', lod)
+        print('terms: ', terms)
+        print('timezone: ', timezone)
+        print('ndot: ', ndot)
+        print('nddot: ', nddot)
+
     rsecef, vsecef = site(latgd, lon, alt)
+    if sh.show:
+        print('rsecef: ', rsecef)
+        print('vsecef: ', vsecef)
     #print('site ecef :\n', rsecef, vsecef)
     #print()
 
     year, mon, day, hr, min, sec = stu.invjday(jdepoch)
 
     for i in range(0, dti+1):
-        #                [reci1, veci1, error] =  kepler  ( reci, veci, i*dtsec );
-    #                reci = reci';
-    #                veci = veci';
         # i *dtsec input in wrong area on matlab code
         reci1, veci1 = pkepler(reci, veci, i * dtsec, ndot, nddot)
-        # These values are slightly off from the book
-        #print(reci1)
-        #print(veci1)
+
         ut1, tut1, jdut1, jdut1frac, utc, tai, tt, ttt, jdtt, jdttfrac, tdb, ttdb, jdtdb, jdtdbfrac \
             = stu.convtime(year, mon, day, hr, min, sec + i * dtsec, timezone, dut1, dat)
          # -------------------- convert eci to ecef --------------------
         a = np.array([[0],[0],[0]])
-        # What are ddpsi and ddeps supposed to be? ttt? lod?
-        #if i == 106:
-        #    reci1 = [-2811.27691, 3486.2632, 5069.5763]
-        #    veci1 = [-6.859691, -2.964792, -1.764721]
-
+        # These values are slightly off from the book
         recef, vecef, aecef = sc.eci2ecef(reci1, veci1, a, ttt, jdut1 + jdut1frac,\
                                         lod, xp, yp, terms, ddpsi, ddeps)
-        #print(f'Julian Time: {jdut1 + jdut1frac}')
-        #print(f'reci1 {i} x {reci1} {veci1}')
-        #print(f'recef {i} x {recef} {vecef} \n')
+
         # ------- find ecef range vector from site to satellite -------
         rhoecef = recef - rsecef
           # ------------- convert to sez for calculations ---------------
         tempvec = smu.rot3(rhoecef, lon)
         rhosez = smu.rot2(tempvec, halfpi - latgd)
 
-        # if i == 106:
-        #     print(jdut1 + jdut1frac)
-        #     print(f'reci1 {i} x {reci1} {veci1}')
-        #     y, m, d, h, mn, s = stu.invjday(jdut1, jdut1frac - dut1 / 86400.0)
-        #     print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
-
-        # if i == 106:
-        #     print(f'recef {i} x {recef} {vecef} \n')
-
-
-        # if i == 106:
-        #     print(f'rhosez {i} x {rhosez} \n')
+        if i == 106 and sh.show:
+            print(f'Julian Time: {jdut1 + jdut1frac}')
+            y, m, d, h, mn, s = stu.invjday(jdut1, jdut1frac - dut1 / 86400.0)
+            print(f'{y} {m} {d:.0f} {h:.0f}:{mn:02.0f} {s} \n')
+            print(f'reci1 {i} x {reci1} {veci1}')
+            print(f'recef {i} x {recef} {vecef} \n')
+            print(f'rhosez {i} x {rhosez} \n')
 
         rho, az, el, drho, daz, del_ = sc.rv2razel(reci1, veci1, latgd, lon, alt, ttt,\
                                     jdut1 + jdut1frac, lod, xp, yp, terms, ddpsi, ddeps)
-        # fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n', rho, az * \
-        # rad2deg, el * rad2deg, drho, daz * rad2deg, del * rad2deg );
+        # if sh.show:
+            # fprintf(1,'rvraz #14.7f#14.7f#14.7f#14.7f#14.7f#14.7f\n', rho, az * \
+            # rad2deg, el * rad2deg, drho, daz * rad2deg, del * rad2deg );
         if az < 0.0:
             az = az + twopi
         if rhosez[2] > 0.0:
             rsun, rtasc, decl = sun(jdtt + jdttfrac)
-            # if i == 106:
-            #     print(f'rsun{i} {rsun} \n')
-            #     print(f'rsun{i} {rsun*au} \n')
+            if i == 106 and sh.show:
+                print(f'rsun{i} {rsun} \n')
+                print(f'rsun{i} {rsun*au} \n')
             rsun = rsun * au
             rseci, vseci, aeci = sc.ecef2eci(rsecef, vsecef, a, ttt, jdut1 + \
                                            jdut1frac, lod, xp, yp, terms, ddpsi, ddeps)
-            # if i == 106:
-            #     print(f'rseci {i} x {rseci} {vseci} \n')
+            if i == 106 and sh.show:
+                print(f'rseci {i} x {rseci} {vseci} \n')
             if np.dot(rsun, rseci) > 0.0:
                 vis = 'radar sun'
             else:
@@ -9869,8 +9876,8 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
                 magrsun = smu.mag(rsun)
                 zet = math.asin(magrxr / (magrsun * magr))
                 dist = smu.mag(reci1) * math.cos(zet - halfpi)
-                # if i == 106:
-                #     print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg, dist))
+                if i == 106 and sh.show:
+                    print('zet  %11.7f dist %11.7f  \n' % (zet * rad2deg, dist))
                 if dist > re:
                     vis = 'visible'
                 else:
@@ -9879,9 +9886,10 @@ def predict(reci, veci, jdepoch, latgd, lon, alt, dtsec, dti, dut1, \
             vis = 'not visible'
 
         # Example 11_6 (table check)
-        # y, m, d, h, mn, s = stu.invjday(jdut1, jdut1frac - dut1 / 86400.0)
-        #print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
-        #      (y, m, d, h, mn, s, vis, rho, az * rad2deg, el * rad2deg))
+        if sh.show:
+            y, m, d, h, mn, s = stu.invjday(jdut1, jdut1frac - dut1 / 86400.0)
+            print('%5i %3i %3i %2i:%2i %6.3f %12s %11.7f  %11.7f  %11.7f  \n' % \
+            (y, m, d, h, mn, s, vis, rho, az * rad2deg, el * rad2deg))
 
     jdutend = jdut1 + jdut1frac
     return jdutend, rho, az, el, vis

@@ -82,9 +82,9 @@ dtsec = 120.0
 # timezone = 0 Assumming Epoch time (UTC)
 jdepoch,jdepochf = stu.jday(year,mon,day,hr,min,sec)
 
-# Was 119 iterations (106 gets example problem in book - Table 11-4)
+# Was 119 iterations (106 gets the example problem in book - Table 11-4)
 jdutend, rho, az, el, vis = obu.predict(reci, veci, jdepoch+jdepochf, \
-                                latgd, lon, alt, dtsec, 106, dut1, dat, xp, yp)
+                                latgd, lon, alt, dtsec, 119, dut1, dat, xp, yp)
 
 
 y,m,d,h,mn,s = stu.invjday(jdutend - (dut1 / 86400.0))
