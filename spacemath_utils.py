@@ -3102,6 +3102,7 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
     # printf(" \n")
     return deltaamt, xnomp
 
+# A quick function to shorten all of the sine and cosine calls made. -zeg
 def getsincos(*args):
     results = []
     for arg in args:
