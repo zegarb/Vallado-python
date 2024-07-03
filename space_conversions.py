@@ -3861,6 +3861,8 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
 #    arglat      - argument of latitude      (ci) 0.0  to 2pi rad
 #    truelon     - true longitude            (ce) 0.0  to 2pi rad
 #    lonper      - longitude of periapsis    (ee) 0.0  to 2pi rad
+#    mu          - grav parameter (optional)      km3/s2
+#                  (default=earth)
 #
 #  outputs       :
 #    r           - ijk position vector            km
@@ -3887,37 +3889,39 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
 
 
 def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
-           nu: float, arglat: float, truelon: float, lonper: float):
+           nu: float, arglat: float, truelon: float, lonper: float, mu:float=mu):
     """This function finds the position and velocity vectors in geocentric
     equatorial (ijk) system given the classical orbit elements.
 
     Parameters
     ----------
     p : float
-        semilatus rectum
+        semilatus rectum: km
     ecc : float
         eccentricity
     incl : float
-        inclination
+        inclination: 0.0  to pi rad
     omega : float
-        longitude of ascending node
+        longitude of ascending node: 0.0  to 2pi rad
     argp : float
-        argument of pedigree
+        argument of pedigree: 0.0  to 2pi rad
     nu : float
-        true anomaly
+        true anomaly: 0.0  to 2pi rad
     arglat : float
-        argument of latitude
+        argument of latitude: 0.0  to 2pi rad
     truelon : float
-        true longitude
+        true longitude: 0.0  to 2pi rad
     lonper : float
-        longitude of periapsis
+        longitude of periapsis: 0.0  to 2pi rad
+    mu: float
+        graviational parameter: km3/s2, default = earth mu
 
     Returns
     -------
     r : ndarray
-        ijk position vector
+        ijk position vector: km
     v : ndarray
-        ijk velocity vector
+        ijk velocity vector: km/s
     """
 
     # -------------------------------------------------------------
@@ -3967,107 +3971,6 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
 
     r = r.T #r = r' (transpose)
     v = v.T #v = v' (transpose)
-    return r, v
-
-#
-# ------------------------------------------------------------------------------
-#
-#                           function coe2rvh
-#
-#  this function finds the position and velocity vectors in geocentric
-#    equatorial (ijk) system given the classical orbit elements.
-#
-#   assuming "h" = heliocentric
-#   (can input different gravitational parameter as opposed to coe2rv)
-#
-#  author        : david vallado                  719-573-2600    9 jun 2002
-#
-#  revisions
-#    vallado     - add constant file use                         29 jun 2003
-#
-#  inputs          description                    range / units
-#    p           - semilatus rectum               km
-#    ecc         - eccentricity
-#    incl        - inclination                    0.0  to pi rad
-#    omega       - longitude of ascending node    0.0  to 2pi rad
-#    argp        - argument of perigee            0.0  to 2pi rad
-#    nu          - true anomaly                   0.0  to 2pi rad
-#    arglat      - argument of latitude      (ci) 0.0  to 2pi rad
-#    truelon     - true longitude            (ce) 0.0  to 2pi rad
-#    lonper      - longitude of periapsis    (ee) 0.0  to 2pi rad
-#    mu          - gravitational parameter in     km3/s2
-#
-#  outputs       :
-#    r           - ijk position vector            km
-#    v           - ijk velocity vector            km / s
-#
-#  locals        :
-#    temp        - temporary real*8 value
-#    rpqw        - pqw position vector            km
-#    vpqw        - pqw velocity vector            km / s
-#    sinnu       - sine of nu
-#    cosnu       - cosine of nu
-#    tempvec     - pqw velocity vector
-#
-#  coupling      :
-#    mag         - magnitude of a vector
-#    rot3        - rotation about the 3rd axis
-#    rot1        - rotation about the 1st axis
-#
-#  references    :
-#    vallado       2007, 126, alg 10, ex 2-5
-#
-# [r, v] = coe2rv (p, ecc, incl, omega, argp, nu, arglat, truelon, lonper, mu)
-# ------------------------------------------------------------------------------
-
-def coe2rvh(p=None, ecc=None, incl=None, omega=None, argp=None, nu=None,
-            arglat=None, truelon=None, lonper=None, mu=None):
-    # -------------------------  implementation   -----------------
-
-    # -------------------------------------------------------------
-#       determine what type of orbit is involved and set up the
-#       set up angles for the special cases.
-# -------------------------------------------------------------
-    if (ecc < small):
-        # ----------------  circular equatorial  ------------------
-        if (incl < small) or (np.abs(incl - np.pi) < small):
-            argp = 0.0
-            omega = 0.0
-            nu = truelon
-        else:
-            # --------------  circular inclined  ------------------
-            argp = 0.0
-            nu = arglat
-    else:
-        # ---------------  elliptical equatorial  -----------------
-        if ((incl < small) or (np.abs(incl - np.pi) < small)):
-            argp = lonper
-            omega = 0.0
-
-    # ----------  form pqw position and velocity vectors ----------
-    cosnu = np.cos(nu)
-    sinnu = np.sin(nu)
-    temp = p / (1.0 + ecc * cosnu)
-    rpqw = np.zeros(3)
-    rpqw[0] = temp * cosnu
-    rpqw[1] = temp * sinnu
-    rpqw[2] = 0.0
-    if (np.abs(p) < 0.0001):
-        p = 0.0001
-
-    vpqw = np.zeros(3)
-    vpqw[0] = - sinnu * np.sqrt(mu) / np.sqrt(p)
-    vpqw[1] = (ecc + cosnu) * np.sqrt(mu) / np.sqrt(p)
-    vpqw[2] = 0.0
-    # ----------------  perform transformation to ijk  ------------
-    tempvec = smu.rot3(rpqw, - argp)
-    tempvec = smu.rot1(tempvec, - incl)
-    r = smu.rot3(tempvec, - omega)
-    tempvec = smu.rot3(vpqw, - argp)
-    tempvec = smu.rot1(tempvec, - incl)
-    v = smu.rot3(tempvec, - omega)
-    r = np.transpose(r)
-    v = np.transpose(v)
     return r, v
 
 # ------------------------------------------------------------------------------

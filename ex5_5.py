@@ -70,7 +70,7 @@ p = a * (1.0 - ecc * ecc) * au
 musun = 132712428000.0
 
 # answer in km/s
-r, v = sc.coe2rvh(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
+r, v = sc.coe2rv(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
 # r in au
 r = r / au
 # v in au/day

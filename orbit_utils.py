@@ -10221,8 +10221,8 @@ def planetrv(abbr, jd):
 
     # approx orbital element of the given planet using Tabel D.4 (pg 1046)
     p, ecc, incl, omega, argp, nu = planet.approxcalc_coe(ttdb)
-    # vectors in km and km/s
-    r, v = sc.coe2rvh(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
+    # vectors in km and km/s (Note: gravitational constant should be the sun)
+    r, v = sc.coe2rv(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0, musun)
 
     # r in au because of large number
     r = r / au

@@ -501,8 +501,15 @@ print(v)
 # print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
 #         truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
 
-r, v = coe2rvh(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper, mu)
-print('coe2rvh:')
+
+p,a,ecc,incl,raan,argp,nu,m,arglat,truelon,lonper = rv2coe(r, v)
+print('rv2coe:')
+print(f'p {p}, a {a}, ecc {ecc}, incl {incl}, omega {omega}, argp {argp}, nu {nu}, arglat {arglat},\
+truelon {truelon}, lonper {lonper}') # % (p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper))
+
+# coe2rvh was combined with coe2rv
+r, v = coe2rv(p, ecc, incl, omega, argp, nu, arglat, truelon, lonper, mu)
+print('coe2rv:')
 print(r)
 print(v)
 

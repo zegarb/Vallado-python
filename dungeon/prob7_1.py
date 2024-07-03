@@ -180,6 +180,6 @@ m = truelon - lonper
 argp = lonper - omega
 p = a * (1.0 - ecc ** 2)
 e0,nu = obu.newtonm(ecc,m)
-r2,v2 = sc.coe2rvh(p,ecc,incl,omega,argp,nu,arglat,truelon,lonper,mu)
+r2,v2 = sc.coe2rv(p,ecc,incl,omega,argp,nu,arglat,truelon,lonper,mu)
 print('r2     %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2 / au,r2))
 print('v2     %11.7f   %11.7f  %11.7f au/tu %11.7f  %11.7f  %11.7f km/s\n' % (v2 * tus,v2))
