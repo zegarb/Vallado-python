@@ -1298,7 +1298,7 @@ def seebatt(v: float):
     i = 1
     while ((i <= 20) and (np.abs(termold) > 1e-08)):
 
-        del_ = 1.0 / (1.0 + c(i) * eta * delold)
+        del_ = 1.0 / (1.0 + c[i] * eta * delold)
         term = termold * (del_ - 1.0)
         sum1 = sum1 + term
         i = i + 1
@@ -1332,7 +1332,7 @@ def seebatt(v: float):
     sum2 = 0.0
     term2 = 1.0 + c[ktr-1] * eta
     for i in range(ktr - 3):
-        sum2 = c(ktr - i) * eta / term2
+        sum2 = c[ktr - i] * eta / term2
         term2 = 1.0 + sum2
 
     seebatt = (8.0 * (1.0 + sqrtopv)

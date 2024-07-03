@@ -10194,13 +10194,15 @@ def planetrv(abbr, jd):
         planet = planets.Mars()
     elif abbr  == 'j':
         planet = planets.Jupiter()
-    # Not complete
-    # elif abbr == 's':
-    #     planet = planets.Saturn()
-    # elif abbr == 'u':
-    #     planet = planets.Uranus()
-    # elif abbr == 'n':
-    #     planet = planets.Neptune()
+    elif abbr == 's':
+        planet = planets.Saturn()
+    elif abbr == 'u':
+        planet = planets.Uranus()
+    elif abbr == 'n':
+        planet = planets.Neptune()
+    # I know Pluto is not a planet but hey, why not? - mjc
+    elif abbr == 'p':
+        planet = planets.Pluto()
     else:
         print("Error: Invalid planet type")
         return None
