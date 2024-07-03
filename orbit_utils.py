@@ -4554,7 +4554,7 @@ def gibbsh(r1=None, r2=None, r3=None, re=None, mu=None):
     w = np.cross(r1, r2)
     pn = np.linalg.norm(p)
     r1n = np.linalg.norm(r1)
-    copa = math.asin(np.dot(pn, r1n))
+    copa = np.arcsin(np.dot(pn, r1n))
     if (abs(np.dot(r1n, pn)) > 0.017452406):
         error = 'not coplanar'
 
