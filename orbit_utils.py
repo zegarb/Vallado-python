@@ -4367,8 +4367,6 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
 
     return r2, v2
 
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function gibbs
@@ -4383,10 +4381,13 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
 #    r1          - ijk position vector #1         km
 #    r2          - ijk position vector #2         km
 #    r3          - ijk position vector #3         km
+#    mu          - gravitational constant
+#                   default earth
 #
 #  outputs       :
 #    v2          - ijk velocity vector for r2     km / s
-#    theta       - angl between vectors           rad
+#    theta1      - angl between vectors 1 and 2   rad
+#    theta2      - angl between vectors 2 and 3   rad
 #    error       - flag indicating success        'ok', ...
 #
 #  locals        :
@@ -4416,7 +4417,7 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
 #    cross       - cross product of two vectors
 #    dot         - dot product of two vectors
 #    unit        - unit vector
-#    angl       - angl between two vectors
+#    angl        - angl between two vectors
 #
 #  references    :
 #    vallado       2007, 456, alg 52, ex 7-5
@@ -4424,9 +4425,36 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
 # [v2, theta, theta1, copa, error] = function gibbs(r1, r2, r3)
 # ------------------------------------------------------------------------------
 
-def gibbs(r1=None, r2=None, r3=None):
-    # -------------------------  implementation   -------------------------
-    small = 1e-06
+def gibbs(r1: np.ndarray, r2: np.ndarray, r3: np.ndarray, mu: float = mu):
+    """this function performs the gibbs method of orbit determination.  this
+    method determines the velocity at the middle point of the 3 given position
+    vectors.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    r2 : ndarray
+        ijk position vector 2: km
+    r3 : ndarray
+        ijk position vector 3: km
+    mu: float, optional
+        gravitational constant, default earth
+
+    Returns
+    -------
+    v2 : ndarray
+        ijk velocity vector 2: km/s
+    theta1 : float
+        angle between vectors 1 and 2: rad
+    theta2 : float
+        angle between vectors 2 and 3: rad
+    copa : float
+        coplanar angle: rad
+    error : str
+        flag indicating success: 'ok', 'not coplanar', 'impossible
+    """
+    small = smalle6
     theta = 0.0
     error = '          ok'
     theta1 = 0.0
@@ -4440,11 +4468,11 @@ def gibbs(r1=None, r2=None, r3=None):
     w = np.cross(r1, r2)
     pn = smu.unit(p)
     r1n = smu.unit(r1)
-    copa = math.asin(np.dot(pn, r1n))
+    copa = math.asin(pn @ r1n)
     if (abs(copa) > 0.017452406):
         error = 'not coplanar'
 
-    # --------------- | don't continue processing --------------
+    # --------------- don't continue processing --------------
     d = p + q + w
     magd = smu.mag(d)
     n = magr1 * p + magr2 * q + magr3 * w
@@ -4452,9 +4480,9 @@ def gibbs(r1=None, r2=None, r3=None):
     nn = smu.unit(n)
     dn = smu.unit(d)
     # -------------------------------------------------------------
-#       determine if  the orbit is possible.  both d and n must be in
-#         the same direction, and non-zero.
-# -------------------------------------------------------------
+    #       determine if  the orbit is possible.  both d and n must be in
+    #       the same direction, and non-zero.
+    # -------------------------------------------------------------
     if (((abs(magd) < small) or (abs(magn) < small)) or
             (np.dot(nn, dn) < small)):
         error = '  impossible'
@@ -4471,123 +4499,8 @@ def gibbs(r1=None, r2=None, r3=None):
         tover2 = l / magr2
         v2 = tover2 * b + l * s
 
-    #    fprintf(1, 'p     #11.7f   #11.7f  #11.7f km2 \n', p)
-#    fprintf(1, 'n     #11.7f   #11.7f  #11.7f km3 \n', n)
-#    fprintf(1, 'd     #11.7f   #11.7f  #11.7f km3 \n', d)
-#    fprintf(1, 's     #11.7f   #11.7f  #11.7f km2 \n', s)
-#    fprintf(1, 'theta     #11.7f   #11.7f deg \n', theta*180/pi, theta1*180/pi)
-#    fprintf(1, 'b     #11.7f   #11.7f  #11.7f km3 \n', b)
-#    fprintf(1, 'l     #11.7f  /kms \n', l)
     return v2, theta, theta1, copa, error
 
-
-# ------------------------------------------------------------------------------
-#
-#                           function gibbsh
-#
-#  this function performs the gibbs method of orbit determination.  this
-#    method determines the velocity at the middle point of the 3 given position
-#    vectors.
-#
-#  author        : david vallado                  719-573-2600    1 mar 2001
-#
-#  inputs          description                    range / units
-#    r1          - ijk position vector #1         km
-#    r2          - ijk position vector #2         km
-#    r3          - ijk position vector #3         km
-#
-#  outputs       :
-#    v2          - ijk velocity vector for r2     km / s
-#    theta       - angl between vectors           rad
-#    error       - flag indicating success        'ok', ...
-#
-#  locals        :
-#    tover2      -
-#    l           -
-#    small       - tolerance for roundoff errors
-#    r1mr2       - magnitude of r1 - r2
-#    r3mr1       - magnitude of r3 - r1
-#    r2mr3       - magnitude of r2 - r3
-#    p           - p vector     r2 x r3
-#    q           - q vector     r3 x r1
-#    w           - w vector     r1 x r2
-#    d           - d vector     p + q + w
-#    n           - n vector (r1)p + (r2)q + (r3)w
-#    s           - s vector
-#                    (r2-r3)r1+(r3-r1)r2+(r1-r2)r3
-#    b           - b vector     d x r2
-#    theta1      - temp angl between the vectors   rad
-#    pn          - p unit vector
-#    r1n         - r1 unit vector
-#    dn          - d unit vector
-#    nn          - n unit vector
-#    i           - index
-#
-#  coupling      :
-#    mag         - magnitude of a vector
-#    cross       - cross product of two vectors
-#    dot         - dot product of two vectors
-#    unit        - unit vector
-#    angl       - angl between two vectors
-#
-#  references    :
-#    vallado       2007, 456, alg 52, ex 7-5
-#
-# [v2, theta, theta1, copa, error] = function gibbs(r1, r2, r3)
-# ------------------------------------------------------------------------------
-
-def gibbsh(r1=None, r2=None, r3=None, re=None, mu=None):
-    # -------------------------  implementation   -------------------------
-    small = 1e-06
-    theta = 0.0
-    error = '          ok'
-    theta1 = 0.0
-    magr1 = smu.mag(r1)
-    magr2 = smu.mag(r2)
-    magr3 = smu.mag(r3)
-    v2 = np.zeros(3)
-    for i in range(1):
-        v2[i] = 0.0
-
-    p = np.cross(r2, r3)
-    q = np.cross(r3, r1)
-    w = np.cross(r1, r2)
-    pn = smu.unit(p)
-    r1n = smu.unit(r1)
-    copa = math.asin(np.dot(pn, r1n))
-    if (abs(np.dot(r1n, pn)) > 0.017452406):
-        error = 'not coplanar'
-
-    # --------------- | don't continue processing --------------
-    d = p + q + w
-    magd = smu.mag(d)
-    n = magr1 * p + magr2 * q + magr3 * w
-    magn = smu.mag(n)
-    nn = np.linalg.norm(n)
-    dn = np.linalg.norm(d)
-    # -------------------------------------------------------------
-#       determine if  the orbit is possible.  both d and n must be in
-#         the same direction, and non-zero.
-# -------------------------------------------------------------
-    if ((((abs(magd) < small) or (abs(magn) < small)) or
-            (np.dot(nn, dn) < small))):
-        error = '  impossible'
-    else:
-        theta = smu.angl(r1, r2)
-        theta1 = smu.angl(r2, r3)
-        # ----------- perform gibbs method to find v2 -----------
-        r1mr2 = magr1 - magr2
-        r3mr1 = magr3 - magr1
-        r2mr3 = magr2 - magr3
-        s = r1mr2 * r3 + r3mr1 * r2 + r2mr3 * r1
-        b = np.cross(d, r2)
-        l = math.sqrt(mu / (magd * magn))
-        tover2 = l / magr2
-        v2 = tover2 * b + l * s
-
-    return v2, theta, theta1, copa, error
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function hgibbs
