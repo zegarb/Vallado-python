@@ -44,8 +44,7 @@ ktgt = 0
 kint = 1
 print('combined maneuver \n' % ())
 ttrans, tphase, dvphase, dvtrans1, dvtrans2, aphase = \
-    obu.noncoplr(phasenew, aint, atgt, ktgt, kint, arglatint, nodeint, truelon,
-                 deltai)
+    obu.noncoplr(aint, atgt, ktgt, kint, arglatint, nodeint, truelon, deltai)
 print(' ttrans  %11.7f \n' % (ttrans))
 print(' tphase  %11.7f \n' % (tphase))
 print(' dvphase  %11.7f  %11.7f \n' % (dvphase, dvphase * velkmps))

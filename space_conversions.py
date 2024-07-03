@@ -8695,8 +8695,8 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
     longstr1 = list(longstr1)
     longstr2 = list(longstr2)
 
-   #     // set the implied decimal points since doing a formated read
-    #     // fixes for bad input data values (missing, ...)
+    # set the implied decimal points since doing a formated read
+    # fixes for bad input data values (missing, ...)
     for j in range(10, 16):
         if (longstr1[j] == ' '):
             longstr1[j] = '_'
@@ -8788,35 +8788,35 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
         stopmfe  =  14400.0
         deltamin = 1440.0
 
-    #     // ---- find no, ndot, nddot ----
+    # ---- find no, ndot, nddot ----
     satrec['no_kozai'] = satrec['no_kozai'] / xpdotp #//* rad/min
     satrec['nddot'] = satrec['nddot'] * 10.0**nexp
     # note the implied decimal is set when adjusting longstr1 above
     satrec['bstar'] = satrec['bstar'] * 10.0**ibexp
 
-    #     // ---- convert to sgp4 units ----
+    # ---- convert to sgp4 units ----
     #    satrec['a']    = (satrec['no']*tumin)^(-2/3)                # [er]
     satrec['ndot'] = satrec['ndot'] / (xpdotp * 1440.0)          # [rad/min^2]
     satrec['nddot'] = satrec['nddot'] / (xpdotp * 1440.0 * 1440)     # [rad/min^3]
 
-    #     // ---- find standard orbital elements ----
+    # ---- find standard orbital elements ----
     satrec['inclo'] = satrec['inclo'] * deg2rad
     satrec['nodeo'] = satrec['nodeo'] * deg2rad
     satrec['argpo'] = satrec['argpo'] * deg2rad
     satrec['mo'] = satrec['mo'] * deg2rad
 
-    #       // sgp4fix not needed here
+    # sgp4fix not needed here
     #    satrec['alta'] = satrec['a']*(1.0 + satrec['ecco']) - 1.0
     #    satrec['altp'] = satrec['a']*(1.0 - satrec['ecco']) - 1.0
 
-    #     // ----------------------------------------------------------------
-    #     // find sgp4epoch time of element set
-    #     // remember that sgp4 uses units of days from 0 jan 1950 (sgp4epoch)
-    #     // and minutes from the epoch (time)
-    #     // --------------------------------------------------------------
+    # ----------------------------------------------------------------
+    # find sgp4epoch time of element set
+    # remember that sgp4 uses units of days from 0 jan 1950 (sgp4epoch)
+    # and minutes from the epoch (time)
+    # --------------------------------------------------------------
 
-    #     // ------------- temp fix for years from 1957-2056 ----------------
-    #     // ------ correct fix will occur when year is 4-digit in 2le ------
+    # ------------- temp fix for years from 1957-2056 ----------------
+    # ------ correct fix will occur when year is 4-digit in 2le ------
     if (satrec['epochyr'] < 57):
         year = satrec['epochyr'] + 2000
     else:
@@ -8832,7 +8832,7 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
     #stopmfe  = 1440.0
     #deltamin = 1.0
 
-    #     // input start stop times manually
+    # input start stop times manually
     # if ((typerun != 'v') and (typerun != 'c')  and (typerun != 'u')):
     #     # ------------- enter start/stop ymd hms values --------------------
     #     if (typeinput == 'e'):
@@ -8885,7 +8885,7 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
 
 
 
-    #     // ------------- initialize the orbit at sgp4epoch --------------
+    # ------------- initialize the orbit at sgp4epoch --------------
     sgp4epoch = satrec['jdsatepoch'] + satrec['jdsatepochf'] - 2433281.5 # days since 0 Jan 1950
     satrec = obu.sgp4init(whichconst, opsmode, satrec,
                         satrec['jdsatepoch'] + satrec['jdsatepochf'] - 2433281.5,

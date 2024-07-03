@@ -119,7 +119,8 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
            inclm=None, mm=None, nm=None, nodem=None, ecco=None, eccsq=None):
 
 
-    # /* --------------------- local variables ------------------------ */
+
+    # --------------------- local variables ------------------------
     aonv = 0.0
     q22 = 1.7891679e-06
     q31 = 2.1460748e-06
@@ -133,11 +134,11 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     x2o3 = 2.0 / 3.0
     znl = 0.00015835218
     zns = 1.19459e-05
-    #     // sgp4fix identify constants and allow alternate values
+    # sgp4fix identify constants and allow alternate values
     # sgp4fix no longer needed, pass xke in
     # global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
 
-    # /* -------------------- deep space initialization ------------ */
+    # -------------------- deep space initialization ------------
     irez = 0
     if ((nm < 0.0052359877) and (nm > 0.0034906585)):
         irez = 1
@@ -163,13 +164,13 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     xlamo = 0
     xli = 0
     xni = 0
-    # /* ------------------------ do solar terms ------------------- */
+    # ------------------------ do solar terms -------------------
     ses = ss1 * zns * ss5
     sis = ss2 * zns * (sz11 + sz13)
     sls = - zns * ss3 * (sz1 + sz3 - 14.0 - 6.0 * emsq)
     sghs = ss4 * zns * (sz31 + sz33 - 6.0)
     shs = - zns * ss2 * (sz21 + sz23)
-    #   // sgp4fix for 180 deg incl
+    # sgp4fix for 180 deg incl
     if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
         shs = 0.0
 
@@ -177,13 +178,13 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
         shs = shs / sinim
 
     sgs = sghs - cosim * shs
-    # /* ------------------------- do lunar terms ------------------ */
+    # ------------------------- do lunar terms ------------------
     dedt = ses + s1 * znl * s5
     didt = sis + s2 * znl * (z11 + z13)
     dmdt = sls - znl * s3 * (z1 + z3 - 14.0 - 6.0 * emsq)
     sghl = s4 * znl * (z31 + z33 - 6.0)
     shll = - znl * s2 * (z21 + z23)
-    #   // sgp4fix for 180 deg incl
+    # sgp4fix for 180 deg incl
     if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
         shll = 0.0
 
@@ -193,7 +194,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
         domdt = domdt - cosim / sinim * shll
         dnodt = dnodt + shll / sinim
 
-    # /* ----------- calculate deep space resonance effects -------- */
+    # ----------- calculate deep space resonance effects --------
     dndt = 0.0
     theta = math.fmod(gsto + tc * rptim, twopi)
     em = em + dedt * t
@@ -201,25 +202,25 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     argpm = argpm + domdt * t
     nodem = nodem + dnodt * t
     mm = mm + dmdt * t
-    # //   sgp4fix for negative inclinations
-    # //   the following if statement should be commented out
-    # //if (inclm < 0.0)
-    # //  {
-    # //    inclm  = -inclm;
-    # //    argpm  = argpm - pi;
-    # //    nodem = nodem + pi;
-    # //  }
+    #   sgp4fix for negative inclinations
+    #   the following if statement should be commented out
+    # if (inclm < 0.0)
+    #  {
+    #    inclm  = -inclm;
+    #    argpm  = argpm - pi;
+    #    nodem = nodem + pi;
+    #  }
 
-    #  /* - update resonances : numerical (euler-maclaurin) integration - */
-    #  /* ------------------------- epoch restart ----------------------  */
-    #  //   sgp4fix for propagator problems
-    #  //   the following integration works for negative time steps and periods
-    #  //   the specific changes are unknown because the original code was so convoluted
+    # - update resonances : numerical (euler-maclaurin) integration -
+    # ------------------------- epoch restart ----------------------
+    #   sgp4fix for propagator problems
+    #   the following integration works for negative time steps and periods
+    #   the specific changes are unknown because the original code was so convoluted
 
-    # /* -------------- initialize the resonance terms ------------- */
+    # -------------- initialize the resonance terms -------------
     if (irez != 0):
         aonv = (nm / xke) ** x2o3
-        # /* ---------- geopotential resonance for 12 hour orbits ------ */
+        # ---------- geopotential resonance for 12 hour orbits ------
         if (irez == 2):
             cosisq = cosim * cosim
             emo = em
@@ -289,7 +290,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
             xfact = mdot + dmdt + 2.0 * (nodedot + dnodt - rptim) - no
             em = emo
             emsq = emsqo
-        # /* ---------------- synchronous resonance terms -------------- */
+        # ---------------- synchronous resonance terms --------------
         if (irez == 1):
             g200 = 1.0 + emsq * (- 2.5 + 0.8125 * emsq)
             g310 = 1.0 + 2.0 * emsq
@@ -304,7 +305,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
             del1 = del1 * f311 * g310 * q31 * aonv
             xlamo = math.fmod(mo + nodeo + argpo - theta, twopi)
             xfact = mdot + xpidot - rptim + dmdt + domdt + dnodt - no
-        # /* ------------ for sgp4, initialize the integrator ---------- */
+        # ------------ for sgp4, initialize the integrator ----------
         xli = xlamo
         xni = no
         atime = 0.0
@@ -515,8 +516,8 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
     satrec['Om'] = 0.0
     satrec['mm'] = 0.0
     satrec['nm'] = 0.0
-    #     /* -------------------- wgs-72 earth constants ----------------- */
-    #     // sgp4fix identify constants and allow alternate values
+    #     -------------------- wgs-72 earth constants -----------------
+    #     sgp4fix identify constants and allow alternate values
     # sgp4fix switch to satrec['so'] only one call is needed to initialize
     # constants
     #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
@@ -553,7 +554,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
         sfour = ss
         qzms24 = qzms2t
         perige = (rp - 1.0) * satrec['radiusearthkm']
-        # /* - for perigees below 156 km, s and qoms2t are altered - */
+        # - for perigees below 156 km, s and qoms2t are altered -
         if (perige < 156.0):
             sfour = perige - 78.0
             if (perige < 98.0):
@@ -610,7 +611,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
             satrec['xmcof'] = - x2o3 * coef * satrec['bstar'] / eeta
         satrec['nodecf'] = 3.5 * omeosq * xhdot1 * satrec['cc1']
         satrec['t2cof'] = 1.5 * satrec['cc1']
-        # // sgp4fix for divide by zero with xinco = 180 deg
+        # sgp4fix for divide by zero with xinco = 180 deg
         if (abs(cosio + 1.0) > 1.5e-12):
             satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinio
                                * (3.0 + 5.0 * cosio) / (1.0 + cosio))
@@ -621,7 +622,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
         satrec['delmo'] = (1.0 + satrec['eta'] * math.cos(satrec['mo'])) ** 3
         satrec['sinmao'] = math.sin(satrec['mo'])
         satrec['x7thm1'] = 7.0 * cosio2 - 1.0
-        # /* --------------- deep space initialization ------------- */
+        # --------------- deep space initialization -------------
         if ((2 * math.pi / satrec['no']) >= 225.0):
             satrec['method'] = 'd'
             satrec['isimp'] = 1
@@ -681,7 +682,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
                        satrec['no'], satrec['nodeo'], satrec['nodedot'],
                        xpidot, z1, z3, z11, z13, z21, z23, z31, z33, em,
                        argpm, inclm, mm, nm, nodem, satrec['ecco'], eccsq)
-        # /* ----------- set variables if not deep space ----------- */
+        # ----------- set variables if not deep space -----------
         if (satrec['isimp'] != 1):
             cc1sq = satrec['cc1'] * satrec['cc1']
             satrec['d2'] = 4.0 * ao * tsi * cc1sq
@@ -697,7 +698,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
                                       + 15.0 * cc1sq * (2.0 * satrec['d2']
                                                         + cc1sq)))
 
-    # /* finally propogate to zero epoch to initialise all others. */
+    # finally propogate to zero epoch to initialise all others.
     # sgp4fix take out check to let satellites process until they are actually below earth surface
     #if(satrec['error'] == 0)
     satrec, satrec['r'], satrec['v'] = sgp4(satrec, 0.0)
@@ -802,24 +803,24 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
 #     hoots, norad spacetrack report #6 1986
 #     hoots, schumacher and glover 2004
 #     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------*/
+#  ----------------------------------------------------------------------------
 
 def sgp4(satrec=None, tsince=None):
-    # /* ------------------ set mathematical constants --------------- */
+    # ------------------ set mathematical constants ---------------
     x2o3 = 2.0 / 3.0
     # sgp4fix divisor for divide by zero check on inclination
     # the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
     # 1.5 e-12, so the threshold was changed to 1.5e-12 for consistancy
     temp4 = 1.5e-12
-    #  // sgp4fix identify constants and allow alternate values
+    # sgp4fix identify constants and allow alternate values
     # no longer needed, pass in through satrec
     #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
     vkmpersec = satrec['radiusearthkm'] * satrec['xke'] / 60.0
-    # /* --------------------- clear sgp4 error flag ----------------- */
+    # --------------------- clear sgp4 error flag -----------------
     satrec['t'] = tsince
     satrec['error'] = 0
     mrt = 0.0
-    # /* ------- update for secular gravity and atmospheric drag ----- */
+    # ------- update for secular gravity and atmospheric drag -----
     xmdf = satrec['mo'] + satrec['mdot'] * satrec['t']
     argpdf = satrec['argpo'] + satrec['argpdot'] * satrec['t']
     nodedf = satrec['nodeo'] + satrec['nodedot'] * satrec['t']
@@ -876,7 +877,7 @@ def sgp4(satrec=None, tsince=None):
     am = (satrec['xke'] / nm) ** x2o3 * tempa * tempa
     nm = satrec['xke'] / am ** 1.5
     em = em - tempe
-    # // fix tolerance for error recognition
+    # fix tolerance for error recognition
     if ((em >= 1.0) or (em < - 0.001) or (am < 0.95)):
         #       fprintf(1,'# error em #f\n', em);
         satrec['error'] = 1
@@ -893,10 +894,10 @@ def sgp4(satrec=None, tsince=None):
     argpm = math.fmod(argpm, twopi)
     xlm = math.fmod(xlm, twopi)
     mm = math.fmod(xlm - argpm - nodem, twopi)
-    # /* ----------------- compute extra mean quantities ------------- */
+    # ----------------- compute extra mean quantities -------------
     sinim = math.sin(inclm)
     cosim = math.cos(inclm)
-    # /* -------------------- add lunar-solar periodics -------------- */
+    # -------------------- add lunar-solar periodics --------------
     ep = em
     xincp = inclm
     argpp = argpm
@@ -925,12 +926,12 @@ def sgp4(satrec=None, tsince=None):
             # fprintf(1,'# error ep #f\n', ep);
             satrec['error'] = 3
 
-    # /* -------------------- long period periodics ------------------ */
+    # -------------------- long period periodics ------------------
     if (satrec['method'] == 'd'):
         sinip = math.sin(xincp)
         cosip = math.cos(xincp)
         satrec['aycof'] = - 0.5 * satrec['j3oj2'] * sinip
-        # // sgp4fix for divide by zero with xinco = 180 deg
+        # sgp4fix for divide by zero with xinco = 180 deg
         if (abs(cosip + 1.0) > 1.5e-12):
             satrec['xlcof'] = (-0.25 * satrec['j3oj2'] * sinip
                                * (3.0 + 5.0 * cosip) / (1.0 + cosip))
@@ -942,13 +943,13 @@ def sgp4(satrec=None, tsince=None):
     temp = 1.0 / (am * (1.0 - ep * ep))
     aynl = ep * math.sin(argpp) + temp * satrec['aycof']
     xl = mp + argpp + nodep + temp * satrec['xlcof'] * axnl
-    # /* --------------------- solve kepler's equation --------------- */
+    # --------------------- solve kepler's equation ---------------
     u = math.fmod(xl - nodep, twopi)
     eo1 = u
     tem5 = 9999.9
     ktr = 1
-    # //   sgp4fix for kepler iteration
-# //   the following iteration needs better limits on corrections
+    #   sgp4fix for kepler iteration
+    #   the following iteration needs better limits on corrections
     while ((abs(tem5) >= 1e-12) and (ktr <= 10)):
 
         sineo1 = math.sin(eo1)
@@ -963,7 +964,7 @@ def sgp4(satrec=None, tsince=None):
         eo1 = eo1 + tem5
         ktr = ktr + 1
 
-    # /* ------------- short period preliminary quantities ----------- */
+    # ------------- short period preliminary quantities -----------
     ecose = axnl * coseo1 + aynl * sineo1
     esine = axnl * sineo1 - aynl * coseo1
     el2 = axnl * axnl + aynl * aynl
@@ -987,7 +988,7 @@ def sgp4(satrec=None, tsince=None):
         temp = 1.0 / pl
         temp1 = 0.5 * satrec['j2'] * temp
         temp2 = temp1 * temp
-        # /* -------------- update for short period periodics ------------ */
+        # -------------- update for short period periodics ------------
         if (satrec['method'] == 'd'):
             cosisq = cosip * cosip
             satrec['con41'] = 3.0 * cosisq - 1.0
@@ -1003,7 +1004,7 @@ def sgp4(satrec=None, tsince=None):
                  * (satrec['x1mth2'] * cos2u
                     + 1.5 * satrec['con41'])
                  / satrec['xke'])
-        # /* --------------------- orientation vectors ------------------- */
+        # --------------------- orientation vectors -------------------
         sinsu = math.sin(su)
         cossu = math.cos(su)
         snod = math.sin(xnode)
@@ -1018,7 +1019,7 @@ def sgp4(satrec=None, tsince=None):
         vx = xmx * cossu - cnod * sinsu
         vy = xmy * cossu - snod * sinsu
         vz = sini * cossu
-        # /* --------- position and velocity (in km and km/sec) ---------- */
+        # --------- position and velocity (in km and km/sec) ----------
         r = np.zeros(3)
         v = np.zeros(3)
         r[0] = (mrt * ux) * satrec['radiusearthkm']
@@ -1028,7 +1029,7 @@ def sgp4(satrec=None, tsince=None):
         v[1] = (mvt * uy + rvdot * vy) * vkmpersec
         v[2] = (mvt * uz + rvdot * vz) * vkmpersec
 
-    # // sgp4fix for decaying satellites
+    # sgp4fix for decaying satellites
     if (mrt < 1.0):
         #         printf("# decay condition #11.6f \n", mrt);
         satrec['error'] = 6
@@ -1096,19 +1097,19 @@ def sgp4(satrec=None, tsince=None):
 
 def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
           opsmode=None):
-    # /* -------------------- wgs-72 earth constants ----------------- */
-    #     // sgp4fix identify constants and allow alternate values
+    # -------------------- wgs-72 earth constants -----------------
+    # sgp4fix identify constants and allow alternate values
     # global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
     x2o3 = 2.0 / 3.0
     #   global opsmode
 
-    # /* ------------- calculate auxillary epoch quantities ---------- */
+    # ------------- calculate auxillary epoch quantities ----------
     eccsq = ecco * ecco
     omeosq = 1.0 - eccsq
     rteosq = math.sqrt(omeosq)
     cosio = math.cos(inclo)
     cosio2 = cosio * cosio
-    # /* ------------------ un-kozai the mean motion ----------------- */
+    # ------------------ un-kozai the mean motion -----------------
     ak = (xke / no_kozai) ** x2o3
     d1 = 0.75 * j2 * (3.0 * cosio2 - 1.0) / (rteosq * omeosq)
     del_ = d1 / (ak * ak)
@@ -1314,17 +1315,17 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
                                     "data", 'makeorbrvJ4.out'), 'wt')
 
     # --------------- approximate ast with gst for this simple demo --------------
-#    gmst = gstime(jd)
-#    st(1, 1) = cos(gmst)
-#    st(1, 2) = -sin(gmst)
-#    st(1, 3) = 0.0
-#    st(2, 1) = sin(gmst)
-#    st(2, 2) = cos(gmst)
-#    st(2, 3) = 0.0
-#    st(3, 1) = 0.0
-#    st(3, 2) = 0.0
-#    st(3, 3) = 1.0
-#    recef = st'*reci
+    #    gmst = gstime(jd)
+    #    st(1, 1) = cos(gmst)
+    #    st(1, 2) = -sin(gmst)
+    #    st(1, 3) = 0.0
+    #    st(2, 1) = sin(gmst)
+    #    st(2, 2) = cos(gmst)
+    #    st(2, 3) = 0.0
+    #    st(3, 1) = 0.0
+    #    st(3, 2) = 0.0
+    #    st(3, 3) = 1.0
+    #    recef = st'*reci
 
     #    fprintf(1, 'st gmst #11.7f ast #11.7f ome  #11.7f \n', gmst*180/pi, ast*180/pi, omegaearth*180/pi)
 
@@ -1545,25 +1546,25 @@ def iau06in():
     pp(appli.shape)
 
     # nutation values planetary now included new iau2006
-#       load iau00n.dat  # luni-solar
-#       apn = iau00n(:, 2:3)
-#       apni = iau00n(:, 4:17)
-#       for i =1:size(apn)
-#           apn[i, 0] = apn[i, 0] * uarcsec2rad
-#           apn[i, 1] = apn[i, 1] * uarcsec2rad
-#       end
+    #       load iau00n.dat  # luni-solar
+    #       apn = iau00n(:, 2:3)
+    #       apni = iau00n(:, 4:17)
+    #       for i =1:size(apn)
+    #           apn[i, 0] = apn[i, 0] * uarcsec2rad
+    #           apn[i, 1] = apn[i, 1] * uarcsec2rad
+    #       end
 
     #       load iau00e.dat  # planetary
-#       ape = iau00n(:, 2:3)
-#       apei = iau00n(:, 4:17)
-#       for i =1:size(ape)
-#           ape[i, 0] = ape[i, 0] * uarcsec2rad
-#           ape[i, 1] = ape[i, 1] * uarcsec2rad
-#       end
+    #       ape = iau00n(:, 2:3)
+    #       apei = iau00n(:, 4:17)
+    #       for i =1:size(ape)
+    #           ape[i, 0] = ape[i, 0] * uarcsec2rad
+    #           ape[i, 1] = ape[i, 1] * uarcsec2rad
+    #       end
 
     # gmst values
-# note - these are very similar to the first 34 elements of iau00s.dat,
-# but they are not the same.
+    # note - these are very similar to the first 34 elements of iau00s.dat,
+    # but they are not the same.
     fn = os.path.join(os.path.dirname(__file__), "data", "iau06gsttab5.2.e.dat")
     filein = open(fn, 'r').readlines()
     agst = []
@@ -1998,6 +1999,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
         y = magr1 + magr2
     print(y, c2new)
 
+    # ----------- check for negative values of y ----------
     if ((vara > 0.0) and (y < 0.0)):  # (vara > 0.0) &
         ynegktr = 1
         while ((y < 0.0) and (ynegktr < 10)):
@@ -2131,7 +2133,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
         #end # while loop
 
         if ((loops >= numiter) or (ynegktr >= 10)):
-            errorl = 'gnotconv' + str(abs(dtnew - dtsec))
+            errorl = 'g not conv ' + str(abs(dtnew - dtsec))
             if (ynegktr >= 10):
                 errorl = 'y negati'
         else:
@@ -2305,21 +2307,21 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     L = ((1.0 - lam) / (1.0 + lam)) ** 2
     m = 8.0 * mu * dtsec * dtsec / (s ** 3 * (1.0 + lam) ** 6)
     #        tan2w = 0.25*eps*eps / (sqrt(ror) + ror * (2.0 + sqrt(ror)))
-#        rp = sqrt(magr1*magr2)*((cos(dnu*0.25))^2 + tan2w)
-#        if (dnu < pi)
-#            L = ((sin(dnu*0.25))^2 + tan2w) / ((sin(dnu*0.25))^2 + tan2w + cos(dnu*0.5))
-#        else
-#            L = ((cos(dnu*0.25))^2 + tan2w - cos(dnu*0.5)) / ((cos(dnu*0.25))^2 + tan2w)
-#        end
-#        m = mu * dtsec*dtsec / (8.0*rp*rp*rp)
-# initial guess
+    #        rp = sqrt(magr1*magr2)*((cos(dnu*0.25))^2 + tan2w)
+    #        if (dnu < pi)
+    #            L = ((sin(dnu*0.25))^2 + tan2w) / ((sin(dnu*0.25))^2 + tan2w + cos(dnu*0.5))
+    #        else
+    #            L = ((cos(dnu*0.25))^2 + tan2w - cos(dnu*0.5)) / ((cos(dnu*0.25))^2 + tan2w)
+    #        end
+    #        m = mu * dtsec*dtsec / (8.0*rp*rp*rp)
+    # initial guess
     if (nrev > 0):
         xn = 1.0 + 4.0 * L
     else:
         xn = L
 
     #    lim1 = sqrt(m/L)
-# alt approach for high energy (long way, retro multi-rev) case
+    # alt approach for high energy (long way, retro multi-rev) case
     if (dm == 'l') and (nrev > 0):
         xn = 1e-20
         x = 10.0
@@ -2358,7 +2360,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
         print('high v1t %16.8f %16.8f %16.8f \n' % (v1dv))
     else:
         # standard processing
-# note that the dr nrev =0 case is not represented
+        # note that the dr nrev =0 case is not represented
         loops = 1
         y1 = 0.0
         x = 10.0
@@ -2383,14 +2385,14 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
             # ----------------------- evaluate cubic ------------------
             b = 0.25 * 27.0 * h2 / ((1.0 + h1) ** 3)
             #        if b < -1.0 # reset the initial condition
-#fprintf(1, 'xx #11.6f  #11.6f  #11.6f \n', L, xn, b)
-#            xn = 1.0 - 2.0*L
-#        end
-#        else
-#            if y1 > lim1
-#                xn = xn * (lim1/y1)
-#            end
-#            else
+            #fprintf(1, 'xx #11.6f  #11.6f  #11.6f \n', L, xn, b)
+            #            xn = 1.0 - 2.0*L
+            #        end
+            #        else
+            #            if y1 > lim1
+            #                xn = xn * (lim1/y1)
+            #            end
+            #            else
             u = 0.5 * b / (1.0 + math.sqrt(1.0 + b))
             k2 = smu.kbat(u)
             y = (((1.0 + h1) / 3.0) * (2.0 + math.sqrt(1.0 + b)
@@ -2398,8 +2400,8 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
             xn = (math.sqrt(((1.0 - L) * 0.5) ** 2 + m / (y * y))
                   - (1.0 + L) * 0.5)
             #                    xn = sqrt(l*l + m/(y*y)) - (1.0 - l) alt, doesn't seem to work
-#            end
-#        end
+            #            end
+            #        end
             y1 = math.sqrt(m / ((L + x) * (1.0 + x)))
             loops = loops + 1
             print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 '
@@ -2410,11 +2412,11 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
               % (loops, y, x, k2, b, u, y1))
         if (loops < 30):
             # blair approach use y from solution
-#       lam = 1.0/s * sqrt(magr1*magr2) * cos(dnu*0.5)
-#       m = 8.0*mu*dtsec*dtsec / (s^3*(1.0 + lam)^6)
-#       L = ((1.0 - lam)/(1.0 + lam))^2
-#a = s*(1.0 + lam)^2*(1.0 + x)*(lam + x) / (8.0*x)
-# p = (2.0*magr1*magr2*(1.0 + x)*sin(dnu*0.5)^2)^2 / (s*(1 + lam)^2*(lam + x))  # loechler, not right?
+            #       lam = 1.0/s * sqrt(magr1*magr2) * cos(dnu*0.5)
+            #       m = 8.0*mu*dtsec*dtsec / (s^3*(1.0 + lam)^6)
+            #       L = ((1.0 - lam)/(1.0 + lam))^2
+            #a = s*(1.0 + lam)^2*(1.0 + x)*(lam + x) / (8.0*x)
+            # p = (2.0*magr1*magr2*(1.0 + x)*sin(dnu*0.5)^2)^2 / (s*(1 + lam)^2*(lam + x))  # loechler, not right?
             p = (2.0 * magr1 * magr2 * y * y * (1.0 + x) ** 2
                  * math.sin(dnu * 0.5) ** 2) / (m * s * (1 + lam) ** 2)
             ecc = math.sqrt((eps ** 2 + 4.0 * magr2 / magr1
@@ -2423,11 +2425,11 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
                               * math.sin(dnu * 0.5) ** 2))
             v1dv, v2dv = lambhodograph(r1, v1, r2, p, ecc, dnu, dtsec)
             #            fprintf(1, 'oldb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dv, smu.mag(v1dv))
-#         r_180 = 0.001  # 1 meter
-#         [v1dvh, v2dvh] = lambert_vel(r1, v1, r2, dnu, p, ecc, mu, dtsec, r_180)
-#         fprintf(1, 'newb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvh, smu.mag(v1dvh))
-            # Battin solution to orbital parameters (and velocities)
-# thompson 2011, loechler 1988
+            #         r_180 = 0.001  # 1 meter
+            #         [v1dvh, v2dvh] = lambert_vel(r1, v1, r2, dnu, p, ecc, mu, dtsec, r_180)
+            #         fprintf(1, 'newb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvh, smu.mag(v1dvh))
+                        # Battin solution to orbital parameters (and velocities)
+            # thompson 2011, loechler 1988
             if dnu > math.pi:
                 lam = - math.sqrt((s - chord) / s)
             else:
@@ -2444,7 +2446,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
                      * ((r2 - r1) - s * (1.0 + lam) ** 2 * (L + x)
                         / (magr2 * (1.0 + x)) * r2))
             #fprintf(1, 'loe v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvl, smu.mag(v1dvl))
-#fprintf(1, 'loe v2t #16.8f #16.8f #16.8f #16.8f\n', v2dvl, smu.mag(v2dvl))
+            #fprintf(1, 'loe v2t #16.8f #16.8f #16.8f #16.8f\n', v2dvl, smu.mag(v2dvl))
 
     return v1dv, v2dv, errorb
 
@@ -2584,13 +2586,13 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     #mu = 1.0
 
     # these are the same
-#    if (de == 'L')
+    #    if (de == 'L')
     chord = math.sqrt(magr1 * magr1 + magr2 * magr2
                     - 2.0 * magr1 * magr2 * cosdeltanu)
     #    else
-#    chord = -sqrt(magr1 * magr1 + magr2 * magr2 - 2.0 * magr1 * magr2 * cosdeltanu)
-#    end
-#chord = smu.mag(r2 - r1)
+    #    chord = -sqrt(magr1 * magr1 + magr2 * magr2 - 2.0 * magr1 * magr2 * cosdeltanu)
+    #    end
+    #chord = smu.mag(r2 - r1)
 
     s = (magr1 + magr2 + chord) * 0.5
     xi = 0.0
@@ -2656,19 +2658,19 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     else:
         tmin = (an ** 1.5) * (2.0 * math.pi * nrev + xi + eta) / math.sqrt(mu)
 
-#      dm = 'S'
-#      de = 'L'
-#      nrev = 0
-#      blair
-#      r1 = [6778.136300000, 0.000000, 0.000000 ]
-#      r2 = [-6694.857334274, -1180.483980026, 0.000000 ]
-#      v1 = [0.000000, 7.668558568, 0.000000 ]
-#      moving
-#      r1 = [ -6175.1034, 2757.0706, 1626.6556 ]
-#      v1 = [ 2.376641, 1.139677, 7.078097]
-#      r2 = [ -1078.007289, 8796.641859, 1890.7135 ]
+    #      dm = 'S'
+    #      de = 'L'
+    #      nrev = 0
+    #      blair
+    #      r1 = [6778.136300000, 0.000000, 0.000000 ]
+    #      r2 = [-6694.857334274, -1180.483980026, 0.000000 ]
+    #      v1 = [0.000000, 7.668558568, 0.000000 ]
+    #      moving
+    #      r1 = [ -6175.1034, 2757.0706, 1626.6556 ]
+    #      v1 = [ 2.376641, 1.139677, 7.078097]
+    #      r2 = [ -1078.007289, 8796.641859, 1890.7135 ]
 
-#      [tmin, tminp, tminenergy] = lambertminT(r1, r2, dm, de, nrev)
+    #      [tmin, tminp, tminenergy] = lambertminT(r1, r2, dm, de, nrev)
 
     print('%c  %c %i  %f  %f  %f  \n'
           % (dm, de, nrev, tmin, tminp, tminenergy))
@@ -2723,9 +2725,9 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
         vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
 
     # ------------ find the minimum time for a nrev transfer --------------
-#   nrev = 0
-#   for zz = 0: 4
-#       nrev = nrev + 1
+    #   nrev = 0
+    #   for zz = 0: 4
+    #       nrev = nrev + 1
     # ---- get outer bounds for each nrev case
     lower = 4.0 * nrev ** 2 * math.pi * math.pi
     upper = 4.0 * (nrev + 1.0) ** 2 * math.pi * math.pi
@@ -2769,7 +2771,7 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
             c2ddot = 0.0
             c3ddot = 0.0
         # now solve this for dt = 0.0
-#            dtdpsi = x^3*(c3dot - 3.0*c3*c2dot/(2.0*c2))* oomu + 0.125*vara/sqrt(mu) * (3.0*c3*sqrty/c2 + vara/x)
+        # dtdpsi = x^3*(c3dot - 3.0*c3*c2dot/(2.0*c2))* oomu + 0.125*vara/sqrt(mu) * (3.0*c3*sqrty/c2 + vara/x)
         dtdpsi = (x ** 3 * (c3dot - 3.0 * c3 * c2dot / (2.0 * c2))
                   * oomu + 0.125 * vara
                   * (3.0 * c3 * sqrty / c2 + vara / x) * oomu)
@@ -2792,7 +2794,7 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
         psiold = psinew
         c2, c3 = smu.findc2c3(psiold)
         # don't need for the loop iterations
-# dtnew = (x^3*c3 + vara*sqrty) * oomu
+        # dtnew = (x^3*c3 + vara*sqrty) * oomu
         loops = loops + 1
 
 
@@ -2804,7 +2806,7 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
           % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi,
              dtdpsi2, lower, upper))
     #       fprintf(1, ' nrev #3i  dtnew #12.5f psi #12.5f  lower #10.3f upper #10.3f #10.6f #10.6f \n', nrev, dtnew, psiold, lower, upper, c2, c3)
-#   end # for checking multi rev cases
+    #   end # for checking multi rev cases
 
     return psib, tof
 
@@ -2885,11 +2887,11 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
         if abs(mu / magr2 - y2b) < abs(mu / magr2 - y2a):
             x1 = - x1
         # depending on the cross product, this will be normal or in plane,
-# or could even be a fan
+        # or could even be a fan
         nvec = np.cross(r1, r2) / smu.mag(np.cross(r1, r2))
         if (np.mod(dnu, twopi) > math.pi):
             nvec = - nvec
-        #       fprintf(1, 'gtr than\n')
+        # fprintf(1, 'gtr than\n')
 
     v1t = (math.sqrt(mu * p) / magr1) * ((x1 / mu) * r1
                                        + np.cross(nvec, r1) / magr1)
@@ -3359,10 +3361,10 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     j6 = - 5.40666576e-07
     p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper = \
         sc.rv2coe(ro, vo)
-    #     fprintf(1, '          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg      arglat   truelon    lonper\n')
-#     fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f\n', ...
-#             p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg, ...
-#             arglat * rad2deg, truelon * rad2deg, lonper * rad2deg)
+    # fprintf(1, '          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg      arglat   truelon    lonper\n')
+    # printf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f\n', ...
+    # p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg, ...
+    # arglat * rad2deg, truelon * rad2deg, lonper * rad2deg)
     n = math.sqrt(mu / (a * a * a))
     cosargp = math.cos(argp)
     sinargp = math.sin(argp)
@@ -3373,15 +3375,15 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     beta2 = (1.0 - ecc ** 2)
     sqrtbeta = math.sqrt(beta2)
     # ------------- find the value of j2 perturbations -------------
-# merson approach
-#     nndot = 0.75*j2*n*(re/p)^2*sqrtbeta*(2.0 - 3.0*sini^2)...
-#         +3.0/512.0*j2^2*n*(re/p)^4 * sqrtbeta *(320.0*ecc*ecc - 280.0*ecc^4 + (1600.0 - 1568.0*ecc*ecc + 328*ecc^4)*sini*sini ...
-#             + (-2096.0 + 1072.0*ecc*ecc + 79.0*ecc^4)*sini^4)...
-#         -45.0/128.0*j4*n*ecc*ecc*(re/p)^4*sqrtbeta*(-8.0 + 40.0*sini - 35.0*sini*sini)... # should be 8.0 - 40.0*sini^2 + 35.0*sini^4
-#         +35.0/2048.0*j6*n*(re/p)^6*sqrtbeta*(-128.0 + 320.0*ecc^2 + 240.0*ecc^4 + ...
-#         (1344.0 - 3360.0*ecc^2 - 2520.0*ecc^4)*sini + (-1512.0 + 3780.0*ecc^2 + 2835.0*ecc^4)*sini^2 ...
-#         - (-1848.0 + 4620.0*ecc^2 + 3465.0*ecc^4)*sini^4)
-#     mdot = n + nndot
+    # merson approach
+    # nndot = 0.75*j2*n*(re/p)^2*sqrtbeta*(2.0 - 3.0*sini^2)...
+    #     +3.0/512.0*j2^2*n*(re/p)^4 * sqrtbeta *(320.0*ecc*ecc - 280.0*ecc^4 + (1600.0 - 1568.0*ecc*ecc + 328*ecc^4)*sini*sini ...
+    #         + (-2096.0 + 1072.0*ecc*ecc + 79.0*ecc^4)*sini^4)...
+    #     -45.0/128.0*j4*n*ecc*ecc*(re/p)^4*sqrtbeta*(-8.0 + 40.0*sini - 35.0*sini*sini)... # should be 8.0 - 40.0*sini^2 + 35.0*sini^4
+    #     +35.0/2048.0*j6*n*(re/p)^6*sqrtbeta*(-128.0 + 320.0*ecc^2 + 240.0*ecc^4 + ...
+    #     (1344.0 - 3360.0*ecc^2 - 2520.0*ecc^4)*sini + (-1512.0 + 3780.0*ecc^2 + 2835.0*ecc^4)*sini^2 ...
+    #     - (-1848.0 + 4620.0*ecc^2 + 3465.0*ecc^4)*sini^4)
+    # mdot = n + nndot
 
     # from escobal pg 371 (the e terms) seems best (closest to STK)
     nbar = (n * (1.5 * j2 * (re / p) ** 2 * sqrtbeta * ((1.0 - 1.5 * sini ** 2))
@@ -3394,11 +3396,11 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
                  * sqrtbeta * (3.0 - 30.0 * cosi * cosi + 35.0 * cosi ** 4)))
     mdot = n + nbar
     # merson approach
-#     raandot = -1.5*n*j2*(re/p)^2*cosi...
-#         +3.0/32.0*n*j2^2*(re/p)^4*cosi*(12.0 - 4.0*ecc^2 - sini^2*(80.0 + 5.0*ecc*ecc))...
-#         +15.0/32.0*n*j4*(re/p)^4*cosi*(8.0 + 12.0 * ecc*ecc - sini^2*(14.0 + 21.0*ecc*ecc)) ...
-#         +105.0/1024.0*j6*n*(re/p)^6*cosi*(64.0 + 160.0*ecc^2 + 120.0*ecc^4 + ...
-#         -(288.0 + 720.0*ecc^2 + 540.0*ecc^4)*sini^2 + (264.0 + 660.0*ecc^2 + 495.0*ecc^4)*sini^4)
+    # raandot = -1.5*n*j2*(re/p)^2*cosi...
+    #     +3.0/32.0*n*j2^2*(re/p)^4*cosi*(12.0 - 4.0*ecc^2 - sini^2*(80.0 + 5.0*ecc*ecc))...
+    #     +15.0/32.0*n*j4*(re/p)^4*cosi*(8.0 + 12.0 * ecc*ecc - sini^2*(14.0 + 21.0*ecc*ecc)) ...
+    #     +105.0/1024.0*j6*n*(re/p)^6*cosi*(64.0 + 160.0*ecc^2 + 120.0*ecc^4 + ...
+    #     -(288.0 + 720.0*ecc^2 + 540.0*ecc^4)*sini^2 + (264.0 + 660.0*ecc^2 + 495.0*ecc^4)*sini^4)
     raandot = (-1.5 * j2 * (re / p) ** 2 * mdot * cosi
                - 1.5 * j2 * (re / p) ** 2 * mdot * cosi * 1.5 * j2
                * (re / p) ** 2
@@ -3415,12 +3417,12 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
                  - 35.0 / 112.0 * j4 * (re / p) ** 4 * n * cosi
                  * (1.0 + 1.5 * ecc * ecc) * (12.0 - 21.0 * sini ** 2))
     # merson approach
-#     argpdot = 0.75*n*j2*(re/p)^2*(4.0 - 5.0*sini^2) ...
-#         + 9.0/384.0*n*j2^2*(re/p)^4*(56.0*ecc*ecc + (760.0 - 36.0*ecc*ecc)*sini^2 - (890.0 + 45.0*ecc*ecc)*sini^4) ...
-#         -15.0/128.0*n*j4*(re/p)^4*(64.0 + 72.0*ecc*ecc - (248.0 + 252.0*ecc*ecc)*sini*sini + (196.0 + 189.0*ecc*ecc)*sini^4) ...
-#         +105.0/2048.0*j6*n*(re/p)^6*(256.0 + 960.0*ecc^2 + 320.0*ecc^4 + ...
-#         -(2048.0 + 6880.0*ecc^2 + 2160.0*ecc^4)*sini^2 + (4128.0 + 13080.0*ecc^2 + 3960.0*ecc^4)*sini^4 ...
-#         -(2376.0 + 14520.0*ecc^2 + 2145.0*ecc^4)*sini^6)
+    # argpdot = 0.75*n*j2*(re/p)^2*(4.0 - 5.0*sini^2) ...
+    #     + 9.0/384.0*n*j2^2*(re/p)^4*(56.0*ecc*ecc + (760.0 - 36.0*ecc*ecc)*sini^2 - (890.0 + 45.0*ecc*ecc)*sini^4) ...
+    #     -15.0/128.0*n*j4*(re/p)^4*(64.0 + 72.0*ecc*ecc - (248.0 + 252.0*ecc*ecc)*sini*sini + (196.0 + 189.0*ecc*ecc)*sini^4) ...
+    #     +105.0/2048.0*j6*n*(re/p)^6*(256.0 + 960.0*ecc^2 + 320.0*ecc^4 + ...
+    #     -(2048.0 + 6880.0*ecc^2 + 2160.0*ecc^4)*sini^2 + (4128.0 + 13080.0*ecc^2 + 3960.0*ecc^4)*sini^4 ...
+    #     -(2376.0 + 14520.0*ecc^2 + 2145.0*ecc^4)*sini^6)
     argpdot = (1.5 * j2 * (re / p) ** 2 * mdot * (2.0 - 2.5 * sini ** 2)
                + 9.0 / 4.0 * j2 ** 2 * (re / p) ** 4 * mdot
                * (2.0 - 2.5 * sini ** 2)
@@ -3447,9 +3449,9 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     print('diffs   %15.11g  %15.11g  %15.11f  %15.11f \n' %
           (raandote1 - raandot, argpdote1 - argpdot, nddot - nbar, mdot - mdot))
     # can put these back in if estimates of ndot etc are known
-#    a = a - 2.0*ndot*dtsec * a / (3.0*n)
-#    ecc = ecc - 2.0*(1.0 - ecc)*ndot*dtsec / (3.0*n)
-#    p = a*(1.0 - ecc*ecc)
+    # a = a - 2.0*ndot*dtsec * a / (3.0*n)
+    # ecc = ecc - 2.0*(1.0 - ecc)*ndot*dtsec / (3.0*n)
+    # p = a*(1.0 - ecc*ecc)
 
     # ----- update the orbital elements for each orbit type --------
     if ecc < small:
@@ -3493,8 +3495,8 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     r, v = sc.coe2rv(p, ecc, incl, raan, argp, nu, arglat, truelon, lonper)
     r = r.T
     v = v.T
-    #        fprintf(1, 'r    #15.9f#15.9f#15.9f', r)
-#        fprintf(1, ' v #15.10f#15.10f#15.10f\n', v)
+    # fprintf(1, 'r    #15.9f#15.9f#15.9f', r)
+    # fprintf(1, ' v #15.10f#15.10f#15.10f\n', v)
     return r, v
 
 
@@ -3568,8 +3570,8 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
              rsite1=None, rsite2=None, rsite3=None, re=None, mu=None):
 
     # for sun
-#re = 149597870.0
-#mu = 1.32712428e11
+    #re = 149597870.0
+    #mu = 1.32712428e11
     magr1in = 2.0 * re
     magr2in = 2.04 * re
     direct = 'y'
@@ -3633,12 +3635,12 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
                         los2, los3, rsite1, rsite2, rsite3, tau12, tau32, direct, re, mu)
         pf1pr2 = (f1delr2 - f1) / deltar2
         pf2pr2 = (f2delr2 - f2) / deltar2
-        #       f = 1.0 - a/magr2*(1.0-cos(deltae32))
-#       g = t3 - sqrt(a^3/mu)*(deltae32-sin(deltae32))
-#       v2 = (r3 - f*r2)/g
-#       [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r2, v2)
-#       fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f\n', ...
-#              p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg)
+        # f = 1.0 - a/magr2*(1.0-cos(deltae32))
+        # g = t3 - sqrt(a^3/mu)*(deltae32-sin(deltae32))
+        # v2 = (r3 - f*r2)/g
+        # [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r2, v2)
+        # fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f\n', ...
+        #         p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg)
         # ------------ now calculate an update
         magr2in = magr2o
         delta = pf1pr1 * pf2pr2 - pf2pr1 * pf1pr2
@@ -3662,13 +3664,13 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
               % (magr1o, deltar1, magr1in, magr1old))
         print('magr2o %11.7f delr2 %11.7f magr2 %11.7f %11.7f  \n'
               % (magr2o, deltar2, magr2in, magr2old))
-        #       f = 1.0 - a/magr2*(1.0-cos(deltae32))
-#       g = t3 - sqrt(a^3/mu)*(deltae32-sin(deltae32))
-#       v2 = (r3 - f*r2)/g
-#       [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r2, v2)
-#       fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f\n', ...
-#              p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg)
-        print('=============================================== \n' % ())
+        # f = 1.0 - a/magr2*(1.0-cos(deltae32))
+        # g = t3 - sqrt(a^3/mu)*(deltae32-sin(deltae32))
+        # v2 = (r3 - f*r2)/g
+        # [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r2, v2)
+        # fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f\n', ...
+        #         p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg)
+        print('=============================================== \n')
 
     # needed to get the r2 set properly since the last one was moving r2
     r2, r3, f1, f2, q1, magr1, magr2, a, deltae32 = \
@@ -3793,21 +3795,21 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     los3[1] = math.cos(decl3) * math.sin(rtasc3)
     los3[2] = math.sin(decl3)
     # topo to body fixed (ecef)
-    #     latgd = 40.0/rad
-    #     lon = -110.0/rad
-    #     l1
-    #     outv = rot2(l1, -pi + latgd)
-    #     l1 = rot3(outv, -lon)
-    #     outv = rot2(l2, -pi + latgd)
-    #     l2 = rot3(outv, -lon)
-    #     outv = rot2(l3, -pi + latgd)
-    #     l3 = rot3(outv, -lon)
-    #     l1
+    # latgd = 40.0/rad
+    # lon = -110.0/rad
+    # l1
+    # outv = rot2(l1, -pi + latgd)
+    # l1 = rot3(outv, -lon)
+    # outv = rot2(l2, -pi + latgd)
+    # l2 = rot3(outv, -lon)
+    # outv = rot2(l3, -pi + latgd)
+    # l3 = rot3(outv, -lon)
+    # l1
 
-    #     # take the middle trans from eecef to eci
-    #     tm = [-0.830668624503591  -0.556765707115059   0.001258429966118...
-    #    0.556766123167794  -0.830669298539751  -0.000023583565998...
-    #    0.001058469658016   0.000681061045186   0.999999207898604]
+    # take the middle trans from eecef to eci
+    # tm = [-0.830668624503591  -0.556765707115059   0.001258429966118...
+    # 0.556766123167794  -0.830669298539751  -0.000023583565998...
+    # 0.001058469658016   0.000681061045186   0.999999207898604]
 
 
     # l1 = tm*l1'
@@ -3893,9 +3895,9 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     print(lmati)
     lir = lmati * rsmat
     # ------------ find f and g series at 1st and 3rd obs ---------
-#   speed by assuming circ sat vel for udot here ??
-#   some similartities in 1/6t3t1 ...
-# --- keep separated this time ----
+    # speed by assuming circ sat vel for udot here ??
+    # some similartities in 1/6t3t1 ...
+    # --- keep separated this time ----
     a1 = tau32 / (tau32 - tau12)
     a1u = ((tau32 * ((tau32 - tau12) ** 2 - tau32 * tau32))
            / (6.0 * (tau32 - tau12)))
@@ -3981,7 +3983,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         magr1 = smu.mag(r1)
         magr2 = smu.mag(r2)
         magr3 = smu.mag(r3)
-        v2, theta, theta1, copa, error = gibbsh(r1, r2, r3, re, mu)
+        v2, theta, theta1, copa, error = gibbs(r1, r2, r3)
         print('r1 %16.14f %16.14f %16.14f %11.7f %11.7f %16.14f \n'
               % (r1[0], r1[1], r1[2], theta * rad2deg, theta1 * rad2deg, copa * rad2deg))
         print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
@@ -4010,20 +4012,20 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             print('u %17.15f rdot  %11.7f udot %11.7f \n' % (u, rdot, udot))
             tausqr = tau12 * tau12
             f1 = 1.0 - 0.5 * u * tausqr - (1.0 / 6.0) * udot * tausqr * tau12
-            #                       - (1.0/24.0) * u*u*tausqr*tausqr
-#                       - (1.0/30.0)*u*udot*tausqr*tausqr*tau1
+            # - (1.0/24.0) * u*u*tausqr*tausqr
+            # - (1.0/30.0)*u*udot*tausqr*tausqr*tau1
             g1 = (tau12 - (1.0 / 6.0) * u * tau12 * tausqr
                   - (1.0 / 12.0) * udot * tausqr * tausqr)
-            #                       - (1.0/120.0)*u*u*tausqr*tausqr*tau1
-#                       - (1.0/120.0)*u*udot*tausqr*tausqr*tausqr
+            # - (1.0/120.0)*u*u*tausqr*tausqr*tau1
+            # - (1.0/120.0)*u*udot*tausqr*tausqr*tausqr
             tausqr = tau32 * tau32
             f3 = 1.0 - 0.5 * u * tausqr - (1.0 / 6.0) * udot * tausqr * tau32
-            #                       - (1.0/24.0) * u*u*tausqr*tausqr
-#                       - (1.0/30.0)*u*udot*tausqr*tausqr*tau3
+            # - (1.0/24.0) * u*u*tausqr*tausqr
+            # - (1.0/30.0)*u*udot*tausqr*tausqr*tau3
             g3 = (tau32 - (1.0 / 6.0) * u * tau32 * tausqr
                   - (1.0 / 12.0) * udot * tausqr * tausqr)
-            #                       - (1.0/120.0)*u*u*tausqr*tausqr*tau3
-#                       - (1.0/120.0)*u*udot*tausqr*tausqr*tausqr
+            # - (1.0/120.0)*u*u*tausqr*tausqr*tau3
+            # - (1.0/120.0)*u*udot*tausqr*tausqr*tausqr
             print('f1 %11.7f g1 %11.7f f3 %11.7f g3 %11.7f \n' % (f1, g1, f3, g3))
         else:
             # -------- use exact method to find f and g -----------
@@ -4044,12 +4046,12 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         print(rhomat)
         print('rhomat %11.7f %11.7f %11.7f \n'
               % (rhomat[0, 0], rhomat[0, 1], rhomat[0, 2]))
-        #        fprintf(1, 'rhomat #11.7f #11.7f #11.7f \n', rhomat/re)
+        # fprintf(1, 'rhomat #11.7f #11.7f #11.7f \n', rhomat/re)
         rhoold1 = rhomat[0, 0] / c1
         rhoold2 = rhomat[1, 0] / c2
         rhoold3 = rhomat[2, 0] / c3
         print('rhoold %11.7f %11.7f %11.7f \n' % (rhoold1, rhoold2, rhoold3))
-        #   fprintf(1, 'rhoold #11.7f #11.7f #11.7f \n', rhoold1/re, rhoold2/re, rhoold3/re)
+        # fprintf(1, 'rhoold #11.7f #11.7f #11.7f \n', rhoold1/re, rhoold2/re, rhoold3/re)
         for i in range(3):
             r1[i] = rhomat[0, 0] * l1eci[i] / c1 + rs1[i]
             r2[i] = rhomat[1, 0] * l2eci[i] / c2 + rs2[i]
@@ -4148,31 +4150,30 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
             rtasc2=None, rtasc3=None, jd1=None, jdf1=None, jd2=None,
             jdf2=None, jd3=None, jdf3=None, diffsites=None, rs1=None,
             rs2=None, rs3=None):
-    # -------------------------  implementation   -------------------------
-#     omegaearth = 0.000072921158553  # earth rad/s
-#     omegaearth = 0.017202791208627  # sun rad/s
-#     omegaearth = 2.0 * pi/365.24221897  # au / day
+    # omegaearth = 0.000072921158553  # earth rad/s
+    # omegaearth = 0.017202791208627  # sun rad/s
+    # omegaearth = 2.0 * pi/365.24221897  # au / day
     earthrate = np.zeros(3)
     earthrate[0] = 0.0
     earthrate[1] = 0.0
     earthrate[2] = earthrot
-    #        tuday = 58.132440906
-#        mu   = 1.32712428e11
-# need to switch these for interplanetary
+    # tuday = 58.132440906
+    # mu   = 1.32712428e11
+    # need to switch these for interplanetary
 
     #        constant
 
-    small = 1e-08
+    small = smalle8
     # ---------- set middle to 0, find deltas to others -----------
 
     # test problem///////////////////////////////////////////////////////
-#      los1 = [-0.425365 0.777650 0.462953]  # just in km
-#      los2 =[-0.825702 0.259424 0.500914]
-#      los3 = [ -0.947067 -0.129576 0.293725]
+    # los1 = [-0.425365 0.777650 0.462953]  # just in km
+    # los2 =[-0.825702 0.259424 0.500914]
+    # los3 = [ -0.947067 -0.129576 0.293725]
 
     # los1 =[-0.425364592304 , 0.777650239833, 0.462952554914]
-# los2 =[ -0.825702365309, 0.259423566604, 0.500914181287]
-# los3 =[-0.947067028031, -0.129575647726, 0.2937246941]
+    # los2 =[ -0.825702365309, 0.259423566604, 0.500914181287]
+    # los3 =[-0.947067028031, -0.129575647726, 0.2937246941]
 
     t1 = - 1200
 
@@ -4188,7 +4189,7 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     tau13 = (jd1 - jd3) * 86400.0 + (jdf1 - jdf3) * 86400.0
     tau32 = (jd3 - jd2) * 86400.0 + (jdf3 - jdf2) * 86400.0
     # --------------- find line of sight vectors ------------------
-# should be eci...
+    # should be eci...
     los1 = np.zeros(3)
     los1[0] = math.cos(decl1) * math.cos(rtasc1)
     los1[1] = math.cos(decl1) * math.sin(rtasc1)
@@ -4202,17 +4203,17 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     los3[1] = math.cos(decl3) * math.sin(rtasc3)
     los3[2] = math.sin(decl3)
     # same- they're both unit vectors
-#     l1
-#     unit(l1)
+    # l1
+    # unit(l1)
 
     los1
     los2
     los3
     # -------------------------------------------------------------
-#       using lagrange interpolation formula to derive an expression
-#       for l(t), substitute t = t2 and differentiate to obtain the
-#       derivatives of l.
-# -------------------------------------------------------------
+    #       using lagrange interpolation formula to derive an expression
+    #       for l(t), substitute t = t2 and differentiate to obtain the
+    #       derivatives of l.
+    # -------------------------------------------------------------
     s1 = - tau32 / (tau12 * tau13)
     s2 = (tau12 + tau32) / (tau12 * tau32)
 
@@ -4228,21 +4229,21 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
 
     ldot
     lddot
-    #    ldotmag = smu.mag(ldot)
-#    lddotmag = smu.mag(lddot)
-# should these unit vectors use a diff name????????//
-#    ldot = unit(ldot)
-#    lddot = unit(lddot)
-#    ldot
-#    lddot
+    # ldotmag = smu.mag(ldot)
+    # lddotmag = smu.mag(lddot)
+    # should these unit vectors use a diff name????????//
+    # ldot = unit(ldot)
+    # lddot = unit(lddot)
+    # ldot
+    # lddot
 
     # ------------------- find 2nd derivative of rs ---------------
-#     temp = cross(rs1, rs2)
-#     temp1 = cross(rs2, rs3)
+    #     temp = cross(rs1, rs2)
+    #     temp1 = cross(rs2, rs3)
 
-    #     #      needs a different test xxxx##
-#     if ((smu.mag(temp) > small) & (smu.mag(temp1) > small))
-#         #          fix this test here
+    # needs a different test xxxx##
+    # if ((smu.mag(temp) > small) & (smu.mag(temp1) > small))
+    # fix this test here
 
     if diffsites == 'n':
         # ------------ all sightings from one site -----------------
@@ -4293,20 +4294,20 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     print('d, di  %11.6g %11.6g %11.6g %11.6g %11.6g \n' % (d, d1, d2, d3, d4))
 
     # ---------------  iterate to find rho magnitude ----------------
-#     magr = 1.5   # first guess
-#     writeln('input initial guess for magr ')
-#     readln(magr)
-#     i = 1
-#     repeat
-#         oldr = magr
-#         rho = -2.0*d1/d - 2.0*d2/(magr*magr*magr*d)
-#         magr = sqrt(rho*rho + 2.0*rho*l2dotrs + rs2(4)*rs2(4))
-#         inc[i]
-#         magr = (oldr - magr) / 2.0             # simple bissection
-#         writeln(fileout, 'rho guesses ', i:2, 'rho ', rho:14:7, ' magr ', magr:14:7, oldr:14:7)
-# seems to converge, but wrong numbers
-#         inc[i]
-#     until (abs(oldr-magr) < small) | (i .ge. 30)
+    # magr = 1.5   # first guess
+    # writeln('input initial guess for magr ')
+    # readln(magr)
+    # i = 1
+    # repeat
+    #     oldr = magr
+    #     rho = -2.0*d1/d - 2.0*d2/(magr*magr*magr*d)
+    #     magr = sqrt(rho*rho + 2.0*rho*l2dotrs + rs2(4)*rs2(4))
+    #     inc[i]
+    #     magr = (oldr - magr) / 2.0             # simple bissection
+    #     writeln(fileout, 'rho guesses ', i:2, 'rho ', rho:14:7, ' magr ', magr:14:7, oldr:14:7)
+    # seems to converge, but wrong numbers
+    #     inc[i]
+    # until (abs(oldr-magr) < small) | (i .ge. 30)
 
     if (abs(d) > 1.0 - 14):
         poly = np.zeros(9)
@@ -4335,18 +4336,18 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         # ------------------ find correct (xx) root ----------------
         bigr2 = 0.0
         for j in range(8):
-            #                if (abs(roots(j, 2)) < small)
-#                    writeln('root ', j, roots(j, 1), ' + ', roots(j, 2), 'j')
-#        temproot = roots(j, 1)*roots(j, 1)
-#        temproot = temproot*temproot*temproot*temproot +
-#                  poly(3)*temproot*temproot*temproot + poly(6)*roots(j, 1)*temproot + poly(9)
-#                    writeln(fileout, 'root ', j, roots(j, 1), ' + ', roots(j, 2), 'j  value = ', temproot)
+            #  if (abs(roots(j, 2)) < small)
+            #      writeln('root ', j, roots(j, 1), ' + ', roots(j, 2), 'j')
+            #  temproot = roots(j, 1)*roots(j, 1)
+            #  temproot = temproot*temproot*temproot*temproot +
+            #             poly(3)*temproot*temproot*temproot + poly(6)*roots(j, 1)*temproot + poly(9)
+            #  writeln(fileout, 'root ', j, roots(j, 1), ' + ', roots(j, 2), 'j  value = ', temproot)
             if (rootarr[j] > bigr2):
                 bigr2 = rootarr[j]
-            #                  end
+
         print('bigr2 %11.7f  %11.7f er \n' % (bigr2, bigr2 / re))
-        #  fprintf(1, 'keep this root ? ')
-#        input (bigr2)
+        # fprintf(1, 'keep this root ? ')
+        # input (bigr2)
         rho = - 2.0 * d1 / d - 2.0 * mu * d2 / (bigr2 * bigr2 * bigr2 * d)
         print('rho %11.7f  %11.7f er \n' % (rho, rho / re))
         r2 = np.zeros(3)
@@ -4356,8 +4357,8 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         magr2 = smu.mag(r2)
         # ---------------- find rhodot magnitude ------------------
         rhodot = - d3 / d - mu * d4 / (magr2 * magr2 * magr2 * d)
-        #        writeln(fileout, 'rho ', rho:14:7)
-#        writeln(fileout, 'rhodot ', rhodot:14:7)
+        # writeln(fileout, 'rho ', rho:14:7)
+        # writeln(fileout, 'rhodot ', rhodot:14:7)
         # -------------- find middle velocity vector --------------
         v2 = np.zeros(3)
         for i in range(3):
@@ -4452,11 +4453,11 @@ def gibbs(r1: np.ndarray, r2: np.ndarray, r3: np.ndarray, mu: float = mu):
     copa : float
         coplanar angle: rad
     error : str
-        flag indicating success: 'ok', 'not coplanar', 'impossible
+        flag indicating success: 'ok', 'not coplanar', 'impossible'
     """
     small = smalle6
     theta = 0.0
-    error = '          ok'
+    error = 'ok'
     theta1 = 0.0
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
@@ -4485,7 +4486,7 @@ def gibbs(r1: np.ndarray, r2: np.ndarray, r3: np.ndarray, mu: float = mu):
     # -------------------------------------------------------------
     if (((abs(magd) < small) or (abs(magn) < small)) or
             (np.dot(nn, dn) < small)):
-        error = '  impossible'
+        error = 'impossible'
     else:
         theta = smu.angl(r1, r2)
         theta1 = smu.angl(r2, r3)
@@ -4553,9 +4554,44 @@ def gibbs(r1: np.ndarray, r2: np.ndarray, r3: np.ndarray, mu: float = mu):
 # [v2, theta, theta1, copa, error ] = hgibbs (r1, r2, r3, jd1, jd2, jd3)
 # ------------------------------------------------------------------------------
 
-def hgibbs(r1=None, r2=None, r3=None, jd1=None, jd2=None, jd3=None):
-    # -------------------------  implementation   -------------------------
-    error = '          ok'
+def hgibbs(r1: np.ndarray, r2: np.ndarray, r3: np.ndarray, jd1: float,
+           jd2: float, jd3: float, mu: float = mu):
+    """this function implements the herrick-gibbs approximation for orbit
+    determination, and finds the middle velocity vector for the 3 given
+    position vectors.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    r2 : ndarray
+        ijk position vector 2: km
+    r3 : ndarray
+        ijk position vector 3: km
+    jd1 : float
+        julian date 1: days since 4713 bc
+    jd2 : float
+        julian date 2: days since 4713 bc
+    jd3 : float
+        julian date 3: days since 4713 bc
+    mu : float, optional
+        gravitational constant, default Earth
+
+    Returns
+    -------
+    v2 : ndarray
+        ijk velocity vector 2: km/s
+    theta1 : float
+        angle between vector 1 and 2: rad
+    theta2 : float
+        angle between vector 2 and 3: rad
+    copa : float
+        coplanar angle
+    error : str
+        flag indicating success: 'ok', 'not coplanar', 'angl > 1'
+    """
+
+    error = 'ok'
     theta = 0.0
     theta1 = 0.0
     magr1 = smu.mag(r1)
@@ -4571,19 +4607,19 @@ def hgibbs(r1=None, r2=None, r3=None, jd1=None, jd2=None, jd3=None):
     p = np.cross(r2, r3)
     pn = smu.unit(p)
     r1n = smu.unit(r1)
-    copa = math.asin(np.dot(pn, r1n))
+    copa = math.asin(pn @ r1n)
     if (abs(copa) > 0.017452406):
         error = 'not coplanar'
 
     # --------------------------------------------------------------
-#       check the size of the angles between the three position vectors.
-#       herrick gibbs only gives "reasonable" answers when the
-#       position vectors are reasonably close.  10 deg is only an estimate.
-# --------------------------------------------------------------
+    #       check the size of the angles between the three position vectors.
+    #       herrick gibbs only gives "reasonable" answers when the
+    #       position vectors are reasonably close.  10 deg is only an estimate.
+    # --------------------------------------------------------------
     theta = smu.angl(r1, r2)
     theta1 = smu.angl(r2, r3)
     if (((theta > tolangle) or (theta1 > tolangle))):
-        error = '   angl > 1'
+        error = 'angl > 1'
 
     # ----------- perform herrick-gibbs method to find v2 ---------
     term1 = - dt32 * (1.0 / (dt21 * dt31) + mu / (12.0 * magr1 * magr1 * magr1))
@@ -4591,8 +4627,9 @@ def hgibbs(r1=None, r2=None, r3=None, jd1=None, jd2=None, jd3=None):
                              + mu / (12.0 * magr2 * magr2 * magr2))
     term3 = dt21 * (1.0 / (dt32 * dt31) + mu / (12.0 * magr3 * magr3 * magr3))
     v2 = term1 * r1 + term2 * r2 + term3 * r3
+
     #     fprintf(1, 'p     #11.7f   #11.7f  #11.7f km2 \n', p)
-#     fprintf(1, 'theta     #11.7f   #11.7f deg \n', theta*180/pi, theta1*180/pi)
+    #     fprintf(1, 'theta     #11.7f   #11.7f deg \n', theta*180/pi, theta1*180/pi)
     return v2, theta, theta1, copa, error
 
 
@@ -4632,10 +4669,23 @@ def hgibbs(r1=None, r2=None, r3=None, jd1=None, jd2=None, jd3=None):
 # ------------------------------------------------------------------------------
 
 
-def hillsv(r, alt, dts):
+def hillsv(r: np.ndarray, alt: float, dts: float):
+    """this function calculates initial velocity for hills equations.
 
-    # --------------------  implementation   ----------------------
+    Parameters
+    ----------
+    r : ndarray
+        initial position vector of interceptor: km
+    alt : float
+        altitude of target satellite
+    dts : float
+        desired time
 
+    Returns
+    -------
+    v : ndarray
+        initial velocity vector of interceptor: km/s
+    """
     radius = re + alt
     omega = math.sqrt(mu / (radius*radius*radius))
     nt = omega*dts
@@ -4649,11 +4699,11 @@ def hillsv(r, alt, dts):
             *(1.0-cosnt)
 
     v = np.zeros(3)
-    if (abs(denom) > 0.000001):
+    if (abs(denom) > smalle6):
         v[1] = numkm / denom
     else:
         v[1] = 0.0
-    if (abs(sinnt) > 0.000001):
+    if (abs(sinnt) > smalle6):
         v[0] = -(omega*r[0]*(4.0-3.0*cosnt) \
               +2.0*(1.0-cosnt)*v[1]) / (sinnt)
     else:
@@ -4679,8 +4729,8 @@ def hillsv(r, alt, dts):
 #    dts         - desired time                   s
 #
 #  outputs       :
-#    rinit       - final rel position of int      m or km
-#    vinit       - final rel velocity of int      m or km/s
+#    rint       - final rel position of int      m or km
+#    vint       - final rel velocity of int      m or km/s
 #
 #  locals        :
 #    nt          - angular velocity times time    rad
@@ -4699,10 +4749,28 @@ def hillsv(r, alt, dts):
 # ------------------------------------------------------------------------------
 
 
-def hillsr(r, v, alt, dts):
+def hillsr(r: np.ndarray, v: np.ndarray, alt: float, dts: float):
+    """this function calculates various position information for hills
+    equations.
 
-    # --------------------  implementation   ----------------------
+    Parameters
+    ----------
+    r : ndarray
+        initial relative position of interceptor: km
+    v : ndarray
+        initial relative velocity of interceptor: km/s
+    alt : float
+        altitude of target satellite
+    dts : float
+        desired time
 
+    Returns
+    -------
+    rint : ndarray
+        final relative position of interceptor: km
+    vint : ndarray
+        final relative velocity of interceptor: km/s
+    """
     radius = re + alt # in km
     omega = math.sqrt(mu / (radius*radius*radius)) # rad/s
     nt = omega * dts
@@ -4735,14 +4803,52 @@ def hillsr(r, v, alt, dts):
 # function [ttrans, tphase, dvphase, dvtrans1, dvtrans2, aphase ] = noncoplr(phasei, aint, atgt, ktgt, kint, arglatint, nodeint, truelon, deltai)
 #------ }
 
-def noncoplr(phasei=None, aint=None, atgt=None, ktgt=None, kint=None,
-             arglatint=None, nodeint=None, truelon=None, deltai=None):
-    mu = 1.0
+def noncoplr(aint: float, atgt: float, ktgt: int, kint: int,
+             arglatint: float, nodeint: float, truelon: float, deltai: float):
+    """this function finds the change in velocities made for a circular
+    noncoplanar orbit transfer
 
-    angvelint = math.sqrt(mu / (aint * aint * aint))
-    angveltgt = math.sqrt(mu / (atgt * atgt * atgt))
+    Parameters
+    ----------
+    aint : float
+        altitude of interceptor orbit: ER
+    atgt : float
+        altitude of target orbit: ER
+    ktgt : int
+        additional target revolutions
+    kint : int
+        additional phasing orbit revolutions
+    arglatint : float
+        argument of latitude of interceptor
+    nodeint : float
+        longitude of ascending node of interceptor
+    truelon : float
+        true longitude of interceptor
+    deltai : float
+        difference in inclination between interceptor and target
+
+    Returns
+    -------
+    ttrans : float
+        time of transfer orbit: TU
+    tphase : float
+        time of phase orbit: TU
+    dvphase : float
+        change in velocity to enter phase orbit: ER/TU
+    dvtrans1 : float
+        change in velocity to enter transfer orbit: ER/TU
+    dvtrans2 : float
+        change in velocity to exit transfer orbit: ER/TU
+    aphase: float
+        angle of phase orbit: rad
+    """
+
+    mu = 1.0
+    angvelint = math.sqrt(mu / (aint**3))
+    angveltgt = math.sqrt(mu / (atgt**3))
     atrans = (aint + atgt) * 0.5
-    ttrans = math.pi * math.sqrt((atrans * atrans * atrans) / mu)
+    ttrans = math.pi * math.sqrt((atrans**3) / mu)
+    phasei = math.pi / 2 - arglatint
     deltatnode = phasei / angvelint
     lead = angveltgt * ttrans
     omeganode = angveltgt * deltatnode
@@ -4750,7 +4856,7 @@ def noncoplr(phasei=None, aint=None, atgt=None, ktgt=None, kint=None,
     leadnew = math.pi + phasenew
     tphase = (leadnew - lead + twopi * ktgt) / angveltgt
     aphase = (mu * (tphase / (twopi * kint)) ** 2) ** (1.0 / 3.0)
-    # -----------------  find deltav's  ----------------- }
+    # -----------------  find deltav's  -----------------
     vint = math.sqrt(mu / aint)
     vphase = math.sqrt(2.0 * mu / aint - mu / aphase)
     dvphase = vphase - vint
@@ -4822,15 +4928,46 @@ def noncoplr(phasei=None, aint=None, atgt=None, ktgt=None, kint=None,
 #
 #  references    :
 #    vallado       2007, 364, alg 44, alg 45, ex 6-8, ex 6-9
-#function [ phasef, waittime, deltav] = rendz(rcs1, rcs3, phasei, einit, efinal, nuinit, nufinal, ktgt, kint)
+#function [ phasef, waittime, deltav] = rendz(rcs1, rcs2, phasei, einit, efinal, nuinit, nufinal, ktgt, kint)
 # ----------------------------------------------------------------------------- }
 
-def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
-          nuinit=None, nufinal=None, ktgt=None, kint=None):
+def rendz(rcs1: float, rcs2: float, phasei: float, einit: float, efinal: float,
+          nuinit: float, nufinal: float, ktgt: int, kint: int):
+    """this procedure calculates parameters for a hohmann transfer rendezvous.
 
+    Parameters
+    ----------
+    rcs1 : float
+        radius of interceptor orbit: ER
+    rcs2 : float
+        radius of target orbit: ER
+    phasei : float
+        initial phase angle (tgt-int): +(ahead)or -(behind) rad
+    einit : float
+        eccentricity of initial orbit
+    efinal : float
+        eccentricity of final orbit
+    nuinit : float
+        true anomaly of first orbit
+    nufinal : float
+        true anomaly of final orbit
+    ktgt : int
+        number of target revolutions to wait
+    kint : int
+        number of interceptor revolutions to wait
+
+    Returns
+    -------
+    phasef : float
+        final phase angle: rad
+    waittime : float
+        wait before next intercept opportunity: TU
+    deltav : float
+        change in velocity: ER/TU
+    """
     mu = 1.0
-    angvelint = math.sqrt(mu / (rcs1 * rcs1 * rcs1))
-    angveltgt = math.sqrt(mu / (rcs3 * rcs3 * rcs3))
+    angvelint = math.sqrt(mu / (rcs1**3))
+    angveltgt = math.sqrt(mu / (rcs2**3))
     vint = math.sqrt(mu / rcs1)
     print(' angvelint %11.7f %11.7f rad/s  \n' % (angvelint, angvelint / tusec))
     print(' angveltgt %11.7f %11.7f rad/s  \n' % (angveltgt, angveltgt / tusec))
@@ -4853,7 +4990,7 @@ def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
         print('atrans %11.7f %11.7f km \n' % (atrans, atrans * 6378.137))
     else:
         # ---- different orbits
-        atrans = (rcs1 + rcs3) / 2.0
+        atrans = (rcs1 + rcs2) / 2.0
         dttutrans = math.pi * math.sqrt(atrans * atrans * atrans / mu)
         leadang = angveltgt * dttutrans
         phasef = math.pi - leadang
@@ -4862,8 +4999,8 @@ def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
             phasef = phasef + math.pi
         waittime = (phasef - phasei + 2.0 * math.pi * ktgt) / (angvelint - angveltgt)
         a1 = (rcs1 * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
-        a2 = (rcs1 + rcs3) / 2.0
-        a3 = (rcs3 * (1.0 + efinal * math.cos(nufinal))) / (1.0 - efinal * efinal)
+        a2 = (rcs1 + rcs2) / 2.0
+        a3 = (rcs2 * (1.0 + efinal * math.cos(nufinal))) / (1.0 - efinal * efinal)
         sme1 = -mu / (2.0 * a1)
         sme2 = -mu / (2.0 * a2)
         sme3 = -mu / (2.0 * a3)
@@ -4872,8 +5009,8 @@ def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
         vtransa = math.sqrt(2.0 * ((mu / rcs1) + sme2))
         deltava = abs(vtransa - vinit)
         # -----------------  find delta v at point b  ------------------ }
-        vfinal = math.sqrt(2.0 * ((mu / rcs3) + sme3))
-        vtransb = math.sqrt(2.0 * ((mu / rcs3) + sme2))
+        vfinal = math.sqrt(2.0 * ((mu / rcs2) + sme3))
+        vtransb = math.sqrt(2.0 * ((mu / rcs2) + sme2))
         deltavb = abs(vfinal - vtransb)
         deltav = deltava + deltavb
         print('atrans %11.7f %11.7f km \n' % (atrans, atrans * 6378.137))
@@ -4934,8 +5071,45 @@ def rendz(rcs1=None, rcs3=None, phasei=None, einit=None, efinal=None,
 #
 # ------------------------------------------------------------------------------
 
-def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
-    # --------------------  initialize values   ------------------- }
+def combined(rinit: float, rfinal: float, einit: float, efinal: float,
+             nuinit: float, nufinal: float, deltai: float):
+    """this procedure calculates the delta v's for a hohmann transfer.
+
+    Parameters
+    ----------
+    rinit : float
+        radius of initial orbit: ER
+    rfinal : float
+        radius of final orbit: ER
+    einit : float
+        eccentricity of initial orbit
+    efinal : float
+        eccentricity of final orbit
+    nuinit : float
+        true anomaly of initial orbit: rad
+    nufinal : float
+        true anomaly of final orbit: rad
+    deltai : float
+        difference in inclination between orbits: rad
+
+    Returns
+    -------
+    deltai1 : float
+        change in inclination at point a: rad
+    deltai2 :
+        change in inclination at point b: rad
+    deltava : float
+        change in velocity at point a: ER/TU
+    deltavb : float
+        change in velocity at point b: ER/TU
+    dttu : float
+        time of flight for transfer: TU
+    gam1 : float
+        payload angle of first change in velocity: rad
+    gam2 : float
+        payload angle of second change in velocity: rad
+    """
+
     mu = 1.0 # canonical
 
     if sh.show:
@@ -4948,12 +5122,13 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
     sme1 = -mu / (2.0*ainit)
     sme2 = -mu / (2.0*atran)
 
+
     if sh.show:
         print('ainit %11.7f %11.7f \n' % (ainit, ainit*6378.1363))
         print('atran %11.7f %11.7f \n' % (atran, atran*6378.1363))
         print('afinal %11.7f %11.7f \n'% (afinal, afinal*6378.1363))
 
-    # -----------------  find delta v at point a  ----------------- }
+    # -----------------  find delta v at point a  -----------------
     vinit = math.sqrt(2.0*(mu/rinit + sme1))
     vtransa = math.sqrt(2.0*(mu/rinit + sme2))
     #     fpa2a = math.atan((e2*math.sin(nu2a)) / (1.0 + e2*math.cos(nu2a)))
@@ -4961,7 +5136,7 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
     #     deltava = math.sqrt(vtransa*vtransa + vinit*vinit - 2.0*vtransa*vinit* ...
     #                     (math.sin(fpa2a)*math.sin(fpa1)+math.cos(fpa2a)*math.cos(fpa1)*math.cos(deltai)))
 
-    # -----------------  find delta v at point b  ----------------- }
+    # -----------------  find delta v at point b  -----------------
     vfinal = math.sqrt(mu/rfinal)  # assumes circular
     vtransb = math.sqrt(2.0*(mu/rfinal + sme2))
     #     fpa2b = math.atan((e2*math.sin(nu2b)) / (1.0 + e2*math.cos(nu2b)))
@@ -5009,15 +5184,13 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
 #  author        : david vallado                  719-573-2600    1 mar 2001
 #
 #  inputs          description                    range / units
-#    vinit       - initial velocity vector        er/tu
 #    iinit       - initial inclination            rad
-#    fpa         - flight path angle              rad
+#    ifinal      - final inclination              rad
 #    deltaraan   - change in node                 rad
-#    deltai      - change in inclination          rad
-#    rfinal      - final position magnitude       er
+#    vinit       - initial velocity vector        er/tu
+#    fpa         - flight path angle              rad
 #
 #  outputs       :
-#    ifinal      - final inclination              rad
 #    deltav      - change in velocity             er/tu
 #
 #  locals        :
@@ -5031,10 +5204,33 @@ def combined(rinit, rfinal, einit, efinal, nuinit, nufinal, deltai):
 #  references    :
 #    vallado       2007, 350, alg 41, ex 6-6
 #function [deltav] = iandnode(iinit, deltaraan, ifinal, vinit, fpa)
-# ----------------------------------------------------------------------------- }
+# -----------------------------------------------------------------------------
 
 
-def iandnode(iinit=None, deltaraan=None, ifinal=None, vinit=None, fpa=None):
+def iandnode(iinit: float, ifinal: float, deltaraan: float, vinit: float,
+             fpa: float):
+    """this function calculates the delta v's for a change in inclination and
+    right ascension of the ascending node.
+
+    Parameters
+    ----------
+    iinit : float
+        initial inclination: rad
+    ifinal : float
+        final inclination: rad
+    deltaraan : float
+        change in ascending node: rad
+    vinit : float
+        initial velocity: ER/TU
+    fpa : float
+        flight path angle: rad
+
+    Returns
+    -------
+    deltav
+        change in velocity: ER/TU
+    """
+
     deltai = iinit - ifinal
     # variables for speed
     cosdraan = math.cos(deltaraan)
@@ -5046,10 +5242,11 @@ def iandnode(iinit=None, deltaraan=None, ifinal=None, vinit=None, fpa=None):
     theta = math.acos(cost)
     sint = math.sin(theta)
     deltav = 2.0 * vinit * math.cos(fpa) * math.sin(0.5 * theta)
-    arglat = math.acos((sinif * math.cos(deltaraan) - cost * sinii) / (sint * cosii))
-    arglat1 = math.acos((cosii * sinif - sinii * cosif * cosdraan) / sint)
-    print(' theta   %11.7f  \n' % (theta * rad2deg))
-    print(' arglat   %11.7f  %11.7f  \n' % (arglat * rad2deg, arglat1 * rad2deg))
+    if sh.show:
+        arglat = math.acos((sinif * math.cos(deltaraan) - cost * sinii) / (sint * cosii))
+        arglat1 = math.acos((cosii * sinif - sinii * cosif * cosdraan) / sint)
+        print(' theta   %11.7f  \n' % (theta * rad2deg))
+        print(' arglat   %11.7f  %11.7f  \n' % (arglat * rad2deg, arglat1 * rad2deg))
     return deltav
 
 # ------------------------------------------------------------------------------
@@ -5086,33 +5283,62 @@ def iandnode(iinit=None, deltaraan=None, ifinal=None, vinit=None, fpa=None):
 #
 #  references    :
 #    vallado       2007, 349, alg 40, ex 6-5
-# function [ifinal, deltav ] = nodeonly(iinit, ecc, deltaomega, vinit, fpa, incl)
+# function [ifinal, deltav ] = nodeonly(ecc, deltaomega, vinit, fpa, incl)
 # ----------------------------------------------------------------------------- }
 
-def nodeonly(iinit=None, ecc=None, deltaomega=None, vinit=None, fpa=None,
-             incl=None):
+def nodeonly(ecc: float, deltaomega: float, vinit: float, incl: float,
+             fpa: float = None):
+    """this procedure calculates the delta v's for a change in longitude of
+    ascending node only.
+
+    Parameters
+    ----------
+    ecc : float
+        eccentricity
+    deltaomega : float
+        change in longitude of ascending node: rad
+    vinit : float
+        initial velocity vector: ER/TU
+    incl : float
+        inclination: rad
+    fpa : float, optional
+        flight path angle, only needed for elliptic orbits
+
+    Returns
+    -------
+    ifinal: float
+        final inclination: rad
+    deltav: float
+        change in velocity: rad
+    """
+
     if ecc > 1e-07:
-        # ------------------------- elliptical --------------------- }
-        theta = math.atan(math.sin(iinit) * math.tan(deltaomega))
+        # ------------------------- elliptical ---------------------
+        theta = math.atan(math.sin(incl) * math.tan(deltaomega))
         ifinal = math.asin(math.sin(theta) / math.sin(deltaomega))
         deltav = 2.0 * vinit * math.cos(fpa) * math.sin(0.5 * theta)
-        arglat = math.pi * 0.5
-        arglat1 = math.acos(math.cos(incl) * math.sin(incl)
-                            * (1.0 - math.cos(deltaomega)) / math.sin(theta))
+        if sh.show:
+            arglat = math.pi * 0.5
+            arglat1 = math.acos(math.cos(incl) * math.sin(incl)
+                                * (1.0 - math.cos(deltaomega)) / math.sin(theta))
     else:
-        # -------------------------- circular ---------------------- }
+        # -------------------------- circular ----------------------
         ifinal = incl
-        theta = math.acos(math.cos(iinit) * math.cos(iinit)
-                          + math.sin(iinit) * math.sin(iinit) * math.cos(deltaomega))
+        theta = math.acos(math.cos(incl)**2 + math.sin(incl)**2
+                          * math.cos(deltaomega))
         deltav = 2.0 * vinit * math.sin(0.5 * theta)
-        arglat = math.acos(math.tan(iinit)
-                           * (math.cos(deltaomega) - math.cos(theta))
-                           / math.sin(theta))
-        arglat1 = math.acos(math.cos(incl) * math.sin(incl)
-                            * (1.0 - math.cos(deltaomega)) / math.sin(theta))
+        if sh.show:
+            arglat = math.acos(math.tan(incl)
+                            * (math.cos(deltaomega) - math.cos(theta))
+                            / math.sin(theta))
+            arglat1 = math.acos(math.cos(incl) * math.sin(incl)
+                                * (1.0 - math.cos(deltaomega)) / math.sin(theta))
 
-    print(' theta   %11.7f deg \n' % (theta * rad2deg))
-    print(' arglat   %11.7f  %11.7f  \n' % (arglat * rad2deg, arglat1 * rad2deg))
+    if sh.show:
+        print(' theta   %11.7f deg \n'
+              % (theta * rad2deg))
+        print(' arglat   %11.7f  %11.7f  \n'
+              % (arglat * rad2deg, arglat1 * rad2deg))
     return ifinal, deltav
 
 # ------------------------------------------------------------------------------
@@ -5142,7 +5368,23 @@ def nodeonly(iinit=None, ecc=None, deltaomega=None, vinit=None, fpa=None,
 #function [ deltavionly] = ionlychg(deltai, vinit, fpa)
 # ----------------------------------------------------------------------------- }
 
-def ionlychg(deltai=None, vinit=None, fpa=None):
+def ionlychg(deltai: float, vinit: float, fpa: float):
+    """this function calculates the delta v's for a change in inclination only.
+
+    Parameters
+    ----------
+    deltai : float
+        change in inclination: rad
+    vinit : float
+        initial velocity: ER/TU
+    fpa : float
+        flight path angle: rad
+
+    Returns
+    -------
+    deltavionly
+        change in velocity: ER/TU
+    """
     deltavionly = 2.0 * vinit * math.cos(fpa) * math.sin(0.5 * deltai)
     return deltavionly
 
@@ -5162,24 +5404,24 @@ def ionlychg(deltai=None, vinit=None, fpa=None):
 #    einit       - eccentricity of first orbit
 #    efinal      - eccentricity of final orbit
 #    nuinit      - true anomaly of first orbit    0 or pi rad
-#    nu2         - true anomaly of second orbit   same quad as nuinit, rad
 #    nufinal     - true anomaly of final orbit    0 or pi rad
 #
 #  outputs       :
 #    deltava     - change in velocity at point a  er / tu
 #    deltavb     - change in velocity at point b  er / tu
 #    dttu        - time of flight for the transf  tu
+#    etran       - eccentricity of transfer orbit
+#    atran       - semimajor axis of trans orbit  er
+#    vtransa     - velocity of trans orbit at a   er / tu
+#    vtransb     - velocity of trans orbit at b   er / tu
 #
 #  locals        :
 #    sme1        - mech energy of first orbit     er2 / tu
 #    sme2        - mech energy of transfer orbit  er2 / tu
 #    sme3        - mech energy of final orbit     er2 / tu
 #    vinit       - velocity of first orbit at a   er / tu
-#    vtransa     - velocity of trans orbit at a   er / tu
-#    vtransb     - velocity of trans orbit at b   er / tu
 #    vfinal      - velocity of final orbit at b   er / tu
 #    ainit       - semimajor axis of first orbit  er
-#    atrans      - semimajor axis of trans orbit  er
 #    afinal      - semimajor axis of final orbit  er
 #    e           - ecc anomaly of trans at b      rad
 #    ratio       - ratio of initial to final
@@ -5193,8 +5435,44 @@ def ionlychg(deltai=None, vinit=None, fpa=None):
 #function [deltava, deltavb, dttu, etran, atran, vtrana, vtranb ] = onetang(rinit, rfinal, einit, efinal, nuinit, nutran)
 # ----------------------------------------------------------------------------- }
 
-def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
-            nuinit=None, nutran=None):
+def onetang(rinit: float, rfinal: float, einit: float, efinal: float,
+            nuinit: float, nutran: float):
+    """this procedure calculates the delta v's for a one tangent transfer for either
+    circle to circle, or ellipse to ellipse.
+
+    Parameters
+    ----------
+    rinit : float
+        initial position magnitude: ER
+    rfinal : float
+        final position magnitude: ER
+    einit : float
+        initial eccentricity
+    efinal : float
+        final eccentricity
+    nuinit : float
+        initial true anomaly: rad
+    nutran : float
+        true anomaly of transfer orbit: rad
+
+    Returns
+    -------
+    deltava : float
+        change in velocity at point a: ER/TU
+    deltavb : float
+        change in velocity at point b: ER/TU
+    dttu : float
+        time of flight for transfer: TU
+    etran : float
+        eccentricity of transfer orbit
+    atran : float
+        semimajor axis of transfer orbit: rad
+    vtrana : float
+        velocity of transfer orbit at point a: ER/TU
+    vtranb : float
+        velocity of transfer orbit at point b: ER/TU
+    """
+
     mu = 1.0
     e = 0.0
     deltava = 0.0
@@ -5203,11 +5481,11 @@ def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
     ratio = rinit / rfinal
     if abs(nuinit) < 0.01:
         etran = ((ratio - 1.0) / (math.cos(nutran) - ratio))
-        etran = ((- rfinal + rinit) / (rfinal * math.cos(nutran) - rinit))
+        etran = ((-rfinal + rinit) / (rfinal * math.cos(nutran) - rinit))
         eainit = 0.0
     else:
         etran = ((ratio - 1.0) / (math.cos(nutran) + ratio))
-        etran = ((- rfinal + rinit) / (rfinal * math.cos(nutran) + rinit))
+        etran = ((-rfinal + rinit) / (rfinal * math.cos(nutran) + rinit))
         eainit = math.pi
 
     if etran >= 0.0:
@@ -5261,13 +5539,13 @@ def onetang(rinit=None, rfinal=None, einit=None, efinal=None,
         print('the one tangent burn is not possible for this case ' % ())
 
     #      fprintf(1, ' atran   #11.7f  #11.7f km #11.7f \n', atran, atran*re, ptran*re)
-#      fprintf(1, ' etran   #11.7f  \n', etran)
-#      fprintf(1, ' vinit   #11.7f  #11.7f km/s \n', vinit, vinit*velkmps)
-#      fprintf(1, ' phi  #11.7f  #11.7f km/s \n', fpatranb * rad2deg, fpafinal * rad2deg)
-#      fprintf(1, ' E  #11.7f  \n', e * rad2deg)
-#      fprintf(1, ' vtrana  #11.7f  #11.7f km/s \n', vtrana, vtrana*velkmps)
-#      fprintf(1, ' vtranb  #11.7f  #11.7f km/s \n', vtranb, vtranb*velkmps)
-#      fprintf(1, ' vfinal  #11.7f  #11.7f km/s \n', vfinal, vfinal*velkmps)
+    #      fprintf(1, ' etran   #11.7f  \n', etran)
+    #      fprintf(1, ' vinit   #11.7f  #11.7f km/s \n', vinit, vinit*velkmps)
+    #      fprintf(1, ' phi  #11.7f  #11.7f km/s \n', fpatranb * rad2deg, fpafinal * rad2deg)
+    #      fprintf(1, ' E  #11.7f  \n', e * rad2deg)
+    #      fprintf(1, ' vtrana  #11.7f  #11.7f km/s \n', vtrana, vtrana*velkmps)
+    #      fprintf(1, ' vtranb  #11.7f  #11.7f km/s \n', vtranb, vtranb*velkmps)
+    #      fprintf(1, ' vfinal  #11.7f  #11.7f km/s \n', vfinal, vfinal*velkmps)
     return deltava, deltavb, dttu, etran, atran, vtrana, vtranb
 
 
@@ -8606,7 +8884,7 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
     stepp = 720.0
     stepn = - 720.0
     step2 = 259200.0
-    # /* ----------- calculate deep space resonance effects ----------- */
+    # ----------- calculate deep space resonance effects -----------
     dndt = 0.0
     theta = math.fmod(gsto + tc * rptim, twopi)
     em = em + dedt * t
@@ -8614,23 +8892,23 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
     argpm = argpm + domdt * t
     nodem = nodem + dnodt * t
     mm = mm + dmdt * t
-    # //   sgp4fix for negative inclinations
-# //   the following if statement should be commented out
-# //  if (inclm < 0.0)
-# // {
-# //    inclm = -inclm
-# //    argpm = argpm - pi
-# //    nodem = nodem + pi
-# //  }
+    #   sgp4fix for negative inclinations
+    #   the following if statement should be commented out
+    #  if (inclm < 0.0)
+    # {
+    #    inclm = -inclm
+    #    argpm = argpm - pi
+    #    nodem = nodem + pi
+    #  }
 
-    # /* - update resonances : numerical (euler-maclaurin) integration - */
-# /* ------------------------- epoch restart ----------------------  */
+    # - update resonances : numerical (euler-maclaurin) integration -
+# ------------------------- epoch restart ----------------------
 
-    # //   sgp4fix for propagator problems
-# //   the following integration works for negative time steps and periods
-# //   the specific changes are unknown because the original code was so convoluted
+    #   sgp4fix for propagator problems
+    #   the following integration works for negative time steps and periods
+    #   the specific changes are unknown because the original code was so convoluted
 
-    # // sgp4fix take out atime = 0.0 and fix for faster operation
+    # sgp4fix take out atime = 0.0 and fix for faster operation
     ft = 0.0
     if (irez != 0):
         # sgp4fix streamline check
@@ -8647,8 +8925,8 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
         iret = 0
         while (iretn == 381):
 
-            # /* ------------------- dot terms calculated ------------- */
-# /* ----------- near - synchronous resonance terms ------- */
+            # ------------------- dot terms calculated -------------
+            # ----------- near - synchronous resonance terms -------
             if (irez != 2):
                 xndt = (del1 * math.sin(xli - fasx2)
                         + del2 * math.sin(2.0 * (xli - fasx4))
@@ -8659,7 +8937,7 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
                          + 3.0 * del3 * math.cos(3.0 * (xli - fasx6)))
                 xnddt = xnddt * xldot
             else:
-                # /* --------- near - half-day resonance terms -------- */
+                # --------- near - half-day resonance terms --------
                 xomi = argpo + argpdot * atime
                 x2omi = xomi + xomi
                 x2li = xli + xli
@@ -8685,8 +8963,8 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
                                   + d5421 * math.cos(xomi + x2li - g54)
                                   + d5433 * math.cos(- xomi + x2li - g54)))
                 xnddt = xnddt * xldot
-            # /* ----------------------- integrator ------------------- */
-# sgp4fix move end checks to end of routine
+            # ----------------------- integrator -------------------
+            # sgp4fix move end checks to end of routine
             if (abs(t - atime) >= stepp):
                 iret = 0
                 iretn = 381
@@ -8781,7 +9059,7 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
 #     hoots, norad spacetrack report #6 1986
 #     hoots, schumacher and glover 2004
 #     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------*/
+#  ----------------------------------------------------------------------------
 
 def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
           pinco=None, plo=None, se2=None, se3=None, sgh2=None,
@@ -8792,14 +9070,14 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
           zmol=None, zmos=None, inclo=None, init=None, ep=None,
           inclp=None, nodep=None, argpp=None, mp=None, opsmode=None):
     # change to variable passed in
-    # /* ---------------------- constants ----------------------------- */
+    # ---------------------- constants -----------------------------
     zns = 1.19459e-05
     zes = 0.01675
     znl = 0.00015835218
     zel = 0.0549
-    # /* --------------- calculate time varying periodics ----------- */
+    # --------------- calculate time varying periodics -----------
     zm = zmos + zns * t
-    # // be sure that the initial call has time set to zero
+    # be sure that the initial call has time set to zero
     if (init == 'y'):
         zm = zmos
 
@@ -8831,7 +9109,7 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
     pgh = sghs + sghl
     ph = shs + shll
     if (init == 'n'):
-        #   //  0.2 rad = 11.45916 deg
+        #  0.2 rad = 11.45916 deg
         pe = pe - peo
         pinc = pinc - pinco
         pl = pl - plo
@@ -8841,14 +9119,14 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
         ep = ep + pe
         sinip = math.sin(inclp)
         cosip = math.cos(inclp)
-        # /* ----------------- apply periodics directly ------------ */
-#   //  sgp4fix for lyddane choice
-#   //  strn3 used original inclination - this is technically feasible
-#   //  gsfc used perturbed inclination - also technically feasible
-#   //  probably best to readjust the 0.2 limit value and limit discontinuity
-#   //  use next line for original strn3 approach and original inclination
-#   //  if (inclo >= 0.2)
-#   //  use next line for gsfc version and perturbed inclination
+        # ----------------- apply periodics directly ------------
+        #  sgp4fix for lyddane choice
+        #  strn3 used original inclination - this is technically feasible
+        #  gsfc used perturbed inclination - also technically feasible
+        #  probably best to readjust the 0.2 limit value and limit discontinuity
+        #  use next line for original strn3 approach and original inclination
+        #  if (inclo >= 0.2)
+        #  use next line for gsfc version and perturbed inclination
         if (inclp >= 0.2):
             ph = ph / sinip
             pgh = pgh - cosip * ph
@@ -8856,7 +9134,7 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
             nodep = nodep + ph
             mp = mp + pl
         else:
-            # /* ---- apply periodics with lyddane modification ---- */
+            # ---- apply periodics with lyddane modification ----
             sinop = math.sin(nodep)
             cosop = math.cos(nodep)
             alfdp = sinip * sinop

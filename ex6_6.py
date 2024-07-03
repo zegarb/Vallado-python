@@ -37,7 +37,7 @@ ecc = 0.0
 deltaomega = 45.0 * deg2rad
 vinit = 5.892311 / 7.905365719
 fpa = 0.0 * deg2rad
-deltav = obu.iandnode(iinit, deltaomega, ifinal, vinit, fpa)
+deltav = obu.iandnode(iinit, ifinal, deltaomega, vinit, fpa)
 print('inclination and node changes \n')
 print(' deltav %11.7f %11.7f km/s \n' % (deltav, deltav * 7.905365719))
 # End of Book Example

@@ -53,7 +53,7 @@
 |  51  |  pg 430 (457)  | Site-Track                                   | site()                               | ex7_1.py                        | pg 431 (458)               |   -   |
 |  52  |  pg 442 (469)  | Angles-Only Gauss                            | anglesg()                            | ex7_2.py                        | pg 447 (474)               |   N   |
 |  53  |  pg 460 (487)  | Angles-Double-R                              | anglesdr()                           | ex7_2.py                        | pg 447 (474)               |   N   |
-|  54  |  pg 460 (487)  | Gibbs                                        | gibbs(), gibbsh()                    | ex7_34.py                       | pg 461 (488)               |   Y   |
+|  54  |  pg 460 (487)  | Gibbs                                        | gibbs()                              | ex7_34.py                       | pg 461 (488)               |   Y   |
 |  55  |  pg 466 (493)  | Herrick-Gibbs                                | hgibbs()                             | ex7_34.py                       | pg 467 (494)               |   Y   |
 |  56  |  pg 475 (502)  | Lambert's Problem - Minimum Energy           | lambertmin()                         | ex7_5.py                        | pg 497 (524)               |  Y/N  |
 |  57  |  pg 478 (505)  | Lambert - Gauss's Solution                   | N/A                                  |                -                |           -                |   -   |
