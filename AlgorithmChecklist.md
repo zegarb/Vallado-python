@@ -9,7 +9,7 @@
 |  7   |  pg 81 (108)   | KeplerCOE                                    | N/A                                  |                -                |           -                |   -   |
 |  8   |  pg 93 (120)   | Kepler                                       | kepler()                             | ex2_4.py                        | pg 94 (121)                |   Y   |
 |  9   |  pg 113 (140)  | RV2COE                                       | rv2coe()                             | ex2_5.py                        | pg 114 (141)               |   Y   |
-|  10  |  pg 118 (145)  | COE2RV                                       | coe2rv(), coe2rvh()                  | ex2_6.py                        | pg 119 (146)               |   Y   |
+|  10  |  pg 118 (145)  | COE2RV                                       | coe2rv()                             | ex2_6.py                        | pg 119 (146)               |   Y   |
 |  11  |  pg 126 (153)  | FindTOF                                      | findtof()                            |                -                |           -                |   N   |
 |  12  |  pg 172 (199)  | ECEF To LatLon                               | ecef2ll()                            | ex3_3.py                        | pg 173 (200)               |   Y   |
 |  13  |  pg 173 (200)  | ECEF To LatLon (B)                           | ecef2llb()                           | ex3_3.py                        | pg 173 (200)               |   Y   |
@@ -32,7 +32,7 @@
 |  30  |  pg 283 (310)  | SunriseSet                                   | sunriset()                           | ex5_2.py                        | pg 284 (311)               |   Y   |
 |  31  |  pg 288 (315)  | Moon                                         | moon()                               | ex5_3.py                        | pg 288 (315)               |   Y   |
 |  32  |  pg 290 (317)  | MoonRiseSet                                  | moonrise(), moonrise2(), moonrise3() | ex5_4.py                        | pg 292 (319)               |   Y   |
-|  33  |  pg 296 (323)  | PlanetRV                                     | planetrv()                           | ex5_5.py                        | pg 297 (324)               |   -   |
+|  33  |  pg 296 (323)  | PlanetRV                                     | planetrv()                           | ex5_5.py                        | pg 297 (324)               |   Y   |
 |  34  |  pg 301 (328)  | Shadow                                       | shadow()                             | shadowtest.py                   |           -                |   N   |
 |  35  |  pg 308 (335)  | Sight                                        | sight(), light()                     | ex5_6.py                        | pg 309 (336)               |   Y   |
 |  36  |  pg 325 (352)  | Hohmann Transfer                             | hohmann()                            | ex6_1.py                        | pg 326 (353)               |   Y   |
@@ -41,15 +41,15 @@
 |  39  |  pg 344 (371)  | Inclination Only                             | ionlychg()                           | ex6_4.py                        | pg 344 (371)               |   Y   |
 |  40  |  pg 347 (374)  | Change in Ascending Node-Circular            | nodeonly()                           | ex6_5.py                        | pg 347 (374)               |   Y   |
 |  41  |  pg 348 (375)  | Combined Changes (i & Omega)-Circular        | iandnode()                           | ex6_6.py                        | pg 349 (376)               |   Y   |
-|  42  |  pg 353 (380)  | Minimum Combined Plane Change                | combined()                           | ex6_7.py                        | pg 356 (383)               |   Y   |
+|  42  |  pg 353 (380)  | Minimum Combined Plane Change                | mincomb()                            | ex6_7.py                        | pg 356 (383)               |   Y   |
 |  43  |  pg 356 (383)  | Fixed-delta v Maneuvers                      | combined()                           | ex6_7.py                        | pg 356 (383)               |   Y   |
 |  44  |  pg 362 (389)  | Circular Coplanar Phasing (Same Orbits)      | rendz()                              | ex6_8.py                        | pg 363 (390)               |   Y   |
 |  45  |  pg 363 (390)  | Circular Coplanar Phasing (Different Orbits) | rendz()                              | ex6_9.py                        | pg 364 (391)               |   Y   |
 |  46  |  pg 368 (395)  | Noncoplanar Phasing                          | noncoplr()                           | ex6_10.py                       | pg 369 (396)               |   Y   |
-|  47  |  pg 387 (414)  | Low Thrust Transfer                          | lowthrust()                          | ex6_12.py & ex6_13.py           | pg 381 (408) & 388 (415)   |   -   |
+|  47  |  pg 387 (414)  | Low Thrust Transfer                          | N/A                                  | ex6_12.py & ex6_13.py           | pg 381 (408) & 388 (415)   |   -   |
 |  48  |  pg 396 (423)  | Hill's Equation                              | hillsr(), hillsv()                   | ex6_14.py and ex6_15.py         | pg 397 (424) & 410 (437)   |   Y   |
-|  49  |  pg 414 (441)  | HillEQCM to ECI                              | EQCM_to_ECI_RTN_sal()  (dungeon)     | EQCM_to_ECI_RTN_sal.py          |           -                |   N   |
-|  50  |  pg 415 (442)  | ECI to HillEQCM                              | ECI_to_EQCM_RTN_sal()  (dungeon)     | ECI_to_EQCM_RTN_sal.py          |           -                |   N   |
+|  49  |  pg 414 (441)  | HillEQCM to ECI                              | hilleqcm2eci()                       |                                 |           -                |   Y   |
+|  50  |  pg 415 (442)  | ECI to HillEQCM                              | eci2hilleqcm()                       |               -                 |           -                |   Y   |
 |  51  |  pg 430 (457)  | Site-Track                                   | site()                               | ex7_1.py                        | pg 431 (458)               |   -   |
 |  52  |  pg 442 (469)  | Angles-Only Gauss                            | anglesg()                            | ex7_2.py                        | pg 447 (474)               |   N   |
 |  53  |  pg 460 (487)  | Angles-Double-R                              | anglesdr()                           | ex7_2.py                        | pg 447 (474)               |   N   |
@@ -74,10 +74,11 @@
 |  71  |  pg 873 (900)  | Repeat Ground Track                          | repeatgt()                           | ex11_3.py                       |       -                    |   N   |
 |  72  |  pg 879 (906)  | Main Repeat Groundtrack                      | N/A                                  | ex11_4.py                       | pg 893 (920)               |   -   |
 |  73  |  pg 885 (912)  | Minimum Altitude Variation                   | N/A                                  | ex11_5.py                       | pg 895 (922)               |   -   |
-|  74  |  pg 911 (938)  | Predict                                      | predict()                            | ex11_6.py                       | pg 912 (939)               |   N   |
+|  74  |  pg 911 (938)  | Predict                                      | predict()                            | ex11_6.py                       | pg 912 (939)               |   Y   |
 |  75  |  pg 916 (943)  | Rise/Set                                     | N/A                                  | ex11_7.py (DNE)                 | pg 918 (945)               |   -   |
 |  76  |  pg 935 (962)  | Close Approach                               | N/A                                  |                -                |           -                |   -   |
 |  77  |  pg 953 (980)  | Patched Conic                                | N/A                                  |                -                |           -                |   -   |
 |  78  |  pg 962 (989)  | Algorithm B-plane I                          | N/A                                  |                -                |           -                |   -   |
 |  79  |  pg 963 (990)  | Algorithm B-plane II                         | N/A                                  |                -                |           -                |   -   |
+
 
