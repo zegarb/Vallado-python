@@ -5955,12 +5955,7 @@ def iau06era(jdut1: float):
 #    jdut1       - julian date of ut1             days from 4713 bc
 #    ttt         - julian centuries of tt
 #    deltapsi    - change in longitude            rad
-#    l           - delaunay element               rad
-#    ll          - delaunay element               rad
-#    f           - delaunay element               rad
-#    d           - delaunay element               rad
-#    omega       - delaunay element               rad
-#    many others for planetary values             rad
+#    opt         - method option                  '06', '02', '96', '80'
 #
 #  outputs       :
 #    gst         - greenwich sidereal time        0 to twopi rad
@@ -5976,11 +5971,30 @@ def iau06era(jdut1: float):
 #  references    :
 #    vallado       2004, 216
 #
-# [gst, st] = iau06gst(jdut1, ttt, deltapsi, l, l1, f, d, omega, ...
-#            lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate)
+# [gst, st] = iau06gst(jdut1, ttt, deltapsi, opt)
 # -----------------------------------------------------------------------------
 
 def iau06gst(jdut1: float, ttt: float, deltapsi: float, opt: str):
+    """this function finds the iau2006 greenwich sidereal time.
+
+    Parameters
+    ----------
+    jdut1 : float
+        julian date of ut1: days
+    ttt : float
+        julian centuries of tt: centuries
+    deltapsi : float
+        change in longitude
+    opt : str
+        theory: '06'(2006), '02'(2000b), '96'(1996), '80'(1980)
+
+    Returns
+    -------
+    gst : float
+        greenwich sidreal time: 0 to 2pi rad
+    st : ndarray
+        transformation matrix
+    """
 
 
     #added by jmb to resolve this list of vars
@@ -6113,18 +6127,25 @@ def iau06gst(jdut1: float, ttt: float, deltapsi: float, opt: str):
 # ] = iau06pna (ttt)
 # ----------------------------------------------------------------------------
 
-def iau06pna(ttt=None):
+def iau06pna(ttt: float):
+    """this function calulates the transformation matrix that accounts for the
+    effects of precession-nutation in the iau2000a theory.
+
+    Parameters
+    ----------
+    ttt : float
+        julian centuries of tt: centuries
+
+    """
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
-    ttt4 = ttt2 * ttt2
-    ttt5 = ttt3 * ttt2
     # obtain data for calculations from the 2000a theory
     opt = '06'
 
     l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
         lonsat, lonurn, lonnep, precrate = smu.fundarg(ttt, opt)
     # ---- obtain data coefficients
-    axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()
+    _, _, _, _, _, _, apn, apni, appl, appli, _, _ = iau06in()
     #        [axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, ape, apei, agst, agsti] = iau06in
     pnsum = 0.0
     ensum = 0.0
@@ -6162,35 +6183,35 @@ def iau06pna(ttt=None):
         print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
 
     # iau2006 approach - does not seem to be correct, close though
-# looks like they still use the iau2000a method and adjust
-#        pnsum = 0.0
-#        # data file is not not reveresed
-#        for i = 1358 : -1 : 1
-#            tempval = apni[i, 0]*l + apni[i, 1]*l1 + apni[i, 2]*f + apni[i, 3]*d + apni[i, 4]*omega + ...
-#                      apni[i, 5]*lonmer  + apni[i, 6]*lonven  + apni[i, 7]*lonear  + apni[i, 8]*lonmar + ...
-#                      apni[i, 9]*lonjup + apni[i, 10]*lonsat + apni[i, 11]*lonurn + apni[i, 12]*lonnep + apni[i, 13]*precrate
-#            if i > 1320
-#                pnsum = pnsum + (apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)) * ttt  #note that sin and cos are reveresed ebtween n and e
-#            else
-#                pnsum = pnsum + apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)
-#            end
-#          end
+    # looks like they still use the iau2000a method and adjust
+    #        pnsum = 0.0
+    #        # data file is not not reveresed
+    #        for i = 1358 : -1 : 1
+    #            tempval = apni[i, 0]*l + apni[i, 1]*l1 + apni[i, 2]*f + apni[i, 3]*d + apni[i, 4]*omega + ...
+    #                      apni[i, 5]*lonmer  + apni[i, 6]*lonven  + apni[i, 7]*lonear  + apni[i, 8]*lonmar + ...
+    #                      apni[i, 9]*lonjup + apni[i, 10]*lonsat + apni[i, 11]*lonurn + apni[i, 12]*lonnep + apni[i, 13]*precrate
+    #            if i > 1320
+    #                pnsum = pnsum + (apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)) * ttt  #note that sin and cos are reveresed ebtween n and e
+    #            else
+    #                pnsum = pnsum + apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)
+    #            end
+    #          end
 
     #        ensum = 0.0
-#        # data file is not reveresed
-#        for i = 1056 : -1 : 1
-#            tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega + ...
-#                      apei[i, 5]*lonmer  + apei[i, 6]*lonven  + apei[i, 7]*lonear  + apei[i, 8]*lonmar + ...
-#                      apei[i, 9]*lonjup + apei[i, 10]*lonsat + apei[i, 11]*lonurn + apei[i, 12]*lonnep + apei[i, 13]*precrate
-#            if i > 1037
-#                ensum = ensum + (ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)) * ttt
-#            else
-#                ensum = ensum + ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)
-#            end
-#          end
-#          #  add planetary and luni-solar components.
-#        deltapsi = pnsum  # rad
-#        deltaeps = ensum
+    #        # data file is not reveresed
+    #        for i = 1056 : -1 : 1
+    #            tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega + ...
+    #                      apei[i, 5]*lonmer  + apei[i, 6]*lonven  + apei[i, 7]*lonear  + apei[i, 8]*lonmar + ...
+    #                      apei[i, 9]*lonjup + apei[i, 10]*lonsat + apei[i, 11]*lonurn + apei[i, 12]*lonnep + apei[i, 13]*precrate
+    #            if i > 1037
+    #                ensum = ensum + (ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)) * ttt
+    #            else
+    #                ensum = ensum + ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)
+    #            end
+    #          end
+    #          #  add planetary and luni-solar components.
+    #        deltapsi = pnsum  # rad
+    #        deltaeps = ensum
 
     # iau2006 corrections to the iau2000a
     j2d = - 2.7774e-06 * ttt * arcsec2rad
@@ -6204,8 +6225,8 @@ def iau06pna(ttt=None):
 
     prec, psia, wa, ea, xa = precess(ttt, '06')
     if sh.iauhelp:
-        print('prec iau 06 \n' % ())
-        print((prec))
+        print('prec iau 06 \n')
+        print(prec)
 
     oblo = 84381.406 * arcsec2rad
 
@@ -6251,21 +6272,21 @@ def iau06pna(ttt=None):
     pnb = a10 @ a9 @ a8 @ a7 @ a6 @ a5 @ a4 @ a3 @ a2 @ a1
     prec = a7 @ a6 @ a5 @ a4
     if sh.iauhelp:
-        print('prec iau 06a alt \n' % ())
-        print((prec))
+        print('prec iau 06a alt \n')
+        print(prec)
 
     nut = a3 @ a2 @ a1
     if sh.iauhelp:
-        print('nut iau 06a \n' % ())
-        print((nut))
+        print('nut iau 06a \n')
+        print(nut)
 
     frb = a10 @ a9 @ a8
     if sh.iauhelp:
-        print('frb iau 06a \n' % ())
-        print((frb))
+        print('frb iau 06a \n')
+        print(frb)
 
-    return deltapsi, pnb, prec, nut, l, l1, f, d, omega, \
-           lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate
+    return deltapsi, pnb, prec, nut, l, l1, f, d, omega, lonmer, lonven, \
+        lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate
 
 # ----------------------------------------------------------------------------
 #
@@ -6322,7 +6343,40 @@ def iau06pna(ttt=None):
 # ] = iau06pnb (ttt)
 # ----------------------------------------------------------------------------
 
-def iau06pnb(ttt=None):
+def iau06pnb(ttt: float):
+    """this function calulates the transformation matrix that accounts for the
+    effects of precession-nutation in the iau2000b theory.
+
+    Parameters
+    ----------
+    ttt : float
+        julian centuries of tt: centuries
+
+    Returns
+    -------
+    deltapsi : float
+        change in longitude: rad
+    pnb : ndarray
+        matrix
+    prec : ndarray
+        matrix
+    nut : ndarray
+        transformation matrix for ire-grcf
+    l : float
+        delauney element
+    l1 : float
+        delauney element
+    f : float
+        delauney element
+    d : float
+        delauney element
+    omega : float
+        delauney element
+    lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep: float
+        planetary longitudes
+    precrate
+
+    """
     # " to rad
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
@@ -6334,7 +6388,7 @@ def iau06pnb(ttt=None):
     l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, lonsat, \
         lonurn, lonnep, precrate = smu.fundarg(ttt, opt)
     # ---- obtain data coefficients
-    axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()
+    _, _, _, _, ass0, a0si, apn, apni, _, _, _, _ = iau06in()
     #        [axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, ape, apei, agst, agsti] = iau06in
 
     pnsum = 0.0
@@ -6347,37 +6401,37 @@ def iau06pnb(ttt=None):
         ensum = (ensum + (apn[i, 2] + apn[i, 3] * ttt) * math.cos(tempval)
                  + (apn[i, 6] + apn[i, 7] * ttt) * math.sin(tempval))
         #             pnsum = pnsum + (apn[i, 0] + apn[i, 1]*ttt) * sin(tempval) ...
-#                           + (apn[i, 4]) * cos(tempval)
-#             tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega
-#             ensum = ensum + (ape[i, 2] + ape[i, 3]*ttt) * cos(tempval) ...
-#                           + (ape[i, 6]) * sin(tempval)
+    #                           + (apn[i, 4]) * cos(tempval)
+    #             tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega
+    #             ensum = ensum + (ape[i, 2] + ape[i, 3]*ttt) * cos(tempval) ...
+    #                           + (ape[i, 6]) * sin(tempval)
 
     # iau2006 approach - does not seem to be correct
-# looks like they still use the iau2000a method and adjust
-#        pnsum = 0.0
-#        # data file is not already reveresed
-#        for i = 77 : -1 : 1
-#            tempval = apni[i, 0]*l + apni[i, 1]*l1 + apni[i, 2]*f + apni[i, 3]*d + apni[i, 4]*omega
-#            if i > 1320
-#                pnsum = pnsum + (apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)) * ttt
-#            else
-#                pnsum = pnsum + apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)
-#            end
-#          end
+    # looks like they still use the iau2000a method and adjust
+    #        pnsum = 0.0
+    #        # data file is not already reveresed
+    #        for i = 77 : -1 : 1
+    #            tempval = apni[i, 0]*l + apni[i, 1]*l1 + apni[i, 2]*f + apni[i, 3]*d + apni[i, 4]*omega
+    #            if i > 1320
+    #                pnsum = pnsum + (apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)) * ttt
+    #            else
+    #                pnsum = pnsum + apn[i, 0] * sin(tempval) + apn[i, 1] * cos(tempval)
+    #            end
+    #          end
 
     #        ensum = 0.0
-#        # data file is already reveresed
-#        for i = 77 : -1 : 1
-#            tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega
-#            if i > 1037
-#                ensum = ensum + (ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)) * ttt
-#            else
-#                ensum = ensum + ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)
-#            end
-#          end
-#          #  add planetary and luni-solar components.
-#        deltapsi = pnsum  # rad
-#        deltaeps = ensum
+    #        # data file is already reveresed
+    #        for i = 77 : -1 : 1
+    #            tempval = apei[i, 0]*l + apei[i, 1]*l1 + apei[i, 2]*f + apei[i, 3]*d + apei[i, 4]*omega
+    #            if i > 1037
+    #                ensum = ensum + (ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)) * ttt
+    #            else
+    #                ensum = ensum + ape[i, 0] * cos(tempval) + ape[i, 1] * sin(tempval)
+    #            end
+    #          end
+    #          #  add planetary and luni-solar components.
+    #        deltapsi = pnsum  # rad
+    #        deltaeps = ensum
 
     # ------ form the planetary arguments
     pplnsum = - 0.000135 * arcsec2rad
@@ -6392,7 +6446,7 @@ def iau06pnb(ttt=None):
     # or 84381.406????
 
     # ----------------- find nutation matrix ----------------------
-# mean to true
+    # mean to true
     a1 = smu.rot1mat(ea + deltaeps)
     a2 = smu.rot3mat(deltapsi)
     a3 = smu.rot1mat(-ea)
@@ -6530,13 +6584,36 @@ def iau06pnb(ttt=None):
 # [x, y, s, nut] = iau06xys (ttt, ddx, ddy)
 # ----------------------------------------------------------------------------
 
-def iau06xys(ttt=None, ddx=None, ddy=None):
+def iau06xys(ttt: float, ddx: float, ddy: float):
+    """this function calulates the transformation matrix that accounts for the
+    effects of precession-nutation in the iau2006 theory.
+
+    Parameters
+    ----------
+    ttt : float
+        julian centuries of tt: centuries
+    ddx : float
+        eop correction for x: rad
+    ddy : float
+        eop correction for y: rad
+
+    Returns
+    -------
+    x : float
+        coordinate of cip: rad
+    y : float
+        coordinate of cip: rad
+    s : float
+        coordinate
+    nut : ndarray
+        transformation matrix for tirs-grcf
+    """
 
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
     ttt4 = ttt2 * ttt2
     ttt5 = ttt3 * ttt2
-    axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()
+    axs0, a0xi, ays0, a0yi, ass0, a0si, _, _, _, _, _, _ = iau06in()
     opt = '06'
 
     l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, lonsat, \
@@ -6549,7 +6626,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     # the iers code puts the constants in here, however
     # don't sum constants in here because they're larger than the last few terms
     xsum0 = 0.0
-    for i in range(1305, -1, - 1):
+    for i in range(1306):
         tempval = (a0xi[i, 0] * l + a0xi[i, 1] * l1 + a0xi[i, 2] * f
                    + a0xi[i, 3] * d + a0xi[i, 4] * omega + a0xi[i, 5] * lonmer
                    + a0xi[i, 6] * lonven + a0xi[i, 7] * lonear
@@ -6563,7 +6640,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     # indicies go from 1 to 1600, but there are 5 groups. the i index counts
     # through each calculation, and j takes care of the individual summations.
     # note that this same process is used for y and s.
-    for j in range(252, -1, - 1):
+    for j in range(253):
         i = 1306 + j
         tempval = (a0xi[i, 0] * l + a0xi[i, 1] * l1 + a0xi[i, 2] * f
                    + a0xi[i, 3] * d + a0xi[i, 4] * omega + a0xi[i, 5] * lonmer
@@ -6574,7 +6651,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
         xsum1 = xsum1 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     xsum2 = 0.0
-    for j in range(35, - 1, - 1):
+    for j in range(36):
         i = 1306 + 253 + j
         tempval = (a0xi[i, 0] * l + a0xi[i, 1] * l1 + a0xi[i, 2] * f
                    + a0xi[i, 3] * d + a0xi[i, 4] * omega + a0xi[i, 5] * lonmer
@@ -6585,7 +6662,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
         xsum2 = xsum2 + axs0[i, 0] * math.sin(tempval) + axs0[i, 1] * math.cos(tempval)
 
     xsum3 = 0.0
-    for j in range(3, - 1, - 1):
+    for j in range(4):
         i = 1306 + 253 + 36 + j
         tempval = (a0xi[i, 0] * l + a0xi[i, 1] * l1 + a0xi[i, 2] * f
                    + a0xi[i, 3] * d + a0xi[i, 4] * omega + a0xi[i, 5] * lonmer
@@ -6611,11 +6688,13 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
     x = x * arcsec2rad + xsum0 + xsum1 * ttt + xsum2 * ttt2 + xsum3 * ttt3 + xsum4 * ttt4
 
     if sh.iauhelp:
-        print('xys x %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n' % (xsum0 / deg2rad, xsum1 / deg2rad, xsum2 / deg2rad, xsum3 / deg2rad, xsum4 / deg2rad))
+        print('xys x %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
+               % (xsum0 / deg2rad, xsum1 / deg2rad, xsum2 / deg2rad,
+                  xsum3 / deg2rad, xsum4 / deg2rad))
 
     # ---------------- now find y
     ysum0 = 0.0
-    for i in range(961, - 1, - 1):
+    for i in range(962):
         tempval = (a0yi[i, 0] * l + a0yi[i, 1] * l1
                    + a0yi[i, 2] * f + a0yi[i, 3] * d + a0yi[i, 4] * omega
                    + a0yi[i, 5] * lonmer + a0yi[i, 6] * lonven
@@ -6626,7 +6705,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
         ysum0 = ysum0 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum1 = 0.0
-    for j in range(276, - 1, - 1):
+    for j in range(277):
         i = 962 + j
         tempval = (a0yi[i, 0] * l + a0yi[i, 1] * l1
                    + a0yi[i, 2] * f + a0yi[i, 3] * d + a0yi[i, 4] * omega
@@ -6638,7 +6717,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
         ysum1 = ysum1 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum2 = 0.0
-    for j in range(29, - 1, - 1):
+    for j in range(30):
         i = 962 + 277 + j
         tempval = (a0yi[i, 0] * l + a0yi[i, 1] * l1
                    + a0yi[i, 2] * f + a0yi[i, 3] * d + a0yi[i, 4] * omega
@@ -6650,7 +6729,7 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
         ysum2 = ysum2 + ays0[i, 0] * math.sin(tempval) + ays0[i, 1] * math.cos(tempval)
 
     ysum3 = 0.0
-    for j in range(4, - 1, - 1):
+    for j in range(5):
         i = 962 + 277 + 30 + j
         tempval = (a0yi[i, 0] * l + a0yi[i, 1] * l1
                    + a0yi[i, 2] * f + a0yi[i, 3] * d + a0yi[i, 4] * omega
@@ -6803,12 +6882,6 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
 
     return x, y, s, nut
 
-
-
-
-
-
-
 # ----------------------------------------------------------------------------
 #
 #                           function nutation
@@ -6854,66 +6927,90 @@ def iau06xys(ttt=None, ddx=None, ddy=None):
 # ----------------------------------------------------------------------------
 
 
-def nutation (ttt, ddpsi, ddeps):
+def nutation(ttt: float, ddpsi: float, ddeps: float):
+    """this function calulates the transformation matrix that accounts for the
+    effects of nutation.
 
-        iar80, rar80 = iau80in()  # coeff in deg
+    Parameters
+    ----------
+    ttt : float
+        julian centuries of tt: centuries
+    ddpsi : float
+        delta psi correction to grcf: rad
+    ddeps : float
+        delta epsilon correction to grcf: rad
 
-        # ---- determine coefficients for iau 1980 nutation theory ----
-        ttt2 = ttt*ttt
-        ttt3 = ttt2*ttt
+    Returns
+    -------
+    deltapsi : float
+        nutation anglue
+    trueeps : float
+        true obliquity of ecliptic
+    meaneps : float
+        mean obliquity of ecliptic
+    omega
 
-        meaneps = -46.8150 *ttt - 0.00059 *ttt2 + 0.001813 *ttt3 + 84381.448
-        meaneps = math.fmod(meaneps/3600.0, 360.0)
-        meaneps = meaneps * deg2rad
+    nut : ndarray
+        transformation matrix for tod
+    """
 
-        l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, lonsat, \
-            lonurn, lonnep, precrate = smu.fundarg(ttt, '80')
-#fprintf(1, 'nut del arg %11.7f  %11.7f  %11.7f  %11.7f  %11.7f  \n', l*180/pi, l1*180/pi, f*180/pi, d*180/pi, omega*180/pi)
+    iar80, rar80 = iau80in()  # coeff in deg
 
-        deltapsi = 0.0
-        deltaeps = 0.0
-        #for i = 106:-1: 1
+    # ---- determine coefficients for iau 1980 nutation theory ----
+    ttt2 = ttt*ttt
+    ttt3 = ttt2*ttt
 
-        for i in range (105, 0, -1):
-            tempval = iar80[i, 0]*l + iar80[i, 1]*l1 + iar80[i, 2]*f + \
-                     iar80[i, 3]*d + iar80[i, 4]*omega
-            deltapsi = deltapsi + (rar80[i, 0]+rar80[i, 1]*ttt) * math.sin(tempval)
-            deltaeps = deltaeps + (rar80[i, 2]+rar80[i, 3]*ttt) * math.cos(tempval)
+    meaneps = -46.8150 *ttt - 0.00059 *ttt2 + 0.001813 *ttt3 + 84381.448
+    meaneps = math.fmod(meaneps/3600.0, 360.0)
+    meaneps = meaneps * deg2rad
 
-        # --------------- find nutation parameters --------------------
-        deltapsi = math.fmod(deltapsi + ddpsi, 2.0 * math.pi)
-        deltaeps = math.fmod(deltaeps + ddeps, 2.0 * math.pi)
-        trueeps = meaneps + deltaeps
+    l, l1, f, d, omega, _, _, _, _, _, _, _, _, _ = smu.fundarg(ttt, '80')
+    #fprintf(1, 'nut del arg %11.7f  %11.7f  %11.7f  %11.7f  %11.7f  \n', l*180/pi, l1*180/pi, f*180/pi, d*180/pi, omega*180/pi)
 
-#fprintf(1, 'meaneps %11.7f dp  %11.7f de  %11.7f te  %11.7f  ttt  %11.7f \n', meaneps*180/pi, deltapsi*180/pi, deltaeps*180/pi, trueeps*180/pi, ttt)
+    deltapsi = 0.0
+    deltaeps = 0.0
+    #for i = 106:-1: 1
 
-        cospsi = math.cos(deltapsi)
-        sinpsi = math.sin(deltapsi)
-        coseps = math.cos(meaneps)
-        sineps = math.sin(meaneps)
-        costrueeps = math.cos(trueeps)
-        sintrueeps = math.sin(trueeps)
+    for i in range (105, 0, -1):
+        tempval = iar80[i, 0]*l + iar80[i, 1]*l1 + iar80[i, 2]*f + \
+                    iar80[i, 3]*d + iar80[i, 4]*omega
+        deltapsi = deltapsi + (rar80[i, 0]+rar80[i, 1]*ttt) * math.sin(tempval)
+        deltaeps = deltaeps + (rar80[i, 2]+rar80[i, 3]*ttt) * math.cos(tempval)
 
-        nut = np.zeros((3, 3))
-        nut[0, 0] = cospsi
-        nut[0, 1] = costrueeps * sinpsi
-        nut[0, 2] = sintrueeps * sinpsi
-        nut[1, 0] = -coseps * sinpsi
-        nut[1, 1] = costrueeps * coseps * cospsi + sintrueeps * sineps
-        nut[1, 2] = sintrueeps * coseps * cospsi - sineps * costrueeps
-        nut[2, 0] = -sineps * sinpsi
-        nut[2, 1] = costrueeps * sineps * cospsi - sintrueeps * coseps
-        nut[2, 2] = sintrueeps * sineps * cospsi + costrueeps * coseps
+    # --------------- find nutation parameters --------------------
+    deltapsi = math.fmod(deltapsi + ddpsi, 2.0 * math.pi)
+    deltaeps = math.fmod(deltaeps + ddeps, 2.0 * math.pi)
+    trueeps = meaneps + deltaeps
 
-#         fprintf(1, 'nut matrix \n')
-#         nut
-#         fprintf(1, 'nut rotations \n')
-#         n1 = smu.rot1mat(trueeps)
-#         n2 = smu.rot3mat(deltapsi)
-#         n3 = smu.rot1mat(-meaneps)
-#         nut1 = n3*n2*n1
+    #fprintf(1, 'meaneps %11.7f dp  %11.7f de  %11.7f te  %11.7f  ttt  %11.7f \n', meaneps*180/pi, deltapsi*180/pi, deltaeps*180/pi, trueeps*180/pi, ttt)
 
-        return deltapsi, trueeps, meaneps, omega, nut
+    cospsi = math.cos(deltapsi)
+    sinpsi = math.sin(deltapsi)
+    coseps = math.cos(meaneps)
+    sineps = math.sin(meaneps)
+    costrueeps = math.cos(trueeps)
+    sintrueeps = math.sin(trueeps)
+
+    nut = np.zeros((3, 3))
+    nut[0, 0] = cospsi
+    nut[0, 1] = costrueeps * sinpsi
+    nut[0, 2] = sintrueeps * sinpsi
+    nut[1, 0] = -coseps * sinpsi
+    nut[1, 1] = costrueeps * coseps * cospsi + sintrueeps * sineps
+    nut[1, 2] = sintrueeps * coseps * cospsi - sineps * costrueeps
+    nut[2, 0] = -sineps * sinpsi
+    nut[2, 1] = costrueeps * sineps * cospsi - sintrueeps * coseps
+    nut[2, 2] = sintrueeps * sineps * cospsi + costrueeps * coseps
+
+    #         fprintf(1, 'nut matrix \n')
+    #         nut
+    #         fprintf(1, 'nut rotations \n')
+    #         n1 = smu.rot1mat(trueeps)
+    #         n2 = smu.rot3mat(deltapsi)
+    #         n3 = smu.rot1mat(-meaneps)
+    #         nut1 = n3*n2*n1
+
+    return deltapsi, trueeps, meaneps, omega, nut
 
 
 # ----------------------------------------------------------------------------
@@ -6957,10 +7054,31 @@ def nutation (ttt, ddpsi, ddeps):
 # [prec, psia, wa, ea, xa] = precess (ttt, opt)
 # ----------------------------------------------------------------------------
 
+def precess(ttt: float, opt: str):
+    """this function calulates the transformation matrix that accounts for the
+    effects of precession. both the 1980 and 2006 theories are handled. note
+    that the required parameters differ a little.
 
+    Parameters
+    ----------
+    ttt : float
+        julian centuries of tt: centuries
+    opt : str
+        method option: '50', '80', '06'
 
-
-def precess(ttt, opt):
+    Returns
+    -------
+    prec : ndarray
+        transformation matrix for mod - j2000 (80 only)
+    psia : float
+        cannonical precession angle: rad (2006 only)
+    wa : float
+        cannonical precession angle: rad (2006 only)
+    ea : float
+        cannonical precession angle: rad (2006 only)
+    xa : float
+        cannonical precession angle: rad (2006 only)
+    """
 
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
@@ -7034,35 +7152,34 @@ def precess(ttt, opt):
         wa = theta
         ea = z
         # ------------------- iau 76 precession angles --------------------
+    elif (opt == '80'):
+        #     fprintf(1, '80prec %15.9f  \n', ttt)
+        psia = 5038.7784*ttt - 1.07259*ttt2 - 0.001147*ttt3 # "
+        wa = 84381.448 + 0.05127*ttt2 - 0.007726*ttt3
+        ea = 84381.448 - 46.8150*ttt - 0.00059*ttt2 + 0.001813*ttt3
+        xa = 10.5526*ttt - 2.38064*ttt2 - 0.001125*ttt3
+
+        zeta = 2306.2181*ttt + 0.30188*ttt2 + 0.017998*ttt3 # "
+        theta = 2004.3109*ttt - 0.42665*ttt2 - 0.041833*ttt3
+        z = 2306.2181*ttt + 1.09468*ttt2 + 0.018203*ttt3
+        # ------------------ iau 06 precession angles -------------------
     else:
-        if (opt == '80'):
-            #     fprintf(1, '80prec %15.9f  \n', ttt)
-            psia = 5038.7784*ttt - 1.07259*ttt2 - 0.001147*ttt3 # "
-            wa = 84381.448 + 0.05127*ttt2 - 0.007726*ttt3
-            ea = 84381.448 - 46.8150*ttt - 0.00059*ttt2 + 0.001813*ttt3
-            xa = 10.5526*ttt - 2.38064*ttt2 - 0.001125*ttt3
+        oblo = 84381.406 # "
+        psia = ((((-0.0000000951 * ttt + 0.000132851) * ttt - 0.00114045)
+                    * ttt - 1.0790069) * ttt + 5038.481507) * ttt # "
+        wa = ((((0.0000003337 * ttt - 0.000000467) * ttt - 0.00772503)
+                    * ttt + 0.0512623) * ttt -    0.025754) * ttt + oblo
+        ea = ((((-0.0000000434 * ttt - 0.000000576) * ttt + 0.00200340)
+                    * ttt - 0.0001831) * ttt -   46.836769) * ttt + oblo
+        xa = ((((-0.0000000560 * ttt + 0.000170663) * ttt - 0.00121197)
+                    * ttt - 2.3814292) * ttt +   10.556403) * ttt
 
-            zeta = 2306.2181*ttt + 0.30188*ttt2 + 0.017998*ttt3 # "
-            theta = 2004.3109*ttt - 0.42665*ttt2 - 0.041833*ttt3
-            z = 2306.2181*ttt + 1.09468*ttt2 + 0.018203*ttt3
-            # ------------------ iau 06 precession angles -------------------
-        else:
-            oblo = 84381.406 # "
-            psia = ((((-0.0000000951 * ttt + 0.000132851) * ttt - 0.00114045)
-                      * ttt - 1.0790069) * ttt + 5038.481507) * ttt # "
-            wa = ((((0.0000003337 * ttt - 0.000000467) * ttt - 0.00772503)
-                      * ttt + 0.0512623) * ttt -    0.025754) * ttt + oblo
-            ea = ((((-0.0000000434 * ttt - 0.000000576) * ttt + 0.00200340)
-                      * ttt - 0.0001831) * ttt -   46.836769) * ttt + oblo
-            xa = ((((-0.0000000560 * ttt + 0.000170663) * ttt - 0.00121197)
-                      * ttt - 2.3814292) * ttt +   10.556403) * ttt
-
-            zeta = ((((-0.0000003173 * ttt - 0.000005971) * ttt + 0.01801828)
-                      * ttt + 0.2988499) * ttt + 2306.083227) * ttt + 2.650545 # "
-            theta = ((((-0.0000001274 * ttt - 0.000007089) * ttt - 0.04182264)
-                      * ttt - 0.4294934) * ttt + 2004.191903) * ttt
-            z = ((((0.0000002904 * ttt - 0.000028596) * ttt + 0.01826837)
-                      * ttt + 1.0927348) * ttt + 2306.077181) * ttt - 2.650545
+        zeta = ((((-0.0000003173 * ttt - 0.000005971) * ttt + 0.01801828)
+                    * ttt + 0.2988499) * ttt + 2306.083227) * ttt + 2.650545 # "
+        theta = ((((-0.0000001274 * ttt - 0.000007089) * ttt - 0.04182264)
+                    * ttt - 0.4294934) * ttt + 2004.191903) * ttt
+        z = ((((0.0000002904 * ttt - 0.000028596) * ttt + 0.01826837)
+                    * ttt + 1.0927348) * ttt + 2306.077181) * ttt - 2.650545
 
     # convert units to rad
     psia = psia * arcsec2rad # rad
@@ -7172,13 +7289,33 @@ def precess(ttt, opt):
 # ------------------------------------------------------------------------------
 
 
-def sight (r1, r2, whichkind):
-    # -------------------------  implementation   -----------------
-    tr1 = np.array([0.0, 0.0, 0.0])
-    tr2 = np.array([0.0, 0.0, 0.0])
-    for i in range(3):
-        tr1[i] = r1[i]
-        tr2[i] = r2[i]
+def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
+    """this function takes the position vectors of two satellites and determines
+    if there is line-of-sight between the two satellites.  an oblate earth
+    with radius of 1 er is assumed.  the process forms the equation of
+    a line between the two vectors.  differentiating and setting to zero finds
+    the minimum value, and when plugged back into the original line equation,
+    gives the minimum distance.  the parameter tmin is allowed to range from
+    0.0  to 1.0 .  scale the k-component to account for oblate earth because it's
+    the only qunatity that changes.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        position vector of first satellite: km
+    r2 : ndarray
+        position vector of second satellite: km
+    whichkind : str
+        spherical or ellipsoidal earth:  's', 'e' by default
+
+    Returns
+    -------
+    los: bool
+        line of sight: True or False
+    """
+
+    tr1 = r1.copy()
+    tr2 = r2.copy()
     magr1 = smu.mag(tr1)
     magr2 = smu.mag(tr2)
 
@@ -7261,9 +7398,31 @@ def sight (r1, r2, whichkind):
 # ------------------------------------------------------------------------------
 
 
-def sun(jd):
+def sun(jd: float):
+    """this function calculates the geocentric equatorial position vector of
+    the sun given the julian date. Sergey K (2022) has noted that improved
+    results are found assuming the output is in a precessing frame (TEME) and
+    converting to ICRF. this is the low precision formula and is valid for
+    years from 1950 to 2050. accuaracy of apparent coordinates is about 0.01
+    degrees. notice many of the calculations are performed in degrees, and are
+    not changed until later. this is due to the fact that the almanac uses
+    degrees exclusively in their formulations.
 
-    # -------------------------  implementation   -----------------
+    Parameters
+    ----------
+    jd : float
+        julian date of utc: days from 4713 bc
+
+    Returns
+    -------
+    rsun: ndarray
+        inertial position vector of the sun: au
+    rtasc: float
+        right ascension: rad
+    decl: float
+        declination: rad
+    """
+
     # -------------------  initialize values   --------------------
     tut1 = (jd - 2451545.0) / 36525.0
 
@@ -7274,7 +7433,7 @@ def sun(jd):
     meanlong = math.fmod(meanlong, 360.0)  #deg
 
     ttdb = tut1
-    meananomaly = 357.5277233 + 35999.05034 *ttdb
+    meananomaly = 357.5277233 + 35999.05034 * ttdb
     meananomaly = math.fmod(meananomaly*deg2rad , twopi)  #rad
     if (meananomaly < 0.0):
         meananomaly = twopi + meananomaly
@@ -7316,11 +7475,6 @@ def sun(jd):
 
     return rsun, rtasc, decl
 
-
-
-
-
-
 # ---------------------------------------------------------------------------
 #
 #                           function site
@@ -7361,37 +7515,58 @@ def sun(jd):
 # -----------------------------------------------------------------------------
 
 
-def site (latgd, lon, alt):
+def site (latgd: float, lon: float, alt: float):
+    """this function finds the position and velocity vectors for a site.  the
+    answer is returned in the geocentric equatorial (ecef) coordinate system.
+    note that the velocity is zero because the coordinate system is fixed to
+    the earth.
 
-        # EGM-08 constants used here
-        flat = 1.0/298.257223563
-        earthrot = 7.292115e-5     # rad/s  old 7.29211514670698e-05
-        mu = 398600.4415      # km3/s2
-        mum = 3.986004415e14   # m3/s2
-        # derived constants from the base values
-        eccearth = math.sqrt(2.0*flat - flat**2)
-        eccearthsqrd = eccearth**2
-        # -------------------------  implementation   -----------------
-        sinlat = math.sin((latgd))
+    Parameters
+    ----------
+    latgd : float
+        geodetic latitude: -pi/2 to pi/2 rad
+    lon : float
+        longitude: -2pi to 2pi rad
+    alt : float
+        altitude: km
 
-        # ------  find rdel and rk components of site vector  ---------
-        cearth = re / math.sqrt(1.0 - (eccearthsqrd*sinlat*sinlat))
-        rdel = (cearth + alt)*math.cos((latgd))
-        rk = ((1.0-eccearthsqrd)*cearth + alt)*sinlat
+    Returns
+    -------
+    rs : ndarray
+        ecef site position vector: km
+    vs : ndarray
+        ecef site velocity vector: km/s
+    """
 
-        # ---------------  find site position vector  -----------------
-        rs = np.zeros((3))
-        rs[0] = rdel * math.cos((lon))
-        rs[1] = rdel * math.sin((lon))
-        rs[2] = rk
-        rs = rs.T
+    # EGM-08 constants used here
+    flat = 1.0/298.257223563
+    earthrot = 7.292115e-5     # rad/s  old 7.29211514670698e-05
+    mu = 398600.4415      # km3/s2
+    mum = 3.986004415e14   # m3/s2
+    # derived constants from the base values
+    eccearth = math.sqrt(2.0*flat - flat**2)
+    eccearthsqrd = eccearth**2
+    # -------------------------  implementation   -----------------
+    sinlat = math.sin((latgd))
 
-        # ---------------  find site velocity vector  -----------------
-        #ome = [0.0 0.0 omegaearth]
-        #[vs] = cross(ome, rs)
-        vs = np.zeros((3))
+    # ------  find rdel and rk components of site vector  ---------
+    cearth = re / math.sqrt(1.0 - (eccearthsqrd*sinlat*sinlat))
+    rdel = (cearth + alt)*math.cos((latgd))
+    rk = ((1.0-eccearthsqrd)*cearth + alt)*sinlat
 
-        return rs, vs
+    # ---------------  find site position vector  -----------------
+    rs = np.zeros((3))
+    rs[0] = rdel * math.cos((lon))
+    rs[1] = rdel * math.sin((lon))
+    rs[2] = rk
+    rs = rs.T
+
+    # ---------------  find site velocity vector  -----------------
+    #ome = [0.0 0.0 omegaearth]
+    #[vs] = cross(ome, rs)
+    vs = np.zeros((3))
+
+    return rs, vs
 
 
 
@@ -7444,9 +7619,29 @@ def site (latgd, lon, alt):
 # ------------------------------------------------------------------------------
 
 
-def sunalmanac(jd):
+def sunalmanac(jd: float):
+    """this function calculates the geocentric equatorial position vector
+    the sun given the julian date.  this is the low precision formula and
+    is valid for years from 1950 to 2050.  accuaracy of apparent coordinates
+    is 0.01  degrees.  notice many of the calculations are performed in
+    degrees, and are not changed until later.  this is due to the fact that
+    the almanac uses degrees exclusively in their formulations.
 
-    # -------------------------  implementation   -----------------
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+
+    Returns
+    -------
+    rsun : ndarray
+        ijk position vector of the sun: au
+    rtasc : float
+        right ascension: rad
+    decl: float
+        declination: rad
+    """
+
     # -------------------  initialize values   --------------------
     tut1 = (jd - 2451545.0) / 36525.0
     print('tut1 %14.9f \n' % tut1)
@@ -7495,8 +7690,6 @@ def sunalmanac(jd):
 
     return rsun, rtasc, decl
 
-
-
 # ------------------------------------------------------------------------------
 #
 #                           function light
@@ -7535,15 +7728,29 @@ def sunalmanac(jd):
 # ------------------------------------------------------------------------------
 
 
-def light (r, jd, whichkind):
+def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
+    """this function determines if a spacecraft is sunlit or in the dark at a
+    particular time.  an oblate earth and cylindrical shadow is assumed.
 
-        # -------------------------  implementation   -------------------------
-        rsun, rtasc, decl = sun(jd)
-        rsun = auer*rsun
+    Parameters
+    ----------
+    r : ndarray
+        position vector of satellite: er
+    jd : float
+        julian date: days from 4713 bc
+    whichkind : str, optional
+        spherical or ellipsoidal earth: 's', 'e' by default
 
-        # ------------ is the satellite in the shadow? ----------------
-        lit = sight(rsun, r, whichkind)
-        return lit
+    Returns
+    -------
+    lit : bool
+        is visible: True or False
+    """
+    rsun, _, _ = sun(jd)
+    rsun = auer*rsun
+
+    lit = sight(rsun, r, whichkind)
+    return lit
 
 
 # -----------------------------------------------------------------------------
@@ -7602,8 +7809,31 @@ def light (r, jd, whichkind):
 # [utsunrise, utsunset, error] = sunriset(jd, latgd, lon, whichkind)
 # -----------------------------------------------------------------------------
 
-def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
-    # ------------------------  implementation   ------------------
+def sunriset(jd: float, latgd: float, lon: float, whichkind: str):
+    """this function finds the universal time for sunrise and sunset given the
+    day and site location. use (- lon) for local time
+
+    Parameters
+    ----------
+    jd : float
+        julain date: days from 4713 bc
+    latgd : float
+        site latitude: -65/180pi to 65/180pi radians
+    lon : float
+        site longitude: -2pi to 2pi radians
+    whichkind : str
+        which 'twilight' angle to use: 's' = standard, 'c' = civil,
+        'n' = nautical, 'a' = astronomical
+
+    Returns
+    -------
+    utsunrise : float
+        universal time of sunrise: hours
+    utsunset : float
+        universal time of sunset: hours
+    error : str
+        error parameter
+    """
     # -------------- make sure lon is within +- 180 deg -----------
     if (lon > math.pi):
         lon = lon - twopi
@@ -7701,8 +7931,6 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
 
     return utsunrise, utsunset, error
 
-
-##############################################################################################################
 # ------------------------------------------------------------------------------
 #
 #                           function moon
@@ -7717,7 +7945,6 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
 #
 #  inputs          description                    range / units
 #    jd          - julian date                    days from 4713 bc
-#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    rmoon       - ijk position vector of moon    er
@@ -7747,9 +7974,24 @@ def sunriset(jd=None, latgd=None, lon=None, whichkind=None):
 # [rmoon, rtasc, decl] = moon (jd, show)
 # ------------------------------------------------------------------------------
 
-def moon(jd=None, show=False):
+def moon(jd: float):
+    """this function calculates the geocentric equatorial (ijk) position vector
+    for the moon given the julian date.
 
-    # -------------------------  implementation   -----------------
+    Parameters
+    ----------
+    jd : float
+        julian date: days since 4713 bc
+
+    Returns
+    -------
+    rmoon : ndarray
+        ijk position vector of the moon: km
+    rtasc : float
+        right ascension: rad
+    decl : float
+        declination: rad
+    """
     ttdb = (jd - 2451545.0) / 36525.0
     eclplong = (218.32 + 481267.8813 * ttdb
                 + 6.29 * math.sin((134.9 + 477198.85 * ttdb) * deg2rad)
@@ -7775,11 +8017,11 @@ def moon(jd=None, show=False):
     obliquity = 23.439291 - 0.0130042 * ttdb
 
     obliquity = obliquity * deg2rad
-    if show:
-        360 + eclplong / deg2rad
-        eclplat / deg2rad
-        hzparal / deg2rad
-        obliquity / deg2rad
+    if sh.show:
+        print(f'eclplong: {360 + eclplong * rad2deg}')
+        print(f'eclplat: {eclplat * rad2deg}')
+        print(f'hzparal: {hzparal * rad2deg}')
+        print(f'obliquity: {obliquity * rad2deg}')
 
     # ------------ find the geocentric direction cosines ----------
     l = math.cos(eclplat) * math.cos(eclplong)
@@ -7789,8 +8031,8 @@ def moon(jd=None, show=False):
          + math.cos(obliquity) * math.sin(eclplat))
     # ------------- calculate moon position vector ----------------
     magr = 1.0 / math.sin(hzparal)
-    if show:
-        magr * re
+    if sh.show:
+        print(f'magr: {magr * re}')
 
     rmoon = np.zeros(3)
     rmoon[0] = magr * l
@@ -7801,10 +8043,9 @@ def moon(jd=None, show=False):
     decl = math.asin(n)
     return rmoon, rtasc, decl
 
-
 # -----------------------------------------------------------------------------
 #
-#                           function moonriset
+#                           function moonrise
 #
 #  this function finds the universal time for moonrise and moonset given the
 #    day and site location.
@@ -7816,7 +8057,7 @@ def moon(jd=None, show=False):
 #
 #  inputs          description                    range / units
 #    jd          - julian date                    days from 4713 bc
-#    latgd       - site latitude (south -)        -65 to 65 rad
+#    latgd       - site latitude (south -)        -65pi/180 to 65pi/180 rad
 #    lon         - site longitude (west -)        -2pi to 2pi rad
 #    show        - show printouts                 True/False
 #
@@ -7876,11 +8117,34 @@ def moon(jd=None, show=False):
 # [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise(jd=None, latgd=None, lon=None, show=False):
-    # ------------------------  implementation   ------------------
+def moonrise(jd: float, latgd: float, lon: float):
+    """this function finds the universal time for moonrise and moonset given the
+    day and site location.
+
+    Parameters
+    ----------
+    jd : float
+        julian date: 4713 bc
+    latgd : float
+        latitude of site: -65pi/180 to 65pi/180 rad
+    lon : float
+        longitude of site: -2pi to 2pi rad
+
+    Returns
+    -------
+    utmoonrise : float
+        universal time of moonrise: hours
+    utmoonset : float
+        universal time of moonset: hours
+    moonphaseang : float
+        moon phase angle: degrees
+    error : str
+        error parameter
+    """
+
     error = 'ok'
     # -------------- for once for moonrise (1), ) set (2) ---------
-# -------------- make sure lon is within +- 180 deg -----------
+    # -------------- make sure lon is within +- 180 deg -----------
     if (lon > math.pi):
         lon = lon - 2.0 * math.pi
 
@@ -7921,7 +8185,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
                        - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
             eclplong = math.fmod(eclplong * deg2rad, twopi)
             eclplat = math.fmod(eclplat * deg2rad, twopi)
-            if show:
+            if sh.show:
                 print('%2d %2d ecpllon %11.7f ecllat %11.7f '
                       % (opt, try1, eclplong / deg2rad, eclplat / deg2rad))
             obliquity = 23.439291 - 0.0130042 * ttdb
@@ -7932,7 +8196,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
                  - math.sin(obliquity) * math.sin(eclplat))
             n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
                  + math.cos(obliquity) * math.sin(eclplat))
-            if show:
+            if sh.show:
                 print('l %11.7f m %11.7f n %11.7f ' % (l, m, n))
             rtasc = math.atan2(m, l)
             # - check that rtasc is in the same quadrant as eclplong
@@ -7943,7 +8207,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
                          * np.rint(0.5 + (eclplong - rtasc) / (0.5 * math.pi)))
             decl = math.asin(n)
             lst, gst = stu.lstime(lon, jdtemp + jdtempf)
-            if show:
+            if sh.show:
                 print('ra %8.5f dcl %8.5f lst %8.5f jdtemp %8.5f \n'
                       % (rtasc / deg2rad, decl / deg2rad, lst / deg2rad,
                          jdtemp + jdtempf))
@@ -7956,12 +8220,12 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
                 dgha = (moonghan - moongha) / deltaut
             if (dgha < 0.0):
                 dgha = dgha + twopi / abs(deltaut)
-            if show:
+            if sh.show:
                 print('mn gha %11.7f  dgha  %11.7f '
                       % (moonghan / deg2rad, dgha / deg2rad))
             lhan = ((0.00233 - math.sin(latgd) * math.sin(decl))
                     / (math.cos(latgd) * math.cos(decl)))
-            if show:
+            if sh.show:
                 print('lhan  %11.7f rad ' % (lhan))
             #fprintf('lhan  #11.7f deg \n', lhan/deg2rad)
             if (lhan > 1.0):
@@ -7971,14 +8235,14 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
             lhan = math.acos(lhan)
             if (opt == 1):
                 lhan = twopi - lhan
-            if show:
+            if sh.show:
                 print('lhan1 %11.7f ' % (lhan / deg2rad))
             if (abs(dgha) > 0.0001):
                 deltaut = (lhan - lha) / dgha
             else:
                 deltaut = 1.0
                 error = 'error1 dgha is too small'
-            if show:
+            if sh.show:
                 print('deltaut %11.7f tn  %11.7f ' % (deltaut, tn))
             t = tn
             if (abs(deltaut) > 0.5):
@@ -7997,7 +8261,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
             jdtemp = jdtemp + jdtempf - uttemp + tn
             i = i + 1
             moongha = moonghan
-            if show:
+            if sh.show:
                 print('deltaut %11.7f  jd  %14.4f  tn  %11.7f \n'
                       % (deltaut, jdtemp + jdtempf, tn))
 
@@ -8011,8 +8275,8 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
         if (uttemp < 0.0):
             uttemp = uttemp + 24.0
         #    if (uttemp > 900)
-#        uttemp = 24.0
-#    end
+        #        uttemp = 24.0
+        #    end
         if (opt == 1):
             utmoonrise = uttemp
         if (opt == 2):
@@ -8020,7 +8284,7 @@ def moonrise(jd=None, latgd=None, lon=None, show=False):
         # update the iteration and check for solution
         try1 = try1 + 1
         if ((i > 5) and (try1 < 3)):
-            if show:
+            if sh.show:
                 print('try1 #2 %4d' % (opt))
         else:
             if ((i > 5) and (try1 > 2)):

@@ -57,7 +57,7 @@ print(' ddpsi %8.6f " ddeps  %8.6f\n' % (ddpsi * rad2arcsec, ddeps * rad2arcsec)
 print('tt  %8.6f ttt  %16.12f jdtt  %18.11f \n' % (tt, ttt, jdtt + jdttfrac))
 print('tut1  %8.6f tut1  %16.12f jdut1  %18.11f \n'
       % (tut1, tut1, jdut1 + jdut1frac))
-rmoon, rtasc, decl = moon(jdtt + jdttfrac, 'y')
+rmoon, rtasc, decl = moon(jdtt + jdttfrac)
 print('rmoon  rtasc %14.6f deg decl %14.6f deg\n' % (rtasc * rad2deg, decl * rad2deg))
 print('rmoon new      %11.9f%11.9f%11.9f er\n' % (rmoon[0], rmoon[1], rmoon[2]))
 print('rmoon new   %14.4f%14.4f%14.4f km\n'
