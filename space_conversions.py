@@ -8881,10 +8881,10 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
                           [-sindlambda, cosdlambda, 0],
                           [cosdphi * cosdlambda, cosdphi * sindlambda, sindphi]])
-    rintsez = rsw2sez @ rintrsw1unit
+    rintsezunit = rsw2sez @ rintrsw1unit
 
-    rintsez[2] = x + rrsw2[0]
-    rscale = rintsez[2] / rintrsw1unit[0]
+    rintsezZ = x + rrsw2[0]
+    rscale = rintsezZ / rintsezunit[2]
 
     rintrsw1 = rscale * rintrsw1unit
 
@@ -8899,6 +8899,106 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     vinteci = transmat1.T @ vintrsw1
 
     return rinteci, vinteci
+
+def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
+                 vint: np.ndarray):
+    """this function takes the eci position and velocity vectors of
+    a target and interceptor, and returns the relative eqcm position of the
+    interceptor
+
+    Parameters
+    ----------
+    rtgt : ndarray
+        position vector of the target: km
+    vtgt : ndarray
+        velocity vector of the target: km/s
+    rint : ndarray
+        positionv vector of interceptor: km
+    vint : ndarray
+        velocity vector of interceptor: km/s
+
+    Returns
+    -------
+    x, y, z: float
+        relative position of interceptor: km
+    dx, dy, dz: float
+        relative velocity of interceptor: km/s
+    """
+    rtgtrsw1, vtgtrsw1, transmat1 = rv2rsw(rtgt, vtgt)
+    rintrsw1 = transmat1 @ rint
+    vintrsw1 = transmat1 @ vint
+
+    # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
+    ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rtgtrsw1, vtgtrsw1)
+    rtgtmag1 = smu.mag(rtgtrsw1)
+    vtgtmag1 = smu.mag(vtgtrsw1)
+    rintmag1 = smu.mag(rintrsw1)
+
+    dphi = math.asin(rintrsw1[2] / rintmag1)
+    dlambda = math.atan(rintrsw1[1] / rintrsw1[0])
+
+    ebar = ((vtgtmag1**2 - mu / rtgtmag1) * rtgtrsw1
+            - (rtgtrsw1 @ vtgtrsw1) * vtgtrsw1) / mu
+    eunit = smu.unit(ebar)
+    lambdap = math.atan(eunit[1]/ eunit[0])
+    nu1 = -lambdap
+    nu2 = dlambda - lambdap
+
+    sinnu2, cosnu2, sindphi, cosdphi, sindlambda, cosdlambda = \
+        smu.getsincos(nu2, dphi, dlambda)
+    rtgtpqw2 = np.array([(ptgt * cosnu2) / (1 + ecc * cosnu2),
+                         (ptgt * sinnu2) / (1 + ecc * cosnu2),
+                         0])
+
+    vtgtpqw2 = np.array([-math.sqrt(mu / ptgt) * sinnu2,
+                         math.sqrt(mu/ptgt) * (ecc + cosnu2),
+                         0])
+    rtgtrsw2, vtgtrsw2, transmat2 = rv2rsw(rtgtpqw2, vtgtpqw2)
+
+    rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
+                        [-sindlambda, cosdlambda, 0],
+                        [cosdphi * cosdlambda, cosdphi * sindlambda, sindphi]])
+    rintsez = rsw2sez @ rintrsw1
+    vintsez = rsw2sez @ vintrsw1
+
+
+    # arc1 = IEISK((E1, E2), ecc**2)
+    btgt = math.sqrt(atgt * ptgt)
+    ea1,_ = smu.newtonnu(ecc,nu1)
+    ea2,_ = smu.newtonnu(ecc,nu2)
+
+    if np.abs(ea2 - ea1) > np.pi:
+        if ea1 < 0.0:
+            ea1 = 2.0 * np.pi + ea1
+        else:
+            ea1 = 2.0 * np.pi - ea1
+
+    arc1 = arclength_ellipse(atgt,btgt,ea1,ea2)[0]
+    #print("testing arclength func: %f", arc1)
+
+    # F1, E1, _ = elliptic12(ea1, ecc ** 2)
+    # F2, E2, _ = elliptic12(ea2, ecc ** 2)
+
+    # fixit = 0.0
+    # if E2 - E1 < 0.0:
+    #     fixit = np.pi
+
+    # arc1 = atgt * (E2 - E1 + fixit)
+    # print("testing elliptic12 func: %f", arc1)
+
+    rtgtmag2 = smu.mag(rtgtpqw2)
+    rinteqcm = np.array([rintsez[2] - rtgtrsw2[0],
+                         arc1,
+                         sindphi * rtgtmag2])
+
+    dotlambda = vintsez[1] / (rintmag1 * cosdphi)
+    dotphi = -vintsez[0] / rintmag1
+    vinteqcm = np.array([vintsez[2] - vtgtrsw2[0],
+                           dotlambda * rtgtmag2 - abs(vtgtrsw1[1]),
+                           dotphi * rtgtmag2])
+
+    return rinteqcm[0], rinteqcm[1], rinteqcm[2], \
+        vinteqcm[0], vinteqcm[1], vinteqcm[2]
 
 
 # ----------------------------------------------------------------------------
@@ -9231,117 +9331,15 @@ def fk4i(rj2000i: np.ndarray = np.array([]), vj2000i: np.ndarray = np.array([]),
 
     return rb1950i, vb1950i, fk4mi
 
-
-
-def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
-                 vint: np.ndarray):
-    """this function takes the eci position and velocity vectors of
-    a target and interceptor, and returns the relative eqcm position of the
-    interceptor
-
-    Parameters
-    ----------
-    rtgt : ndarray
-        position vector of the target: km
-    vtgt : ndarray
-        velocity vector of the target: km/s
-    rint : ndarray
-        positionv vector of interceptor: km
-    vint : ndarray
-        velocity vector of interceptor: km/s
-
-    Returns
-    -------
-    x, y, z: float
-        relative position of interceptor: km
-    dx, dy, dz: float
-        relative velocity of interceptor: km/s
-    """
-    rtgtrsw1, vtgtrsw1, transmat1 = rv2rsw(rtgt, vtgt)
-    rintrsw1 = transmat1 @ rint
-    vintrsw1 = transmat1 @ vint
-
-    # TODO: Add ebar to rv2coe outputs instead of computing it again here -zeg
-    ptgt, atgt, ecc, _, _, _, _, _, _, _, _ = rv2coe(rtgtrsw1, vtgtrsw1)
-    rtgtmag1 = smu.mag(rtgtrsw1)
-    vtgtmag1 = smu.mag(vtgtrsw1)
-    rintmag1 = smu.mag(rintrsw1)
-
-    dphi = math.asin(rintrsw1[2] / rintmag1)
-    dlambda = math.atan(rintrsw1[1] / rintrsw1[0])
-
-    ebar = ((vtgtmag1**2 - mu / rtgtmag1) * rtgtrsw1
-            - (rtgtrsw1 @ vtgtrsw1) * vtgtrsw1) / mu
-    eunit = smu.unit(ebar)
-    lambdap = math.atan(eunit[1]/ eunit[0])
-    nu1 = -lambdap
-    nu2 = dlambda - lambdap
-
-    sinnu2, cosnu2, sindphi, cosdphi, sindlambda, cosdlambda = \
-        smu.getsincos(nu2, dphi, dlambda)
-    rtgtpqw2 = np.array([(ptgt * cosnu2) / (1 + ecc * cosnu2),
-                         (ptgt * sinnu2) / (1 + ecc * cosnu2),
-                         0])
-
-    vtgtpqw2 = np.array([-math.sqrt(mu / ptgt) * sinnu2,
-                         math.sqrt(mu/ptgt) * (ecc + cosnu2),
-                         0])
-    rtgtrsw2, vtgtrsw2, transmat2 = rv2rsw(rtgtpqw2, vtgtpqw2)
-
-    rsw2sez = np.array([[sindphi * cosdlambda, sindphi * sindlambda, -cosdphi],
-                        [-sindlambda, cosdlambda, 0],
-                        [cosdphi * cosdlambda, cosdphi * sindlambda, sindlambda]])
-    rintsez = rsw2sez @ rintrsw1
-    vintsez = rsw2sez @ vintrsw1
-
-
-    # arc1 = IEISK((E1, E2), ecc**2)
-    btgt = math.sqrt(atgt * ptgt)
-    ea1,_ = smu.newtonnu(ecc,nu1)
-    ea2,_ = smu.newtonnu(ecc,nu2)
-
-    if np.abs(ea2 - ea1) > np.pi:
-        if ea1 < 0.0:
-            ea1 = 2.0 * np.pi + ea1
-        else:
-            ea1 = 2.0 * np.pi - ea1
-
-    arc1 = arclength_ellipse(atgt,btgt,ea1,ea2)[0]
-    #print("testing arclength func: %f", arc1)
-
-    # F1, E1, _ = elliptic12(ea1, ecc ** 2)
-    # F2, E2, _ = elliptic12(ea2, ecc ** 2)
-
-    # fixit = 0.0
-    # if E2 - E1 < 0.0:
-    #     fixit = np.pi
-
-    # arc1 = atgt * (E2 - E1 + fixit)
-    # print("testing elliptic12 func: %f", arc1)
-
-    rtgtmag2 = smu.mag(rtgtpqw2)
-    rinteqcm = np.array([rintsez[2] - rtgtrsw2[0],
-                         arc1,
-                         dphi * rtgtmag2])
-
-    dotlambda = vintsez[1] / (rintmag1 * cosdphi)
-    dotphi = -vintsez[0] / rintmag1
-    vinteqcm = np.array([vintsez[2] - vtgtrsw2[0],
-                           dotlambda * rtgtmag2 - abs(vtgtrsw1[1]),
-                           dotphi * rtgtmag2])
-
-    return rinteqcm[0], rinteqcm[1], rinteqcm[2], \
-        vinteqcm[0], vinteqcm[1], vinteqcm[2]
-
 if __name__ == '__main__':
 
     print('hill to ecqm and ecqm to hill conversion test\n')
-    x = 10
+    x = 500
     y = 10
-    z = 10
-    xd = 0.01
+    z = 250
+    xd = 200
     yd = 0.01
-    zd = 0.01
+    zd = 20
 
     rtgteci = np.array([-605.7904308, -5870.230407, 3493.052004])
     vtgteci = np.array([-1.568251615, -3.702348353, -6.479484915])
@@ -9353,57 +9351,57 @@ if __name__ == '__main__':
     print(x, y, z)
     print(dx, dy, dz)
 
-    print('\nConversion Function fk4 and fk4i Testing (Explanatory Supplement Astronomical Almanac, 1992)\n')
-    print('Original fk4 Test (Vallado)')
-    r1, v1, m1 = fk4(np.array([1,2,3]), np.array([4,5,6]), 'org')
-    print('r1')
-    print(r1)
-    print('v1')
-    print (v1)
-    print('m1')
-    print(m1)
+    # print('\nConversion Function fk4 and fk4i Testing (Explanatory Supplement Astronomical Almanac, 1992)\n')
+    # print('Original fk4 Test (Vallado)')
+    # r1, v1, m1 = fk4(np.array([1,2,3]), np.array([4,5,6]), 'org')
+    # print('r1')
+    # print(r1)
+    # print('v1')
+    # print (v1)
+    # print('m1')
+    # print(m1)
 
-    r2, v2, m2 = fk4i(r1, v1, 'org')
-    print('r2')
-    print(r2)
-    print('v2')
-    print (v2)
-    print('m2')
-    print(m2)
+    # r2, v2, m2 = fk4i(r1, v1, 'org')
+    # print('r2')
+    # print(r2)
+    # print('v2')
+    # print (v2)
+    # print('m2')
+    # print(m2)
 
-    print('STK fk4 Test')
-    r1, v1, m1 = fk4(np.array([1,2,3]), np.array([4,5,6]),'stk')
-    print('r1')
-    print(r1)
-    print('v1')
-    print (v1)
-    print('m1')
-    print(m1)
+    # print('STK fk4 Test')
+    # r1, v1, m1 = fk4(np.array([1,2,3]), np.array([4,5,6]),'stk')
+    # print('r1')
+    # print(r1)
+    # print('v1')
+    # print (v1)
+    # print('m1')
+    # print(m1)
 
-    r2, v2, m2 = fk4i(r1, v1,'stk')
-    print('r2')
-    print(r2)
-    print('v2')
-    print (v2)
-    print('m2')
-    print(m2)
+    # r2, v2, m2 = fk4i(r1, v1,'stk')
+    # print('r2')
+    # print(r2)
+    # print('v2')
+    # print (v2)
+    # print('m2')
+    # print(m2)
 
-    print('6 dimensional fk4 Test (Explanatory Supplement Astronomical \
-          Almanac, 1992)')
-    r1, v1, m1 = fk4(np.array([1,2,3,4,5,6]), np.array([7,8,9,10,11,12]), '6d')
-    print('r1')
-    print(r1)
-    print('v1')
-    print (v1)
-    print('m1')
-    print(m1)
+    # print('6 dimensional fk4 Test (Explanatory Supplement Astronomical \
+    #       Almanac, 1992)')
+    # r1, v1, m1 = fk4(np.array([1,2,3,4,5,6]), np.array([7,8,9,10,11,12]), '6d')
+    # print('r1')
+    # print(r1)
+    # print('v1')
+    # print (v1)
+    # print('m1')
+    # print(m1)
 
-    r2, v2, m2 = fk4i(r1, v1, '6d')
-    print('r2')
-    print(r2)
-    print('v2')
-    print (v2)
-    print('m2')
-    print(m2)
+    # r2, v2, m2 = fk4i(r1, v1, '6d')
+    # print('r2')
+    # print(r2)
+    # print('v2')
+    # print (v2)
+    # print('m2')
+    # print(m2)
 
 
