@@ -2188,7 +2188,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
         #             if abs(dt-dtsec) < 160
         #                 [v1dv, v2dv] = lambhodograph(r1, v1, r2, p, ecc, dnu, dtsec)
         #             end
-    #end  # if  var a > 0.0
+    # end  # if  var a > 0.0
 
     if (errorl != '      ok'):
         print("\n\n-----Error found in lambertu: ", errorl)
@@ -2745,6 +2745,27 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
             y = magr1 + magr2 - (vara * (1.0 - psiold * c3) / math.sqrt(c2))
         else:
             y = magr1 + magr2
+
+        # ----------- check for negative values of y ----------
+        if ((vara > 0.0) and (y < 0.0)):  # (vara > 0.0) &
+            ynegktr = 1
+            while ((y < 0.0) and (ynegktr < 10)):
+                psinew = 0.8*(1.0 / c3)*(1.0 - (magr1 + magr2)
+                                            *math.sqrt(c2)/vara)
+                # -------- find c2 and c3 functions -----------
+                c2, c3 = smu.findc2c3(psinew)
+                psiold = psinew
+                lower = psiold
+                if (abs(c2) > small):
+                    y = magr1 + magr2 - (vara*(1.0-psiold*c3)
+                                        / math.sqrt(c2))
+                else:
+                    y = magr1 + magr2
+                # outfile
+                print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
+                        % (y, lower, c2, psinew, ynegktr))
+                ynegktr = ynegktr + 1
+
         if (abs(c2) > small):
             x = math.sqrt(y / c2)
         else:
@@ -2820,13 +2841,13 @@ def lambgettbiu(r1=None, r2=None, order=None):
     tbi = np.zeros((order, 2))
     #tbi = [0 0 0 0 0 0 0 0 0 0]
     for i in range(order):
-        psib, tof = lambertumins(r1, r2, i + 1, 'S')
+        psib, tof = lambertumins(r1, r2, i, 'S')
         tbi[i, 0] = psib
         tbi[i, 1] = tof
 
     tbil = np.zeros((order, 2))
     for i in range(order):
-        psib, tof = lambertumins(r1, r2, i + 1, 'L')
+        psib, tof = lambertumins(r1, r2, i, 'L')
         tbil[i, 0] = psib
         tbil[i, 1] = tof
 
@@ -5593,9 +5614,36 @@ def onetang(rinit: float, rfinal: float, einit: float, efinal: float,
 #function [deltava, deltavb, dttu ] = hohmann (rinit, rfinal, einit, efinal, nuinit, nufinal)
 # ----------------------------------------------------------------------------- }
 
-def hohmann(rinit=None, rfinal=None, einit=None, efinal=None,
-            nuinit=None, nufinal=None):
-    # --------------------  initialize values   ------------------- }
+def hohmann(rinit: float, rfinal: float, einit: float, efinal: float,
+            nuinit: float, nufinal: float):
+    """this procedure calculates the delta v's for a hohmann transfer for
+    either circle to circle, or ellipse to ellipse.
+
+    Parameters
+    ----------
+    rinit : float
+        initial position magnitude: ER
+    rfinal : float
+        final position magnitude: ER
+    einit : float
+        initial eccentricity
+    efinal : float
+        final eccentricity
+    nuinit : float
+        initial true anomaly: 0 or pi rad
+    nufinal : float
+        final true anomaly: 0 or pi rad
+
+    Returns
+    -------
+    deltava : float
+        change in velocity at point a: ER/TU
+    deltavb : float
+        change in velocity at point b: ER/TU
+    dttu : float
+        time of flight for transfer: TU
+    """
+    # --------------------  initialize values   -------------------
     mu = 1.0
 
     ainit = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
@@ -5606,21 +5654,22 @@ def hohmann(rinit=None, rfinal=None, einit=None, efinal=None,
     deltavb = 0.0
     dttu = 0.0
     if (einit < 1.0) or (efinal < 1.0):
-        # -----------------  find delta v at point a  -------------- }
+        # -----------------  find delta v at point a  --------------
         vinit = math.sqrt((2.0 * mu) / rinit - (mu / ainit))
         vtrana = math.sqrt((2.0 * mu) / rinit - (mu / atran))
         deltava = abs(vtrana - vinit)
-        # -----------------  find delta v at point b  -------------- }
+        # -----------------  find delta v at point b  --------------
         vfinal = math.sqrt((2.0 * mu) / rfinal - (mu / afinal))
         vtranb = math.sqrt((2.0 * mu) / rfinal - (mu / atran))
         deltavb = abs(vfinal - vtranb)
-        # ----------------  find transfer time of flight  ---------- }
+        # ----------------  find transfer time of flight  ----------
         dttu = math.pi * math.sqrt((atran * atran * atran) / mu)
-        print(' atran   %11.7f  %11.7f km \n' % (atran, atran * re))
-        print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit * velkmps))
-        print(' vtrana  %11.7f  %11.7f km/s \n' % (vtrana, vtrana * velkmps))
-        print(' vtranb  %11.7f  %11.7f km/s \n' % (vtranb, vtranb * velkmps))
-        print(' vfinal  %11.7f  %11.7f km/s \n' % (vfinal, vfinal * velkmps))
+        if sh.show:
+            print(' atran   %11.7f  %11.7f km \n' % (atran, atran * re))
+            print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit * velkmps))
+            print(' vtrana  %11.7f  %11.7f km/s \n' % (vtrana, vtrana * velkmps))
+            print(' vtranb  %11.7f  %11.7f km/s \n' % (vtranb, vtranb * velkmps))
+            print(' vfinal  %11.7f  %11.7f km/s \n' % (vfinal, vfinal * velkmps))
 
     return deltava, deltavb, dttu
 
@@ -5671,8 +5720,40 @@ def hohmann(rinit=None, rfinal=None, einit=None, efinal=None,
 # ----------------------------------------------------------------------------- }
 
 
-def biellip(rinit, rb, rfinal, einit, efinal, nuinit, nufinal):
-    # --------------------  initialize values   ------------------- }
+def biellip(rinit : float, rb: float, rfinal: float, einit: float,
+            efinal: float, nuinit: float, nufinal: float):
+    """this procedure calculates the delta v's for a bi-elliptic transfer for either
+    circle to circle, or ellipse to ellipse.
+
+    Parameters
+    ----------
+    rinit : float
+        initial position magnitude: ER
+    rb : float
+        interim orbit magnitude: ER
+    rfinal : float
+        final position magnitude: ER
+    einit : float
+        initial eccentricity
+    efinal : float
+        final eccentricity
+    nuinit : float
+        initial true anomaly: 0 or pi rad
+    nufinal : float
+        final true anomaly: opposite of nuinit
+
+    Returns
+    -------
+    deltava : float
+        change in velocity at point a: ER/TU
+    deltavb : float
+        change in velocity at point b: ER/TU
+    deltavc : float
+        change in velocity at point c: ER/TU
+    dttu : float
+        time of transfer: TU
+    """
+    # --------------------  initialize values   -------------------
     mu = 1.0 # cannonical units
 
     ainit = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit * einit)
@@ -5707,23 +5788,18 @@ def biellip(rinit, rb, rfinal, einit, efinal, nuinit, nufinal):
         dttu = (math.pi * math.sqrt((atran1 * atran1 * atran1)/mu)
             + math.pi * math.sqrt((atran2 * atran2 * atran2)/mu))
 
-
-    #it is odd that they redefine mu here...
-    mu = 398600.4415      # km3/s2
-    velkmps = math.sqrt(mu / re)
-
-
-    t1 = math.pi * math.sqrt((atran1 * atran1 * atran1)/1)*13.446852064
-    t2 = math.pi * math.sqrt((atran2 * atran2 * atran2)/1)*13.446852064
-    print(' atran1   %11.7f  %11.7f km \n' % (atran1, atran1 * re))
-    print(' atran2   %11.7f  %11.7f km \n' % (atran2, atran2 * re))
-    print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit * velkmps))
-    print(' vtran1a  %11.7f  %11.7f km/s \n' % (vtran1a, vtran1a * velkmps))
-    print(' vtran1b  %11.7f  %11.7f km/s \n' % (vtran1b, vtran1b * velkmps))
-    print(' vtran2b  %11.7f  %11.7f km/s \n' % (vtran2b, vtran2b * velkmps))
-    print(' vtran2c  %11.7f  %11.7f km/s \n' % (vtran2c, vtran2c * velkmps))
-    print(' vfinal  %11.7f  %11.7f km/s \n' % (vfinal, vfinal * velkmps))
-    print(' t1  %11.7f t2 %11.7f min \n' % (t1, t2))
+    if sh.show:
+        t1 = math.pi * math.sqrt((atran1 * atran1 * atran1)/1)*13.446852064
+        t2 = math.pi * math.sqrt((atran2 * atran2 * atran2)/1)*13.446852064
+        print(' atran1   %11.7f  %11.7f km \n' % (atran1, atran1 * re))
+        print(' atran2   %11.7f  %11.7f km \n' % (atran2, atran2 * re))
+        print(' vinit   %11.7f  %11.7f km/s \n' % (vinit, vinit * velkmps))
+        print(' vtran1a  %11.7f  %11.7f km/s \n' % (vtran1a, vtran1a * velkmps))
+        print(' vtran1b  %11.7f  %11.7f km/s \n' % (vtran1b, vtran1b * velkmps))
+        print(' vtran2b  %11.7f  %11.7f km/s \n' % (vtran2b, vtran2b * velkmps))
+        print(' vtran2c  %11.7f  %11.7f km/s \n' % (vtran2c, vtran2c * velkmps))
+        print(' vfinal  %11.7f  %11.7f km/s \n' % (vfinal, vfinal * velkmps))
+        print(' t1  %11.7f t2 %11.7f min \n' % (t1, t2))
 
 
     return deltava, deltavb, deltavc, dttu
@@ -5745,11 +5821,11 @@ def biellip(rinit, rb, rfinal, einit, efinal, nuinit, nufinal):
 #                -
 #
 #  inputs          description                    range / units
-#    iar80       - integers for fk5 1980
-#    rar80       - reals for fk5 1980             rad
+#    none
 #
 #  outputs       :
-#    none
+#    iar80       - integers for fk5 1980
+#    rar80       - reals for fk5 1980             rad
 #
 #  locals        :
 #    convrt      - conversion factor to degrees
@@ -5765,30 +5841,40 @@ def biellip(rinit, rb, rfinal, einit, efinal, nuinit, nufinal):
 
 
 def iau80in():
+    """this function initializes the nutation matricies needed for reduction
+    calculations.
+
+    Returns
+    -------
+    iarr : ndarray
+        integers for fk5 1980
+    rarr : ndarray
+        reals for fk5 1980: rad
+    """
     # 0.0001" to rad
     convrt = 0.0001 * math.pi / (180*3600.0)
 
     fn = os.path.join(os.path.dirname(__file__), "data", "nut80.dat")
 
-    tdat = open(fn, "r").readlines()
+    dat = np.loadtxt(fn)
+    iarr = dat[:, 0:5]
+    rarr = dat[:, 5:10] * convrt
 
-    iarr = np.zeros((106, 5), dtype = int)
-    rarr = np.zeros((106, 5))
+    # tdat = open(fn, "r").readlines()
+    # iarr = np.zeros((106, 5), dtype = int)
+    # rarr = np.zeros((106, 5))
+    # ii = 0
+    # for rec in tdat:
+    #     lnd = rec.strip().replace(" ", ", ").replace(", , , , ", ", ").replace(", , , ", ", ").replace(", , ", ", ")
+    #     lid = [int(xx) for xx in lnd.split(", ")[0:5]]
+    #     iarr[ii, 0:5] = np.array([lid])
 
-    ii = 0
-    for rec in tdat:
-        lnd = rec.strip().replace(" ", ", ").replace(", , , , ", ", ").replace(", , , ", ", ").replace(", , ", ", ")
-        lid = [int(xx) for xx in lnd.split(", ")[0:5]]
-        iarr[ii, 0:5] = np.array([lid])
+    #     rid = [float(xx)*convrt for xx in lnd.split(", ")[5:10]]
+    #     rarr[ii, 0:5] = np.array([rid])
 
-        rid = [float(xx)*convrt for xx in lnd.split(", ")[5:10]]
-        rarr[ii, 0:5] = np.array([rid])
-
-        ii += 1
+    #     ii += 1
 
     #print("iau80 float constant is: ", convrt)
-
-
     return iarr, rarr
 
 #
@@ -5819,7 +5905,20 @@ def iau80in():
 # [st] = iau06era (jdut1)
 # ----------------------------------------------------------------------------
 
-def iau06era(jdut1=None):
+def iau06era(jdut1: float):
+    """this function calulates the transformation matrix that accounts for the
+    effects of sidereal time via the earth rotation angle.
+
+    Parameters
+    ----------
+    jdut1 : float
+        julian days of ut1: days
+
+    Returns
+    -------
+    st: ndarray
+        transformation matrix for pef-ire
+    """
     # julian centuries of ut1
     tut1d = jdut1 - 2451545.0
     era = twopi * (0.779057273264 + 1.0027378119113546 * tut1d)
@@ -5881,7 +5980,8 @@ def iau06era(jdut1=None):
 #            lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate)
 # -----------------------------------------------------------------------------
 
-def iau06gst(jdut1=None, ttt=None, deltapsi=None, opt=None):
+def iau06gst(jdut1: float, ttt: float, deltapsi: float, opt: str):
+
 
     #added by jmb to resolve this list of vars
     l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
