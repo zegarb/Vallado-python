@@ -95,7 +95,7 @@ def findjpldeparam(jdtdb=None, jdtdbF=None, interp=None, jpldearr=None,
             rmoon[2] = jpldearr['rmoon3'][recnum] + (jpldearr['rmoon3'](recnum + 1) - jpldearr['rmoon3'][recnum]) * fixf
             rmmag = smu.mag(rmoon)
             #printf("sunm #i rsmag #lf fixf #lf n #lf nxt #lf \n", recnum, rsmag, fixf, jpldearr['rsun'](1), jpldearr['rsun'](1));
-#printf("recnum l #i fixf #lf #lf rsun #lf #lf #lf \n", recnum, fixf, jpldearr['rsun'](1), rsun(1), rsuny, rsunz);
+            #printf("recnum l #i fixf #lf #lf rsun #lf #lf #lf \n", recnum, fixf, jpldearr['rsun'](1), rsun(1), rsuny, rsunz);
         # ---- do spline interpolations
         if (interp == 's'):
             off1 = 1
@@ -111,7 +111,7 @@ def findjpldeparam(jdtdb=None, jdtdbF=None, interp=None, jpldearr=None,
             rmoon[2] = smu.cubicinterp(jpldearr['rmoon3'][recnum - off1],jpldearr['rmoon3'][recnum],jpldearr['rmoon3'][recnum + off1],jpldearr['rmoon3'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
             rmmag = smu.mag(rmoon)
             #printf("recnum s #i mfme #lf days rsun #lf #lf #lf \n", recnum, mfme, rsunx, rsuny, rsunz);
-#printf(" #lf #lf #lf #lf \n", jpldearr(recnum - off2).mjd, jpldearr(recnum - off1.mjd, jpldearr[recnum].mjd, jpldearr[recnum + off1].mjd);
+            #printf(" #lf #lf #lf #lf \n", jpldearr(recnum - off2).mjd, jpldearr(recnum - off1.mjd, jpldearr[recnum].mjd, jpldearr[recnum + off1].mjd);
         # set default values
     else:
         rsun[0] = 0.0
