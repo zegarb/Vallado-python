@@ -3190,7 +3190,7 @@ def legPoly(x=None, i=None):
 # 1-dimensional and random arrays remark call of the function unique(.)
 # and edit further code.
 
-def elliptic12(u: np.ndarray, m: np.ndarray, tol: np.ndarray = None):
+def elliptic12(u: np.ndarray, m: np.ndarray, tol: float = None):
     if not isinstance(u, np.ndarray):
         u = np.array([u])
 
