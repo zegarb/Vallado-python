@@ -19,6 +19,7 @@ import spacemath_utils as smu
 #    jpldearr      - array of jplde data records
 #    jdjpldestart  - julian date of the start of the jpldearr data (set in initjplde)
 #
+#
 #  outputs       :
 #    dut1        - delta ut1 (ut1-utc)                        sec
 #    dat         - number of leap seconds                     sec
@@ -46,8 +47,37 @@ import spacemath_utils as smu
 #  [rsun, rsmag, rmoon, rmmag] = findjpldeparam( jdtdb, jdtdbF, 'l', jpldearr, jdjpldestart);
 # --------------------------------------------------------------------------- */
 
-def findjpldeparam(jdtdb=None, jdtdbF=None, interp=None, jpldearr=None,
-                   jdjpldestart=None):
+def findjpldeparam(jdtdb: float, jdtdbF: float, interp: str, jpldearr,
+                   jdjpldestart: float):
+    """this routine finds the jplde parameters for a given time. several types of
+    interpolation are available. the cio and iau76 nutation parameters are also
+    read for optimizing the speeed of calculations.
+
+    Parameters
+    ----------
+    jdtdb : float
+        epoch julian date: days from 4713 bc
+    jdtdbF : float
+        epoch julian date fraction: day fraction from jdutc
+    interp : str
+        interpolation: 'n' - none, 'l' - linear, 's' spline
+    jpldearr : dictionary of arrays
+        jplde information from initjplde
+    jdjpldestart : float
+        julian date start of the jpldearr data set in initjplde
+
+    Returns
+    -------
+    rsun : ndarray
+        position vector of the sun
+    rsmag : float
+        magnitude of sun position vector
+    rmoon : ndarray
+        position vector of the moon
+    rmmag : float
+        magnitude of moon position vector
+    """
+
     #Int32 recnum;
     #Int32 off1, off2;
     #double fixf, jdjpldestarto, mjd, jdb, mfme;
@@ -86,13 +116,13 @@ def findjpldeparam(jdtdb=None, jdtdbF=None, interp=None, jpldearr=None,
         # ---- do linear interpolation
         if (interp == 'l'):
             fixf = mfme / 1440.0
-            rsun[0] = jpldearr['rsun1'][recnum] + (jpldearr['rsun1'](recnum + 1) - jpldearr['rsun1'][recnum]) * fixf
-            rsun[1] = jpldearr['rsun2'][recnum] + (jpldearr['rsun2'](recnum + 1) - jpldearr['rsun2'][recnum]) * fixf
-            rsun[2] = jpldearr['rsun3'][recnum] + (jpldearr['rsun3'](recnum + 1) - jpldearr['rsun3'][recnum]) * fixf
+            rsun[0] = jpldearr['rsun1'][recnum] + (jpldearr['rsun1'][recnum + 1] - jpldearr['rsun1'][recnum]) * fixf
+            rsun[1] = jpldearr['rsun2'][recnum] + (jpldearr['rsun2'][recnum + 1] - jpldearr['rsun2'][recnum]) * fixf
+            rsun[2] = jpldearr['rsun3'][recnum] + (jpldearr['rsun3'][recnum + 1] - jpldearr['rsun3'][recnum]) * fixf
             rsmag = smu.mag(rsun)
-            rmoon[0] = jpldearr['rmoon1'][recnum] + (jpldearr['rmoon1'](recnum + 1) - jpldearr['rmoon1'][recnum]) * fixf
-            rmoon[1] = jpldearr['rmoon2'][recnum] + (jpldearr['rmoon2'](recnum + 1) - jpldearr['rmoon2'][recnum]) * fixf
-            rmoon[2] = jpldearr['rmoon3'][recnum] + (jpldearr['rmoon3'](recnum + 1) - jpldearr['rmoon3'][recnum]) * fixf
+            rmoon[0] = jpldearr['rmoon1'][recnum] + (jpldearr['rmoon1'][recnum + 1] - jpldearr['rmoon1'][recnum]) * fixf
+            rmoon[1] = jpldearr['rmoon2'][recnum] + (jpldearr['rmoon2'][recnum + 1] - jpldearr['rmoon2'][recnum]) * fixf
+            rmoon[2] = jpldearr['rmoon3'][recnum] + (jpldearr['rmoon3'][recnum + 1] - jpldearr['rmoon3'][recnum]) * fixf
             rmmag = smu.mag(rmoon)
             #printf("sunm #i rsmag #lf fixf #lf n #lf nxt #lf \n", recnum, rsmag, fixf, jpldearr['rsun'](1), jpldearr['rsun'](1));
             #printf("recnum l #i fixf #lf #lf rsun #lf #lf #lf \n", recnum, fixf, jpldearr['rsun'](1), rsun(1), rsuny, rsunz);
@@ -102,13 +132,61 @@ def findjpldeparam(jdtdb=None, jdtdbF=None, interp=None, jpldearr=None,
             off2 = 2
             fixf = mfme / 1440.0
             # setup so the interval is in between points 2 and 3
-            rsun[0] = smu.cubicinterp(jpldearr['rsun1'][recnum - off1],jpldearr['rsun1'][recnum],jpldearr['rsun1'][recnum + off1],jpldearr['rsun1'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
-            rsun[1] = smu.cubicinterp(jpldearr['rsun2'][recnum - off1],jpldearr['rsun2'][recnum],jpldearr['rsun2'][recnum + off1],jpldearr['rsun2'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
-            rsun[2] = smu.cubicinterp(jpldearr['rsun3'][recnum - off1],jpldearr['rsun3'][recnum],jpldearr['rsun3'][recnum + off1],jpldearr['rsun3'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
+            rsun[0] = smu.cubicinterp(jpldearr['rsun1'][recnum - off1],
+                                      jpldearr['rsun1'][recnum],
+                                      jpldearr['rsun1'][recnum + off1],
+                                      jpldearr['rsun1'][recnum + off2],
+                                      jpldearr['mjd'][recnum - off1],
+                                      jpldearr['mjd'][recnum],
+                                      jpldearr['mjd'][recnum + off1],
+                                      jpldearr['mjd'][recnum + off2],
+                                      jpldearr['mjd'][recnum] + fixf)
+            rsun[1] = smu.cubicinterp(jpldearr['rsun2'][recnum - off1],
+                                      jpldearr['rsun2'][recnum],
+                                      jpldearr['rsun2'][recnum + off1],
+                                      jpldearr['rsun2'][recnum + off2],
+                                      jpldearr['mjd'][recnum - off1],
+                                      jpldearr['mjd'][recnum],
+                                      jpldearr['mjd'][recnum + off1],
+                                      jpldearr['mjd'][recnum + off2],
+                                      jpldearr['mjd'][recnum] + fixf)
+            rsun[2] = smu.cubicinterp(jpldearr['rsun3'][recnum - off1],
+                                      jpldearr['rsun3'][recnum],
+                                      jpldearr['rsun3'][recnum + off1],
+                                      jpldearr['rsun3'][recnum + off2],
+                                      jpldearr['mjd'][recnum - off1],
+                                      jpldearr['mjd'][recnum],
+                                      jpldearr['mjd'][recnum + off1],
+                                      jpldearr['mjd'][recnum + off2],
+                                      jpldearr['mjd'][recnum] + fixf)
             rsmag = smu.mag(rsun)
-            rmoon[0] = smu.cubicinterp(jpldearr['rmoon1'][recnum - off1],jpldearr['rmoon1'][recnum],jpldearr['rmoon1'][recnum + off1],jpldearr['rmoon1'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
-            rmoon[1] = smu.cubicinterp(jpldearr['rmoon2'][recnum - off1],jpldearr['rmoon2'][recnum],jpldearr['rmoon2'][recnum + off1],jpldearr['rmoon2'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
-            rmoon[2] = smu.cubicinterp(jpldearr['rmoon3'][recnum - off1],jpldearr['rmoon3'][recnum],jpldearr['rmoon3'][recnum + off1],jpldearr['rmoon3'](recnum + off2),jpldearr['mjd'][recnum - off1],jpldearr['mjd'][recnum],jpldearr['mjd'][recnum + off1],jpldearr['mjd'](recnum + off2),jpldearr['mjd'][recnum] + fixf)
+            rmoon[0] = smu.cubicinterp(jpldearr['rmoon1'][recnum - off1],
+                                       jpldearr['rmoon1'][recnum],
+                                       jpldearr['rmoon1'][recnum + off1],
+                                       jpldearr['rmoon1'][recnum + off2],
+                                       jpldearr['mjd'][recnum - off1],
+                                       jpldearr['mjd'][recnum],
+                                       jpldearr['mjd'][recnum + off1],
+                                       jpldearr['mjd'][recnum + off2],
+                                       jpldearr['mjd'][recnum] + fixf)
+            rmoon[1] = smu.cubicinterp(jpldearr['rmoon2'][recnum - off1],
+                                       jpldearr['rmoon2'][recnum],
+                                       jpldearr['rmoon2'][recnum + off1],
+                                       jpldearr['rmoon2'][recnum + off2],
+                                       jpldearr['mjd'][recnum - off1],
+                                       jpldearr['mjd'][recnum],
+                                       jpldearr['mjd'][recnum + off1],
+                                       jpldearr['mjd'][recnum + off2],
+                                       jpldearr['mjd'][recnum] + fixf)
+            rmoon[2] = smu.cubicinterp(jpldearr['rmoon3'][recnum - off1],
+                                       jpldearr['rmoon3'][recnum],
+                                       jpldearr['rmoon3'][recnum + off1],
+                                       jpldearr['rmoon3'][recnum + off2],
+                                       jpldearr['mjd'][recnum - off1],
+                                       jpldearr['mjd'][recnum],
+                                       jpldearr['mjd'][recnum + off1],
+                                       jpldearr['mjd'][recnum + off2],
+                                       jpldearr['mjd'][recnum] + fixf)
             rmmag = smu.mag(rmoon)
             #printf("recnum s #i mfme #lf days rsun #lf #lf #lf \n", recnum, mfme, rsunx, rsuny, rsunz);
             #printf(" #lf #lf #lf #lf \n", jpldearr(recnum - off2).mjd, jpldearr(recnum - off1.mjd, jpldearr[recnum].mjd, jpldearr[recnum + off1].mjd);
@@ -124,4 +202,4 @@ def findjpldeparam(jdtdb=None, jdtdbF=None, interp=None, jpldearr=None,
         rmmag = 0.0
 
     #  findjpldeparam
-    return rsun,rsmag,rmoon,rmmag
+    return rsun, rsmag, rmoon, rmmag
