@@ -8753,7 +8753,7 @@ def moonrise3(jd: float, latgd: float, lon: float):
 
     # try1 = 1 # try another approach on the current option
     # opt = 1-2 for rise/set
-    for opt in range(3):
+    for opt in range(1, 3):
         tolerance = 0.00035
         GHA = 0.0
         LHAn = 0.0
