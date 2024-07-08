@@ -57,6 +57,7 @@ rad2 = rad2deg * rad2deg
 anom = 'truea'
 anom = 'truen'
 #anom = 'meana';
+anomflt = 'latlon'
 testnum = 0
 
 ddpsi = 0.0
@@ -126,7 +127,7 @@ if testnum == 2:
     covntw = np.array([[1.0,0.0,0.0,0.0,0.0,0.0],[0.0,10.0,0.0,0.0,0.0,0.0],[0.0,0.0,1.0,0.0,0.0,0.0],[0.0,0.0,0.0,1e-06,0.0,0.0],[0.0,0.0,0.0,0.0,0.0001,0.0],[0.0,0.0,0.0,0.0,0.0,1e-06]])
     #, tcg, jdtcg,jdtcgfrac, tcb, jdtcb,jdtcbfrac
     ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
-    cartstate,classstate,flstate,eqstate = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,ddpsi,ddeps)
+    cartstate,classstate,flstate,eqstate = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps) #latlon or radec? -mjc
     sc.printcov(covntw,'ct','m',anom)
     cartcov,tm = sc.covo22ct(covntw,cartstate)
     sc.printcov(cartcov,'ct','m',anom)
@@ -183,8 +184,8 @@ if testnum == 4:
     # ----- in from usstratcom is lower diagonal!!!
     eqcov = np.array([[4.68914e-11,1.6009e-11,1.64731e-10,- 4.38141e-16,- 1.41195e-10,1.09999e-11,- 8.49933e-12],[1.6009e-11,1.06881e-11,6.39732e-11,6.53124e-16,- 5.60554e-11,2.56099e-11,- 4.4424e-13],[1.64731e-10,6.39732e-11,6.71336e-10,1.04455e-14,- 6.37507e-10,9.40554e-11,7.34847e-12],[- 4.38141e-16,6.53124e-16,1.04455e-14,2.10897e-17,1.59272e-14,1.03081e-14,1.80744e-13],[- 1.41195e-10,- 5.60554e-11,- 6.37507e-10,1.59272e-14,7.59844e-10,- 1.05437e-10,1.77857e-10],[1.09999e-11,2.56099e-11,9.40554e-11,1.03081e-14,- 1.05437e-10,1.86472e-10,3.99631e-11],[- 8.49933e-12,- 4.4424e-13,7.34847e-12,1.80744e-13,1.77857e-10,3.99631e-11,4.67207e-06]])
     sc.printcov(eqcovtrace,'eq','t',anom)
-    eqcovt = covunits(eqcovtrace,anom,'eq','m')
-    sc.printcov(eqcovt,'eq','m',anom)
+    #eqcovt = covunits(eqcovtrace,anom,'eq','m')
+    #sc.printcov(eqcovt,'eq','m',anom)
 
 if testnum == 5:
     reci = np.array([10127.26750234, 6972.89492052, 4902.05501566])
@@ -205,8 +206,8 @@ if testnum == 5:
     order = 106
     eqcovtrace = np.array([[1.79533e-09,9.35041e-10,- 1.99413e-09,- 1.63427e-13,1.05541e-10,- 5.77137e-10,5.44105e-10],[9.35041e-10,1.04209e-09,- 5.91847e-10,- 9.78886e-14,- 4.0233e-11,- 4.39526e-10,6.10449e-10],[- 1.99413e-09,- 5.91847e-10,3.63062e-09,2.62623e-13,- 3.98481e-10,9.56574e-10,2.86557e-09],[- 1.63427e-13,- 9.78886e-14,2.62623e-13,5.56451e-16,5.18072e-14,- 2.60304e-14,- 2.27216e-12],[1.05541e-10,- 4.0233e-11,- 3.98481e-10,5.18072e-14,1.00164e-09,2.40555e-10,- 1.10189e-10],[- 5.77137e-10,- 4.39526e-10,9.56574e-10,- 2.60304e-14,2.40555e-10,2.05855e-09,- 1.97222e-11],[5.44105e-10,6.10449e-10,2.86557e-09,- 2.27216e-12,- 1.10189e-10,- 1.97222e-11,1.13395e-05]])
     sc.printcov(eqcovtrace,'eq','t',anom)
-    eqcovt = covunits(eqcovtrace,anom,'eq','m')
-    sc.printcov(eqcovt,'eq','m',anom)
+    #eqcovt = covunits(eqcovtrace,anom,'eq','m')
+    #sc.printcov(eqcovt,'eq','m',anom)
 
 #         a = 6860.7631;
 #         ecc = 0.0010640;
@@ -234,7 +235,7 @@ anomflt = 'latlon'
 #, tcg, jdtcg,jdtcgfrac, tcb, jdtcb,jdtcbfrac
 ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
 # --- convert the eci state into the various other state formats (classical, equinoctial, etc)
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anomeq1+anomeq2,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anomeq1+anomeq2,anomflt,ddpsi,ddeps)
 print('==================== do the sensitivity tests \n' % ())
 print('1.  Cartesian Covariance \n' % ())
 sc.printcov(cartcov,'ct','m',anomeq1+'a')
@@ -399,33 +400,33 @@ print('rsw\n' % ())
 sc.printcov(covrsw,'ct','m',anom)
 temt = covrsw
 covntw,tm = sc.covct2ntw(cartcov,cartstate)
-print('ntw\n' % ())
+print('\nntw\n' % ())
 sc.printcov(covntw,'ct','m',anom)
 temt = covntw
 
 print('===============================================================================================\n' % ())
 # --- convert the eci state into the various other state formats (classical, equinoctial, etc)
 anom = 'meana'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-print('2.  Classical Covariance from Cartesian #1 above (meana) ------------------- \n' % ())
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+print('\n2.  Classical Covariance from Cartesian #1 above (meana) ------------------- \n' % ())
 classcovmeana,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 sc.printcov(classcovmeana,'cl','m',anom)
-print('  Cartesian Covariance from Classical #2 above \n' % ())
+print(' \nCartesian Covariance from Classical #2 above \n' % ())
 cartcovmeanarev,tmcl2ct = sc.covcl2ctnew(classcovmeana,classstate,anom)
 sc.printcov(cartcovmeanarev,'ct','m',anom)
-print('\n' % ())
 smu.printdiff(' cartcov - cartcovmeanarev \n',cartcov,cartcovmeanarev)
-sc.printcov(tmct2cl * tmcl2ct,'tm','m',anom)
+sc.printcov((tmct2cl @ tmcl2ct),'tm','m',anom)
+#sc.printcov((tmcl2ct @ tmct2cl),'tm','m',anom)
 #smu.printdiff( ' tmct2cl - np.linalg.inv(tmcl2ct) \n', tmct2cl, np.linalg.inv(tmcl2ct));
 #rintdiff( ' tmcl2ct - np.linalg.inv(tmct2cl) \n', tmcl2ct, np.linalg.inv(tmct2cl));
 
 # ===============================================================================================
-print('2.  Classical Covariance from Cartesian #1 above (meann) ------------------- \n' % ())
+print('\n2.  Classical Covariance from Cartesian #1 above (meann) ------------------- \n' % ())
 anom = 'meann'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovmeann,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 sc.printcov(classcovmeann,'cl','m',anom)
-print('  Cartesian Covariance from Classical #2 above \n' % ())
+print('\n  Cartesian Covariance from Classical #2 above \n' % ())
 cartcovmeannrev,tmcl2ct = sc.covcl2ctnew(classcovmeann,classstate,anom)
 sc.printcov(cartcovmeannrev,'ct','m',anom)
 print('\n' % ())
@@ -436,32 +437,32 @@ print('\n' % ())
 #         fprintf(1,'\n');
 
 smu.printdiff(' cartcov - cartcovmeannrev \n',cartcov,cartcovmeannrev)
-sc.printcov(tmct2cl * tmcl2ct,'tm','m',anom)
+sc.printcov(tmct2cl @ tmcl2ct,'tm','m',anom)
 #smu.printdiff( ' tmct2cl - np.linalg.inv(tmcl2ct) \n', tmct2cl, np.linalg.inv(tmcl2ct));
 #smu.printdiff( ' tmcl2ct - np.linalg.inv(tmct2cl) \n', tmcl2ct, np.linalg.inv(tmct2cl));
 
 
 # ===============================================================================================
-print('2.  Classical Covariance from Cartesian #1 above (truea) -------------------- \n' % ())
+print('\n2.  Classical Covariance from Cartesian #1 above (truea) -------------------- \n' % ())
 anom = 'truea'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovtruea,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 sc.printcov(classcovtruea,'cl','m',anom)
-print('  Cartesian Covariance from Classical #2 above \n' % ())
+print('\n  Cartesian Covariance from Classical #2 above \n' % ())
 cartcovtruearev,tmcl2ct = sc.covcl2ctnew(classcovtruea,classstate,anom)
 sc.printcov(cartcovtruearev,'ct','m',anom)
 print('\n' % ())
 tmcl2cttruea = tmcl2ct
 smu.printdiff(' cartcov - cartcovtruearev \n',cartcov,cartcovtruearev)
-sc.printcov(tmct2cl * tmcl2ct,'tm','m',anom)
+sc.printcov(tmct2cl @ tmcl2ct,'tm','m',anom)
 #smu.printdiff( ' tmct2cl - np.linalg.inv(tmcl2ct) \n', tmct2cl, np.linalg.inv(tmcl2ct));
 #smu.printdiff( ' tmcl2ct - np.linalg.inv(tmct2cl) \n', tmcl2ct, np.linalg.inv(tmct2cl));
 
 
 # ===============================================================================================
-print('2.  Classical Covariance from Cartesian #1 above (truen) -------------------- \n' % ())
+print('\n2.  Classical Covariance from Cartesian #1 above (truen) -------------------- \n' % ())
 anom = 'truen'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovtruen,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 sc.printcov(classcovtruen,'cl','m',anom)
 print('  Cartesian Covariance from Classical #2 above \n' % ())
@@ -470,7 +471,7 @@ sc.printcov(cartcovtruenrev,'ct','m',anom)
 print('\n' % ())
 tmcl2cttruen = tmcl2ct
 smu.printdiff(' cartcov - cartcovtruenrev \n',cartcov,cartcovtruenrev)
-sc.printcov(tmct2cl * tmcl2ct,'tm','m',anom)
+sc.printcov(tmct2cl @ tmcl2ct,'tm','m',anom)
 #smu.printdiff( ' tmct2cl - np.linalg.inv(tmcl2ct) \n', tmct2cl, np.linalg.inv(tmcl2ct));
 #smu.printdiff( ' tmcl2ct - np.linalg.inv(tmct2cl) \n', tmcl2ct, np.linalg.inv(tmct2cl));
 
@@ -478,176 +479,182 @@ sc.printcov(tmct2cl * tmcl2ct,'tm','m',anom)
 # ===============================================================================================
 print('===============================================================================================\n' % ())
 # strcat(anomeq1,anomeq2)
-print('3.  Equinoctial Covariance from Classical #2 above (truea) \n' % ())
+print('\n3.  Equinoctial Covariance from Classical #2 above (truea) \n' % ())
 anom = 'truea'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovtruea,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 eqcovtruea,tmcl2eq = sc.covcl2eq(classcovtruea,classstate,anom,fr)
 sc.printcov(eqcovtruea,'eq','m',anom)
 #eqcov = eqcovtruea; # save for later
 
-tmct2eqtruea = tmct2cl * tmcl2eq
-print('4.  Classical Covariance from Equinoctial #3 above \n' % ())
+tmct2eqtruea = tmct2cl @ tmcl2eq
+print('\n4.  Classical Covariance from Equinoctial #3 above \n' % ())
 classcovtruearev,tmeq2cl = sc.coveq2cl(eqcovtruea,eqstate,anom,fr)
 sc.printcov(classcovtruearev,'cl','m',anom)
-tmeq2cttruea = tmeq2cl * tmcl2cttruea
+tmeq2cttruea = tmeq2cl @ tmcl2cttruea
 smu.printdiff(' classcovtruea - classcovtruearev \n',classcovtruea,classcovtruearev)
-sc.printcov(tmcl2eq * tmeq2cl,'tm','m',anom)
+sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 #smu.printdiff( ' tmcl2eq - np.linalg.inv(tmeq2cl) \n', tmcl2eq, np.linalg.inv(tmeq2cl));
 #smu.printdiff( ' tmeq2cl - np.linalg.inv(tmcl2eq) \n', tmeq2cl, np.linalg.inv(tmcl2eq));
 
 
 # ===============================================================================================
 # strcat(anomeq1,anomeq2)
-print('3.  Equinoctial Covariance from Classical #2 above (truen) \n' % ())
+print('\n3.  Equinoctial Covariance from Classical #2 above (truen) \n' % ())
 anom = 'truen'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovtruen,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 eqcovtruen,tmcl2eq = sc.covcl2eq(classcovtruen,classstate,anom,fr)
 sc.printcov(eqcovtruen,'eq','m',anom)
 #eqcov = eqcovtruen; # save for later
 
-tmct2eqtruen = tmcl2eq * tmct2cl
-print('4.  Classical Covariance from Equinoctial #3 above \n' % ())
+tmct2eqtruen = tmcl2eq @ tmct2cl
+print('\n4.  Classical Covariance from Equinoctial #3 above \n' % ())
 classcovtruenrev,tmeq2cl = sc.coveq2cl(eqcovtruen,eqstate,anom,fr)
 sc.printcov(classcovtruenrev,'cl','m',anom)
-tmeq2cttruen = tmcl2cttruen * tmeq2cl
+tmeq2cttruen = tmcl2cttruen @ tmeq2cl
 smu.printdiff(' classcovtruen - classcovtruenrev \n',classcovtruen,classcovtruenrev)
-sc.printcov(tmcl2eq * tmeq2cl,'tm','m',anom)
+sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 #smu.printdiff( ' tmcl2eq - np.linalg.inv(tmeq2cl) \n', tmcl2eq, np.linalg.inv(tmeq2cl));
 #smu.printdiff( ' tmeq2cl - np.linalg.inv(tmcl2eq) \n', tmeq2cl, np.linalg.inv(tmcl2eq));
 
 
 # ===============================================================================================
 # strcat(anomeq1,anomeq2)
-print('3.  Equinoctial Covariance from Classical #2 above (meana) \n' % ())
+print('\n3.  Equinoctial Covariance from Classical #2 above (meana) \n' % ())
 anom = 'meana'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovmeana,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 eqcovmeana,tmcl2eq = sc.covcl2eq(classcovmeana,classstate,anom,fr)
 sc.printcov(eqcovmeana,'eq','m',anom)
-print('4.  Classical Covariance from Equinoctial #3 above \n' % ())
+print('\n4.  Classical Covariance from Equinoctial #3 above \n' % ())
 classcovmeanarev,tmeq2cl = sc.coveq2cl(eqcovmeana,eqstate,anom,fr)
 sc.printcov(classcovmeanarev,'cl','m',anom)
 smu.printdiff(' classcovmeana - classcovmeanarev \n',classcovmeana,classcovmeanarev)
-sc.printcov(tmcl2eq * tmeq2cl,'tm','m',anom)
+sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 #smu.printdiff( ' tmcl2eq - np.linalg.inv(tmeq2cl) \n', tmcl2eq, np.linalg.inv(tmeq2cl));
 #smu.printdiff( ' tmeq2cl - np.linalg.inv(tmcl2eq) \n', tmeq2cl, np.linalg.inv(tmcl2eq));
 
 
 # ===============================================================================================
 # strcat(anomeq1,anomeq2)
-print('3.  Equinoctial Covariance from Classical #2 above (meann) \n' % ())
+print('\n3.  Equinoctial Covariance from Classical #2 above (meann) \n' % ())
 anom = 'meann'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 classcovmeann,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
 eqcovmeann,tmcl2eq = sc.covcl2eq(classcovmeann,classstate,anom,fr)
 sc.printcov(eqcovmeann,'eq','m',anom)
-print('4.  Classical Covariance from Equinoctial #3 above \n' % ())
+print('\n4.  Classical Covariance from Equinoctial #3 above \n' % ())
 classcovmeannrev,tmeq2cl = sc.coveq2cl(eqcovmeann,eqstate,anom,fr)
 sc.printcov(classcovmeannrev,'cl','m',anom)
 smu.printdiff(' classcovmeann - classcovmeannrev \n',classcovmeann,classcovmeannrev)
-sc.printcov(tmcl2eq * tmeq2cl,'tm','m',anom)
+sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 #smu.printdiff( ' tmcl2eq - np.linalg.inv(tmeq2cl) \n', tmcl2eq, np.linalg.inv(tmeq2cl));
 #smu.printdiff( ' tmeq2cl - np.linalg.inv(tmcl2eq) \n', tmeq2cl, np.linalg.inv(tmcl2eq));
 
 
 # ===============================================================================================
 print('===============================================================================================\n' % ())
-print('5.  Equinoctial Covariance from Cartesian #1 above (truen) \n' % ())
+print('\n5.  Equinoctial Covariance from Cartesian #1 above (truen) \n' % ())
 anom = 'truen'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+#Problem: Entire bottom row missing -mjc
 eqcovDtruen,tmct2eq = sc.covct2eq(cartcov,cartstate,anom,fr)
 sc.printcov(eqcovDtruen,'eq','m',anom)
 smu.printdiff(' eqcovtruen - eqcovDtruen \n',eqcovtruen,eqcovDtruen)
-print('6.  Cartesian Covariance from Equinoctial #5 above \n' % ())
+print('\n6.  Cartesian Covariance from Equinoctial #5 above \n' % ())
 # try with intermediate one
 eqcovDtruenx = np.array([4.306970722e-17,1.2444284692e-14,1.4014592713e-14,- 4.7096511176e-17,- 5.1804415247e-17,2.6405645277e-17,1.2444284692e-14,6.1777913966e-12,2.6215113639e-12,- 2.2655462787e-14,- 2.3898379798e-14,- 1.5822346004e-12,1.4014592713e-14,2.6215113639e-12,6.7713072988e-12,- 1.8031837762e-14,- 1.6405199435e-14,1.4140513359e-12,- 4.7096511176e-17,- 2.2655462787e-14,- 1.8031837762e-14,2.5193704546e-12,- 2.7497854222e-13,7.2254489606e-13,- 5.1804415247e-17,- 2.3898379798e-14,- 1.6405199435e-14,- 2.7497854222e-13,2.5859832833e-12,- 2.5681926955e-12,2.640564528e-17,- 1.5822346004e-12,1.4140513359e-12,7.2254489606e-13,- 2.5681926955e-12,4.7583323083e-12])
 cartcovDtruenrev,tmeq2cti = sc.coveq2ct(eqcovDtruen,eqstate,anom,fr)
 sc.printcov(cartcovDtruenrev,'ct','m',anom)
 smu.printdiff(' cartcov - cartcovDtruenrev \n',cartcov,cartcovDtruenrev)
-sc.printcov(tmcl2eq * tmeq2cl,'tm','m',anom)
+sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 #smu.printdiff( ' tmct2eq - np.linalg.inv(tmeq2cti) \n', tmct2eq, np.linalg.inv(tmeq2cti));
 #smu.printdiff( ' tmeq2cti - np.linalg.inv(tmct2eq) \n', tmeq2cti, np.linalg.inv(tmct2eq));
 
 # compare combined tm
 print('===============================================================================================\n' % ())
 # fwd
+print('Combined TM')
 sc.printcov(tmct2eqtruen,'tm','m',anom)
 print(' \n' % ())
+print('Direct function conversion')
 sc.printcov(tmct2eq,'tm','m',anom)
 smu.printdiff(' tmct2eqtruen - tmct2eq \n',tmct2eqtruen,tmct2eq)
 print('===============================================================================================\n' % ())
 # bacwd
+print('Combined TM')
 sc.printcov(tmeq2cttruen,'tm','m',anom)
 print(' \n' % ())
+print('Direct function conversion')
 sc.printcov(tmeq2cti,'tm','m',anom)
 smu.printdiff(' tmeq2cttruen - tmeq2cti \n',tmeq2cttruen,tmeq2cti)
 
 # ===============================================================================================
 print('===============================================================================================\n' % ())
-print('5.  Equinoctial Covariance from Cartesian #1 above (meana) \n' % ())
+print('\n5.  Equinoctial Covariance from Cartesian #1 above (meana) \n' % ())
 anom = 'meana'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 eqcovDmeana,tmct2eq = sc.covct2eq(cartcov,cartstate,anom,fr)
 sc.printcov(eqcovDmeana,'eq','m',anom)
 smu.printdiff(' eqcovmeana - eqcovDmeana \n',eqcovmeana,eqcovDmeana)
-print('6.  Cartesian Covariance from Equinoctial #5 above \n' % ())
+print('\n6.  Cartesian Covariance from Equinoctial #5 above \n' % ())
 # try with intermediate one
 cartcovDmeanarev,tmeq2ct = sc.coveq2ct(eqcovDmeana,eqstate,anom,fr) #jmb changed this from tmeq2cti
 sc.printcov(cartcovDmeanarev,'ct','m',anom)
 smu.printdiff(' cartcov - cartcovDmeanarev \n',cartcov,cartcovDmeanarev)
-sc.printcov(tmct2eq * tmeq2ct,'tm','m',anom)
+#Problem: DOUBLE CHECK THIS (Close but not the same as Matlab) -mjc
+sc.printcov(tmct2eq @ tmeq2ct,'tm','m',anom)
 #smu.printdiff( ' tmct2eq - np.linalg.inv(tmeq2cti) \n', tmct2eq, np.linalg.inv(tmeq2cti));
 #smu.printdiff( ' tmeq2cti - np.linalg.inv(tmct2eq) \n', tmeq2cti, np.linalg.inv(tmct2eq));
 
 
 # ===============================================================================================
 print('===============================================================================================\n' % ())
-print('7.  Flight Covariance from Cartesian #1 above \n' % ())
+print('\n7.  Flight Covariance from Cartesian #1 above \n' % ())
 anom = 'meana'
 anomflt = 'latlon'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 flcov,tmct2fl = sc.covct2fl(cartcov,cartstate,anomflt,ttt,jdut1,lod,xp,yp,2,ddpsi,ddeps)
-if str(anomflt) == str('latlon') == 1:
+if str(anomflt) == str('latlon'):
     sc.printcov(flcov,'fl','m',anomflt)
 else:
     sc.printcov(flcov,'sp','m',anomflt)
 
-print('8. Cartesian Covariance from Flight #7 above \n' % ())
+print('\n8. Cartesian Covariance from Flight #7 above \n' % ())
 cartcovfltrev,tmfl2ct = sc.covfl2ct(flcov,flstate,anomflt,ttt,jdut1,lod,xp,yp,2,ddpsi,ddeps)
 sc.printcov(cartcovfltrev,'ct','m',anom)
 smu.printdiff(' cartcov - cartcovfltrev \n',cartcov,cartcovfltrev)
-print('9. Classical Covariance from Flight #7 above \n' % ())
+print('\n9. Classical Covariance from Flight #7 above \n' % ())
 print('\n-------- tm fl2cl --------- \n' % ())
 print('\n-------- SKIPPING --------- \n' % ())
 '''
 classcovfl,tmfl2cl = sc.covfl2cltest(flcov,flstate,anomflt,ttt,jdut1,lod,xp,yp,2,ddpsi,ddeps)
 sc.printcov(classcovfl,'cl','m',anom)
 smu.printdiff(' classcov - classcovfl \n',classcovmeana,classcovfl)
-sc.printcov(tmct2fl * tmfl2ct,'tm','m',anom)
+sc.printcov(tmct2fl @ tmfl2ct,'tm','m',anom)
 '''
 
 
 # ===============================================================================================
 print('===============================================================================================\n' % ())
-print('7.  Flight Covariance from Cartesian #1 above \n' % ())
+print('\n7.  Flight Covariance from Cartesian #1 above \n' % ())
 anom = 'meana'
 anomflt = 'radec'
-cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
+cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 flcov,tmct2fl = sc.covct2fl(cartcov,cartstate,anomflt,ttt,jdut1,lod,xp,yp,2,ddpsi,ddeps)
 if str(anomflt) == str('latlon') == 1:
     sc.printcov(flcov,'fl','m',anomflt)
 else:
     sc.printcov(flcov,'sp','m',anomflt)
 
-print('8. Cartesian Covariance from Flight #7 above \n' % ())
+print('\n8. Cartesian Covariance from Flight #7 above \n' % ())
 cartcovfltrev,tmfl2ct = sc.covfl2ct(flcov,flstate,anomflt,ttt,jdut1,lod,xp,yp,2,ddpsi,ddeps)
 sc.printcov(cartcovfltrev,'ct','m',anom)
 smu.printdiff(' cartcov - cartcovfltrev \n',cartcov,cartcovfltrev)
 
 
-print('9. Classical Covariance from Flight #7 above \n' % ())
+print('\n9. Classical Covariance from Flight #7 above \n' % ())
 print('\n-------- tm fl2cl --------- \n' % ())
 print('\n-------- SKIPPING --------- \n' % ())
 '''
@@ -771,7 +778,7 @@ print((np.transpose(diffmm)))
 #anom = 'true';
 classcovrev,tm = sc.covct2clnew(cartcov,cartstate,anomeq1+anomeq2)
 sc.printcov(classcovrev,'cl','m',anomeq1+anomeq2)
-#        [cartcov1, tm]   = covcl2ct( classco1,classstate,strcat(anomeq1,anomeq2) );
+#        [cartcov1, tm]   = covcl2ctnew( classco1,classstate,strcat(anomeq1,anomeq2) );
 #        printcov( cartcov1,'ct','m',strcat(anomeq1,anomeq2) );
 
 
@@ -1035,7 +1042,7 @@ for testnumbb in np.arange(1,12+1).reshape(-1):
     print('coes %11.4f%11.4f%13.9f%13.7f%14.8f%14.8f%14.8f%14.8f%14.8f\n' % (p,a,ecc,incl * rad2deg,omega * rad2deg,argp * rad2deg,nu * rad2deg,m * rad2deg,arglat * rad2deg))
     if (truelon and lonper):
       print(truelon * rad2deg,lonper * rad2deg)
-    cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,year,mon,day,hr,min,sec,dut1,dat,ttt,jdut1,lod,xp,yp,terms,'n',anom,anomflt,ddpsi,ddeps)
+    cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'n',anom,anomflt,ddpsi,ddeps)
     print('new case --------------\n' % ())
     for i in range(6):
         eqcov[i,3] = eqcov[i,3] / tusec
@@ -1137,16 +1144,19 @@ print((100.0 * ((np.transpose(tmcl2ctt) - np.transpose(np.linalg.inv(tmct2clt)))
 
 eqCovmeana = np.array([729.98470594,- 5.1232022015e-05,- 5.769702175e-05,1.938917477e-07,2.1327374042e-07,- 5.9997332907e-07,- 5.1232022015e-05,6.1778006946e-12,2.62153547e-12,- 2.2655470832e-14,- 2.3898387998e-14,4.2135772123e-12,- 5.769702175e-05,2.62153547e-12,6.7713618731e-12,- 1.8031914124e-14,- 1.6405273668e-14,- 3.6135835764e-12,1.938917477e-07,- 2.2655470832e-14,- 1.8031914124e-14,2.5193665805e-12,- 2.7497822431e-13,7.117843681e-13,2.1327374042e-07,- 2.3898387998e-14,- 1.6405273668e-14,- 2.7497822431e-13,2.5859797681e-12,- 2.5800265285e-12,- 5.9997332907e-07,4.2135772123e-12,- 3.6135835764e-12,7.117843681e-13,- 2.5800265285e-12,1.1608008196e-11])
 eqCovmeana = np.reshape(eqCovmeana,(6,6))
-xxx = (np.linalg.svd(eqCovmeana))
-print("svd:")
-print(xxx)
-print("diag:")
-print(np.diag(xxx))
-s1eqA0 = np.sqrt(np.diag(np.linalg.svd(eqCovmeana)))
+#Debugging
+# xxx = (np.linalg.svd(eqCovmeana)[1])
+# print("svd:")
+# print(xxx)
+# print("diag:")
+# print(np.diag(xxx))
+s1eqA0 = np.sqrt(np.diag(np.linalg.svd(eqCovmeana)[1]))
+print(s1eqA0)
 eqCovmeann = np.array([0.043069707203,3.9352341277e-07,4.431823694e-07,- 1.4893213124e-09,- 1.6381982769e-09,4.608515197e-09,3.9352341277e-07,6.1778006946e-12,2.62153547e-12,- 2.2655470832e-14,- 2.3898387998e-14,4.2135772123e-12,4.431823694e-07,2.62153547e-12,6.7713618731e-12,- 1.8031914124e-14,- 1.6405273668e-14,- 3.6135835764e-12,- 1.4893213124e-09,- 2.2655470832e-14,- 1.8031914124e-14,2.5193665805e-12,- 2.7497822431e-13,7.117843681e-13,- 1.6381982769e-09,- 2.3898387998e-14,- 1.6405273668e-14,- 2.7497822431e-13,2.5859797681e-12,- 2.5800265285e-12,4.6085151971e-09,4.2135772123e-12,- 3.6135835764e-12,7.117843681e-13,- 2.5800265285e-12,1.1608008196e-11])
+eqCovmeann = np.reshape(eqCovmeann,(6,6))
 #np.linalg.svd(eqCovmeann)
-s1eqN0 = np.sqrt(np.diag(np.linalg.svd(eqCovmeann)))
-a = np.array([s1eqA0(1,1),s1eqN0(1,1),s1eqA0(2,2),s1eqN0(2,2),s1eqA0(3,3),s1eqN0(3,3),s1eqA0(4,4),s1eqN0(4,4),s1eqA0(5,5),s1eqN0(5,5),s1eqA0(6,6),s1eqN0(6,6)])
+s1eqN0 = np.sqrt(np.diag(np.linalg.svd(eqCovmeann)[1]))
+a = np.array([s1eqA0[0,0],s1eqN0[0,0],s1eqA0[1,1],s1eqN0[1,1],s1eqA0[2,2],s1eqN0[2,2],s1eqA0[3,3],s1eqN0[3,3],s1eqA0[4,4],s1eqN0[4,4],s1eqA0[5,5],s1eqN0[5,5]])
 # test sigmapts -------------------------------------------
 cov3 = np.zeros([3,3])
 cov3[0,0] = 12559.93762571587
@@ -1171,11 +1181,11 @@ r1[1] = - 28804817.6521682
 r1[2] = - 991451.166480117
 print('cov3 starting \n' % ())
 #    fprintf(1,'#20.10e #20.10e #20.10e #20.10e #20.10e #20.10e\n',cov3);
-print(' %20.10e %20.10e %20.10e\n' % (cov3))
-np.linalg.eig(cov3)
-eigenaxes,d = np.linalg.eig(cov3)
+print(cov3)
+#np.linalg.eig(cov3)
+d, eigenaxes = np.linalg.eig(cov3)
 eigenvalues = np.sqrt(d)
-
+# print(eigenvalues) #Not in same order as matlab but same values
 #eigenvalues
 #     fprintf(1,'eigenaxes  #16.8f  #16.8f  #16.8f  #16.8f  #16.8f  #16.8f  m \n', eigenaxes(1:6) );
 #     fprintf(1,'eigenaxes  #16.8f  #16.8f  #16.8f  #16.8f  #16.8f  #16.8f  m \n', eigenaxes(7:12) );
@@ -1191,10 +1201,11 @@ eigenvalues = np.sqrt(d)
 # ----- setup 12 initial states
 
 # ---- find sigma points
-sigmapts = poscov2pts(r1,cov3)
-sigmapts
-yu,covout = remakecov(sigmapts)
-covout
+# sigmapts = poscov2pts(r1,cov3)
+# sigmapts
+# yu,covout = remakecov(sigmapts)
+# covout
+
 # test pos/vel
 r1[0] = - 30762454.8061775
 r1[1] = - 28804817.6521682
@@ -1239,6 +1250,8 @@ cov2[5,2] = 0.1977541628188323
 cov2[4,3] = - 6.396031584925255e-05
 cov2[5,3] = 1.079960679599204e-06
 cov2[5,4] = 1.03146660433274e-06
-sigmapts = posvelcov2pts(r1,v1,cov2)
-yu,covout = remakecov(sigmapts)
-print(covout)
+
+
+# sigmapts = posvelcov2pts(r1,v1,cov2)
+# yu,covout = remakecov(sigmapts)
+# print(covout)

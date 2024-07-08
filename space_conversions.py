@@ -815,7 +815,7 @@ def covct2eq (cartcov, cartstate, anom, fr):
                    + (fr*psi*Y - chi*X)*ww/A)
 
     # ---------- calculate the output covariance matrix -----------
-    eqcov = tm*cartcov*tm.T
+    eqcov = tm@cartcov@tm.T
     return eqcov, tm
 
 # ----------------------------------------------------------------------------
@@ -1012,7 +1012,7 @@ def covct2fl(cartcov, cartstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi, dd
     tm[5, 5] = p0*vz
 
     # ---------- calculate the output covariance matrix -----------
-    flcov = tm*cartcov*tm.T
+    flcov = tm @ cartcov @ tm.T
     return flcov, tm
 
 # ----------------------------------------------------------------------------
@@ -1135,9 +1135,8 @@ def covcl2eq (classcov, classstate, anom, fr):
         tm[5, 3] = fr
         tm[5, 4] = 1.0
         tm[5, 5] = 1.0
-
     # ---------- calculate the output covariance matrix -----------
-    eqcov = tm*classcov*tm.T
+    eqcov = tm @ classcov @ tm.T
     return eqcov, tm
 
 # ----------------------------------------------------------------------------
@@ -1511,7 +1510,7 @@ def coveq2ct(eqcov, eqstate, anom, fr):
     #             tm[5, 5] = temp*nu_scale
 
     # ---------- calculate the output covariance matrix -----------
-    cartcov = tm * eqcov * tm.T
+    cartcov = tm @ eqcov @ tm.T
     return cartcov, tm
 
 
@@ -1642,7 +1641,7 @@ def coveq2cl(eqcov, eqstate, anom, fr):
         tm[5, 5] = 1.0
 
     # ---------- calculate the output covariance matrix -----------
-    classcov = tm@eqcov@tm.T
+    classcov = tm @ eqcov @ tm.T
     return classcov, tm
 
 # ----------------------------------------------------------------------------
@@ -1721,7 +1720,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     vecef = np.zeros(3)
     reci = np.zeros(3)
     veci = np.zeros(3)
-    if (anom, 'latlon'):
+    if (anom == 'latlon'):
         craf = np.cos(lon)  # earth fixed needed for the lon lat partials only
         sraf = np.sin(lon)
         cdf = np.cos(latgc)
@@ -1747,7 +1746,6 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
         temp = np.sqrt(reci[0]*reci[0] + reci[1]*reci[1])
         if (temp < small):
             rtasc = math.atan2(veci[1] , veci[0])
-            temp
         else:
             rtasc = math.atan2(reci[1] , reci[0])
         #decl = math.atan2(reci[2] , np.sqrt(reci[0]**2 + reci[1]**2))
@@ -1756,7 +1754,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
         sra = np.sin(rtasc)
         cd = np.cos(decl)
         sd = np.sin(decl)
-    elif (anom, 'radec'):
+    elif (anom == 'radec'):
         rtasc = lon  # these come in as rtasc decl in this case
         decl = latgc
         reci[0] = magr*np.cos(decl)*np.cos(rtasc)
@@ -1777,7 +1775,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm = np.zeros((6, 6))
     # ---------------- calculate matrix elements ------------------
     # ---- partials of rx wrt (lon latgc fpa az r v)
-    if (anom, 'radec'):
+    if (anom == 'radec'):
         tm[0, 0] = -magr*cd*sra
         tm[0, 1] = -magr*sd*cra
     else:  # latlon
@@ -1789,7 +1787,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm[0, 5] = 0.0
 
     # ---- partials of ry wrt (lon latgc fpa az r v)
-    if (anom, 'radec'):
+    if (anom == 'radec'):
         tm[1, 0] = magr*cd*cra
         tm[1, 1] = -magr*sd*sra
     else:   # latlon
@@ -1801,7 +1799,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm[1, 5] = 0.0
 
     # ---- partials of rz wrt (lon latgc fpa az r v)
-    if (anom, 'radec'):
+    if (anom == 'radec'):
         tm[2, 0] = 0.0
         tm[2, 1] = magr*cd
     else:   # latlon
@@ -1813,7 +1811,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm[2, 5] = 0.0
 
     # ---- partials of vx wrt (lon latgc fpa az r v)
-    if (anom, 'radec'):
+    if (anom == 'radec'):
         tm[3, 0] = -magv*(-sra*caz*sd*cfpa + cra*saz*cfpa + cd*sra*sfpa)
         #  tm[3, 0] = -vy
         tm[3, 1] = -cra*magv*(sd*sfpa + cd*caz*cfpa)
@@ -1829,7 +1827,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm[3, 5] = -cra*caz*sd*cfpa - sra*saz*cfpa + cd*cra*sfpa
 
     # ---- partials of vy wrt (lon latgc fpa az r v)
-    if (anom, 'radec'):
+    if (anom == 'radec'):
         tm[4, 0] = magv*(-cra*caz*sd*cfpa - sra*saz*cfpa + cd*cra*sfpa)
         #  tm[4, 0] = vx
         tm[4, 1] = -sra*magv*(sd*sfpa + cd*caz*cfpa)
@@ -1845,7 +1843,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm[4, 5] = -sra*caz*sd*cfpa + cra*saz*cfpa + cd*sra*sfpa
 
     # ---- partials of vz wrt (lon latgc fpa az r v)
-    if (anom, 'radec'):
+    if (anom == 'radec'):
         tm[5, 0] = 0.0
         tm[5, 1] = magv*(cd*sfpa - sd*caz*cfpa)
     else:   # latlon
@@ -1857,7 +1855,7 @@ def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
     tm[5, 5] = sd*sfpa + cd*caz*cfpa
 
     # ---------- calculate the output covariance matrix -----------
-    cartcov = tm*flcov*tm.T
+    cartcov = tm @ flcov @ tm.T
     return cartcov, tm
 
 # ------------------------------------------------------------------------------
@@ -2499,7 +2497,7 @@ def printcov(covin: np.ndarray, covtype: str, cu: str, anom: str):
     print("covin:")
     print(covin)
     #        print('#16e#16e#16e#16e#16e#16e\n', covin')
-    print('covin transpose\n', (covin.T))
+    # print('covin transpose\n', (covin.T))
 
 # ----------------------------------------------------------------------------
 #
@@ -2634,7 +2632,7 @@ def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
         if smu.mag(vteci - np.transpose(veci)) > 0.01:
             print('ERROR in test of vel in setcov %11.7f \n'
                   % (smu.mag(vteci - veci.T)))
-        print('input data \n' % ())
+        print('input data (within setcov)\n' % ())
         print(' re %8.6f km  \n' % (re))
         print(' mu %14.8f km3/s2  \n' % (mu))
         # print('year %5i ' % (year))
@@ -2646,28 +2644,28 @@ def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
         print(' xp %8.6f "' % (xp))
         print(' yp %8.6f "' % (yp))
         print(' lod %8.6f s\n' % (lod))
-        print('r :')
+        print('r :',end='')
         print(reci)
-        print('v :')
+        print('v :',end='')
         print(veci)
-        print('          p km       a km      ecc      incl deg    ')
-        print(' raan deg     argp deg      nu deg      m deg \n')
-        print('coes %11.4f %11.4f %11.7f %11.5f %11.5f'
-              % (p, a, ecc, incl * rad2deg, omega * rad2deg))
-        print('%11.5f %11.5f %11.5f\n'
-              % (argp * rad2deg, nu * rad2deg, m * rad2deg))
-        print('          a (km)       af           ag')
-        print('           chi        psi            meanlonM     '
-              'meanLonNu   fr\n')
-        print('eq   %14.7f %14.7f %14.7f %15.7f %14.7f %14.7f %14.7f %2.0f\n'
-              % (a, af, ag, chi, psi, meanlonM * rad2deg, meanlonNu * rad2deg,
-                 fr))
-        print('       lon deg       latgc deg     rtasc deg      '
-              'decl deg      fpa deg       ')
-        print(' az deg       magr km      magv km/s\n')
-        print('flt  %14.7f%14.7f%14.7f%14.7f%14.7f%15.7f%14.7f%14.7f\n'
+        print('coes:')
+        print('          p km       a km      ecc         incl deg    ')
+        print('coes %11.4f %11.4f %11.7f %11.5f\n'
+              % (p, a, ecc, incl * rad2deg))
+        print(' raan deg     argp deg      nu deg      m deg')
+        print('%11.5f %11.5f %11.5f %11.5f\n'
+              % (omega * rad2deg,argp * rad2deg, nu * rad2deg, m * rad2deg))
+        print('          a (km)         af              ag')
+        print('eq   %14.7f %14.7f %14.7f\n' % (a, af, ag))
+        print('           chi        psi            meanlonM     meanLonNu   fr')
+        print('%15.7f %14.7f %14.7f %14.7f %2.0f\n'
+             % (chi, psi, meanlonM * rad2deg, meanlonNu * rad2deg, fr))
+        print('       lon deg       latgc deg     rtasc deg      decl deg      fpa deg')
+        print('flt  %14.7f%14.7f%14.7f%14.7f%14.7f\n'
               % (lon * rad2deg, latgc * rad2deg, rtasc * rad2deg, decl
-                 * rad2deg, fpa * rad2deg, az * rad2deg, magr, magv))
+                 * rad2deg, fpa * rad2deg))
+        print('      az deg       magr km      magv km/s')
+        print('%15.7f%14.7f%14.7f\n' % ( az * rad2deg, magr, magv))
 
     return cartstate, classstate, flstate, eqstate, fr
 
@@ -2759,6 +2757,7 @@ def covcl2ctnew(classcov, classstate, anom):
     # cos_nu = np.cos(nu)
     sin_inc, cos_inc, sin_raan, cos_raan, sin_w, cos_w, sin_nu, cos_nu = \
         smu.getsincos(incl, raan, argp, nu)
+    
 
     # assign elements of PQW to ECI transformation (pg 168)
     p11 = cos_raan * cos_w - sin_raan * sin_w * cos_inc
@@ -2798,8 +2797,8 @@ def covcl2ctnew(classcov, classstate, anom):
     #tm[0, 0] = rx/a # alternate approach if vectors available
     tm[0, 1] = - p3 * (p11 * cos_nu + p12 * sin_nu)
     tm[0, 2] = p5 * p13 * (sin_w * cos_nu + cos_w * sin_nu)
-    tm[0, 4] = - p5 * (p21 * cos_nu + p22 * sin_nu)
-    tm[0, 5] = p5 * (p12 * cos_nu - p11 * sin_nu)
+    tm[0, 3] = - p5 * (p21 * cos_nu + p22 * sin_nu)
+    tm[0, 4] = p5 * (p12 * cos_nu - p11 * sin_nu)
     # true anomaly same
     # p10 = a * (ecc**2 - 1.0) / (ecc*cos_nu + 1.0)**2
     # tm[0, 5] = p10 * (ecc*cos(raan)*sin(argp) + cos(raan)*cos(argp)*sin(nu) + ...
@@ -2818,8 +2817,8 @@ def covcl2ctnew(classcov, classstate, anom):
     #tm[1, 0] = ry/a
     tm[1, 1] = - p3 * (p21 * cos_nu + p22 * sin_nu)
     tm[1, 2] = p5 * p23 * (sin_w * cos_nu + cos_w * sin_nu)
-    tm[1, 4] = p5 * (p11 * cos_nu + p12 * sin_nu)
-    tm[1, 5] = p5 * (p22 * cos_nu - p21 * sin_nu)
+    tm[1, 3] = p5 * (p11 * cos_nu + p12 * sin_nu)
+    tm[1, 4] = p5 * (p22 * cos_nu - p21 * sin_nu)
     # true anomaly, same
     #  p10 = a * (ecc**2 - 1.0) / (ecc*cos(nu) + 1.0)**2
     #  tm[1, 5] = p10 * (ecc*sin(raan)*sin(argp) + sin(raan)*cos(argp)*sin(nu) + ...
@@ -2838,8 +2837,8 @@ def covcl2ctnew(classcov, classstate, anom):
     #tm[2, 0] = rz/a
     tm[2, 1] = - p3 * sin_inc * (cos_w * sin_nu + sin_w * cos_nu)
     tm[2, 2] = p5 * cos_inc * (cos_w * sin_nu + sin_w * cos_nu)
-    tm[2, 4] = 0.0
-    tm[2, 5] = p5 * sin_inc * (cos_w * cos_nu - sin_w * sin_nu)
+    tm[2, 3] = 0.0
+    tm[2, 4] = p5 * sin_inc * (cos_w * cos_nu - sin_w * sin_nu)
     #  p10 = -a * (ecc**2 - 1.0) / (ecc*cos(nu) + 1.0)**2
     #  tm[2, 5] = p10 * sin(incl)*(cos(argp+nu)+ecc*cos(argp))
     tm[2, 5] = p6 * (- p31 * sin_nu + p32 * (ecc + cos_nu))
@@ -2866,7 +2865,7 @@ def covcl2ctnew(classcov, classstate, anom):
         #tm[3, 5] = tm[3, 5] / dMdnu + tm[3, 1] / dMde
         #tm[3, 1] = tm[3, 5] * dMde - dMde*atm/dMdnu
         tm[3, 5] = tm[3, 5] / dMdnu
-        tm[3, 2] = tm[3, 2] - tm[3, 5] * dMde
+        tm[3, 1] = tm[3, 1] - tm[3, 5] * dMde
 
     # ---- partials of (a ecc incl node argp nu) wrt vy
     tm[4, 0] = p2 * (p21 * sin_nu - p22 * (ecc + cos_nu))
@@ -2903,7 +2902,6 @@ def covcl2ctnew(classcov, classstate, anom):
         #tm[5, 1] = tm[5, 5] * dMde - dMde*atm/dMdnu
         tm[5, 5] = tm[5, 5] / dMdnu
         tm[5, 1] = tm[5, 1] - tm[5, 5] * dMde
-
     # ---------- calculate the output covariance matrix -----------
     cartcov = tm @ classcov @ tm.T
     return cartcov, tm
@@ -3364,8 +3362,9 @@ def covct2o2(cartcov, cartstate):
 # ----------------------------------------------------------------------------
 
 def covct2rsw(cartcov, cartstate):
-    print("cartstate:")
-    print(cartstate)
+    if sh.show:
+        print("cartstate:")
+        print(cartstate)
     x = cartstate[0, 0]
     y = cartstate[1, 0]
     z = cartstate[2, 0]

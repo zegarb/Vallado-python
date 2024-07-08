@@ -1177,9 +1177,9 @@ def printdiff(strin: str, mat1: np.ndarray, mat2: np.ndarray):
     """
 
     small = smalle18
-    print('diff %s \n' % (strin))
+    print('\ndiff %s' % (strin))
     print(mat1.T - mat2.T)
-    print('pctdiff %s pct over 1e-18  \n' % (strin))
+    print('\npctdiff %s pct over 1e-18  \n' % (strin))
     #    fprintf(1, '#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f \n', 100.0*((mat1' - mat2')/mat1'))
     #    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
     #    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
