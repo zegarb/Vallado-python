@@ -148,28 +148,28 @@ angumbearth = 0.004695073367587701 #rad
 angpenearth = 0.004609804797371252 #rad
 
 
-'''
-% ------------------------------------------------------------------------------
-%
-%                           function sethelp
-%
-%  this function sets help flags to control intermediate output during
-%  debugging
-%
-%  author        : david vallado                  719-573-2600   16 jul 2002
-%
-%  revisions
-%
-%  inputs        : description                    range / units
-%    none
-%
-%  outputs       :
-%    iauhelp
-%
-%
-% sethelp;
-% ------------------------------------------------------------------------------
-'''
+
+# ------------------------------------------------------------------------------
+#
+#                           function sethelp
+#
+#  this function sets help flags to control intermediate output during
+#  debugging
+#
+#  author        : david vallado                  719-573-2600   16 jul 2002
+#
+#  revisions
+#
+#  inputs        : description                    range / units
+#    none
+#
+#  outputs       :
+#    iauhelp
+#
+#
+# sethelp;
+# ------------------------------------------------------------------------------
+
 class sethelp():
   iauhelp = False;
   iaupnhelp = True;

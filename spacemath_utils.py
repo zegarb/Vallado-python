@@ -1,4 +1,5 @@
 import math
+import sys
 import numpy as np
 from pprint import pprint as pp
 from space_constants import *
@@ -3151,6 +3152,414 @@ def legPoly(x=None, i=None):
     return pn
 
 
+# ELLIPTIC12 evaluates the value of the Incomplete Elliptic Integrals
+# of the First, Second Kind and Jacobi's Zeta Function.
+
+#   [F, E, Z] = ELLIPTIC12(U, M, TOL) where U is a phase in radians, 0<M<1 is
+#   the module and TOL is the tolerance (optional). Default value for
+#   the tolerance is eps = 2.220e-16.
+
+#   ELLIPTIC12 uses the method of the Arithmetic-Geometric Mean
+#   and Descending Landen Transformation described in [1] Ch. 17.6,
+#   to determine the value of the Incomplete Elliptic Integrals
+#   of the First, Second Kind and Jacobi's Zeta Function [1], [2].
+
+#       F(phi, m) = int(1/sqrt(1-m*sin(t)^2), t=0..phi);
+#       E(phi, m) = int(sqrt(1-m*sin(t)^2), t=0..phi);
+#       Z(phi, m) = E(u, m) - E(m)/K(m)*F(phi, m).
+
+#   Tables generating code ([1], pp. 613-621):
+#       [phi, alpha] = meshgrid(0:5:90, 0:2:90);                  # modulus and phase in degrees
+#       [F, E, Z] = elliptic12(pi/180*phi, sin(pi/180*alpha).^2);  # values of integrals
+
+#   See also ELLIPKE, ELLIPJ, ELLIPTIC12I, ELLIPTIC3, THETA, AGM.
+
+#   References:
+#   [1] M. Abramowitz and I.A. Stegun, "Handbook of Mathematical Functions",
+#       Dover Publications", 1965, Ch. 17.1 - 17.6 (by L.M. Milne-Thomson).
+#   [2] D. F. Lawden, "Elliptic Functions and Applications"
+#       Springer-Verlag, vol. 80, 1989
+
+# Copyright Elliptic Project 2011
+# For support, please reply to
+#     moiseev.igor[at]gmail.com
+#     Moiseev Igor,
+
+# The code is optimized for ordered inputs produced by the functions
+# meshgrid, ndgrid. To obtain maximum performace (up to 30#) for singleton,
+# 1-dimensional and random arrays remark call of the function unique(.)
+# and edit further code.
+
+def elliptic12(u: np.ndarray, m: np.ndarray, tol: float = None):
+    if not isinstance(u, np.ndarray):
+        u = np.array([u])
+
+    if not isinstance(m, np.ndarray):
+        m = np.array([m])
+
+    if tol == None:
+        tol = sys.float_info.epsilon
+
+    if not np.isreal(u).all() or not np.isreal(m).all():
+        raise Exception('Input arguments must be real. Use ELLIPTIC12i for complex arguments.')
+
+    # if len(m) == 1:
+    #     m = m(np.ones(u.shape))
+
+    # if len(u) == 1:
+    #     u = u(np.ones(m.shape))
+
+    # if not m.shape == u.shape:
+    #     raise Exception('U and M must be the same size.')
+
+    F = np.zeros(u.shape)
+    E = F.copy()
+    Z = E.copy()
+
+    m = m.T
+    u = u.T
+
+    if np.any(m < 0) or np.any(m > 1):
+        raise Exception('M must be in the range 0 <= M <= 1.')
+
+    # cdav change for small eccentricities
+    # for i in range(len(m)):
+    #     if abs(m[i]) < 1e-07:
+    #         m[i] = 1e-07
+
+    I = np.nonzero((m != 1) & (m != 0))[0]
+    if len(I):
+        # mu, J, K = unique(m(I))
+        mu, K = np.unique(m[I], False, True)
+        # K = uint32(K)
+        mumax = len(mu)
+        signU = np.sign(u[I])
+        # pre-allocate space and augment if needed
+        chunk = 7
+        a = np.zeros((chunk, mumax))
+        c = a.copy()
+        b = a.copy()
+        a[0, :] = np.ones(mumax)
+        c[0, :] = np.sqrt(mu)
+        b[0, :] = np.sqrt(1 - mu)
+        n = np.zeros(mumax)
+        i = 0
+        while (abs(c[i, :]) > tol).any(): # Arithmetic-Geometric Mean of A, B and C
+
+            i = i + 1
+            if i > a.shape[0]:
+                np.append(a, np.zeros((1, mumax)), axis=0)
+                np.append(b, np.zeros((1, mumax)), axis=0)
+                np.append(c, np.zeros((1, mumax)), axis=0)
+
+            a[i, :] = 0.5 * (a[i - 1, :] + b[i - 1, :])
+            b[i, :] = np.sqrt(a[i - 1, :] * b[i - 1, :])
+            c[i, :] = 0.5 * (a[i - 1, :] - b[i - 1, :])
+            in_ = np.nonzero((abs(c[i, :]) <= tol)
+                             & (abs(c[i - 1, :]) > tol))[0]
+            if len(in_):
+                n[in_] = i
+
+        mmax = len(I)
+        mn = int(np.max(n))
+        phin = np.zeros(mmax)
+        C = np.zeros(mmax)
+        Cp = C.copy()
+        e = C.copy()
+        phin = signU * u[I]
+        i = 0
+        c2 = c ** 2
+        while i < mn: # Descending Landen Transformation
+
+            in_ = np.nonzero(n[K] > i)[0]
+            if len(in_):
+                phin[in_] = (np.arctan(b[i, K[in_]] / a[i, K[in_]]
+                                         * np.tan(phin[in_]))
+                               + np.pi * np.ceil(phin[in_] / np.pi - 0.5)
+                               + phin[in_])
+                e[in_] = 2.0 ** i
+                C[in_] = C[in_] + e[in_[0]] * c2[i, K[in_]]
+                Cp[in_] = Cp[in_] + c[i + 1, K[in_]] * np.sin(phin[in_])
+            i = i + 1
+
+        Ff = phin / (a[mn, K] * e * 2)
+        F[I] = Ff * signU
+        Z[I] = Cp * signU
+        E[I] = (Cp + ((1 - 1 / 2 * C) *  Ff)) * signU
+
+    # Special cases: m == {0, 1}
+    m0 = np.nonzero(m == 0)[0]
+    if len(m0):
+        F[m0] = u[m0]
+        E[m0] = u[m0]
+        Z[m0] = 0
+
+    m1 = np.nonzero(m == 1)[0]
+    um1 = abs(u[m1])
+    if len(m1):
+        N = np.floor((um1 + np.pi / 2) / np.pi)
+        M = np.nonzero(um1 < np.pi / 2)[0]
+        F[m1[M]] = np.log(np.tan(np.pi / 4 + u[m1[M]] / 2))
+        F[m1[um1 >= np.pi / 2]] = math.inf *  np.sign(u[m1[um1 >= np.pi / 2]])
+        E[m1] = (((-1) ** N * np.sin(um1)) + 2 * N) * np.sign(u[m1])
+        Z[m1] = -1 ** N * np.sin(u[m1])
+
+    return F, E, Z
+
+# INVERSELLIPTIC2 evaluates the value of the INVERSE Incomplete Elliptic Integrals
+# of the Second Kind.
+
+# INVE = INVERSELLIPTIC2(E,M,TOL) where E is a value of the integral to
+# be inverted, 0<M<1 is the module and TOL is the tolerance (optional).
+# Default value for the tolerance is eps = 2.220e-16.
+
+# INVERSELLIPTIC2 uses the method described by Boyd J. P.
+# to determine the value of the inverse Incomplete Elliptic Integrals
+# of the Second Kind using the Empirical initialization to
+# the Newtons iteration method [1].
+
+# NOTICE. Please pay attention to the definition of the elliptic functions
+# which follows the Abramovitz et al [2], for more theory on elliptic
+# functions please consult the Lawden book [3].
+
+# Elliptic integral of the second kind:
+
+# E(phi,m) = int(sqrt(1-m*sin(t)^2), t=0..phi);
+
+# Empirical initialization [1]:
+
+# T0(z,m) = pi/2 + sqrt(r)/(theta ? pi/2)
+
+# where
+# z \in [?E(pi/2,m), E(pi/2,m)]x[0, 1], value of the entire parameter space
+# r = sqrt((1-m)^2 + zeta^2)
+# zeta = 1 - z/E(pi/2,m)
+# theta = atan((1 - m)/zeta)
+
+
+# Example:
+# # modulus and phase in degrees
+# [phi,alpha] = meshgrid(0:5:90, 0:2:90);
+# # values of integrals
+# [F,E] = elliptic12(pi/180*phi, sin(pi/180*alpha).^2);
+# # values of inverse
+# invE = inverselliptic2(E, sin(pi/180*alpha).^2);
+# # the difference between phase phi and invE should close to zero
+# phi - invE * 180/pi
+
+# See also ELLIPKE, ELLIPTIC12.
+
+# References:
+# [1] J. P. Boyd, "Numerical, Perturbative and Chebyshev Inversion
+# of the Incomplete Elliptic Integral of the Second Kind", Applied Mathematics and Computation (January 2012)
+# [2] M. Abramowitz and I.A. Stegun, "Handbook of Mathematical Functions",
+# Dover Publications", 1965, Ch. 17.1 - 17.6 (by L.M. Milne-Thomson).
+# [3] D. F. Lawden, "Elliptic Functions and Applications"
+# Springer-Verlag, vol. 80, 1989
+
+# Copyright (C) 2011 by Elliptic Project. All rights reserved.
+
+# GNU GENERAL PUBLIC LICENSE Version 2, June 1991
+# http://www.gnu.org/licenses/gpl.html
+# Everyone is permitted to copy and distribute verbatim copies of this
+# script under terms and conditions of GNU GENERAL PUBLIC LICENSE.
+
+# For support, please reply to
+# moiseev.igor[at]gmail.com
+# Moiseev Igor
+
+# ELLIPTIC PROJECT: http://elliptic.googlecode.com
+# Group:
+
+def inverselliptic2(E: np.ndarray, m: np.ndarray, tol: float = None):
+    if not isinstance(E, np.ndarray):
+        E = np.array([E])
+
+    if not isinstance(m, np.ndarray):
+        m = np.array([m])
+
+    if tol == None:
+        tol = sys.float_info.epsilon
+
+    if not np.isreal(E).all() or not np.isreal(m).all() :
+        raise Exception('Input arguments must be real.')
+
+    # if len(m) == 1:
+    #     m = m(np.ones(E.shape))
+
+    # if len(E) == 1:
+    #     E = E(np.ones(m.shape))
+
+    # if not m.shape == E.shape:
+    #     raise Exception('E and M must be the same size.')
+
+    invE = np.zeros(E.shape)
+    # make a row vector
+    m = m
+    E = E
+
+    if np.any(m < 0) or np.any(m > 1):
+        raise Exception('M must be in the range 0 <= M <= 1.')
+
+    # cdav change for small eccentricities
+    # for i in range(len(m)):
+    #     if abs(m[i]) < 1e-07:
+    #         m[i] = 1e-07
+
+
+    # inputs
+    z = E
+    mu = 1 - m
+    # complete integral initialization
+    # E1 = special.ellipe(m, tol)
+    u = np.full(m.shape, np.pi / 2)
+    __, E1, _ = elliptic12(u, m)
+    zeta = 1 - z / E1
+    r = np.sqrt(zeta * zeta + mu * mu)
+    theta = np.arctan(mu / (z + sys.float_info.epsilon))
+    # Empirical initialization [1]
+    invE = np.pi / 2 + np.sqrt(r) * (theta - (np.pi / 2))
+    for _ in range(4):
+        __, E, _ = elliptic12(invE, m, tol)
+        invE = invE -(E - z) / np.sqrt(1 - m * np.sin(invE) ** 2)
+
+    return invE
+
+#ARCLENGTH_ELLIPSE Calculates the arclength of ellipse.
+#
+#   ARCLENGTH_ELLIPSE(A, B, THETA0, THETA1) Calculates the arclength of ellipse
+#   using the precise formulas based on the representation of
+#   the arclength by the Elliptic integral of the second kind.
+#
+#   Ellipse parameters:
+#       T - measured in radians from 0 in the positive direction,
+#           Period: 2*Pi
+#       A - major axis
+#       B - minor axis
+#
+#   Parametric equations:
+#       x(t) = a.cos(t)
+#       y(t) = b.sin(t)
+#
+#   Cartesian equation:
+#   x^2/a^2 + y^2/b^2 = 1
+#
+#   Eccentricity:
+#       e = Sqrt(1 - (a/b)^2)
+#
+#   Focal parameter:
+#       b^2/Sqrt(a^2 - b^2)
+#
+#   Foci:
+#       (-Sqrt(a^2 - b^2), 0)   OR   (Sqrt(a^2 - b^2), 0)
+#
+#   Arclength:
+#       b*EllipticE( t, 1 - (a/b)^2 )
+#
+#   Mathematica Test 1:
+#       In:= b = 10; a = 5;
+#            SetPrecision[b*EllipticE[2Pi, 1.0- a^2/b^2],20]
+#      Out:= 48.442241102738385905
+#
+#   Mathematica Test 2:
+#       In:= b = 10; a = 5;
+#            SetPrecision[b*(EllipticE[Pi/2-Pi/10, 1.0- a^2/b^2]-EllipticE[Pi/10, 1.0- a^2/b^2]),20]
+#      Out:= 7.3635807913930495516
+#
+#   MATLAB Test 1:
+#       # full ellipse
+#       arclength = arclength_ellipse(5,10)
+#       arclength =
+#           48.442241102738436
+#
+#   MATLAB Test 2:
+#       # arclength ellipse
+#       arclength = arclength_ellipse(5,10,pi/10,pi/2)
+#       arclength =
+#           7.363580791393055
+#
+#   References:
+#   @see http://mathworld.wolfram.com/Ellipse.html
+#   @see http://www.wolframalpha.com/input/?i=ellipse+arc+length&lk=1&a=ClashPrefs_*PlaneCurve.Ellipse.PlaneCurveProperty.ArcLength-
+#
+
+# Special thanks to for bug correction
+#    drbitboy (Brian Carcich) https://github.com/drbitboy
+# 2015-07-14 (New Horizons flyby of Pluto)
+#
+# 1) Old code returned values that were in error
+# 1.1)  arclength_ellipse(1., .5, pi*.001, pi*.002) returned 0
+# 1.2)  arclength_ellipse(1., .5, pi*.002, pi*.001) returned -.0003*pi instead of pi correct .0005*pi
+# 1.3)  arclength_ellipse(1., .5, theta0, theta1) did not return the negative of the same call with the thetas reversed
+# 2) Angles theta0 and theta1 were always interpreted as measured from the semi-minor axis
+#
+# 3) Corrected code:
+# 3.1) Angle theta is measured from the positive a axis
+# 3.2) The standard form of the b*E(phi,m) arc length integral has m = 1 - (a/b)^2
+# 3.2.1) N.B. That only only works if b>a
+# 3.3) If a>b, then an alternate formula is used:  a*E(PI/2 - phi, m') where m' = 1 - (b/a)^2
+# 3.4) A few simple cases will show that the new code is correct
+#        arclength_ellipse(1, .5, pi*.001, pi*.002) ~  pi*.0005
+#        arclength_ellipse(1, .5, pi*.002, pi*.001) = -arclength(1, .5, pi*.001, pi*.002) ~ -pi*.0005
+#        arclength_ellipse(1., 2., pi*.001, pi*.002) ~ pi*.002
+#        arclength_ellipse(1, .5, pi/2 - pi*.002, pi/2 - pi*.001) ~ -pi*.001
+#        arclength_ellipse(1, 2., pi/2 - pi*.002, pi/2 - pi*.001) ~ -pi*.001
+#        etc.
+
+# Copyright Elliptic Project 2011
+# For support,
+#     moiseev.igor[at]gmail.com
+#     Moiseev Igor
+
+def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
+                      theta1: np.ndarray = None):
+
+    if not isinstance(a, np.ndarray):
+        a = np.array([a])
+
+    if not isinstance(b, np.ndarray):
+        b = np.array([b])
+
+    if not isinstance(theta0, np.ndarray):
+        theta0 = np.array([theta0])
+
+    if not isinstance(theta1, np.ndarray):
+        theta1 = np.array([theta1])
+
+    arclength = a * (theta1 - theta0)
+
+    if not theta0.any() or not theta1.any():
+        if not theta0.any() and not theta1.any():
+            theta0 = np.full(a.shape, 0)
+            theta1 = np.full(a.shape, 2*math.pi)
+        else:
+            print("Error: requires both theta0 and theta1 set or neither!")
+            return
+
+    theta0a = np.zeros(len(a))
+    theta1a = np.zeros(len(a))
+    ab = np.zeros(len(a))
+    for i in range(len(a)):
+        if a[i] < b[i]:
+            ab[i] = 1 - (a[i] / b[i]) ** 2
+            theta0a[i] = theta0[i]
+            theta1a[i] = theta1[i]
+        elif a[i] > b[i]:
+            ab[i] =  1 - (b[i] / a[i]) ** 2
+            theta0a[i] = math.pi / 2 - theta0[i]
+            theta1a[i] = math.pi / 2 - theta1[i]
+
+    F1, E1, Z1 = elliptic12(theta1a, ab)
+    F0, E0, Z0 = elliptic12(theta0a, ab)
+
+    arclength = np.zeros(len(a))
+    for i in range(len(a)):
+        if a[i] < b[i]:
+            arclength[i] = b[i] * (E1[i] - E0[i])
+        elif a[i] > b[i]:
+            arclength[i] = a[i] * (E0[i] - E1[i])
+
+    return arclength
 
 
 ##############################################################################################################
@@ -3160,90 +3569,106 @@ def legPoly(x=None, i=None):
 if __name__ == '__main__':
 
 
-  c2new, c3new = findc2c3(math.pi/7.0)
-  print("findc2c3 returned: ", c2new, c3new)
+    c2new, c3new = findc2c3(math.pi/7.0)
+    print("findc2c3 returned: ", c2new, c3new)
 
 
-  m, nu = newtone(0.4, 334.566986 * deg2rad)
-  print("newtone returned: ", m, nu)
+    m, nu = newtone(0.4, 334.566986 * deg2rad)
+    print("newtone returned: ", m, nu)
 
-  e0, nu = newtonm(0.1, math.pi/2.0)
-  print("newtonm returned: ", e0, nu)
+    e0, nu = newtonm(0.1, math.pi/2.0)
+    print("newtonm returned: ", e0, nu)
 
-  e0, ma = newtonnu(0.1, math.pi/2.0)
-  print("newtonnu returned: ", e0, ma)
+    e0, ma = newtonnu(0.1, math.pi/2.0)
+    print("newtonnu returned: ", e0, ma)
 
-  jd = 60206
+    jd = 60206
 
-  r1r, r1i, r2r, r2i, r3r, r3i = cubic(1, 2, 3, 4, 'I')
-  print("cubic returned: ", r1r, r1i, r2r, r2i, r3r, r3i)
+    r1r, r1i, r2r, r2i, r3r, r3i = cubic(1, 2, 3, 4, 'I')
+    print("cubic returned: ", r1r, r1i, r2r, r2i, r3r, r3i)
 
-  r1r, r1i, r2r, r2i = quadric(1, 2, 3, 'I')
-  print("quadric returned: ", r1r, r1i, r2r, r2i)
-
-
-  ttt = (jd - 2451545.0)/ 36525.0  #0.34698738576
-  print("ttt is ", ttt)
-  opt = "80"
-
-  l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
-    lonsat, lonurn, lonnep, precrate = fundarg(ttt, opt)
-  print("fundarg returned ", l, l1, f, d, omega, lonmer, lonven,
-         lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate)
-
-  xp = math.pi
-  yp = math.pi
-
-  pm = polarm (xp, yp, ttt, opt)
-  print("polarm returned ", pm)
+    r1r, r1i, r2r, r2i = quadric(1, 2, 3, 'I')
+    print("quadric returned: ", r1r, r1i, r2r, r2i)
 
 
-  vec = np.array([1, 2, 3])
-  print("ORIG: ", vec)
+    ttt = (jd - 2451545.0)/ 36525.0  #0.34698738576
+    print("ttt is ", ttt)
+    opt = "80"
 
-  print("ANGL---")
-  vecx = angl(vec, vec)
-  print("ZERO: ", vecx)
+    l, l1, f, d, omega, lonmer, lonven, lonear, lonmar, lonjup, \
+        lonsat, lonurn, lonnep, precrate = fundarg(ttt, opt)
+    print("fundarg returned ", l, l1, f, d, omega, lonmer, lonven,
+            lonear, lonmar, lonjup, lonsat, lonurn, lonnep, precrate)
 
-  print("ROT1---")
-  vecx = rot1(vec, 0.0)
-  print("ZERO: ", vecx)
-  vecx = rot1(vec, math.pi/2.0)
-  print("PIO2: ", vecx)
-  vecx = rot1(vec, math.pi)
-  print("PI  : ", vecx)
-  vecx = rot1(vec, 2.0*math.pi)
-  print("2PI : ", vecx)
+    xp = math.pi
+    yp = math.pi
 
-  print("ROT2---")
-  vecx = rot2(vec, 0.0)
-  print("ZERO: ", vecx)
-  vecx = rot2(vec, math.pi/2.0)
-  print("PIO2: ", vecx)
-  vecx = rot2(vec, math.pi)
-  print("PI  : ", vecx)
-  vecx = rot2(vec, 2.0*math.pi)
-  print("2PI : ", vecx)
-
-  print("ROT3---")
-  vecx = rot3(vec, 0.0)
-  print("ZERO: ", vecx)
-  vecx = rot3(vec, math.pi/2.0)
-  print("PIO2: ", vecx)
-  vecx = rot3(vec, math.pi)
-  print("PI  : ", vecx)
-  vecx = rot3(vec, 2.0*math.pi)
-  print("2PI : ", vecx)
+    pm = polarm (xp, yp, ttt, opt)
+    print("polarm returned ", pm)
 
 
-  print("MAG---")
-  vec = np.array([math.sqrt(1.1e-16), math.sqrt(1.1e-16), math.sqrt(1.1e-16)])
-  vecx = mag(vec)
-  print("MAG : ", vecx)
-  vec = np.array([math.sqrt(1.0e-16/3.0), math.sqrt(1.0e-16/3.0),
-                  math.sqrt(1.0e-16/3.0)])
-  vecx = mag(vec)
-  print("MAG : ", vecx)
+    vec = np.array([1, 2, 3])
+    print("ORIG: ", vec)
+
+    print("ANGL---")
+    vecx = angl(vec, vec)
+    print("ZERO: ", vecx)
+
+    print("ROT1---")
+    vecx = rot1(vec, 0.0)
+    print("ZERO: ", vecx)
+    vecx = rot1(vec, math.pi/2.0)
+    print("PIO2: ", vecx)
+    vecx = rot1(vec, math.pi)
+    print("PI  : ", vecx)
+    vecx = rot1(vec, 2.0*math.pi)
+    print("2PI : ", vecx)
+
+    print("ROT2---")
+    vecx = rot2(vec, 0.0)
+    print("ZERO: ", vecx)
+    vecx = rot2(vec, math.pi/2.0)
+    print("PIO2: ", vecx)
+    vecx = rot2(vec, math.pi)
+    print("PI  : ", vecx)
+    vecx = rot2(vec, 2.0*math.pi)
+    print("2PI : ", vecx)
+
+    print("ROT3---")
+    vecx = rot3(vec, 0.0)
+    print("ZERO: ", vecx)
+    vecx = rot3(vec, math.pi/2.0)
+    print("PIO2: ", vecx)
+    vecx = rot3(vec, math.pi)
+    print("PI  : ", vecx)
+    vecx = rot3(vec, 2.0*math.pi)
+    print("2PI : ", vecx)
+
+
+    print("MAG---")
+    vec = np.array([math.sqrt(1.1e-16), math.sqrt(1.1e-16), math.sqrt(1.1e-16)])
+    vecx = mag(vec)
+    print("MAG : ", vecx)
+    vec = np.array([math.sqrt(1.0e-16/3.0), math.sqrt(1.0e-16/3.0),
+                    math.sqrt(1.0e-16/3.0)])
+    vecx = mag(vec)
+    print("MAG : ", vecx)
+
+    #arclength_ellipse tests
+    answers = np.array([.0005, -.0005, .002, .001, .001, 48.4422411 / math.pi,
+                        7.36358/math.pi])
+    a = np.array([1, 1, 1, 1, 1, 5, 5])
+    b = np.array([.5, .5, 2, .5, 2, 10, 10])
+    theta0 = np.array([.001, .002, .001, .5 - .002, .5 - .002, 0, 0.1])
+    theta1 = np.array([.002, .001, .002, .5 - .001, .5 - .001, 2, 0.5])
+    theta0 = theta0 * math.pi
+    theta1 = theta1 * math.pi
+
+    arclength = arclength_ellipse(a, b, theta0, theta1)
+
+    print(f'{answers}')
+    print(f'{arclength / math.pi}')
+    print(f'{(arclength / math.pi) / answers}')
 
 
 

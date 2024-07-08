@@ -14,9 +14,7 @@ import spacetime_utils as stu
 #  revisions
 #
 #  inputs          description                    range / units
-#
-#
-#
+#    infilename  - input data file
 #
 #  outputs       :
 #    jpldearr    - array of jplde data records
@@ -32,7 +30,23 @@ import spacetime_utils as stu
 #  -------------------------------------------------------------------------- */
 
 
-def initjplde(infilename = None):
+def initjplde(infilename: str):
+    """this function initializes the jpl planetary ephemeris data. the input
+       data files are from processing the ascii files into a text file of sun
+       and moon positions.
+
+    Parameters
+    ----------
+    infilename : str
+        name of the data file to use
+
+    Returns
+    -------
+    jpldearr : dictionary of arrays
+        arrays of jplde data records
+    jdjpldestart : float
+        julian date of the start of the jpldearr data
+    """
     #double jdtdb, jdtdbf;
     #string pattern;
     #Int32 i;

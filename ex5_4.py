@@ -29,23 +29,32 @@ import space_conversions as sc
 import orbit_utils as obu
 from space_constants import au, rad2deg, deg2rad
 
-# --------  moon         - moon rise set
+# --------  moon - moon rise/set
 jd, jdfrac = stu.jday(1998, 8, 21, 0, 0, 0.0)
 latgd = 40.0 * deg2rad
 lon = 0.0 * deg2rad
 utmoonrise, utmoonset, moonphaseang, error = obu.moonrise(jd + jdfrac, latgd,
                                                           lon)
-#fprintf(1, 'moon moonrise #14.4f    moonset #14.4f hrs \n', utmoonrise, utmoonset );
-print('moon moonrise %14.4f  %14.4f   moonset %14.4f %14.4f  \n'
-      % (utmoonrise, (utmoonrise - int(np.floor(utmoonrise))) * 60,
-         utmoonset, (utmoonset - int(np.floor(utmoonset))) * 60))
+print('moon moonrise %14.6f  %14.4f   moonset %14.6f %14.4f  \n'
+      % (utmoonrise, (utmoonrise - np.floor(utmoonrise)) * 60,
+         utmoonset, (utmoonset - np.floor(utmoonset)) * 60))
 print('moon phase angle %14.4f   \n' % (moonphaseang))
+
+utmoonrise, utmoonset, moonphaseang, error = obu.moonrise2(jd + jdfrac, latgd,
+                                                           lon)
+print('2moon moonrise %14.6f  %14.4f   moonset %14.6f %14.4f  \n'
+      % (utmoonrise, (utmoonrise - np.floor(utmoonrise)) * 60,
+         utmoonset, (utmoonset - np.floor(utmoonset)) * 60))
+print('2moon phase angle %14.4f   \n' % (moonphaseang))
+
+# seems to be the most accurate. -zeg
 utmoonrise, utmoonset, moonphaseang, error = obu.moonrise3(jd + jdfrac, latgd,
                                                            lon)
-print('2moon moonrise %14.4f  %14.4f   moonset %14.4f %14.4f  \n'
-      % (utmoonrise, (utmoonrise - int(np.floor(utmoonrise))) * 60,
-         utmoonset, (utmoonset - int(np.floor(utmoonset))) * 60))
-print('2moon phase angle %14.4f   \n' % (moonphaseang))
+print('3moon moonrise %14.6f  %14.4f   moonset %14.6f %14.4f  \n'
+      % (utmoonrise, (utmoonrise - np.floor(utmoonrise)) * 60,
+         utmoonset, (utmoonset - np.floor(utmoonset)) * 60))
+print('3moon phase angle %14.4f   \n' % (moonphaseang))
+
 jd, jdfrac = stu.jday(1990, 3, 5, 0, 0, 0.0)
 latgd = 40.94 * deg2rad
 lon = - 73.97 * deg2rad
@@ -53,16 +62,16 @@ lon = - 73.97 * deg2rad
 #        fprintf(1, 'moon moonrise #14.4f  #14.4f   moonset #14.4f #14.4f  \n', utmoonrise, (utmoonrise-floor(utmoonrise))*60, utmoonset, (utmoonset-floor(utmoonset))*60 );
 #        fprintf(1, 'moon phase angle #14.4f   \n', moonphaseang );
 utmoonrise, utmoonset, moonphaseang, error = obu.moonrise2(jd + jdfrac, latgd,
-                                                           lon, 'y')
+                                                           lon)
 print('moon moonrise %14.4f  %14.4f   moonset %14.4f %14.4f  \n'
-      % (utmoonrise, (utmoonrise - int(np.floor(utmoonrise))) * 60,
-         utmoonset, (utmoonset - int(np.floor(utmoonset))) * 60))
+      % (utmoonrise, (utmoonrise - np.floor(utmoonrise)) * 60,
+         utmoonset, (utmoonset - np.floor(utmoonset)) * 60))
 print('moon phase angle %14.4f   \n' % (moonphaseang))
 jd, jdfrac = stu.jday(2006, 6, 28, 0, 0, 0.0)
 latgd = 40.0 * deg2rad
 lon = 0.0 * deg2rad
 utmoonrise, utmoonset, moonphaseang, error = obu.moonrise2(jd + jdfrac,
-                                                           latgd, lon, 'y')
+                                                           latgd, lon)
 print('moon moonrise %14.4f    moonset %14.4f hrs \n'
       % (utmoonrise, utmoonset))
 print('moon phase angle %14.4f   \n' % (moonphaseang))
@@ -71,13 +80,13 @@ jdfrac = 0.0
 latgd = - 108.2802963256836 * deg2rad
 lon = 32.77009963989258 * deg2rad
 utmoonrise, utmoonset, moonphaseang, error = obu.moonrise(jd + jdfrac,
-                                                          latgd, lon, 'y')
+                                                          latgd, lon)
 #fprintf(1, 'moon moonrise #14.4f    moonset #14.4f hrs \n', utmoonrise, utmoonset );
 print('moon moonrise %14.4f  %14.4f   moonset %14.4f %14.4f  \n' %
-      (utmoonrise, (utmoonrise - int(np.floor(utmoonrise))) * 60,
-       utmoonset, (utmoonset - int(np.floor(utmoonset))) * 60))
+      (utmoonrise, (utmoonrise - np.floor(utmoonrise)) * 60,
+       utmoonset, (utmoonset - np.floor(utmoonset)) * 60))
 print('moon phase angle %14.4f   \n' % (moonphaseang))
-#pause
+
 print('     40    42    44    46    48    50    52    54    56    58    60    62    64    66  \n' % ())
 for i in range(8, 31):
     jd, jdfrac = stu.jday(2006, 6, i, 0, 0, 0.0)
@@ -85,7 +94,7 @@ for i in range(8, 31):
         latgd = (40.0 + j * 2.0) * deg2rad
         lon = 0.0 * deg2rad
         utmoonrise, utmoonset, moonphaseang, error = \
-            obu.moonrise3(jd + jdfrac, latgd, lon, 'n')
+            obu.moonrise3(jd + jdfrac, latgd, lon)
         #                if strcmp(error, 'ok') == 0 # 1 if true, 0 if false
 #                    fprintf(1, 'error');
 #                end;
@@ -125,7 +134,7 @@ for i in range(8, 31):
         latgd = (40.0 + j * 2.0) * deg2rad
         lon = 0.0 * deg2rad
         utmoonrise, utmoonset, moonphaseang, error = \
-            obu.moonrise3(jd + jdfrac, latgd, lon, 'n')
+            obu.moonrise3(jd + jdfrac, latgd, lon)
         #                if strcmp(error, 'ok') == 0 # 1 if true, 0 if false
 #                    fprintf(1, 'error');
 #                end;
