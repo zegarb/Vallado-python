@@ -7,9 +7,6 @@ import spacemath_utils as smu
 import spacetime_utils as stu
 import orbit_utils as obu
 from space_constants import sethelp as sh
-from arclength_ellipse import arclength_ellipse
-from elliptic12 import elliptic12
-from inverselliptic2 import inverselliptic2
 
 # ------------------------------------------------------------------------------
 #
@@ -8840,13 +8837,13 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     ea1, _ = smu.newtonnu(ecc, nu1)
     if abs(arclength) > 0.001:
         DE = arclength / atgt
-        deltaea = inverselliptic2(DE, ecc **2)
-        F1, E1, _ = elliptic12(ea1, ecc **2)
+        deltaea = smu.inverselliptic2(DE, ecc **2)
+        F1, E1, _ = smu.elliptic12(ea1, ecc **2)
         ea2e = ea1 + deltaea
         i = 1
         arclength1a = arclength + 10
         while (i < 10) and (abs(arclength1a - arclength) > 0.001):
-            F2, E2, _ = elliptic12(ea2e, ecc**2)
+            F2, E2, _ = smu.elliptic12(ea2e, ecc**2)
             arclength1a = atgt * (E2 - E1)
             corr = arclength / (ea2e - ea1)
             ea2e = ea2e - (arclength1a - arclength) / corr
@@ -8973,7 +8970,7 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
         else:
             ea1 = 2.0 * np.pi - ea1
 
-    arc1 = arclength_ellipse(atgt,btgt,ea1,ea2)[0]
+    arc1 = smu.arclength_ellipse(atgt,btgt,ea1,ea2)[0]
     #print("testing arclength func: %f", arc1)
 
     # F1, E1, _ = elliptic12(ea1, ecc ** 2)
