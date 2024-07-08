@@ -30,7 +30,6 @@ Examples:
 5_3: Y
 
 5_4: 'moonel' function doesn't exist
-    moon phase angle output of moonrise() could be wrong
 
 5_5: Y (matches the actual values explained in ErattaVer4, which are slightly
         different than the book)

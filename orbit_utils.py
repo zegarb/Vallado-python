@@ -1897,7 +1897,7 @@ def satfov(incl=None, az=None, slatgd=None, slon=None, salt=None, tfov=None,
 def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
 
     numiter = 20
-    errorl = '      ok'
+    errorl = 'ok'
     v1dv = np.zeros((3))
     v2dv = np.zeros((3))
 
@@ -6689,8 +6689,8 @@ def iau06xys(ttt: float, ddx: float, ddy: float):
 
     if sh.iauhelp:
         print('xys x %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
-               % (xsum0 / deg2rad, xsum1 / deg2rad, xsum2 / deg2rad,
-                  xsum3 / deg2rad, xsum4 / deg2rad))
+               % (xsum0 * rad2deg, xsum1 * rad2deg, xsum2 * rad2deg,
+                  xsum3 * rad2deg, xsum4 * rad2deg))
 
     # ---------------- now find y
     ysum0 = 0.0
@@ -6759,8 +6759,8 @@ def iau06xys(ttt: float, ddx: float, ddy: float):
 
     if sh.iauhelp:
         print('xys y %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
-              % (ysum0 / deg2rad, ysum1 / deg2rad, ysum2 / deg2rad,
-                 ysum3 / deg2rad, ysum4 / deg2rad))
+              % (ysum0 * rad2deg, ysum1 * rad2deg, ysum2 * rad2deg,
+                 ysum3 * rad2deg, ysum4 * rad2deg))
 
     # ---------------- now find s
     ssum0 = 0.0
@@ -6832,8 +6832,8 @@ def iau06xys(ttt: float, ddx: float, ddy: float):
         print('06xys before x  %14.12f y  %14.12f s %14.12f rad \n'
               % (x, y, s))
         print('xys s %14.12f  %14.12f  %14.12f  %14.12f  %14.12f \n'
-              % (ssum0 / deg2rad, ssum1 / deg2rad, ssum2 / deg2rad,
-                 ssum3 / deg2rad, ssum4 / deg2rad))
+              % (ssum0 * rad2deg, ssum1 * rad2deg, ssum2 * rad2deg,
+                 ssum3 * rad2deg, ssum4 * rad2deg))
 
     # add corrections if available
     x = x + ddx
@@ -8187,7 +8187,7 @@ def moonrise(jd: float, latgd: float, lon: float):
             eclplat = math.fmod(eclplat * deg2rad, twopi)
             if sh.show:
                 print('%2d %2d ecpllon %11.7f ecllat %11.7f '
-                      % (opt, try1, eclplong / deg2rad, eclplat / deg2rad))
+                      % (opt, try1, eclplong * rad2deg, eclplat * rad2deg))
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
             # ------- find the geocentric direction cosines -------
@@ -8209,7 +8209,7 @@ def moonrise(jd: float, latgd: float, lon: float):
             lst, gst = stu.lstime(lon, jdtemp + jdtempf)
             if sh.show:
                 print('ra %8.5f dcl %8.5f lst %8.5f jdtemp %8.5f \n'
-                      % (rtasc / deg2rad, decl / deg2rad, lst / deg2rad,
+                      % (rtasc * rad2deg, decl * rad2deg, lst * rad2deg,
                          jdtemp + jdtempf))
             moonghan = lst - lon - rtasc
             #cdav
@@ -8222,7 +8222,7 @@ def moonrise(jd: float, latgd: float, lon: float):
                 dgha = dgha + twopi / abs(deltaut)
             if sh.show:
                 print('mn gha %11.7f  dgha  %11.7f '
-                      % (moonghan / deg2rad, dgha / deg2rad))
+                      % (moonghan * rad2deg, dgha * rad2deg))
             lhan = ((0.00233 - math.sin(latgd) * math.sin(decl))
                     / (math.cos(latgd) * math.cos(decl)))
             if sh.show:
@@ -8236,7 +8236,7 @@ def moonrise(jd: float, latgd: float, lon: float):
             if (opt == 1):
                 lhan = twopi - lhan
             if sh.show:
-                print('lhan1 %11.7f ' % (lhan / deg2rad))
+                print('lhan1 %11.7f ' % (lhan * rad2deg))
             if (abs(dgha) > 0.0001):
                 deltaut = (lhan - lha) / dgha
             else:
@@ -8324,7 +8324,7 @@ def moonrise(jd: float, latgd: float, lon: float):
 
 # -----------------------------------------------------------------------------
 #
-#                           function moonriset
+#                           function moonrise
 #
 #  this function finds the universal time for moonrise and moonset given the
 #    day and site location. notice this routine kicks out if the event
@@ -8337,9 +8337,8 @@ def moonrise(jd: float, latgd: float, lon: float):
 #
 #  inputs          description                    range / units
 #    jd          - julian date                    days from 4713 bc
-#    latgd       - site latitude (south -)        -65 to 65 rad
+#    latgd       - site latitude (south -)        -65pi/180 to 65pi/180 rad
 #    lon         - site longitude (west -)        -2pi to 2pi rad
-#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    utmoonrise  - universal time of moonrise     hrs
@@ -8397,11 +8396,35 @@ def moonrise(jd: float, latgd: float, lon: float):
 # [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise2(jd=None, latgd=None, lon=None, show=False):
-    # ------------------------  implementation   ------------------
+def moonrise2(jd: float, latgd: float, lon: float):
+    """this function finds the universal time for moonrise and moonset given
+    the day and site location. notice this routine kicks out if the event
+    occurs on the next or previous day.
+
+    Parameters
+    ----------
+    jd : float
+        julian date: days since 4713 bc
+    latgd : float
+        geodetic latitude of site: -65pi/180 to 65pi/180 radians
+    lon : float
+        longitude of site: -2pi to 2pi radians
+
+    Returns
+    -------
+    utmoonrise : float
+        universal time of moonrise: hours
+    utmoonset : float
+        universal time of moonset: hours
+    moonphaseang : float
+        moon phase angle: degrees
+    error : str
+        error parameter
+    """
+
     error = 'ok'
-    # -------------- for once for moonrise (1), ) set (2) ---------
-# -------------- make sure lon is within +- 180 deg -----------
+
+    # -------------- make sure lon is within +- 180 deg -----------
     if (lon > math.pi):
         lon = lon - 2.0 * math.pi
 
@@ -8428,8 +8451,10 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
         jdtemp = jdtemp + jdtempf + uttemp
         deltaut = 10.0
         ktlim = 15
-        if show:
-            print('   ecplon    ecllat       l          m           n       rtasc          decl        gmst       mgha      dgha    lhan     lhan1   deltaut     tn    deltaut    jd    tn \n' % ())
+        if sh.show:
+            print('   ecplon    ecllat       l          m           n       '
+                  'rtasc          decl        gmst       mgha      dgha    '
+                  'lhan     lhan1   deltaut     tn    deltaut    jd    tn \n')
         while ((abs(deltaut) >= 8e-05) and (i < ktlim)):
 
             ttdb = (jdtemp + jdtempf - 2451545.0) / 36525.0
@@ -8446,8 +8471,9 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
                        - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
             eclplong = math.fmod(eclplong * deg2rad, twopi)
             eclplat = math.fmod(eclplat * deg2rad, twopi)
-            if show:
-                print('%2i %2i %11.7f %11.7f ' % (opt, i, eclplong / deg2rad, eclplat / deg2rad))
+            if sh.show:
+                print('%2i %2i %11.7f %11.7f '
+                      % (opt, i, eclplong * rad2deg, eclplat * rad2deg))
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
             # ------- find the geocentric direction cosines -------
@@ -8456,45 +8482,45 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
                  - math.sin(obliquity) * math.sin(eclplat))
             n = (math.sin(obliquity) * math.cos(eclplat) * math.sin(eclplong)
                  + math.cos(obliquity) * math.sin(eclplat))
-            if show:
+            if sh.show:
                 print(' %11.7f %11.7f %11.7f ' % (l, m, n))
             rtasc = math.atan2(m, l)
             # - check that rtasc is in the same quadrant as eclplong
-#        if (eclplong < 0.0)
-#            eclplong = eclplong + twopi
-#        end
+            #        if (eclplong < 0.0)
+            #            eclplong = eclplong + twopi
+            #        end
             if (abs(eclplong - rtasc) > math.pi * 0.5):
                 rtasc = rtasc + 0.5 * math.pi * np.rint(0.5 + (eclplong - rtasc)
                                                       / (0.5 * math.pi))
             decl = math.asin(n)
             lst, gmst = stu.lstime(lon, jdtemp)
-            if show:
-                print(' %d %d %d ' % (rtasc, decl, gmst / deg2rad))
+            if sh.show:
+                print(' %d %d %d ' % (rtasc, decl, gmst * rad2deg))
             moonghan = gmst - rtasc
             #cdav
             lha = moonghan + lon
             #           # find elevation directly at this time
-#           el = asin(sin(latgd) * sin(rtasc) + cos(latgd) * cos(rtasc) * cos(lha))
+            #           el = asin(sin(latgd) * sin(rtasc) + cos(latgd) * cos(rtasc) * cos(lha))
             if (i == 0):
                 dgha = 347.81 * deg2rad
             else:
                 dgha = (moonghan - moongha) / deltaut
             #        if (dgha < 0.0)
-#            dgha = dgha + twopi / abs(deltaut)
-#        end
-            if show:
-                print(' %11.7f  %11.7f ' % (moonghan / deg2rad, dgha / deg2rad))
+            #            dgha = dgha + twopi / abs(deltaut)
+            #        end
+            if sh.show:
+                print(' %11.7f  %11.7f ' % (moonghan * rad2deg, dgha * rad2deg))
             lhan = (0.00233 - (math.sin(latgd) * math.sin(decl))
                     / (math.cos(latgd) * math.cos(decl)))
-            if show:
+            if sh.show:
                 print(' %11.7f rad ' % (lhan))
             #fprintf('lhan  #11.7f deg \n', lhan/deg2rad)
-#       if (lhan > 1.0)
-#           lhan = 0.0
-#       end
-#       if (lhan < -1.0)
-#           lhan = -1.0
-#       end
+            #       if (lhan > 1.0)
+            #           lhan = 0.0
+            #       end
+            #       if (lhan < -1.0)
+            #           lhan = -1.0
+            #       end
             if abs(lhan) > 1.0:
                 deltaut = 1.0
                 uttemp = 9999.9
@@ -8503,51 +8529,42 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
                 lhan = math.acos(lhan)
                 if (opt == 1):
                     lhan = twopi - lhan
-                if show:
-                    print(' %11.7f ' % (lhan / deg2rad))
+                if sh.show:
+                    print(' %11.7f ' % (lhan * rad2deg))
                 deltaut = (lhan - lha) / dgha
-                if show:
+                if sh.show:
                     print(' % 11.7f  %11.7f ' % (deltaut, tn))
                 #                if (abs(deltaut) > 0.5)
-#                    if (abs(dgha) > 0.001)
+                #                    if (abs(dgha) > 0.001)
                 if (deltaut < - 0.5):
                     deltaut = deltaut + twopi / dgha
-                    #                            if (abs(deltaut) > 0.51)
-#                                uttemp = -9999.9  # day before
-#                                i = ktlim # end this trial
-#                            end
+                    # if (abs(deltaut) > 0.51)
+                    #    uttemp = -9999.9  # day before
+                    #    i = ktlim # end this trial
                 else:
                     if (deltaut > 0.5):
                         deltaut = deltaut - twopi / dgha
-                        #                                if (abs(deltaut) > 0.51)
-#                                    i = ktlim # end this trial needed
-#                                    uttemp = 9999.9
-#                                end
-                #                    else
-#                        error = 'error2 dgha is too small'
-#                        fprintf('dgha too small #11.7f ', dgha)
-#                    end
-#                end
-                #                 if (abs(deltaut) > 0.5)
-#                     if (abs(dgha) > 0.001)
-#                         if (deltaut < 0.0) # event is day before
-#                             deltaut = deltaut + twopi / dgha
-#                             if (abs(deltaut) > 0.51)
-#                                 uttemp = -9999.9  # day before
-#                                 i = ktlim # end this trial
-#                             end
-#                         else
-#                             deltaut = deltaut - twopi / dgha
-#                             if (abs(deltaut) > 0.51)
-#                                 i = ktlim # end this trial needed
-#                                 uttemp = 9999.9
-#                             end
-#                         end
-#                     else
-#                         error = 'error2 dgha is too small'
-#                         fprintf('dgha too small #11.7f ', dgha)
-                #                     end
-#                 end
+                        # if (abs(deltaut) > 0.51)
+                            # i = ktlim # end this trial needed
+                            # uttemp = 9999.9
+                    # else
+                            # error = 'error2 dgha is too small'
+                            # fprintf('dgha too small #11.7f ', dgha)
+                    # if (abs(deltaut) > 0.5)
+                        # if (abs(dgha) > 0.001)
+                            # if (deltaut < 0.0) # event is day before
+                                # deltaut = deltaut + twopi / dgha
+                                # if (abs(deltaut) > 0.51)
+                                    # uttemp = -9999.9  # day before
+                                    # i = ktlim # end this trial
+                                # else
+                                    # deltaut = deltaut - twopi / dgha
+                                    # if (abs(deltaut) > 0.51)
+                                        # i = ktlim # end this trial needed
+                                        # uttemp = 9999.9
+                                    # else
+                                        # error = 'error2 dgha is too small'
+                                        # fprintf('dgha too small #11.7f ', dgha)
                 if uttemp + deltaut < 0.0:
                     deltaut = deltaut - 1.0
                     i = ktlim
@@ -8558,7 +8575,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
             jdtemp = jdtemp + jdtempf + deltaut
             uttemp = uttemp + deltaut
             tn = uttemp
-            if show:
+            if sh.show:
                 print(' % 11.7f  %14.4f  %11.7f \n'
                       % (deltaut, jdtemp + jdtempf, tn))
 
@@ -8566,11 +8583,11 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
         if (tn > 2.0):
             i = ktlim
             uttemp = 9999.99
-        #if (uttemp > 24.0) && (uttemp < 9999.0)
-# fprintf('rem #11.7f ', uttemp)
-        #  uttemp = math.fmod(uttemp, 24.0)
-# fprintf('#11.7f ', uttemp)
-#end
+        # if (uttemp > 24.0) && (uttemp < 9999.0)
+            # fprintf('rem #11.7f ', uttemp)
+            # uttemp = math.fmod(uttemp, 24.0)
+            # fprintf('#11.7f ', uttemp)
+            #end
 #        if (uttemp < 0.0)
 #            uttemp = uttemp + 24.0
 #        end
@@ -8585,7 +8602,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
         # update the iteration and check for solution
         try1 = try1 + 1
         if ((i > ktlim - 1) and (try1 < 3)):
-            if show:
+            if sh.show:
                 print('try1 #2 %4d \n' % (opt))
                 print(' uttemp  %11.7f  hrs \n' % (uttemp))
         else:
@@ -8599,7 +8616,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
 #                     uttemp = 9997.99
 #                 end
 #             end
-            if show:
+            if sh.show:
                 print(' uttemp  %11.7f  hrs \n' % (uttemp))
             opt = opt + 1
             try1 = 1
@@ -8631,7 +8648,7 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
 
 # -----------------------------------------------------------------------------
 #
-#                           function moonriset
+#                           function moonrise
 #
 #  this function finds the universal time for moonrise and moonset given the
 #    day and site location.
@@ -8645,7 +8662,6 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
 #    jd          - julian date                    days from 4713 bc
 #    latgd       - site latitude (south -)        -65 to 65 rad
 #    lon         - site longitude (west -)        -2pi to 2pi rad
-#    show        - show printouts                 True/False
 #
 #  outputs       :
 #    utmoonrise  - universal time of moonrise     hrs
@@ -8703,19 +8719,40 @@ def moonrise2(jd=None, latgd=None, lon=None, show=False):
 # [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise3(jd=None, latgd=None, lon=None, show=False):
-    # ------------------------  implementation   ------------------
+def moonrise3(jd: float, latgd: float, lon: float):
+    """this function finds the universal time for moonrise and moonset given
+    the day and site location.
+
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+    latgd : float
+        geodetic latitude of site: -65pi/180 to 65pi/180 radians
+    lon : float
+        longidute of site: -2pi to 2pi radians
+
+    Returns
+    -------
+    utmoonrise : float
+        universal time of moonrise: hours
+    utmoonset : float
+        universal time of moonset: hours
+    moonphaseang : float
+        moon phase angle: degrees
+    error : str
+        error parameter
+    """
     error = 'ok'
-    # -------------- for once for moonrise (1), ) set (2) ---------
-# -------------- make sure lon is within +- 180 deg -----------
+    # -------------- make sure lon is within +- 180 deg -----------
     if (lon > math.pi):
         lon = lon - 2.0 * math.pi
 
     if (lon < - math.pi):
         lon = lon + twopi
 
-    #   try1 = 1 # try another approach on the current option
-# opt = 1-2 for rise/set
+    # try1 = 1 # try another approach on the current option
+    # opt = 1-2 for rise/set
     for opt in range(3):
         tolerance = 0.00035
         GHA = 0.0
@@ -8740,10 +8777,10 @@ def moonrise3(jd=None, latgd=None, lon=None, show=False):
                        - 0.17 * math.sin((217.6 - 407332.2 * ttdb) * deg2rad))
             eclplong = math.fmod(eclplong * deg2rad, twopi)
             eclplat = math.fmod(eclplat * deg2rad, twopi)
-            if show:
+            if sh.show:
                 print('%2i %2i%8.5f  %11.7f %11.7f ' %
-                      (opt, loopCount, ttdb, eclplong / deg2rad,
-                       eclplat / deg2rad))
+                      (opt, loopCount, ttdb, eclplong * rad2deg,
+                       eclplat * rad2deg))
             obliquity = 23.439291 - 0.0130042 * ttdb
             obliquity = obliquity * deg2rad
             # ------- find the geocentric direction cosines -------
@@ -8771,15 +8808,15 @@ def moonrise3(jd=None, latgd=None, lon=None, show=False):
                 deltaGHA = deltaGHA + twopi / abs(deltaUT)
             cosLHAn = ((0.00233 - math.sin(latgd) * math.sin(decl))
                        / (math.cos(latgd) * math.cos(decl)))
-            if show:
+            if sh.show:
                 print(' coslha %8.5f lmn %11.7f %11.7f %11.7f \n'
                       % (cosLHAn, l, m, n))
             if (abs(cosLHAn) > 1.0):
                 # No event on this day advance to the next
                 deltaUT = 1
-                if show:
+                if sh.show:
                     print('nothing Advancing one day \n' % ())
-                print('a' % ())
+                    print('a' % ())
             else:
                 LHAn = math.acos(cosLHAn)
                 if (opt == 1):
@@ -8793,19 +8830,19 @@ def moonrise3(jd=None, latgd=None, lon=None, show=False):
                         deltaUT = deltaUT - twopi / deltaGHA
                 if (deltaJD + deltaUT < 0.0):
                     deltaUT = deltaUT + 1
-                    print('A' % ())
-                    if show:
+                    if sh.show:
+                        print('A' % ())
                         print('Advancing one day \n' % ())
                 GHA = GHAn
             jdtemp = jdtemp + deltaUT
             deltaJD = deltaJD + deltaUT
             loopCount = loopCount + 1
-            if show:
+            if sh.show:
                 print('%2i %2i %11.7f hrs %8.5f '
                       % (opt, loopCount, deltaUT * 24, deltaJD * 24))
                 print('rtasc %11.7f  decl %8.5f gmst %8.5f GHAn %8.5f dGHA %8.5f  LHAn %8.5f jdtemp %8.5f\n'
-                      % (rtasc / deg2rad, decl / deg2rad, gmst / deg2rad,
-                         GHAn / deg2rad, deltaGHA / deg2rad, LHAn / deg2rad,
+                      % (rtasc * rad2deg, decl * rad2deg, gmst * rad2deg,
+                         GHAn * rad2deg, deltaGHA * rad2deg, LHAn * rad2deg,
                          jdtemp))
 
         if opt == 1:
@@ -8813,7 +8850,7 @@ def moonrise3(jd=None, latgd=None, lon=None, show=False):
         if opt == 2:
             utmoonset = deltaJD * 24
 
-    if show:
+    if sh.show:
         print('rise %11.7f  set %11.7f  \n' % (utmoonrise, utmoonset))
 
 
@@ -8854,7 +8891,7 @@ def moonrise3(jd=None, latgd=None, lon=None, show=False):
 #                -
 #
 #  inputs          description                    range / units
-#    f           - moon hase angle                rad
+#    phaseangle  - moon phase angle               rad
 #    moonel      - moon elevation                 rad
 #
 #  outputs       :
@@ -8872,8 +8909,21 @@ def moonrise3(jd=None, latgd=None, lon=None, show=False):
 # [moonillum] = moonill (f, moonel)
 # ------------------------------------------------------------------------------
 
-def moonill(f=None, moonel=None):
-    # ------------------------  implementation   ------------------
+def moonill(phaseangle: float, moonel: float):
+    """this function calculates the illumination due to the moon.
+
+    Parameters
+    ----------
+    phaseangle : float
+        moon phase angle: rad
+    moonel : float
+        moon elevation: rad
+
+    Returns
+    -------
+    moonillum : float
+        moon illumination
+    """
     x = moonel / 90.0
     g = 1.0
     if (moonel >= 20):
@@ -8881,34 +8931,32 @@ def moonill(f=None, moonel=None):
         l1 = 4.06
         l2 = - 4.24
         l3 = 1.56
+    elif (((moonel >= 5.0) and (moonel < 20.0))):
+        l0 = - 2.58
+        l1 = 12.58
+        l2 = - 42.58
+        l3 = 59.06
+    elif (((moonel > - 0.8) and (moonel < 5.0))):
+        l0 = - 2.79
+        l1 = 24.27
+        l2 = - 252.95
+        l3 = 1321.29
     else:
-        if (((moonel >= 5.0) and (moonel < 20.0))):
-            l0 = - 2.58
-            l1 = 12.58
-            l2 = - 42.58
-            l3 = 59.06
-        else:
-            if (((moonel > - 0.8) and (moonel < 5.0))):
-                l0 = - 2.79
-                l1 = 24.27
-                l2 = - 252.95
-                l3 = 1321.29
-            else:
-                l0 = 0.0
-                l1 = 0.0
-                l2 = 0.0
-                l3 = 0.0
-                f = 0.0
-                g = 0.0
+        l0 = 0.0
+        l1 = 0.0
+        l2 = 0.0
+        l3 = 0.0
+        phaseangle = 0.0
+        g = 0.0
 
     l1 = l0 + l1 * x + l2 * x * x + l3 * x * x * x
-    l2 = (- 0.00868 * f - 2.2e-09 * f * f * f * f)
+    l2 = (- 0.00868 * phaseangle - 2.2e-09 * phaseangle**4)
     #       hzparal = 0.9508 + 0.0518*cos((134.9+477198.85*ttdb)*deg2rad)
-#                + 0.0095*cos((259.2-413335.38*ttdb)*deg2rad)
-#                + 0.0078*cos((235.7+890534.23*ttdb)*deg2rad)
-#                + 0.0028*cos((269.9+954397.70*ttdb)*deg2rad)   { deg }
-#       hzparal = realmod(hzparal*deg2rad, twopi)
-#       l3 = (2.0* power(10.0, (hzparal * rad2deg / 0.951))*g) { use g to eliminate neg el passes }
+    #                + 0.0095*cos((259.2-413335.38*ttdb)*deg2rad)
+    #                + 0.0078*cos((235.7+890534.23*ttdb)*deg2rad)
+    #                + 0.0028*cos((269.9+954397.70*ttdb)*deg2rad)   { deg }
+    #       hzparal = realmod(hzparal*deg2rad, twopi)
+    #       l3 = (2.0* power(10.0, (hzparal * rad2deg / 0.951))*g) { use g to eliminate neg el passes }
 
     moonillum = 10.0 ** (l1 + l2)
     if (((moonillum < - 1e+36) or (moonillum > 0.999))):
@@ -8957,23 +9005,47 @@ def moonill(f=None, moonel=None):
 # [hitearth, hitearthstr] = checkhitearth (altpad, r1, v1t, r2, v2t, nrev)
 # ------------------------------------------------------------------------------
 
-def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
-    # --------------------------  implementation   -----------------
-    show = False
-    mu = 398600.4418
-    hitearth = 'n'
+def checkhitearth(altpad: float, r1: np.ndarray, v1t: np.ndarray,
+                  r2: np.ndarray, v2t: np.ndarray, nrev: int):
+    """this function checks to see if the trajectory hits the earth during the
+    transfer.
+
+    Parameters
+    ----------
+    altpad : float
+        pad for altitude above surface
+    r1 : ndarray
+        initial position vector: km
+    v1t : ndarray
+        initial velocity vector of transfer: km/s
+    r2 : ndarray
+        final position vector: km
+    v2t : ndarray
+        final velocity vector of transfer: km/s
+    nrev : int
+        number of revolutions
+
+    Returns
+    -------
+    hitearth : bool
+        if earth was impacted: True or False
+    hitearthstr : str
+        error string for earth impact
+    """
+
+    hitearth = False
     hitearthstr = 'no'
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
-    rpad = 6378.137 + altpad
+    rpad = re + altpad
     #fprintf(1, 'mr1 #11.7f mr2 #11.7f ', magr1, magr2)
-# check whether Lambert transfer trajectory hits the Earth
-# this check may not be needed depending on input data
+    # check whether Lambert transfer trajectory hits the Earth
+    # this check may not be needed depending on input data
     if (magr1 < rpad or magr2 < rpad):
         # hitting earth already at start or stop point
-        hitearth = 'y'
-        hitearthstr = hitearth + ' initradii'
-        if show:
+        hitearth = True
+        hitearthstr = 'y - initradii'
+        if sh.show:
             print('hitearth? %s \n' % (hitearthstr))
     else:
         rdotv1 = np.dot(r1, v1t)
@@ -8983,10 +9055,10 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
         # Find ecos(E)
         ecosea1 = 1.0 - magr1 * ainv
         ecosea2 = 1.0 - magr2 * ainv
-        #fprintf(1, 'ec1 #11.7f ec2 #11.7f ainv #11.7f ', ecosea1, ecosea2, ainv)
+
         # Determine radius of perigee
-# 4 distinct cases pass thru perigee
-# nrev > 0 you have to check
+        # 4 distinct cases pass thru perigee
+        # nrev > 0 you have to check
         if (nrev > 0):
             a = 1.0 / ainv
             # elliptical orbit
@@ -8999,12 +9071,12 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
                 ecc = math.sqrt(ecosea1 * ecosea1 - esinea1 * esinea1)
             rp = a * (1.0 - ecc)
             if (rp < rpad):
-                hitearth = 'y'
-                hitearthstr = hitearth + 'Sub_Earth_nrev'
+                hitearth = True
+                hitearthstr = 'y - Sub_Earth_nrev'
             # nrev = 0, 3 cases:
-# heading to perigee and ending after perigee
-# both headed away from perigee, but end is closer to perigee
-# both headed toward perigee, but start is closer to perigee
+            # heading to perigee and ending after perigee
+            # both headed away from perigee, but end is closer to perigee
+            # both headed toward perigee, but start is closer to perigee
         else:
             if ((rdotv1 < 0.0 and rdotv2 > 0.0) or
                     (rdotv1 > 0.0 and rdotv2 > 0.0 and ecosea1 < ecosea2) or
@@ -9015,8 +9087,8 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
                     magh = smu.mag(hbar)
                     rp = magh * magh * 0.5 / mu
                     if (rp < rpad):
-                        hitearth = 'y'
-                        hitearthstr = hitearth + ' Sub_Earth_para'
+                        hitearth = True
+                        hitearthstr = 'y - Sub_Earth_para'
                 else:
                     # for both elliptical & hyperbolic
                     a = 1.0 / ainv
@@ -9028,18 +9100,18 @@ def checkhitearth(altpad=None, r1=None, v1t=None, r2=None, v2t=None, nrev=None):
                     if (ecc < 1.0):
                         rp = a * (1.0 - ecc)
                         if (rp < rpad):
-                            hitearth = 'y'
-                            hitearthstr = hitearth + ' Sub_Earth_ell'
+                            hitearth = True
+                            hitearthstr = 'y - Sub_Earth_ell'
                     else:
                         # hyperbolic heading towards the earth
                         if (rdotv1 < 0.0 and rdotv2 > 0.0):
                             rp = a * (1.0 - ecc)
                             if (rp < rpad):
-                                hitearth = 'y'
-                                hitearthstr = hitearth + ' Sub_Earth_hyp'
+                                hitearth = True
+                                hitearthstr = 'y - Sub_Earth_hyp'
                     #   fprintf(1, 'hitearth? #s rp #11.7f  #11.7f km \n', hitearthstr, rp*6378.137, rpad*6378.137)
-            if show:
-                print('hitearth? %s rp %11.7f km \n' % (hitearth, rp * 6378.0))
+            if sh.show:
+                print('hitearth? %s rp %11.7f km \n' % (hitearth, rp * re))
 
     return hitearth, hitearthstr
 
@@ -9266,7 +9338,7 @@ def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
     #  }
 
     # - update resonances : numerical (euler-maclaurin) integration -
-# ------------------------- epoch restart ----------------------
+    # ------------------------- epoch restart ----------------------
 
     #   sgp4fix for propagator problems
     #   the following integration works for negative time steps and periods
@@ -9531,83 +9603,81 @@ def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
 
     return ep, inclp, nodep, argpp, mp
 
-'''
-% -----------------------------------------------------------------------------
-%
-%                            procedure dscom
-%
-%   this procedure provides deep space common items used by both the secular
-%     and periodics subroutines.  input is provided as shown. this routine
-%     used to be called dpper, but the functions inside weren't well organized.
-%
-% Author:
-%   Jeff Beck
-%   beckja@alumni.lehigh.edu
-%   1.0 (aug 7, 2006) - update for paper dav
-% original comments from Vallado C++ version:
-%   author        : david vallado                  719-573-2600   28 jun 2005
-%
-%   inputs        :
-%     epoch       -
-%     ep          - eccentricity
-%     argpp       - argument of perigee
-%     tc          -
-%     inclp       - inclination
-%     nodep       - right ascension of ascending node
-%     np          - mean motion
-%
-%   outputs       :
-%     sinim  , cosim  , sinomm , cosomm , snodm  , cnodm
-%     day         -
-%     e3          -
-%     ee2         -
-%     em          - eccentricity
-%     emsq        - eccentricity squared
-%     gam         -
-%     peo         -
-%     pgho        -
-%     pho         -
-%     pinco       -
-%     plo         -
-%     rtemsq      -
-%     se2, se3         -
-%     sgh2, sgh3, sgh4        -
-%     sh2, sh3, si2, si3, sl2, sl3, sl4         -
-%     s1, s2, s3, s4, s5, s6, s7          -
-%     ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1, sz2, sz3         -
-%     sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32, sz33        -
-%     xgh2, xgh3, xgh4, xh2, xh3, xi2, xi3, xl2, xl3, xl4         -
-%     nm          - mean motion
-%     z1, z2, z3, z11, z12, z13, z21, z22, z23, z31, z32, z33         -
-%     zmol        -
-%     zmos        -
-%
-%   locals        :
-%     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10         -
-%     betasq      -
-%     cc          -
-%     ctem, stem        -
-%     x1, x2, x3, x4, x5, x6, x7, x8          -
-%     xnodce      -
-%     xnoi        -
-%     zcosg  , zsing  , zcosgl , zsingl , zcosh  , zsinh  , zcoshl , zsinhl ,
-%     zcosi  , zsini  , zcosil , zsinil ,
-%     zx          -
-%     zy          -
-%
-%   coupling      :
-%     none.
-%
-%   references    :
-%     hoots, roehrich, norad spacetrack report #3 1980
-%     hoots, norad spacetrack report #6 1986
-%     hoots, schumacher and glover 2004
-%     vallado, crawford, hujsak, kelso  2006
-%  ----------------------------------------------------------------------------*/
-'''
+# -----------------------------------------------------------------------------
+#
+#                            procedure dscom
+#
+#   this procedure provides deep space common items used by both the secular
+#     and periodics subroutines.  input is provided as shown. this routine
+#     used to be called dpper, but the functions inside weren't well organized.
+#
+# Author:
+#   Jeff Beck
+#   beckja@alumni.lehigh.edu
+#   1.0 (aug 7, 2006) - update for paper dav
+# original comments from Vallado C++ version:
+#   author        : david vallado                  719-573-2600   28 jun 2005
+#
+#   inputs        :
+#     epoch       -
+#     ep          - eccentricity
+#     argpp       - argument of perigee
+#     tc          -
+#     inclp       - inclination
+#     nodep       - right ascension of ascending node
+#     np          - mean motion
+#
+#   outputs       :
+#     sinim  , cosim  , sinomm , cosomm , snodm  , cnodm
+#     day         -
+#     e3          -
+#     ee2         -
+#     em          - eccentricity
+#     emsq        - eccentricity squared
+#     gam         -
+#     peo         -
+#     pgho        -
+#     pho         -
+#     pinco       -
+#     plo         -
+#     rtemsq      -
+#     se2, se3         -
+#     sgh2, sgh3, sgh4        -
+#     sh2, sh3, si2, si3, sl2, sl3, sl4         -
+#     s1, s2, s3, s4, s5, s6, s7          -
+#     ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1, sz2, sz3         -
+#     sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32, sz33        -
+#     xgh2, xgh3, xgh4, xh2, xh3, xi2, xi3, xl2, xl3, xl4         -
+#     nm          - mean motion
+#     z1, z2, z3, z11, z12, z13, z21, z22, z23, z31, z32, z33         -
+#     zmol        -
+#     zmos        -
+#
+#   locals        :
+#     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10         -
+#     betasq      -
+#     cc          -
+#     ctem, stem        -
+#     x1, x2, x3, x4, x5, x6, x7, x8          -
+#     xnodce      -
+#     xnoi        -
+#     zcosg  , zsing  , zcosgl , zsingl , zcosh  , zsinh  , zcoshl , zsinhl ,
+#     zcosi  , zsini  , zcosil , zsinil ,
+#     zx          -
+#     zy          -
+#
+#   coupling      :
+#     none.
+#
+#   references    :
+#     hoots, roehrich, norad spacetrack report #3 1980
+#     hoots, norad spacetrack report #6 1986
+#     hoots, schumacher and glover 2004
+#     vallado, crawford, hujsak, kelso  2006
+#  ----------------------------------------------------------------------------*/
 def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
 
-    #% /* -------------------------- constants ------------------------- */
+    # -------------------------- constants -------------------------
     zes     =  0.01675;
     zel     =  0.05490;
     c1ss    =  2.9864797e-6;
@@ -9617,7 +9687,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
     zcosgs  =  0.1945905;
     zsings  = -0.98088458;
 
-    #% /* --------------------- local variables ------------------------ */
+    # --------------------- local variables ------------------------
     nm     = np;
     em     = ep;
     snodm  = math.sin(nodep);
@@ -9630,7 +9700,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
     betasq = 1.0 - emsq;
     rtemsq = math.sqrt(betasq);
 
-    #% /* ----------------- initialize lunar solar terms --------------- */
+    # ----------------- initialize lunar solar terms ---------------
     peo    = 0.0;
     pinco  = 0.0;
     plo    = 0.0;
@@ -9652,7 +9722,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
     zcosgl = math.cos(zx);
     zsingl = math.sin(zx);
 
-    #% /* ------------------------- do solar terms --------------------- */
+    # ------------------------- do solar terms ---------------------
     zcosg = zcosgs;
     zsing = zsings;
     zcosi = zcosis;
@@ -9708,7 +9778,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
         s6  = x2 * x3 + x1 * x4;
         s7  = x2 * x4 - x1 * x3;
 
-        #% /* ----------------------- do lunar terms ------------------- */
+        # ----------------------- do lunar terms -------------------
         if (lsflg == 0):
             ss1   = s1;
             ss2   = s2;
@@ -9740,7 +9810,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
     zmol = math.fmod(4.7199672 + 0.22997150  * day - gam, twopi);
     zmos = math.fmod(6.2565837 + 0.017201977 * day, twopi);
 
-    #% /* ------------------------ do solar terms ---------------------- */
+    # ------------------------ do solar terms ----------------------
     se2  =   2.0 * ss1 * ss6;
     se3  =   2.0 * ss1 * ss7;
     si2  =   2.0 * ss2 * sz12;
@@ -9754,7 +9824,7 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
     sh2  =  -2.0 * ss2 * sz22;
     sh3  =  -2.0 * ss2 * (sz23 - sz21);
 
-    #% /* ------------------------ do lunar terms ---------------------- */
+    # ------------------------ do lunar terms ----------------------
     ee2  =   2.0 * s1 * s6;
     e3   =   2.0 * s1 * s7;
     xi2  =   2.0 * s2 * z12;
@@ -9808,20 +9878,31 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
 # [sunillum] = sunill   (jd, lat, lon, sunaz, sunel)
 # ------------------------------------------------------------------------------
 
-def sunill(jd=None, lat=None, lon=None, sunaz=None, sunel=None):
-    # -------------------------  implementation   -----------------
-    rsun, srtasc, sdecl = sun(jd)
+def sunill(jd: float, lat: float, lon: float):
+    """this function calculates the illumination due to the sun.
 
-    lst, gst = stu.lstime(lon, jd)
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+    lat : float
+        latitude of site: rad
+    lon : float
+        longitude of site: rad
+
+    Returns
+    -------
+    sunillum : float
+        illumination of the sun
+    """
+    _, srtasc, sdecl = sun(jd)
+
+    lst, _ = stu.lstime(lon, jd)
     lha = lst - srtasc
-    sunel = (math.asin(math.sin(sdecl) * math.sin(lat)
-                       + math.cos(sdecl) * math.cos(lat) * math.cos(lha)))
-    sinv = (- math.sin(lha) * math.cos(sdecl)
-            * math.cos(lat) / (math.cos(sunel) * math.cos(lat)))
-    cosv = ((math.sin(sdecl) - math.sin(sunel) * math.sin(lat))
-            / (math.cos(sunel) * math.cos(lat)))
-    sunaz = math.atan2(sinv, cosv)
-    sunel = sunel / deg2rad
+    sinlat, coslat, sindecl, cosdecl, _, coslha = \
+        smu.getsincos(lat, sdecl, lha)
+    sunel = (math.asin(sindecl * sinlat + cosdecl * coslat * coslha))
+    sunel = sunel * rad2deg
     if (sunel > - 18.01):
         x = sunel / 90.0
         if (sunel >= 20):
@@ -9829,41 +9910,36 @@ def sunill(jd=None, lat=None, lon=None, sunaz=None, sunel=None):
             l1 = 3.97
             l2 = - 4.07
             l3 = 1.47
+        elif (((sunel >= 5.0) and (sunel < 20.0))):
+            l0 = 3.05
+            l1 = 13.28
+            l2 = - 45.98
+            l3 = 64.33
+        elif (((sunel >= - 0.8) and (sunel < 5.0))):
+            l0 = 2.88
+            l1 = 22.26
+            l2 = - 207.64
+            l3 = 1034.3
+        elif (((sunel >= - 5.0)and (sunel < - 0.8))):
+            l0 = 2.88
+            l1 = 21.81
+            l2 = - 258.11
+            l3 = - 858.36
+        elif (((sunel >= - 12.0) and (sunel < - 5.0))):
+            l0 = 2.7
+            l1 = 12.17
+            l2 = - 431.69
+            l3 = - 1899.83
+        elif (((sunel >= - 18.0) and (sunel < - 12.0))):
+            l0 = 13.84
+            l1 = 262.72
+            l2 = 1447.42
+            l3 = 2797.93
         else:
-            if (((sunel >= 5.0) and (sunel < 20.0))):
-                l0 = 3.05
-                l1 = 13.28
-                l2 = - 45.98
-                l3 = 64.33
-            else:
-                if (((sunel >= - 0.8) and (sunel < 5.0))):
-                    l0 = 2.88
-                    l1 = 22.26
-                    l2 = - 207.64
-                    l3 = 1034.3
-                else:
-                    if (((sunel >= - 5.0)and (sunel < - 0.8))):
-                        l0 = 2.88
-                        l1 = 21.81
-                        l2 = - 258.11
-                        l3 = - 858.36
-                    else:
-                        if (((sunel >= - 12.0) and (sunel < - 5.0))):
-                            l0 = 2.7
-                            l1 = 12.17
-                            l2 = - 431.69
-                            l3 = - 1899.83
-                        else:
-                            if (((sunel >= - 18.0) and (sunel < - 12.0))):
-                                l0 = 13.84
-                                l1 = 262.72
-                                l2 = 1447.42
-                                l3 = 2797.93
-                            else:
-                                l0 = 0.0
-                                l1 = 0.0
-                                l2 = 0.0
-                                l3 = 0.0
+            l0 = 0.0
+            l1 = 0.0
+            l2 = 0.0
+            l3 = 0.0
         l1 = l0 + l1 * x + l2 * x * x + l3 * x * x * x
         sunillum = 10.0 ** l1
         if (((sunillum < - 1e+36) or (sunillum > 999.999))):
@@ -9923,15 +9999,52 @@ def sunill(jd=None, lat=None, lon=None, sunaz=None, sunel=None):
 # ------------------------------------------------------------------------------
 
 
-def target (rint, vint, rtgt, vtgt, dm, kind, dtsec, ndot, nddot):
+def target (rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
+            vtgt: np.ndarray, dm: str, kind: str, dtsec: float, ndot: float,
+            nddot: float):
+    """this function accomplishes the targeting problem using kepler/pkepler &
+    lambert.
 
-# -------------------------  implementation   -------------------------
+    Parameters
+    ----------
+    rint : ndarray
+        initial position vector of interceptor: km
+    vint : ndarray
+        initial velocity vector of interceptor: km/s
+    rtgt : ndarray
+        initial position vector of target: km
+    vtgt : ndarray
+        initial velocity vector of target: km/s
+    dm : str
+        direction of motion for gauss: 'l' or 's'
+    kind : str
+        type of propagator: 'k' or 'p'
+    dtsec : float
+        time of flight for interceptor: sec
+    ndot : float
+
+    nddot : float
+
+
+    Returns
+    -------
+    v1t : ndarray
+        initial transfer velocity vec: km/s
+    v2t : ndarray
+        final transfer velocity vec: km/s
+    dv1 : ndarray
+        initial change velocity vec: km/s
+    dv2 : ndarray
+        final change velocity vec: km/s
+    error : str
+        error flag from gauss: 'ok', ...
+    """
 
     # ----------- propogate target forward by time ----------------
     if (kind =='k'):
-        kepler
         r1tgt, v1tgt, errmsg = kepler(rtgt, vtgt, 0.0)
-        print("kepler returned: ", errmsg)
+        if sh.show:
+            print("kepler returned: ", errmsg)
     elif (kind =='p'):
         r1tgt, v1tgt = pkepler(rtgt, vtgt, dtsec, ndot, nddot)
     else:
@@ -9941,14 +10054,14 @@ def target (rint, vint, rtgt, vtgt, dm, kind, dtsec, ndot, nddot):
     # ----------- calculate transfer orbit between r's ------------
     v1t, v2t, error1 = lambertu(rint, r1tgt, dm, 'n', dtsec)
 
-    if (error1 == '      ok'):
+    if (error1 == 'ok'):
         dv1 = -vint + v1t
         dv2 = v1tgt - v2t
     else:
         print(' err %s ', error1)
         v1t = np.zeros((3))
         v2t = np.zeros((3))
-        dvt = np.zeros((3))
+        dv1 = np.zeros((3))
         dv2 = np.zeros((3))
 
     return v1t, v2t, dv1, dv2
@@ -9956,7 +10069,7 @@ def target (rint, vint, rtgt, vtgt, dm, kind, dtsec, ndot, nddot):
 
 # -----------------------------------------------------------------------------
 #
-#                           procedure findatwbatwa
+#                           procedure findatwaatwb
 #
 # this procedure finds the a and b matrices for the differential correction
 #   problem.  remember that it isn't critical for the propagations to use
@@ -9973,19 +10086,15 @@ def target (rint, vint, rtgt, vtgt, dm, kind, dtsec, ndot, nddot):
 #  inputs          description                                range / units
 #    firstob     - number of observations
 #    lastob      - number of observations
+#    obsrecarr    - array of records containing:
+#                  time, timef, latgd, lon, alt, ttt,
+#                  jdut1, xp, yp, noiserng, noiseaz,
+#                  noiseel, obstype
 #    statesize   - size of state                                6 , 7
 #    percentchg  - amount to modify the vectors
 #                  by in finite differencing
 #    deltaamtchg - tolerance for small value in
 #                  finite differencing                         0.0000001
-#    whichconst  - parameter for sgp4 constants                wgs72, wgs721, wgs84
-#    satrec      - structure of satellite parameters for TLE
-#    obsrecfile    - array of records containing:
-#                  senum, jd, rsvec, obstype,
-#                  rng, az, el, drng, daz, del,
-#                  trtasc, tdecl data
-#    statetype   - type of elements (equinoctial, etc)         'e', 't'
-#    scalef      - scale factor to limit the size of the state vector
 #    xnom        - state vector                                varied
 #
 #  outputs       :
@@ -9996,17 +10105,6 @@ def target (rint, vint, rtgt, vtgt, dm, kind, dtsec, ndot, nddot):
 #    drng2       - range residual squared
 #    daz2        - azimuth residual squared
 #    del2        - elevation residual squared
-#    ddrng2      - range rate residual squared
-#    ddaz2       - azimuth rate residual squared
-#    ddel2       - elevation rate residual squared
-#    dtrtasc2    - topocentric right ascension residual squared
-#    dtdecl2     - topocentric declination residual squared
-#    dx2         - x position residual squared
-#    dy2         - y position residual squared
-#    dz2         - z position residual squared
-#    dxdot2      - xdot position residual squared
-#    dydot2      - ydot position residual squared
-#    dzdot2      - zdot position residual squared
 #
 #  locals        :
 #    rnom        - nom position vector at epoch                km
@@ -10036,26 +10134,68 @@ def target (rint, vint, rtgt, vtgt, dm, kind, dtsec, ndot, nddot):
 #
 #  references    :
 #    vallado       2013, 753-765
-# --------------------------------------------------------------------------- */
+# ---------------------------------------------------------------------------
 
-def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
-                 statesize=None, percentchg=None, deltaamtchg=None,
-                 xnom=None):
+def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
+                 statesize: int, percentchg: float, deltaamtchg: float,
+                 xnom: np.ndarray):
+    """this procedure finds the a and b matrices for the differential correction
+   problem.  remember that it isn't critical for the propagations to use
+   the highest fidelity techniques because we're only trying to find the
+   "slope". k is an index that allows us to do multiple rows at once. it's
+   used for both the b and a matrix calculations.
+
+    Parameters
+    ----------
+    firstobs : int
+        first observation to use
+    lastobs : int
+        last observation to use
+    obsrecarr : observation array
+        array of records containing: time, timef, latgd, lon, alt, ttt,
+        jdut1, xp, yp, noiserng, noiseaz,noiseel, obstype
+    statesize : int
+        size of state: 6 or 7
+    percentchg : float
+        amount to modify the vectors by in finite differencing
+    deltaamtchg : float
+        tolerance for small value in finite differencing
+    xnom : ndarray
+        state vector
+
+    Returns
+    -------
+    atwa : ndarray
+        atwa matrix
+    atwb : ndarray
+        atwb matrix
+    atw : ndarray
+        atw matrix
+    b : ndarray
+        b matrix/residuals
+    drng2 : float
+        range residual squared
+    daz2 : float
+        azimuth residual squared
+    del2 : float
+        elevation residual squared
+    """
     # --------------------- initialize parameters ------------------
     if obsrecarr[0]['obstype'] == 0:
         indobs = 1
+    elif obsrecarr[0]['obstype'] == 2:
+        indobs = 3
     else:
-        if obsrecarr[0]['obstype'] == 2:
-            indobs = 3
-        else:
-            indobs = 2
+        indobs = 2
 
     drng2 = 0.0
     daz2 = 0.0
     del2 = 0.0
     dtrtasc2 = 0.0
     dtdecl2 = 0.0
-    atwaacc = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+    atwaacc = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
     atwbacc = np.array([[0], [0], [0], [0], [0], [0]])
     # ------------- reset these since they will accumulate ---------
 # zero out matrices
@@ -10070,16 +10210,17 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
     for obsktr in range(firstobs, lastobs + 1):
         currobsrec = obsrecarr[obsktr]
         #printf("ob #2i rsecef0 #11.5f jd #11.5f dtmin #8.3f hr #3i rng #11.7f \n",
-#         i, currobsrec['rsecef'][0], currobsrec['jd'], currobsrec['dtmin'], currobsrec['hr'], currobsrec['rng'])  # ritrf
+        # i, currobsrec['rsecef'][0], currobsrec['jd'], currobsrec['dtmin'], currobsrec['hr'], currobsrec['rng'])  # ritrf
         # ----------------- determine sensor characteristics -----------------
-#         rs[0] = currobsrec['rsecef'][0]
-#         rs(2) = currobsrec['rsecef'](2)
-#         rs(3) = currobsrec['rsecef'](3)
+        # rs[0] = currobsrec['rsecef'][0]
+        # rs(2) = currobsrec['rsecef'](2)
+        # rs(3) = currobsrec['rsecef'](3)
         # temporary sensor for now
 #  getsensorparams(currobsrec.sennum, currsenrec)
         # --------- propagate the nominal vector to the epoch time -----------
-#         sgp4 (whichconst, satrec,  currobsrec.dtmin, rteme, vteme)
-        dtsec = (currobsrec['time'] + currobsrec['timef'] - obsrecarr[0]['time'] - obsrecarr[0]['timef']) * 86400.0
+        # sgp4 (whichconst, satrec,  currobsrec.dtmin, rteme, vteme)
+        dtsec = (currobsrec['time'] + currobsrec['timef'] -
+                 obsrecarr[0]['time'] - obsrecarr[0]['timef']) * 86400.0
         rnom[0] = xnom[0, 0]
         rnom[1] = xnom[1, 0]
         rnom[2] = xnom[2, 0]
@@ -10090,9 +10231,17 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
         reci1, veci1 = pkepler(rnom, vnom, dtsec, 0, 0)
         # ------------------------- find b matrix ----------------------------
         if currobsrec['obstype'] != 3:
-            rngnom, aznom, elnom, drngnom, daznom, delnom = sc.rv2razel(reci1.T, veci1.T, currobsrec['latgd'], currobsrec['lon'], currobsrec['alt'], currobsrec['ttt'], currobsrec['jdut1'], 0.0, currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
+            rngnom, aznom, elnom, drngnom, daznom, delnom = \
+            sc.rv2razel(reci1.T, veci1.T, currobsrec['latgd'],
+                        currobsrec['lon'], currobsrec['alt'],
+                        currobsrec['ttt'], currobsrec['jdut1'], 0.0,
+                        currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
         else:
-            rngnom, trtascnom, tdeclnom, drngnom, dtrtascnom, dtdeclnom = sc.rv2tradc(reci1.T, veci1.T, currobsrec['latgd'], currobsrec['lon'], currobsrec['alt'], currobsrec['ttt'], currobsrec['jdut1'], 0.0, currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
+            rngnom, trtascnom, tdeclnom, drngnom, dtrtascnom, dtdeclnom = \
+            sc.rv2tradc(reci1.T, veci1.T, currobsrec['latgd'],
+                        currobsrec['lon'], currobsrec['alt'],
+                        currobsrec['ttt'], currobsrec['jdut1'], 0.0,
+                        currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
         if 0 == (currobsrec['obstype']):
             b[0, 0] = currobsrec['rng'] - rngnom
         elif 1 == (currobsrec['obstype']):
@@ -10115,10 +10264,10 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
                 b[0, 0] = b[0, 0] - np.sign(b[0, 0]) * 2.0 * math.pi
             b[1, 0] = currobsrec['tdecl'] - tdeclnom
         #printf("rnom #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f #8.3f \n",
-#              rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
+            #  rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
         # ------------------------ find a matrix -----------------------------
-# ------------- reset the perturbed vector to the nominal ------------
-#  satrecp = satrec
+        # ------------- reset the perturbed vector to the nominal ------------
+        #  satrecp = satrec
         xnomp = np.copy(xnom)
         rnomp = np.zeros(3)
         vnomp = np.zeros(3)
@@ -10137,15 +10286,15 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
             #  [reci3, veci3] = kepler (rnomp, vnomp, dtsec)
             reci3, veci3 = pkepler(rnomp, vnomp, dtsec, 0, 0)
             # teme to itrf if observation type
-#  if (currobsrec['obstype'] ~= 4)
-#      mfme = currobsrec['hr'](j) * 60 + currobsrec['min'](j) + currobsrec['sec'](j)/60.0
-#      findeopparam (currobsrec['jd'], mfme, interp, eoparr, jdeopstart,
-#                     dut1, dat, lod, xp, yp, ddpsi, ddeps,
-#                     iaudx, dy, icrsx, y, s, deltapsi, deltaeps)
-#      [ut1, tut1, jdut1, utc, tai, tt, ttt, jdtt, tdb, ttdb, jdtdb ] ...
-#       = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
-#      iau76fk5_itrf_teme(ritrf, vitrf, aitrf, eFrom, r3, v3, ateme, ttt, xp, yp, jdut1, lod, trans)
-#  end # if obstype
+            #  if (currobsrec['obstype'] ~= 4)
+            #      mfme = currobsrec['hr'](j) * 60 + currobsrec['min'](j) + currobsrec['sec'](j)/60.0
+            #      findeopparam (currobsrec['jd'], mfme, interp, eoparr, jdeopstart,
+            #                     dut1, dat, lod, xp, yp, ddpsi, ddeps,
+            #                     iaudx, dy, icrsx, y, s, deltapsi, deltaeps)
+            #      [ut1, tut1, jdut1, utc, tai, tt, ttt, jdtt, tdb, ttdb, jdtdb ] ...
+            #       = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
+            #      iau76fk5_itrf_teme(ritrf, vitrf, aitrf, eFrom, r3, v3, ateme, ttt, xp, yp, jdut1, lod, trans)
+            #  end # if obstype
             if (currobsrec['obstype'] == 3):
                 trrpert, trtascpert, tdeclpert, tdrrpert, tdrtascpert, tddeclpert =\
                       sc.rv2tradc(reci3.T, veci3.T, currobsrec['latgd'],
@@ -10160,8 +10309,8 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
                                 currobsrec['lon'], currobsrec['alt'],
                                 currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                                 currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
-                    #        fprintf(1, 'rnom  #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f km \n', reci1, rngnom, aznom, elnom, deltaamt)
-#        fprintf(1, 'rpert #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f km \n', reci3, rngpert, azpert, elpert, dtsec)
+                # fprintf(1, 'rnom  #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f km \n', reci1, rngnom, aznom, elnom, deltaamt)
+                # fprintf(1, 'rpert #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f #16.8f km \n', reci3, rngpert, azpert, elpert, dtsec)
 
             if 0 == currobsrec['obstype']:
                 a[0, j] = (rngpert - rngnom) / deltaamt
@@ -10176,9 +10325,9 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
                 a[0, j] = (trtascpert - trtascnom) / deltaamt
                 a[1, j] = (tdeclpert - tdeclnom) / deltaamt
             #printf("rpert #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f \n",
-#              r3[0], r3[0], r3[2], rngpert, azpert * rad2deg, elpert * rad2deg)  # ritrf
+            # r3[0], r3[0], r3[2], rngpert, azpert * rad2deg, elpert * rad2deg)  # ritrf
             # ----------------- reset the modified vector --------------------
-#satrecp = satrec
+            # satrecp = satrec
             xnomp = np.copy(xnom)
         # ----------------- now form the matrix combinations -----------------
         at = a.T
@@ -10240,9 +10389,9 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
         for r in range(statesize):
             atwb[r, c] = atwbacc[r, c] + atwb[r, c]
         #writeexpmat("atwa ", atwa, statesize, statesize)
-#writeexpmat("atwb ", atwb, statesize, 1)
-#writeexpmat("a ", a, indobs, statesize)
-#writemat("b ", b, indobs, 1)
+        #writeexpmat("atwb ", atwb, statesize, 1)
+        #writeexpmat("a ", a, indobs, statesize)
+        #writemat("b ", b, indobs, 1)
 
     return atwa, atwb, atw, b, drng2, daz2, del2
 
@@ -10274,7 +10423,31 @@ def findatwaatwb(firstobs=None, lastobs=None, obsrecarr=None,
 # ------------------------------------------------------------------------------
 
 
-def shadow(reci, rsun, angumb=angumbearth, angpen=angpenearth):
+def shadow(reci: np.ndarray, rsun: np.ndarray, angumb: float = angumbearth,
+           angpen: float = angpenearth):
+    """this function detemines whether a satellite falls in the umbral or penumbral
+    regions if it is ecclipsed by the earth.
+
+    Parameters
+    ----------
+    reci : ndarray
+        satellite ijk position vector
+    rsun : ndarray
+        sun ijk position vector
+
+    Umbra and penumbra angle default uses mean sun-earth distance
+    angumb : float, optional
+        unbra angle
+    angpen : float, optional
+        penumbra angle
+
+    Returns
+    -------
+    umb : boolean
+        satellite in umbral region
+    pen : boolean
+        satellite in penumbral region
+    """
 
     umbvert = 0.0
     penvert = 0.0
@@ -10537,15 +10710,35 @@ def predict(reci:np.ndarray, veci:np.ndarray, jdepoch:float, jdend:float,
 #    jd            - julian date (UTC)       days from 4713 bc
 #
 #  outputs       :
-#    reci          - position rel to sun    au
-#    veci          - velocity rel to sun    au/day
+#    rfk5          - position rel to sun    au
+#    vfk5          - velocity rel to sun    au/day
 #
 #  references    :  pg 296-298 Vallado (2013)
 #    vallado
 #
 # ------------------------------------------------------------------------------
 
-def planetrv(abbr, jd):
+def planetrv(abbr: str, jd: float):
+    """this function approximates the position and velocity vectors of a planet
+    with respect to the sun using the mean equator, equinox of IAU-76/FK5 (J2000)
+
+    note: this function uses the assumption TDB = UTC = UT1 and DE-245
+    from the Jet Propulsion Laboratory thus only valid from 1900 to 2050
+
+    Parameters
+    ----------
+    abbr : str
+        planet abbreviation: 'me' 'v' 'e' 'ma' 'j' 's' 'u' 'n'
+    jd : float
+        julian date
+
+    Returns
+    -------
+    rfk5 : ndarray
+        position vector relative to the sun
+    vfk5 : ndarray
+        position vector relative to the sun
+    """
     planet = None
 
     if abbr == 'me':
@@ -10599,10 +10792,10 @@ def planetrv(abbr, jd):
 
     # Rotation changes the reference to the mean equator and
     # mean equinox of IAU-76/FK5
-    reci = smu.rot1(r, - eps)
-    veci = smu.rot1(v, - eps)
+    rfk5 = smu.rot1(r, - eps)
+    vfk5 = smu.rot1(v, - eps)
 
-    return reci, veci
+    return rfk5, vfk5
 
 # ------------------------------------------------------------------------------
 #
@@ -10629,7 +10822,25 @@ def planetrv(abbr, jd):
 # [a] = repeatgt ( b );
 # ------------------------------------------------------------------------------
 
-def repeatgt(krev2rep, kday2rep, ecc, incl):
+def repeatgt(krev2rep : float, kday2rep: float, ecc: float, incl: float):
+    """This subroutine calculates repeat ground tracks.
+
+    Parameters
+    ----------
+    krev2rep : float
+        revs to repeat (crossing points): km
+    kday2rep : float
+        days to repeat (frequency): days
+    ecc : float
+        eccentricity
+    incl : float
+        inclination: rad
+
+    Returns
+    -------
+    a : float
+        semimajor axis: rad
+    """
     revpday = krev2rep / kday2rep
     n = revpday * 2 * math.pi / 86400.0
     a = (mu * (1 / n) ** 2) ** 0.33333
@@ -10741,6 +10952,42 @@ def repeatgt(krev2rep, kday2rep, ecc, incl):
 
 def mincomb(rinit: float, rfinal: float, einit: float, efinal: float,
             nuinit: float, nufinal: float, iinit: float, ifinal: float):
+    """this procedure calculates the delta v's and the change in inclination
+    necessary for the minimum change in velocity when traveling between two
+    non-coplanar orbits.
+
+    Parameters
+    ----------
+    rinit : float
+        initial position magnitude: km
+    rfinal : float
+        final position magnitude: km
+    einit : float
+        initial eccentricity
+    efinal : float
+        final eccentricity
+    nuinit : float
+        initial true anomaly: rad
+    nufinal : float
+        final true anomaly: rad
+    iinit : float
+        initial inclination: rad
+    ifinal : float
+        final inclination: rad
+
+    Returns
+    -------
+    deltai : float
+        change in inclination: rad
+    deltai1
+        amount of inclination change at point a: rad
+    deltava : ndarray
+        change in velocity at point a: km/s
+    deltavb
+        change in velocity at point b: km/s
+    dttu
+        time of flight for transfer: sec
+    """
 
     a1 = (rinit * (1.0 + einit * math.cos(nuinit))) / (1.0 - einit*einit)
     a2 = 0.5 * (rinit + rfinal)
@@ -10808,7 +11055,7 @@ if __name__ == '__main__':
 
     jd = 60206
 
-    sunillum = sunill(jd, 30.0, 45.0, 10.0, 20.0)
+    sunillum = sunill(jd, 30.0, 45.0)
     print("sunill returned: ", sunillum)
 
     a = 6860.7631
