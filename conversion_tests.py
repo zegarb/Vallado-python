@@ -387,9 +387,6 @@ pp(aecig)
 
 print("----------------------------------------")
 
-
-
-
 a = 6860.7631
 ecc = 0.75
 p = a*(1.0 - ecc**2)
@@ -571,8 +568,25 @@ print('rho %f, az %f, el %f, drho %f, daz %f, del_ %f' %\
         (rho, az, el, drho, daz, del_))
 
 
+#---- hilleqcm tests
 
+print('hill to ecqm and ecqm to hill conversion test\n')
+x = 500
+y = 10
+z = 250
+dx = 200
+dy = 0.01
+dz = 20
+rinteqcm = np.array([x, y, z])
+vinteqcm = np.array([dx, dy, dz])
+rtgteci = np.array([-605.7904308, -5870.230407, 3493.052004])
+vtgteci = np.array([-1.568251615, -3.702348353, -6.479484915])
 
-
+rintecix, vintecix = hilleqcm2eci(rtgteci, vtgteci, rinteqcm, vinteqcm)
+pp(rintecix)
+pp(vintecix)
+rinteqcm, vinteqcm = eci2hilleqcm(rtgteci, vtgteci, rintecix, vintecix)
+pp(rinteqcm)
+pp(vinteqcm)
 
 
