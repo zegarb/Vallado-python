@@ -32,6 +32,7 @@ import spacetime_utils as stu
 
 
 tus = 86400 / au
+mu = musun
 
 # 2 McKusky Heliocentric     pg 82
 #  1961 11  15  0  0  0.000    0.000000    0.000000    0.00 339.8645833 -10.89736111
@@ -127,7 +128,10 @@ r2ans = np.array([- 1.74284,4.49538,1.96939])
 
 #    [r2,v2] = anglesl ( decl1,decl2,decl3,rtasc1,rtasc2,rtasc3,jd1,jd2,jd3, rsite1,rsite2,rsite3, re, mu, tu );
 #    processtype = 'anglesl';
-r2,v2 = obu.anglesg(decl1,decl2,decl3,rtasc1,rtasc2,rtasc3,jd1 + jd1f,jd2 + jd2f,jd3 + jd3f,rsite1,rsite2,rsite3)
+r2,v2 = obu.anglesg(decl1,decl2,decl3,rtasc1,rtasc2,rtasc3,jd1, jd1f,jd2, jd2f,jd3, jd3f,rsite1,rsite2,rsite3)
+print('r2 and v2 check:')
+print(r2)
+print(v2)
 processtype = 'anglesg'
 
 #    [r2,v2] = anglesdr ( decl1,decl2,decl3,rtasc1,rtasc2,rtasc3,jd1,jd2,jd3, rsite1,rsite2,rsite3, re, mu, tu );
@@ -137,25 +141,32 @@ processtype = 'anglesg'
 
 # -------------- write out answer --------------
 print('\n\ninputs: \n\n' % ())
-latgc,latgd,lon,alt = sc.ijk2ll(rsite1)
-print('Site obs1 %11.7f %11.7f %11.7f au  lat %11.7f lon %11.7f alt %11.7f  \n' % (rsite1,0,0,0))
-latgc,latgd,lon,alt = sc.ijk2ll(rsite2)
-print('Site obs2 %11.7f %11.7f %11.7f au  lat %11.7f lon %11.7f alt %11.7f  \n' % (rsite2,0,0,0))
-latgc,latgd,lon,alt = sc.ijk2ll(rsite3)
-print('Site obs3 %11.7f %11.7f %11.7f au  lat %11.7f lon %11.7f alt %11.7f  \n' % (rsite3,0,0,0))
+latgc,latgd,lon,alt = sc.ecef2ll(rsite1)
+print('Site obs1 %11.7f %11.7f %11.7f au  lat %11.7f lon %11.7f alt %11.7f  \n' % (rsite1[0],rsite1[1],rsite1[2], 
+                                                                                   latgc, lon, alt ))
+latgc,latgd,lon,alt = sc.ecef2ll(rsite2)
+print('Site obs2 %11.7f %11.7f %11.7f au  lat %11.7f lon %11.7f alt %11.7f  \n' % (rsite2[0],rsite2[1],rsite2[2], 
+                                                                                   latgc, lon, alt ))
+latgc,latgd,lon,alt = sc.ecef2ll(rsite3)
+print('Site obs3 %11.7f %11.7f %11.7f au  lat %11.7f lon %11.7f alt %11.7f  \n' % (rsite3[0],rsite3[1],rsite3[2], 
+                                                                                   latgc, lon, alt ))
 year,mon,day,hr,min,sec = stu.invjday(jd1,jd1f)
-print('obs#1 %4i %2i %2i %2i %2i %6.3f ra %11.7f de %11.7f  \n' % (year,mon,day,hr,min,sec,rtasc1 * rad2deg,decl1 * rad2deg))
+print('Obs#1 %4i %2i %2i %2i %2i %6.3f ra %11.7f de %11.7f  \n' % (year,mon,day,hr,min,sec,rtasc1 * rad2deg,decl1 * rad2deg))
 year,mon,day,hr,min,sec = stu.invjday(jd2,jd2f)
-print('obs#2 %4i %2i %2i %2i %2i %6.3f ra %11.7f de %11.7f  \n' % (year,mon,day,hr,min,sec,rtasc2 * rad2deg,decl2 * rad2deg))
+print('Obs#2 %4i %2i %2i %2i %2i %6.3f ra %11.7f de %11.7f  \n' % (year,mon,day,hr,min,sec,rtasc2 * rad2deg,decl2 * rad2deg))
 year,mon,day,hr,min,sec = stu.invjday(jd3,jd3f)
 print('Obs#3 %4i %2i %2i %2i %2i %6.3f ra %11.7f de %11.7f  \n' % (year,mon,day,hr,min,sec,rtasc3 * rad2deg,decl3 * rad2deg))
 print('\nsolution by %s \n\n' % (processtype))
-print('r2     %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2 / re,r2 * au))
-print('r2 ans %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2ans / re,r2ans * au))
-print('v2     %11.7f   %11.7f  %11.7f au/tu %11.7f  %11.7f  %11.7f km/s\n' % (v2 / velkmps,v2 * tus))
+print('r2     %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2[0] / re, r2[1] / re, r2[2] / re , 
+                                                                             r2[0] * au, r2[1] * au, r2[2] * au))
+print('r2 ans %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2ans[0] / re, r2ans[1] / re, r2ans[2] / re , 
+                                                                             r2ans[0] * au, r2ans[1] * au, r2ans[2] * au))
+print('v2     %11.7f   %11.7f  %11.7f au/tu %11.7f  %11.7f  %11.7f km/s\n' % (v2[0] / velkmps, v2[1] / velkmps, v2[2] / velkmps, 
+                                                                              v2[0] * tus, v2[1] * tus, v2[2] * tus))
 #    fprintf(1,'v2 ans #11.7f   #11.7f  #11.7f au/tu #11.7f  #11.7f  #11.7f km/s\n',v2ans/velkmps, v2ans);
 
 p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper = sc.rv2coe(r2,v2,mu)
+
 print('         p au          a au         ecc       incl deg     raan deg    argp deg     nu deg      m deg  \n' % ())
 print('coes %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f \n' % (p,a,ecc,incl * rad2deg,omega * rad2deg,argp * rad2deg,nu * rad2deg,m * rad2deg))
 #    [p,a,ecc,incl,omega,argp,nu,m,arglat,truelon,lonper ] = rv2coe(r2ans,v2ans, mu);
@@ -181,5 +192,7 @@ argp = lonper - omega
 p = a * (1.0 - ecc ** 2)
 e0,nu = obu.newtonm(ecc,m)
 r2,v2 = sc.coe2rv(p,ecc,incl,omega,argp,nu,arglat,truelon,lonper,mu)
-print('r2     %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2 / au,r2))
-print('v2     %11.7f   %11.7f  %11.7f au/tu %11.7f  %11.7f  %11.7f km/s\n' % (v2 * tus,v2))
+print('r2     %11.7f   %11.7f  %11.7f au    %11.7f  %11.7f  %11.7f km \n' % (r2[0] / au, r2[1] / au, r[2] / au,
+                                                                             r2[0], r2[1], r2[2]))
+print('v2     %11.7f   %11.7f  %11.7f au/tu %11.7f  %11.7f  %11.7f km/s\n' % (v2[0] * tus, v2[1] * tus, v2[2] * tus,
+                                                                              v2[0], v2[1], v2[2]))
