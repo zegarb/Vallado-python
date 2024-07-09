@@ -68,7 +68,7 @@ if testnum == 0:
     veci = np.array([- 2.940822436,0.9007122363,0.002036330819])
     aeci = np.array([0.001,0.002,0.003])
     year = 2022
-    mon = 106
+    mon = 106 #Is this right? -mjc
     day = 28
     hr = 15
     min = 8
@@ -79,7 +79,7 @@ if testnum == 0:
     yp = 0.286
     lod = 0.0
     timezone = 0
-    order = 4
+    order = 4 #Should order be 106 like the others? -mjc
     terms = 2
     cartcov = np.array([[24097166,86695628,- 5509927,- 6294.97,1752.326,17.65861],[86695628,453000000.0,- 28000000.0,- 32967.4,6319.431,90.73355],[- 5509927,- 28000000.0,1771703,2061.582,- 401.582,- 5.67764],[- 6294.97,- 32967.4,2061.582,6949865,- 1352586,0.385006],[1752.326,6319.431,- 401.582,- 1352586,263241.3,2.013476],[17.65861,90.73355,- 5.67764,0.385006,2.013476,33.37338]])
 
@@ -620,7 +620,6 @@ if str(anomflt) == str('latlon'):
     sc.printcov(flcov,'fl','m',anomflt)
 else:
     sc.printcov(flcov,'sp','m',anomflt)
-
 print('\n8. Cartesian Covariance from Flight #7 above \n' % ())
 cartcovfltrev,tmfl2ct = sc.covfl2ct(flcov,flstate,anomflt,ttt,jdut1,lod,xp,yp,2,ddpsi,ddeps)
 sc.printcov(cartcovfltrev,'ct','m',anom)
@@ -740,15 +739,15 @@ for i in range(6):
 
 print('pct differences if over %4e \n' % (small))
 print((np.transpose(diffmm)))
-temp = tmcl2eq * tmct2cl
-temp1 = tmcl2ct * tmeq2cl
+temp = tmcl2eq @ tmct2cl
+temp1 = tmcl2ct @ tmeq2cl
 print('\n-------- tm combined ct2cl, cl2eq --------- \n' % ())
 sc.printcov(temp,'tm','m',anomeq1+anomeq2)
 print('\n-------- tm ct2eq --------- \n' % ())
 sc.printcov(tmct2eq,'tm','m',anomeq1+anomeq2)
 print('\n-------- tm combined eq2cl, cl2ct --------- \n' % ())
 sc.printcov(temp1,'tm','m',anomeq1+anomeq2)
-print('\n-------- tm ct2eq --------- \n' % ())
+print('\n-------- tm eq2ct --------- \n' % ())
 sc.printcov(tmeq2ct,'tm','m',anomeq1+anomeq2)
 print('-------- accuracy of test tm ct2eq --------- \n' % ())
 tm1 = temp
@@ -792,6 +791,7 @@ cartco,tm = sc.covcl2ctnew(classco,classstate,anom)
 print("cartco")
 print(cartco)
 print("-----")
+# First element (0,0) is off in classco - mjc
 classco,tm = sc.covct2clnew(cartco,cartstate,anom)
 print("classco")
 print(classco)
@@ -819,6 +819,8 @@ sc.printcov(cartcov,'ct','m',anom)
 print(' -------- classical covariance conversions --------- \n' % ())
 print(' -----  cartesian to classical covariance  --------- \n' % ())
 classcov,tm = sc.covct2clnew(cartcov,cartstate,anom)
+print('tm check:')
+print(tm)
 sc.printcov(classcov,'cl','m',anom)
 print('tm ct2cl \n' % ())
 print((np.transpose(tm)))
@@ -976,7 +978,7 @@ print((np.transpose(diffmm)))
 small = 1e-18
 doall = 'n'
 #        fprintf(1,'year mon day hms  magr  magv  r sig  vsig  max diag  max mat \n');
-print('      ecc         incl        maxdiag        maxdiff        magr        r sig   \n' % ())
+# print('      ecc         incl        maxdiag        maxdiff        magr        r sig   \n' % ())
 for testnumbb in np.arange(1,12+1).reshape(-1):
     #        for testnumb = 1:122
     if testnumbb == 1:
