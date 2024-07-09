@@ -34,7 +34,7 @@ smalle18 = 1.0e-18
 
 
 infinite = math.inf
-undefined = 999999.1
+undefined = float('nan')
 
 # -------------------------  mathematical  --------------------
 twopi = 2.0 * math.pi

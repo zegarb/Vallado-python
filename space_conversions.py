@@ -450,7 +450,6 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
     veci: ndarray
         eci velocity vector
     """
-    # -------------------------  implementation   -----------------
     arglat = undefined
     lonper = undefined
     truelon = undefined
@@ -2754,7 +2753,7 @@ def covcl2ctnew(classcov, classstate, anom):
     # cos_nu = np.cos(nu)
     sin_inc, cos_inc, sin_raan, cos_raan, sin_w, cos_w, sin_nu, cos_nu = \
         smu.getsincos(incl, raan, argp, nu)
-    
+
 
     # assign elements of PQW to ECI transformation (pg 168)
     p11 = cos_raan * cos_w - sin_raan * sin_w * cos_inc
@@ -4067,9 +4066,9 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
         longitude of periapsis: Elliptical equatorial: 0.0  to 2pi rad, else None
     """
 
-    m = None
+    m = undefined
     small = 1.0e-12
-    # -------------------------  implementation   -----------------
+
     magr = smu.mag(r)
     magv = smu.mag(v)
     # ------------------  find h n and e vectors   ----------------
@@ -4131,7 +4130,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
                 raan = twopi - raan
 
         else:
-            raan = None
+            raan = undefined
 
 
         # ---------------- find argument of perigee ---------------
@@ -4140,7 +4139,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
             if (ebar[2] < 0.0):
                 argp = twopi - argp
         else:
-            argp = None
+            argp = undefined
 
         # ------------  find true anomaly at epoch    -------------
         if typeorbit.startswith('e'):
@@ -4154,7 +4153,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
         # initial measurement. Computer-software routines must account for this
         # special case." (pg 18)
         else:
-            nu = None
+            nu = undefined
 
         # ----  find argument of latitude - circular inclined -----
         # -- find in general cases too
@@ -4164,7 +4163,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
                 arglat = twopi - arglat
             m = arglat
         else:
-            arglat = None
+            arglat = undefined
 
         # -- find longitude of perigee - elliptical equatorial ----
         if  (ecc > small) and (typeorbit == 'ee'):
@@ -4180,7 +4179,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
                 lonper = twopi - lonper
 
         else:
-            lonper = None
+            lonper = undefined
 
         # -------- find true longitude - circular equatorial ------
         if  (magr > small) and (typeorbit == 'ce'):
@@ -4194,7 +4193,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
                 truelon = twopi - truelon
             m = truelon
         else:
-            truelon = None
+            truelon = undefined
 
         # ------------ find mean anomaly for all orbits -----------
 
