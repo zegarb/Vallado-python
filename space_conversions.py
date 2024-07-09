@@ -8793,8 +8793,8 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
     return startmfe, stopmfe, deltamin, satrec
 
 
-def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
-                  z: float, dx: float, dy: float, dz: float):
+def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, rinteqcm: np.ndarray,
+                 vinteqcm: np.ndarray):
     """this function takes the position and velocity of a target orbit, and the
     relative position and velocity of the interceptor to get the inertial
     position and velocity of the interceptor
@@ -8805,9 +8805,9 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
         target position: km
     vtgt : ndarray
         target velocity: km/s
-    x, y, z : float
+    rinteqcm : ndarray
         relative position of interceptor: km
-    dx, dy, dz : float
+    vinteqcm : ndarray
         relative velocity of interceptor: km/s
 
     Returns
@@ -8831,7 +8831,7 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
     nu1 = -lambdap
 
 
-    arclength = y
+    arclength = rinteqcm[1]
     ea1, _ = smu.newtonnu(ecc, nu1)
     if abs(arclength) > 0.001:
         DE = arclength / atgt
@@ -8841,7 +8841,7 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
         i = 1
         arclength1a = arclength + 10
         while (i < 10) and (abs(arclength1a - arclength) > 0.001):
-            F2, E2, _ = smu.elliptic12(ea2e, ecc**2)
+            _, E2, _ = smu.elliptic12(ea2e, ecc**2)
             arclength1a = atgt * (E2 - E1)
             corr = arclength / (ea2e - ea1)
             ea2e = ea2e - (arclength1a - arclength) / corr
@@ -8859,8 +8859,8 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
                       math.sqrt(mu / ptgt) * (ecc + cosnu2),
                       0])
 
-    rrsw2, vrsw2, transmat2 = rv2rsw(rpqw2, vpqw2)
-    dphi = math.asin(z / smu.mag(rrsw2))
+    rrsw2, vrsw2, _ = rv2rsw(rpqw2, vpqw2)
+    dphi = math.asin(rinteqcm[2] / smu.mag(rrsw2))
     dlambda = nu2 - nu1
 
     sindphi = math.sin(dphi)
@@ -8878,15 +8878,15 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, x: float, y: float,
                           [cosdphi * cosdlambda, cosdphi * sindlambda, sindphi]])
     rintsezunit = rsw2sez @ rintrsw1unit
 
-    rintsezZ = x + rrsw2[0]
+    rintsezZ = rinteqcm[0] + rrsw2[0]
     rscale = rintsezZ / rintsezunit[2]
 
     rintrsw1 = rscale * rintrsw1unit
 
     magrtgt2 = smu.mag(rpqw2)
-    vintsez = [-(dz/magrtgt2) * rscale,
-               (dy + vrsw1[1]) * rscale * (cosdphi/magrtgt2),
-               dx + vrsw2[0]]
+    vintsez = [-(vinteqcm[2]/magrtgt2) * rscale,
+               (vinteqcm[1] + vrsw1[1]) * rscale * (cosdphi/magrtgt2),
+               vinteqcm[0] + vrsw2[0]]
 
     vintrsw1 = rsw2sez.T @ vintsez
 
@@ -8914,11 +8914,12 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
 
     Returns
     -------
-    x, y, z: float
+    rinteqcm : ndarray
         relative position of interceptor: km
-    dx, dy, dz: float
+    vinteqcm : ndarray
         relative velocity of interceptor: km/s
     """
+
     rtgtrsw1, vtgtrsw1, transmat1 = rv2rsw(rtgt, vtgt)
     rintrsw1 = transmat1 @ rint
     vintrsw1 = transmat1 @ vint
@@ -8992,8 +8993,7 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
                            dotlambda * rtgtmag2 - abs(vtgtrsw1[1]),
                            dotphi * rtgtmag2])
 
-    return rinteqcm[0], rinteqcm[1], rinteqcm[2], \
-        vinteqcm[0], vinteqcm[1], vinteqcm[2]
+    return rinteqcm, vinteqcm
 
 
 # ----------------------------------------------------------------------------
