@@ -3172,7 +3172,9 @@ def covct2clnew(cartcov, cartstate, anom):
         tm[5, 5] = tm[5, 5] * dMdnu + tm[1, 5] * dMde
 
     # ---------- calculate the output covariance matrix -----------
+
     classcov = tm @ cartcov @ tm.T
+    
     return classcov, tm
 
 #
