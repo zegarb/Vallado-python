@@ -34,7 +34,7 @@ j2 = 0.00108263
 # --------  repeat gt calculations
 alt = 160.0
 
-ecc = None
+ecc = undefined
 incl = 45.0 * deg2rad
 latgd = 41.52 * deg2rad
 lon = 12.37 * deg2rad

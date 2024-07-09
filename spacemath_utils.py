@@ -2414,7 +2414,7 @@ def newtone (ecc: float, e0: float):
 #                            function angl
 #
 #  this function calculates the angle between two vectors.  the output is
-#    set to 999999.1 to indicate an undefined value.  be sure to check for
+#    set to nan to indicate an undefined value.  be sure to check for
 #    this at the output phase.
 #
 #  author        : david vallado                  719-573-2600   27 may 2002
@@ -2451,7 +2451,7 @@ def angl(vec1: np.ndarray, vec2: np.ndarray):
     Returns
     -------
     theta : float
-        angle between two vetors: -pi to pi, None if undefined
+        angle between two vetors: -pi to pi, nan if undefined
     """
 
     small = smalle8
@@ -2464,7 +2464,7 @@ def angl(vec1: np.ndarray, vec2: np.ndarray):
             temp = np.sign(temp) * 1.0
         theta = math.acos(temp)
     else:
-        theta=None
+        theta=undefined
     return theta
 
 # ------------------------------------------------------------------------------
@@ -3520,6 +3520,14 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
     if not isinstance(b, np.ndarray):
         b = np.array([b])
 
+    if theta0 == None or theta1 == None:
+        if theta0 == None and theta1 == None:
+            theta0 = np.full(a.shape, 0)
+            theta1 = np.full(a.shape, 2*math.pi)
+        else:
+            print("Error: requires both theta0 and theta1 set or neither!")
+            return
+
     if not isinstance(theta0, np.ndarray):
         theta0 = np.array([theta0])
 
@@ -3528,19 +3536,12 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
 
     arclength = a * (theta1 - theta0)
 
-    if not theta0.any() or not theta1.any():
-        if not theta0.any() and not theta1.any():
-            theta0 = np.full(a.shape, 0)
-            theta1 = np.full(a.shape, 2*math.pi)
-        else:
-            print("Error: requires both theta0 and theta1 set or neither!")
-            return
 
     theta0a = np.zeros(len(a))
     theta1a = np.zeros(len(a))
     ab = np.zeros(len(a))
     for i in range(len(a)):
-        if a[i] < b[i]:
+        if a[i] <= b[i]:
             ab[i] = 1 - (a[i] / b[i]) ** 2
             theta0a[i] = theta0[i]
             theta1a[i] = theta1[i]
@@ -3554,7 +3555,7 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
 
     arclength = np.zeros(len(a))
     for i in range(len(a)):
-        if a[i] < b[i]:
+        if a[i] <= b[i]:
             arclength[i] = b[i] * (E1[i] - E0[i])
         elif a[i] > b[i]:
             arclength[i] = a[i] * (E0[i] - E1[i])

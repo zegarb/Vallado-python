@@ -116,13 +116,25 @@ def findjpldeparam(jdtdb: float, jdtdbF: float, interp: str, jpldearr,
         # ---- do linear interpolation
         if (interp == 'l'):
             fixf = mfme / 1440.0
-            rsun[0] = jpldearr['rsun1'][recnum] + (jpldearr['rsun1'][recnum + 1] - jpldearr['rsun1'][recnum]) * fixf
-            rsun[1] = jpldearr['rsun2'][recnum] + (jpldearr['rsun2'][recnum + 1] - jpldearr['rsun2'][recnum]) * fixf
-            rsun[2] = jpldearr['rsun3'][recnum] + (jpldearr['rsun3'][recnum + 1] - jpldearr['rsun3'][recnum]) * fixf
+            rsun[0] = (jpldearr['rsun1'][recnum]
+                       + (jpldearr['rsun1'][recnum + 1]
+                          - jpldearr['rsun1'][recnum]) * fixf)
+            rsun[1] = (jpldearr['rsun2'][recnum]
+                       + (jpldearr['rsun2'][recnum + 1]
+                          - jpldearr['rsun2'][recnum]) * fixf)
+            rsun[2] = (jpldearr['rsun3'][recnum]
+                       + (jpldearr['rsun3'][recnum + 1]
+                          - jpldearr['rsun3'][recnum]) * fixf)
             rsmag = smu.mag(rsun)
-            rmoon[0] = jpldearr['rmoon1'][recnum] + (jpldearr['rmoon1'][recnum + 1] - jpldearr['rmoon1'][recnum]) * fixf
-            rmoon[1] = jpldearr['rmoon2'][recnum] + (jpldearr['rmoon2'][recnum + 1] - jpldearr['rmoon2'][recnum]) * fixf
-            rmoon[2] = jpldearr['rmoon3'][recnum] + (jpldearr['rmoon3'][recnum + 1] - jpldearr['rmoon3'][recnum]) * fixf
+            rmoon[0] = (jpldearr['rmoon1'][recnum]
+                        + (jpldearr['rmoon1'][recnum + 1]
+                           - jpldearr['rmoon1'][recnum]) * fixf)
+            rmoon[1] = (jpldearr['rmoon2'][recnum]
+                        + (jpldearr['rmoon2'][recnum + 1]
+                           - jpldearr['rmoon2'][recnum]) * fixf)
+            rmoon[2] = (jpldearr['rmoon3'][recnum]
+                        + (jpldearr['rmoon3'][recnum + 1]
+                           - jpldearr['rmoon3'][recnum]) * fixf)
             rmmag = smu.mag(rmoon)
             #printf("sunm #i rsmag #lf fixf #lf n #lf nxt #lf \n", recnum, rsmag, fixf, jpldearr['rsun'](1), jpldearr['rsun'](1));
             #printf("recnum l #i fixf #lf #lf rsun #lf #lf #lf \n", recnum, fixf, jpldearr['rsun'](1), rsun(1), rsuny, rsunz);
