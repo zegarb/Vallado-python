@@ -8829,7 +8829,8 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, rinteqcm: np.ndarray,
     eunit = ebar / ecc
     lambdap = math.atan(eunit[1] / eunit[0])
     nu1 = -lambdap
-
+    if math.isnan(nu1):
+        nu1 = 0
 
     arclength = rinteqcm[1]
     ea1, _ = smu.newtonnu(ecc, nu1)
@@ -8848,6 +8849,8 @@ def hilleqcm2eci(rtgt: np.ndarray, vtgt: np.ndarray, rinteqcm: np.ndarray,
             i = i + 1
 
         _, nu2 = smu.newtone(ecc, ea2e)
+    else:
+        nu2 = 0
 
     cosnu2 = math.cos(nu2)
     sinnu2 = math.sin(nu2)
@@ -8937,6 +8940,8 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
             - (rtgtrsw1 @ vtgtrsw1) * vtgtrsw1) / mu
     eunit = smu.unit(ebar)
     lambdap = math.atan(eunit[1]/ eunit[0])
+    if math.isnan(lambdap):
+        lambdap = 0
     nu1 = -lambdap
     nu2 = dlambda - lambdap
 
@@ -8957,19 +8962,20 @@ def eci2hilleqcm(rtgt: np.ndarray, vtgt: np.ndarray, rint: np.ndarray,
     rintsez = rsw2sez @ rintrsw1
     vintsez = rsw2sez @ vintrsw1
 
+    if ecc == 0:
+        arc1 = rtgtmag1 * nu2
+    else:
+        btgt = math.sqrt(atgt * ptgt)
+        ea1,_ = smu.newtonnu(ecc,nu1)
+        ea2,_ = smu.newtonnu(ecc,nu2)
 
-    # arc1 = IEISK((E1, E2), ecc**2)
-    btgt = math.sqrt(atgt * ptgt)
-    ea1,_ = smu.newtonnu(ecc,nu1)
-    ea2,_ = smu.newtonnu(ecc,nu2)
+        if np.abs(ea2 - ea1) > np.pi:
+            if ea1 < 0.0:
+                ea1 = 2.0 * np.pi + ea1
+            else:
+                ea1 = 2.0 * np.pi - ea1
+        arc1 = smu.arclength_ellipse(atgt,btgt,ea1,ea2)[0]
 
-    if np.abs(ea2 - ea1) > np.pi:
-        if ea1 < 0.0:
-            ea1 = 2.0 * np.pi + ea1
-        else:
-            ea1 = 2.0 * np.pi - ea1
-
-    arc1 = smu.arclength_ellipse(atgt,btgt,ea1,ea2)[0]
     #print("testing arclength func: %f", arc1)
 
     # F1, E1, _ = elliptic12(ea1, ecc ** 2)
