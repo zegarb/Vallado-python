@@ -517,80 +517,84 @@ if r2.all() and v2.all():
 #         fprintf(1, 'coes #11.4f #11.4f #13.9f #13.7f #11.5f #11.5f #11.5f #11.5f \n', ...
 #             p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg );
 
-range_ = 7550.679305
-r = 1000.0 * np.array([7.721359586705, -6.293226594912, -1.333676254902])
-magr = smu.mag(r)
-print('r:')
-print(r)
-print('magr:')
-print(magr)
-rho = 1000.0 * np.array([4.648325989705, -2.479803066912, -5.409004552902])
-magrho = smu.mag(rho)
-print('rho:')
-print(rho)
-print('magrho:')
-print(magrho)
-rs = 1000.0 * np.array([3.073033597, -3.813423528, 4.075328298])
-magrs = smu.mag(rs)
-print('rs:')
-print(rs, magrs)
-print('magrs')
-print(magrs)
-los1 = np.array([0.6156119, -0.3284185, -0.7163541])
-print('los1:')
-print(los1)
-print('mag los1:')
-print(smu.mag(los1))
-rtasc1 = 331.922 * deg2rad
-rx = np.arctan(rho[1] / rho[0]) * rad2deg + 360
-decl1 = -45.754 * deg2rad
-dx = np.arcsin(rho[2] / smu.mag(rho)) * rad2deg
-print('rtasc %11.7f  %11.7f decl %11.7f  %11.7f \n'
-      % (rtasc1 * rad2deg, rx, decl1 * rad2deg, dx))
-los1 = np.array([np.cos(decl1) * np.cos(rtasc1),
-                 np.cos(decl1) * np.sin(rtasc1), np.sin(decl1)])
-print('los1:')
-print(los1)
-print('mag los1:')
-print(smu.mag(los1))
-rtasc1x = np.arctan(rho[1] / rho[0])
-los1x = np.array([np.cos(decl1) * np.cos(rtasc1x),
-                  np.cos(decl1) * np.sin(rtasc1x), np.sin(decl1)])
-print('los1x:')
-print(los1x)
-print('mag los1x:')
-print(smu.mag(los1x))
-urho = smu.unit(rho)
-print('urho:')
-print(urho)
-print('mag urho:')
-print(smu.mag(urho))
-dotrsl2 = 2.0 * np.dot(rs, np.transpose(los1))
-rhotem1 = 0.5 * (-dotrsl2 + np.sqrt(dotrsl2 * dotrsl2 - 4.0 *
-                                    (magrs * magrs - magr * magr)))
-r1 = rhotem1 * los1 + rs
-print('r1:')
-print(r1)
-print('mag r1:')
-print(smu.mag(r1))
-rhotem1 = 0.5 * (-dotrsl2 - np.sqrt(dotrsl2 * dotrsl2 - 4.0 *
-                                     (magrs * magrs - magr * magr)))
-r1 = rhotem1 * los1 + rs
-print('r1:')
-print(r1)
-print('mag r1:')
-print(smu.mag(r1))
-rr = smu.unit(rho)
-x1 = np.array([0.0, los1[0], 0.0, rr[0]])
-y1 = np.array([0.0, los1[1], 0.0, rr[1]])
-z1 = np.array([0.0, los1[2], 0.0, rr[2]])
-#plot3(x1, y1, z1, 'X')
-mjd1 = 58896.0
-rs1 = 124647954.923
-mjd2 = 58897.0
-rs2 = 126054577.073
-mjd3 = 58898.0
-rs3 = 127422565.338
-mjd4 = 58899.0
-rs4 = 128751471.066
-smu.cubicinterp(rs1, rs2, rs3, rs4, mjd1, mjd2, mjd3, mjd4, 58897.0416667)
+
+# Not sure what all these hardcoded values represent - mjc
+# Commented out for now
+
+# range_ = 7550.679305
+# r = 1000.0 * np.array([7.721359586705, -6.293226594912, -1.333676254902])
+# magr = smu.mag(r)
+# print('r:')
+# print(r)
+# print('magr:')
+# print(magr)
+# rho = 1000.0 * np.array([4.648325989705, -2.479803066912, -5.409004552902])
+# magrho = smu.mag(rho)
+# print('rho:')
+# print(rho)
+# print('magrho:')
+# print(magrho)
+# rs = 1000.0 * np.array([3.073033597, -3.813423528, 4.075328298])
+# magrs = smu.mag(rs)
+# print('rs:')
+# print(rs, magrs)
+# print('magrs')
+# print(magrs)
+# los1 = np.array([0.6156119, -0.3284185, -0.7163541])
+# print('los1:')
+# print(los1)
+# print('mag los1:')
+# print(smu.mag(los1))
+# rtasc1 = 331.922 * deg2rad
+# rx = np.arctan(rho[1] / rho[0]) * rad2deg + 360
+# decl1 = -45.754 * deg2rad
+# dx = np.arcsin(rho[2] / smu.mag(rho)) * rad2deg
+# print('rtasc %11.7f  %11.7f decl %11.7f  %11.7f \n'
+#       % (rtasc1 * rad2deg, rx, decl1 * rad2deg, dx))
+# los1 = np.array([np.cos(decl1) * np.cos(rtasc1),
+#                  np.cos(decl1) * np.sin(rtasc1), np.sin(decl1)])
+# print('los1:')
+# print(los1)
+# print('mag los1:')
+# print(smu.mag(los1))
+# rtasc1x = np.arctan(rho[1] / rho[0])
+# los1x = np.array([np.cos(decl1) * np.cos(rtasc1x),
+#                   np.cos(decl1) * np.sin(rtasc1x), np.sin(decl1)])
+# print('los1x:')
+# print(los1x)
+# print('mag los1x:')
+# print(smu.mag(los1x))
+# urho = smu.unit(rho)
+# print('urho:')
+# print(urho)
+# print('mag urho:')
+# print(smu.mag(urho))
+# dotrsl2 = 2.0 * np.dot(rs, np.transpose(los1))
+# rhotem1 = 0.5 * (-dotrsl2 + np.sqrt(dotrsl2 * dotrsl2 - 4.0 *
+#                                     (magrs * magrs - magr * magr)))
+# r1 = rhotem1 * los1 + rs
+# print('r1:')
+# print(r1)
+# print('mag r1:')
+# print(smu.mag(r1))
+# rhotem1 = 0.5 * (-dotrsl2 - np.sqrt(dotrsl2 * dotrsl2 - 4.0 *
+#                                      (magrs * magrs - magr * magr)))
+# r1 = rhotem1 * los1 + rs
+# print('r1:')
+# print(r1)
+# print('mag r1:')
+# print(smu.mag(r1))
+# rr = smu.unit(rho)
+# x1 = np.array([0.0, los1[0], 0.0, rr[0]])
+# y1 = np.array([0.0, los1[1], 0.0, rr[1]])
+# z1 = np.array([0.0, los1[2], 0.0, rr[2]])
+# #plot3(x1, y1, z1, 'X')
+# mjd1 = 58896.0
+# rs1 = 124647954.923
+# mjd2 = 58897.0
+# rs2 = 126054577.073
+# mjd3 = 58898.0
+# rs3 = 127422565.338
+# mjd4 = 58899.0
+# rs4 = 128751471.066
+# smu.cubicinterp(rs1, rs2, rs3, rs4, mjd1, mjd2, mjd3, mjd4, 58897.0416667)

@@ -4227,7 +4227,6 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
 
     m = undefined
     small = 1.0e-12
-
     magr = smu.mag(r)
     magv = smu.mag(v)
     # ------------------  find h n and e vectors   ----------------

@@ -3838,7 +3838,10 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # l3 =tm*l3'
 
     # ------------- find l matrix and determinant -----------------
-    los1
+    if sh.show:
+        print('los1 is: ')
+        print(los1)
+
     vs = np.transpose(np.array([0, 0, 0]))
     aecef = np.transpose(np.array([0, 0, 0]))
     #[l1eci, vs3, aeci] = ecef2eci(l1', vs, aecef, (jd1-2451545.0)/36525.0, jd1, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
@@ -3872,7 +3875,8 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
           % (rmt[2, 0], rmt[2, 1], rmt[2, 2]))
     print(lmat)
     print('this should be the inverse of what the code finds later\n' % ())
-    li = lmat.T
+    #li = np.linalg.inv(lmat)
+    #li = lmat.T (?)
     # alt way of Curtis not seem to work ------------------
     p1 = np.cross(los2, los3)
     p2 = np.cross(los1, los3)
@@ -3914,7 +3918,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     lmati[1, 2] = (- l1eci[0] * l3eci[1] + l1eci[1] * l3eci[0]) / d
     lmati[2, 2] = (l1eci[0] * l2eci[1] - l1eci[1] * l2eci[0]) / d
     print(lmati)
-    lir = lmati * rsmat
+    lir = lmati @ rsmat
     # ------------ find f and g series at 1st and 3rd obs ---------
     # speed by assuming circ sat vel for udot here ??
     # some similartities in 1/6t3t1 ...
@@ -3969,7 +3973,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     cmat[0, 0] = - c1
     cmat[1, 0] = - c2
     cmat[2, 0] = - c3
-    rhomat = lir * cmat
+    rhomat = lir @ cmat
     rhoold1 = rhomat[0, 0] / c1
     rhoold2 = rhomat[1, 0] / c2
     rhoold3 = rhomat[2, 0] / c3
@@ -4012,7 +4016,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         print('w gibbs km/s       v2 %11.7f %11.7f %11.7f \n'
               % (v2[0], v2[1], v2[2]))
         # check if too close obs
-        if ((str(error) == str('          ok')) and
+        if ((str(error) == str('ok')) and
                 ((abs(theta) < 1.0 * deg2rad) or (abs(theta1) < 1.0 * deg2rad))):
             p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
                 sc.rv2coe(r2, v2, mu)
@@ -4063,7 +4067,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         cmat[0, 0] = - c1
         cmat[1, 0] = - c2
         cmat[2, 0] = - c3
-        rhomat = lir * cmat
+        rhomat = lir @ cmat
         print(rhomat)
         print('rhomat %11.7f %11.7f %11.7f \n'
               % (rhomat[0, 0], rhomat[0, 1], rhomat[0, 2]))
@@ -4091,6 +4095,8 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         r2[i] = - rhomat[1, 0] * l2eci[i] + rs2[i]
         r3[i] = rhomat[2, 0] * l3eci[i] / c3 + rs3[i]
 
+
+    print('The error is', error)
     return r2, v2
 
 # ------------------------------------------------------------------------------
@@ -4196,13 +4202,13 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # los2 =[ -0.825702365309, 0.259423566604, 0.500914181287]
     # los3 =[-0.947067028031, -0.129575647726, 0.2937246941]
 
-    t1 = - 1200
+    # t1 = - 1200
 
-    t2 = 0
-    t3 = 1200
-    tau12 = t1 - t2
-    tau13 = t1 - t3
-    tau32 = t3 - t2
+    # t2 = 0
+    # t3 = 1200
+    # tau12 = t1 - t2
+    # tau13 = t1 - t3
+    # tau32 = t3 - t2
     # test problem///////////////////////////////////////////////////////
 
     tau12 = (jd1 - jd2) * 86400.0 + (jdf1 - jdf2) * 86400.0
@@ -4223,13 +4229,17 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     los3[0] = math.cos(decl3) * math.cos(rtasc3)
     los3[1] = math.cos(decl3) * math.sin(rtasc3)
     los3[2] = math.sin(decl3)
+
+    los_test = smu.findlos(np.array([decl1,rtasc1]), np.array([decl2,rtasc2]))
+
     # same- they're both unit vectors
     # l1
     # unit(l1)
-
-    los1
-    los2
-    los3
+    if sh.show:
+        print('Line of Site Vectors:')
+        print(los1)
+        print(los2)
+        print(los3)
     # -------------------------------------------------------------
     #       using lagrange interpolation formula to derive an expression
     #       for l(t), substitute t = t2 and differentiate to obtain the
