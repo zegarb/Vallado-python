@@ -1,4 +1,4 @@
-#
+#   stm = state transition matrix
 #   teststm
 #
 # test the various implementations of the stm moving a state through time
