@@ -799,11 +799,11 @@ for ktr in range(casetest, casetest + 1):
 #                           % (ttime, rintecisl[0], rintecisl[1], rintecisl[2],
 #                              vintecisl[0], vintecisl[1], vintecisl[2]))
 
-# outfiledet.close()
-# outfiledethp.close()
-# outfiledetH.close()
-# outfiledethpH.close()
-# outfilehill.close()
+outfiledet.close()
+outfiledethp.close()
+outfiledetH.close()
+outfiledethpH.close()
+outfilehill.close()
 # #pause;
 
 # #         res1.t(1:numsteps) = res1.t(1:numsteps) / 86400.0;
@@ -960,7 +960,7 @@ for ktr in range(casetest, casetest + 1):
 # print('results in testouput/testhill.out  \n')
 # print('results in testoutput/testhilldet.out  \n')
 # print('should be done now. sort the outfile and plot in excel \n')
-# outfile.close()
+outfile.close()
 # #   load handel
 # #   sound(y, Fs)
 
