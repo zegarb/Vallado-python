@@ -627,7 +627,28 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
 # [eqcov, tm] = covct2eq (cartcov, cartstate, anom, fr)
 # ----------------------------------------------------------------------------
 
-def covct2eq (cartcov, cartstate, anom, fr):
+def covct2eq (cartcov: np.ndarray, cartstate: np.ndarray, anom: str, fr: int):
+    """this function transforms a six by six covariance matrix expressed in
+    cartesian vectors into one expressed in equinoctial elements.
+
+    Parameters
+    ----------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state
+    anom : str
+        anomaly: 'meana', 'truea', 'meann', 'truen'
+    fr : int
+        retrograde factor: 1 or -1
+
+    Returns
+    -------
+    eqcov : ndarray
+        6x6 equinoctial covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
 
     # -------- parse the input vectors into cartesian and classical components
     rx = cartstate[0, 0] * 1000.0
@@ -864,7 +885,44 @@ def covct2eq (cartcov, cartstate, anom, fr):
 #   [flcov, tm] = covct2fl(cartcov, cartstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
 
-def covct2fl(cartcov, cartstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps):
+def covct2fl(cartcov: np.ndarray, cartstate: np.ndarray, anom: str, ttt: float,
+             jdut1: float, lod: float, xp: float, yp: float, terms: int,
+             ddpsi: float, ddeps: float):
+    """this function transforms a six by six covariance matrix expressed in cartesian elements
+    into one expressed in flight parameters
+
+    Parameters
+    ----------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state
+    anom : str
+        anomaly: 'latlon', 'radec'
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        number of terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    flcov : ndarray
+        6x6 flight covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
 
     # -------- parse the input vectors into cartesian components
     rx = cartstate[0, 0] * 1000  # keep all in m, m/s
@@ -1051,7 +1109,28 @@ def covct2fl(cartcov, cartstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi, dd
 # [eqcov, tm] = covcl2eq (classcov, classstate, anom, fr)
 # ----------------------------------------------------------------------------
 
-def covcl2eq (classcov, classstate, anom, fr):
+def covcl2eq (classcov: np.ndarray, classstate: np.ndarray, anom: str, fr: int):
+    """this function transforms a six by six covariance matrix expressed in
+    classical elements into one expressed in equinoctial elements.
+
+    Parameters
+    ----------
+    classcov : ndarray
+        6x6 classical covariance matrix
+    classstate : ndarray
+        6x1 classical orbit state
+    anom : str
+        anomaly: 'meana', 'truea', 'meann', 'truen'
+    fr : int
+        retrograde factor: 1, -1
+
+    Returns
+    -------
+    eqcov : ndarray
+        6x6 equinoctial matrix
+    tm : ndarray
+        transformation matrix
+    """
 
     # --------- determine which set of variables is in use ---------
     # -------- parse the orbit state
@@ -1177,7 +1256,28 @@ def covcl2eq (classcov, classstate, anom, fr):
 # [cartcov, tm] = coveq2ct(eqcov, eqstate, anom, fr)
 # ----------------------------------------------------------------------------
 
-def coveq2ct(eqcov, eqstate, anom, fr):
+def coveq2ct(eqcov : np.ndarray, eqstate : np.ndarray, anom : str, fr: int):
+    """this function transforms a six by six covariance matrix expressed in
+    equinoctial elements into one expressed in cartesian elements.
+
+    Parameters
+    ----------
+    eqcov : ndarray
+        6x6 equinoctial covariance matrix
+    eqstate : ndarray
+        6x1 equinoctial orbit state
+    anom : str
+        anomaly: 'meana', 'truea', 'meann', 'truen'
+    fr : int
+        retrograde factor: 1, -1
+
+    Returns
+    -------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
 
     # --------- determine which set of variables is in use ---------
     # -------- parse the orbit state
@@ -1549,7 +1649,28 @@ def coveq2ct(eqcov, eqstate, anom, fr):
 # [classcov, tm] = coveq2cl eqcov, eqstate, anom, fr)
 # ----------------------------------------------------------------------------
 
-def coveq2cl(eqcov, eqstate, anom, fr):
+def coveq2cl(eqcov : np.ndarray, eqstate : np.ndarray, anom: str, fr: int):
+    """this function transforms a six by six covariance matrix expressed in
+    equinoctial elements into one expressed in classical orbital elements.
+
+    Parameters
+    ----------
+    eqcov : ndarray
+        6x6 equinoctial covariance matrix
+    eqstate : ndarray
+        6x1 equinoctial orbit state
+    anom : str
+        anomaly: 'meana', 'truea', 'meann', 'truen'
+    fr : int
+        retrograde factor: 1, -1
+
+    Returns
+    -------
+    classcov : ndarray
+        6x6 classical covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
 
     # -------- parse the orbit state
     # --------- determine which set of variables is in use ---------
@@ -1690,8 +1811,44 @@ def coveq2cl(eqcov, eqstate, anom, fr):
 # ----------------------------------------------------------------------------
 
 
-def covfl2ct(flcov, flstate, anom, ttt, jdut1, lod, xp, yp, terms, ddpsi,
-             ddeps):
+def covfl2ct(flcov : np.ndarray, flstate : np.ndarray, anom: str, ttt: float,
+             jdut1: float, lod: float, xp: float, yp: float, terms: int,
+             ddpsi: float, ddeps : float):
+    """this function transforms a six by six covariance matrix expressed in
+    flight elements into one expressed in cartesian elements.
+
+    Parameters
+    ----------
+    flcov : ndarray
+        6x6 flight covariance matrix
+    flstate : ndarray
+        6x1 flight orbit state
+    anom : str
+        anomaly: 'latlon', 'radec'
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        number of terms for ast calculation: 0, 2
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
 
     small = 0.00000001
 
@@ -3174,7 +3331,7 @@ def covct2clnew(cartcov, cartstate, anom):
     # ---------- calculate the output covariance matrix -----------
 
     classcov = tm @ cartcov @ tm.T
-    
+
     return classcov, tm
 
 #
