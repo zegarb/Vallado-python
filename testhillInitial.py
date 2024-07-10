@@ -26,17 +26,12 @@ import spacemath_utils as smu
 import space_conversions as sc
 print('------------------------------------------------ initial accuracy ----------------------------- \n')
 # now test the ability to convert eci - hills and back
-casenumo = 1
-
-casetest = 7
-
 ang_step = 1e-08
 # case where you read in the int and tgt ephemerides
-ropt = 'm'
-outfilehill = open(os.path.join(os.path.dirname(__file__), 'testoutput',
-                   f'thillc{casenumo}n{casetest}.out'), 'wt')
 # outfilehill = open(strcat('d:/STKFiles Educational Files/Hills/thillc', int2str(casenumo),'n', int2str(casetest),'.out'),'wt')
-
+casenumo = 1
+outfilehill = open(os.path.join(os.path.dirname(__file__), 'testoutput',
+                    'thillinitial.out'), 'wt')
 # -----------------------------------------------------------------------------------------------
 # -------------------------------- do initial accuracy checks fwd, back, ------------------------
 # -----------------------------------------------------------------------------------------------
@@ -47,6 +42,7 @@ for ktr in range(1, 12):
         casenum = ktr
     else:
         casenum = casenumo
+
     rtgteci = np.zeros(3)
     vtgteci = np.zeros(3)
     match casenum:
@@ -68,10 +64,7 @@ for ktr in range(1, 12):
             rtgteci, vtgteci = sc.coe2rv(p, 0.0, 0.001 * deg2rad, 0.0, 0.0,
                                          0.0, 0.0, 0.0, 0.0)
             circ = 'y'
-            print('rtgt = [%20.13f %20.13f %20.13f]; '
-                  '\n vtgt = [%20.13f %20.13f %20.13f]; '
-                  '\n' % (rtgteci[0], rtgteci[1], rtgteci[2],
-                          vtgteci[0], vtgteci[1], vtgteci[2]))
+
         case 2:
             a = 26500.0
             ecc = 0.0
@@ -127,31 +120,44 @@ for ktr in range(1, 12):
     zd = 0.01
     hro1 = np.zeros(3)
     hvo1 = np.zeros(3)
-    hro1[0] = x / 1000.0
-    hro1[1] = y / 1000.0
-    hro1[2] = z / 1000.0
-    hvo1[0] = xd / 1000.0
-    hvo1[1] = yd / 1000.0
-    hvo1[2] = zd / 1000.0
+    hro1[0] = x
+    hro1[1] = y
+    hro1[2] = z
+    hvo1[0] = xd
+    hvo1[1] = yd
+    hvo1[2] = zd
     rintecix, vintecix = sc.hilleqcm2eci(rtgteci, vtgteci, hro1, hvo1)
     rhillx, vhillx = sc.eci2hilleqcm(rtgteci, vtgteci, rintecix, vintecix)
     dr = rhillx - hro1
     dv = vhillx - hvo1
     mdr = smu.mag(dr * 1000000)
     mdv = smu.mag(dv * 1000000)
+    outfilehill.write(f'\nCase {casenum}:\n')
+    outfilehill.write(f'Initial values: rtgteci:{rtgteci}, vtgteci:{vtgteci}\n'
+                      f'hro: {hro1}, vro: {hvo1}\n'
+                      f'circle? {circ}\n')
+    outfilehill.write(f'converted values: rhill:{rhillx}, vhill:{vhillx}\n')
+    outfilehill.write(f'dr m: {dr}, {mdr}, dv m: {dv}, {mdv}\n')
     print('dr m         %20.13f %20.13f %20.13f %15.8f mm %20.13f %20.13f %20.13f %15.8f mm/s \n'
-          % (dr[0] * 1000, dr[1] * 1000, dr[2] * 1000, mdr, dv[0] * 1000,
-             dv[1] * 1000, dv[2] * 1000, mdv))
+          % (dr[0], dr[1], dr[2], mdr, dv[0], dv[1], dv[2], mdv))
+
     p, a, ecc, incl, omega, argpx1, nux1, m, arglat, truelon, lonper = sc.rv2coe(rtgteci, vtgteci)
+    outfilehill.write(f'initial coe: {p = } {a = }, {ecc = }, {incl = }, '
+                      f'{omega = }, {argpx1 = }, {nux1 = }, {m = }, '
+                      f'{arglat = }, {truelon = }, {lonper = }\n')
     print('coes %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f\n'
           % (p, a, ecc, incl * rad2deg, omega * rad2deg, argpx1 * rad2deg,
              nux1 * rad2deg, m * rad2deg, arglat * rad2deg, truelon * rad2deg,
              lonper * rad2deg))
     p, a, ecc, incl, omega, argpx1, nux1, m, arglat, truelon, lonper = sc.rv2coe(rintecix, vintecix)
+    outfilehill.write(f'converted coe: {p = } {a = }, {ecc = }, {incl = }, '
+                      f'{omega = }, {argpx1 = }, {nux1 = }, {m = }, '
+                      f'{arglat = }, {truelon = }, {lonper = }\n')
     print('coes %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f\n'
           % (p, a, ecc, incl * rad2deg, omega * rad2deg, argpx1 * rad2deg,
              nux1 * rad2deg, m * rad2deg, arglat * rad2deg, truelon * rad2deg,
              lonper * rad2deg))
+
 
 # -----------------------------------------------------------------------------------------------
 # ------------------- check various positions to determine if the veocity is correct ------------
@@ -181,13 +187,17 @@ for ktr in range(1, 7):
         zd = 0.01
     else:
         zd = 0.0
-    hro1[0] = x / 1000.0
-    hro1[1] = y / 1000.0
-    hro1[2] = z / 1000.0
-    hvo1[0] = xd / 1000.0
-    hvo1[1] = yd / 1000.0
-    hvo1[2] = zd / 1000.0
+    hro1[0] = x
+    hro1[1] = y
+    hro1[2] = z
+    hvo1[0] = xd
+    hvo1[1] = yd
+    hvo1[2] = zd
     rinteci, vinteci = sc.hilleqcm2eci(rtgteci, vtgteci, hro1, hvo1)
+    outfilehill.write(f'\nCase {casenum} single values check {ktr}:\n')
+    outfilehill.write(f'rtgteci:{rtgteci}, vtgteci:{vtgteci}\n'
+                      f'hro: {hro1} vro: {hvo1}\n')
+    outfilehill.write(f'rinteci: {rinteci}, vinteci: {vinteci}\n')
     print('hillsin       %20.13f %20.13f %20.13f %20.13f %20.13f %20.13f \n'
           % (hro1[0] * 1000, hro1[1] * 1000, hro1[2] * 1000,
              hvo1[0] * 1000, hvo1[1] * 1000, hvo1[2] * 1000))
@@ -218,8 +228,6 @@ xd = 0.0
 yd = 0.0
 
 zd = 0.0
-
-fid = 2
 for ktr in range(1, 7):
     if ktr == 1:
         x = 100.0
@@ -245,14 +253,13 @@ for ktr in range(1, 7):
         zd = 1
     else:
         zd = 0.0
-    hro1[0] = x / 1000.0
-    hro1[1] = y / 1000.0
-    hro1[2] = z / 1000.0
-    hvo1[0] = xd / 1000.0
-    hvo1[1] = yd / 1000.0
-    hvo1[2] = zd / 1000.0
+    hro1[0] = x
+    hro1[1] = y
+    hro1[2] = z
+    hvo1[0] = xd
+    hvo1[1] = yd
+    hvo1[2] = zd
 
-    # reset this!! so m for hills call!!
     hro = np.zeros(3)
     hvo = np.zeros(3)
     hro[0] = x
