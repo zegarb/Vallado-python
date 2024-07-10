@@ -9,7 +9,7 @@ import orbit_utils as obu
 def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc):
     outfile.write('xx  \n')
     outfile.write('xx 501    psinew         dt       x      a          e \n')
-    for i in range((nrev) * 100, 501):
+    for i in range((nrev) * 100 + 1, 501):
         dt = i * 60.0
         # make target moving...
         if kepmov == 'y':
