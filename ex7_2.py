@@ -55,12 +55,15 @@ diffsites = 'n'
 # typerun = 'o'; # gooding
 typerun = 'a' #run them all!
 
-if casenum == 0:
-    fn = os.path.join(os.path.dirname(__file__), "data",
-                      "Sat11Access.dat")
-else:
-    fn = os.path.join(os.path.dirname(__file__), "data",
-                      "Sat11Ex" + str(casenum) + ".dat")
+# if casenum == 0:
+#     fn = os.path.join(os.path.dirname(__file__), "data",
+#                       "Sat11Access.dat")
+# else:
+#     fn = os.path.join(os.path.dirname(__file__), "data",
+#                       "Sat11Ex" + str(casenum) + ".dat")
+
+fn = os.path.join(os.path.dirname(__file__), "data",
+                       "Sat11Ex" + str(casenum) + ".dat")
 filedat = np.loadtxt(fn)
 print(filedat)
 if casenum == 0:
