@@ -2190,7 +2190,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
         #             end
     # end  # if  var a > 0.0
 
-    if (errorl != '      ok'):
+    if (errorl != 'ok'):
         print("\n\n-----Error found in lambertu: ", errorl)
         print("\n\n")
         p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
@@ -2270,7 +2270,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
 
 def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
              dtsec=None):
-    errorb = '      ok'
+    errorb = 'ok'
     y = 0.0
     k2 = 0.0
     u = 0.0
@@ -2306,6 +2306,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     lam = 1.0 / s * math.sqrt(magr1 * magr2) * math.cos(dnu * 0.5)
     L = ((1.0 - lam) / (1.0 + lam)) ** 2
     m = 8.0 * mu * dtsec * dtsec / (s ** 3 * (1.0 + lam) ** 6)
+
     #        tan2w = 0.25*eps*eps / (sqrt(ror) + ror * (2.0 + sqrt(ror)))
     #        rp = sqrt(magr1*magr2)*((cos(dnu*0.25))^2 + tan2w)
     #        if (dnu < pi)
@@ -2314,11 +2315,8 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     #            L = ((cos(dnu*0.25))^2 + tan2w - cos(dnu*0.5)) / ((cos(dnu*0.25))^2 + tan2w)
     #        end
     #        m = mu * dtsec*dtsec / (8.0*rp*rp*rp)
-    # initial guess
-    if (nrev > 0):
-        xn = 1.0 + 4.0 * L
-    else:
-        xn = L
+
+
 
     #    lim1 = sqrt(m/L)
     # alt approach for high energy (long way, retro multi-rev) case
@@ -2361,6 +2359,12 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     else:
         # standard processing
         # note that the dr nrev =0 case is not represented
+         # initial guess
+        if (nrev > 0):
+            xn = 1.0 + 4.0 * L
+        else:
+            xn = L
+
         loops = 1
         y1 = 0.0
         x = 10.0
@@ -2368,6 +2372,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 
             if (nrev > 0):
                 x = xn
+
                 temp = 1.0 / ((1.0 + 2.0 * x + L) * (4.0 * x ** 2))
                 temp1 = (nrev * math.pi * 0.5
                          + math.atan(math.sqrt(x))) / math.sqrt(x)
@@ -2399,6 +2404,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
                                        / (1.0 + 2.0 * u * k2 * k2)))
             xn = (math.sqrt(((1.0 - L) * 0.5) ** 2 + m / (y * y))
                   - (1.0 + L) * 0.5)
+
             #                    xn = sqrt(l*l + m/(y*y)) - (1.0 - l) alt, doesn't seem to work
             #            end
             #        end

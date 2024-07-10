@@ -15,10 +15,10 @@ def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc):
         if kepmov == 'y':
             rtgt1, vtgt1, errork = obu.kepler(rtgto, vtgto, dt)
         else:
-            errork = '      ok'
+            errork = 'ok'
             rtgt1 = rtgto
             vtgt1 = vtgto
-        if i == nrev * 100:
+        if i == nrev * 100 + 1:
             # check min energy condition and min time for that
             cosdeltanu = np.dot(rinto, rtgt1) / (smu.mag(rinto) * smu.mag(rtgt1))
             chord = np.sqrt(smu.mag(rinto) ** 2 + smu.mag(rtgt1) ** 2 - 2.0 * smu.mag(rinto) * smu.mag(rtgt1) * cosdeltanu)
@@ -49,14 +49,13 @@ def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc):
         flights = ['d', 'r']
         for flight in flights:
             vtrans1, vtrans2, errorl = obu.lambertb(rinto, vinto, rtgt1, direc, flight, nrev, dt )
-            if errorl == '      ok' and errork == '      ok':
+            if errorl == 'ok' and errork == 'ok':
                 [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = sc.rv2coe(rinto, vtrans1); # of trans orbit
                 dv1 = smu.mag(vinto - vtrans1)
                 dv2 = smu.mag(vtrans2 - vtgt1)
-                outfile.write(' #11.5f #11.5f #11.5f #11.5f #11.5f \n', a, ecc, dv1, dv2, dv1+dv2 );
+                outfile.write(' %11.5f %11.5f %11.5f %11.5f %11.5f \n' % (a, ecc, dv1, dv2, dv1+dv2) )
             else:
-                outfile.write('  0  0 #s \n', errorl)
-
+                outfile.write('  0  0 %s \n' % errorl)
 
 st = 'y'
 outpath = os.path.join(os.path.dirname(__file__), 'testoutput', 'fig712.out')
@@ -124,6 +123,9 @@ for kt in range(1, 8):
     dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc)
     direc = 's'
     nrev = 1
+    # kt = 1: X falls below 0 in lambertu when nrev is set
+    # to 1 for this test case. Creates a negative square root in an
+    # atan function error. Can't figure out what is going wrong. - mjc
     dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc)
     direc = 'l'
     nrev = 1
