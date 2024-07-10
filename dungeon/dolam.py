@@ -19,7 +19,7 @@ for i in range((nrev) * 100, 500+1):
     if kepmov == 'y':
         rtgt1, vtgt1, errork = obu.kepler(rtgto, vtgto, dt, 0)
     else:
-        errork = '      ok'
+        errork = 'ok'
         rtgt1 = rtgto
         vtgt1 = vtgto
     if i == nrev * 100:
@@ -47,7 +47,7 @@ for i in range((nrev) * 100, 500+1):
         print('dnu %11.7f mins c %11.7f s %11.7f a %11.7f be %11.7f tranmin %11.7f tmin %11.7f  tpar %11.7f\n' % (np.arccos(cosdeltanu) * 180 / np.pi, chord, s, amin, betam, ttran, tmin, tpar))
     vtrans1, vtrans2, errorl = obu.lambertu(rinto, rtgt1, direc, nrev, dt, fid)
     #          [vtrans1, vtrans2, errorl] = lambertb( rinto, rtgt1, direc, overrev, dt );
-    #           if strcmp(errorl, '      ok') ==0 && strcmp(errork, '      ok') ==0
+    #           if strcmp(errorl, 'ok') ==0 && strcmp(errork, 'ok') ==0
     #               [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe (rinto, vtrans1, muin); # of trans orbit
     #               dv1 = smu.mag(vinto - vtrans1);
     #               dv2 = smu.mag(vtrans2 - vtgt1);

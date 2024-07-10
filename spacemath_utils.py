@@ -2281,8 +2281,6 @@ def newtonnu (ecc: float, nu: float):
     e0 = undefined
     m = undefined
     small = 0.00000001
-    print('ecc is ', ecc)
-    print('nu is', nu)
     # --------------------------- circular ------------------------
     if (abs(ecc) < small):
         m = -0.0
@@ -3564,7 +3562,7 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
 
     return arclength
 
-def findlos(*decl_rtasc_angles):
+def findlos(*decl_rtasc_angles: np.ndarray):
 
     los = np.zeros((len(decl_rtasc_angles),3))
 
