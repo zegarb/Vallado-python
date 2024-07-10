@@ -2278,9 +2278,11 @@ def newtonnu (ecc: float, nu: float):
         mean anomaly: 0 to 2pi rad
     """
 
-    e0 = None
-    m = None
+    e0 = undefined
+    m = undefined
     small = 0.00000001
+    print('ecc is ', ecc)
+    print('nu is', nu)
     # --------------------------- circular ------------------------
     if (abs(ecc) < small):
         m = -0.0
@@ -2312,12 +2314,12 @@ def newtonnu (ecc: float, nu: float):
         if (abs(nu) < 168.0*math.pi/180.0):
             e0= math.tan(nu*0.5)
             m = e0 + (e0*e0*e0)/3.0
-                #print("m fin is ", m)
+            #print("m is ", m)
 
     if (ecc < 1.0):
-        m = np.fmod(m, 2.0 *math.pi)
+        m = np.fmod(m, 2.0 * math.pi)
         if (m < 0.0):
-            m = m + 2.0 *math.pi
+            m = m + 2.0 * math.pi
         e0 = np.fmod(e0, 4.0 *math.pi)
 
     return e0, m
@@ -3561,6 +3563,21 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
             arclength[i] = a[i] * (E0[i] - E1[i])
 
     return arclength
+
+def findlos(*decl_rtasc_angles):
+
+    los = np.zeros((len(decl_rtasc_angles),3))
+
+    i = 0
+    for arg in decl_rtasc_angles:
+        decl = arg[0]
+        rtasc = arg[1]
+        los[i,0] = math.cos(decl) * math.cos(rtasc)
+        los[i,1] = math.cos(decl) * math.sin(rtasc)
+        los[i,2] = math.sin(decl)
+        i = i + 1
+    return los
+
 
 
 ##############################################################################################################
