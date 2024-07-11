@@ -154,7 +154,7 @@ def rot2mat(xval: float):
 #    none.
 #
 # [outmat] = rot3mat (xval)
-# ----------------------------------------------------------------------------- }
+# -----------------------------------------------------------------------------
 
 
 def rot3mat(xval: float):
@@ -1604,7 +1604,7 @@ def unit(vec: np.ndarray):
 def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
             magr1in=None, magr2in=None, los1=None, los2=None,
             los3=None, rsite1=None, rsite2=None, rsite3=None,
-            t1=None, t3=None, direct=None, re=None, mu=None):
+            t1=None, t3=None, direct=None, mu=None):
 
     rho1 = (- cc1 + np.sqrt(cc1 ** 2 - 4.0
                             * (magrsite1 ** 2 - magr1in ** 2))) / 2.0
@@ -1699,7 +1699,7 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
         sindh21 = (magr1 / np.sqrt(- a * p) * sindv21
                    + magr1 / p * (1 - cosdv21) * s)
         deltah32 = np.log(sindh32 + np.sqrt(sindh32 ** 2 + 1))
-        deltah21 = np.log(sindh21 + np.sqrt(sindh21 ** 2 + 1))
+        deltah21 = np.log(sindh21 + np.sqrt(sindh21 ** 2 + 1)) #s (and esinv2) being negative ripples down and makes this negative
         deltam32 = (- deltah32 + 2 * s * (np.sinh(deltah32 / 2)) ** 2
                     + c * np.sinh(deltah32))
         deltam12 = (deltah21 + 2 * s * (np.sinh(deltah21 / 2)) ** 2
@@ -3409,8 +3409,8 @@ def inverselliptic2(E: np.ndarray, m: np.ndarray, tol: float = None):
 #     moiseev.igor[at]gmail.com
 #     Moiseev Igor
 
-def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
-                      theta1: np.ndarray = None):
+def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = np.array([]),
+                      theta1: np.ndarray = np.array([])):
 
     if not isinstance(a, np.ndarray):
         a = np.array([a])
@@ -3418,8 +3418,8 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
     if not isinstance(b, np.ndarray):
         b = np.array([b])
 
-    if theta0 == None or theta1 == None:
-        if theta0 == None and theta1 == None:
+    if theta0.size == 0 or theta1.size == 0:
+        if theta0.size == 0 and theta1.size == 0:
             theta0 = np.full(a.shape, 0)
             theta1 = np.full(a.shape, 2*math.pi)
         else:
@@ -3460,14 +3460,52 @@ def arclength_ellipse(a: np.ndarray, b: np.ndarray, theta0: np.ndarray = None,
 
     return arclength
 
-def findlos(*decl_rtasc_angles: np.ndarray):
 
-    los = np.zeros((len(decl_rtasc_angles),3))
+# ------------------------------------------------------------------------------
+#
+#                                  findlos
+#
+#  finds the line of site vector given an array or arrays of right topocentric
+#  ascension and declination angles in eci
+#
+#  author        : michael courville                            jul 11, 2024
+#
+#  revisions
+#                -
+#
+#  inputs               description                             range / units
+#    radec_angles        - array(s) of rtasc and decl angles    rad
+#                        - np.array([rtasc,decl])
+#
+#  outputs       :
+#    los                - line of site unit vector(s)           unitless
+#
+#
+# [los1x,los1y,los1z], [los2x, los2y, los2z],... =
+#           findlos(np.array([rtasc1, decl1]), np.array([rtasc2, decl2]), ...)
+# -----------------------------------------------------------------------------
+def findlos(*radec_angles: np.ndarray):
+    """finds the line of site vector given an array or arrays
+    of right topocentric ascension and declination angles in eci
+
+    Parameters
+    ----------
+    radec_angles: ndarray([float, float)]
+        array(s) of rtasc and decl angles: rad
+        ex: np.array([rtasc,decl])
+    Returns
+    -------
+    los: ndarray([float, float, float)]
+        line of site unit vector(s)
+    """
+
+    los = np.zeros((len(radec_angles),3))
 
     i = 0
-    for arg in decl_rtasc_angles:
-        decl = arg[0]
+    for arg in radec_angles:
         rtasc = arg[1]
+        decl = arg[1]
+
         los[i,0] = math.cos(decl) * math.cos(rtasc)
         los[i,1] = math.cos(decl) * math.sin(rtasc)
         los[i,2] = math.sin(decl)

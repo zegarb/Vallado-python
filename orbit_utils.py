@@ -3549,6 +3549,9 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
 #    rsite1       - eci site position vector                    km
 #    rsite2       - eci site position vector                    km
 #    rsite3       - eci site position vector                    km
+#    re           - radius earth, sun, etc                      km
+#    mu           - grav param earth, sun etc                   km3/s2
+#
 #
 #  outputs        :
 #    r2           - eci position vector at t2                   km
@@ -3594,7 +3597,7 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
              rsite1=None, rsite2=None, rsite3=None, re=None, mu=None):
 
     # for sun
-    #re = 149597870.0
+    #re = 149597870.0 (this is not the radius of the sun but the atomic unit - mjc)
     #mu = 1.32712428e11
     magr1in = 2.0 * re
     magr2in = 2.04 * re
@@ -3633,31 +3636,31 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
         r2, r3, f1, f2, q1, magr1, magr2, a, deltae32 = \
             smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1,
                         los2, los3, rsite1, rsite2, rsite3, tau12, tau32,
-                        direct, re, mu)
+                        direct, mu)
         # check intermediate status
         f = 1.0 - a / magr2 * (1.0 - math.cos(deltae32))
-        g = tau32 - math.sqrt(a**3 / mu) * (deltae32 - math.sin(deltae32))
+        g = tau32 - math.sqrt(np.abs(a)**3 / mu) * (deltae32 - math.sin(deltae32))
         v2 = (r3 - f * r2) / g
         p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
             sc.rv2coe(r2, v2, mu)
         ###print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
-        # -------------- re-calculate f1 and f2 with r1 = r1 + delta r1
+        # -------------- recalculate f1 and f2 with r1 = r1 + delta r1
         magr1o = magr1in
         deltar1 = pctchg * magr1in
         magr1in = magr1in + deltar1
         r2, r3, f1delr1, f2delr1, q2, magr1, magr2, a, deltae32 = \
             smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1, los2,
-                        los3, rsite1, rsite2, rsite3, tau12, tau32, direct, re, mu)
+                        los3, rsite1, rsite2, rsite3, tau12, tau32, direct, mu)
         pf1pr1 = (f1delr1 - f1) / deltar1
         pf2pr1 = (f2delr1 - f2) / deltar1
-        # ----------------  re-calculate f1 and f2 with r2 = r2 + delta r2
+        # ----------------  recalculate f1 and f2 with r2 = r2 + delta r2
         magr1in = magr1o
         magr2o = magr2in
         deltar2 = pctchg * magr2in
         magr2in = magr2in + deltar2
         r2, r3, f1delr2, f2delr2, q3, magr1, magr2, a, deltae32 = \
             smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1,
-                        los2, los3, rsite1, rsite2, rsite3, tau12, tau32, direct, re, mu)
+                        los2, los3, rsite1, rsite2, rsite3, tau12, tau32, direct, mu)
         pf1pr2 = (f1delr2 - f1) / deltar2
         pf2pr2 = (f2delr2 - f2) / deltar2
         # f = 1.0 - a/magr2*(1.0-cos(deltae32))
@@ -3703,13 +3706,13 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # needed to get the r2 set properly since the last one was moving r2
     r2, r3, f1, f2, q1, magr1, magr2, a, deltae32 = \
         smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1, los2, los3,
-                    rsite1, rsite2, rsite3, tau12, tau32, direct, re, mu)
-    if a and mu and magr2:
-      f = 1.0 - a / magr2 * (1.0 - math.cos(deltae32))
-      g = tau32 - math.sqrt(a ** 3 / mu) * (deltae32 - math.sin(deltae32))
-      v2 = (r3 - f * r2) / g
+                    rsite1, rsite2, rsite3, tau12, tau32, direct, mu)
+    if a != None and mu != None and magr2 != None:
+        f = 1.0 - a / magr2 * (1.0 - math.cos(deltae32))
+        g = tau32 - math.sqrt(a ** 3 / mu) * (deltae32 - math.sin(deltae32))
+        v2 = (r3 - f * r2) / g
     else:
-      v2=None
+        v2=None
     return r2, v2
 
 # ------------------------------------------------------------------------------
@@ -3740,6 +3743,8 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
 #    rsite1       - eci site position vector                    km
 #    rsite2       - eci site position vector                    km
 #    rsite3       - eci site position vector                    km
+#    mu           - grav param earth, sun etc                   km3/s2
+#
 #
 #  outputs        :
 #    r            - ijk position vector at t2     km
@@ -3791,14 +3796,12 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
 def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             rtasc2=None, rtasc3=None, jd1=None, jdf1=None,
             jd2=None, jdf2=None, jd3=None, jdf3=None, rs1=None,
-            rs2=None, rs3=None):
+            rs2=None, rs3=None, mu=mu):
     # -------------------------  implementation   -------------------------
     ddpsi = 0.0
-
     ddeps = 0.0
-    magr1in = 2.0 * re
-
-    magr2in = 2.01 * re
+    #magr1in = 2.0 * re
+    #magr2in = 2.01 * re
     direct = 'y'
 
     # ---------- set middle to 0, find decls to others -----------
@@ -3870,9 +3873,9 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         rsmat[i, 0] = rs1[i]
         rsmat[i, 1] = rs2[i]
         rsmat[i, 2] = rs3[i]
-    rmt = rsmat.T / re
 
     if sh.show:
+        rmt = rsmat.T / re #divide by re?
         print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
           % (rmt[0, 0], rmt[0, 1], rmt[0, 2]))
         # the order is right, but to print out, need '
@@ -4031,7 +4034,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         magr1 = smu.mag(r1)
         magr2 = smu.mag(r2)
         magr3 = smu.mag(r3)
-        v2, theta, theta1, copa, error = gibbs(r1, r2, r3)
+        v2, theta, theta1, copa, error = gibbs(r1, r2, r3, mu)
         if sh.show:
             print('r1 %16.14f %16.14f %16.14f %11.7f %11.7f %16.14f \n'
               % (r1[0], r1[1], r1[2], theta * rad2deg, theta1 * rad2deg, copa * rad2deg))
@@ -4047,7 +4050,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             ###print('coes init ans %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
             # --- hgibbs to get middle vector ----
             v2, theta, theta1, copa, error = \
-                hgibbs(r1, r2, r3, jd1 + jdf1, jd2 + jdf2, jd3 + jdf3)
+                hgibbs(r1, r2, r3, jd1 + jdf1, jd2 + jdf2, jd3 + jdf3, mu)
             if sh.show:
                 print('using hgibbs km/s       v2 %11.7f %11.7f %11.7f \n'
                 % (v2[0], v2[1], v2[2]))
@@ -4140,8 +4143,6 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
 #  author        : david vallado                  719-573-2600   24 apr 2003
 #
 #  inputs          description                    range / units
-#    re           - radius earth, sun, etc        km
-#    mu           - grav param earth, sun etc     km3/s2
 #    rtasc1       - right ascension #1                          rad
 #    rtasc2       - right ascension #2                          rad
 #    rtasc3       - right ascension #3                          rad
@@ -4154,6 +4155,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
 #    rsite1       - eci site position vector                    km
 #    rsite2       - eci site position vector                    km
 #    rsite3       - eci site position vector                    km
+#    mu           - grav param earth, sun etc                   km3/s2
 #
 #  outputs        :
 #    r            - ijk position vector           km
@@ -4207,7 +4209,7 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
 def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
             rtasc2=None, rtasc3=None, jd1=None, jdf1=None, jd2=None,
             jdf2=None, jd3=None, jdf3=None, diffsites=None, rs1=None,
-            rs2=None, rs3=None):
+            rs2=None, rs3=None, mu=mu):
     # omegaearth = 0.000072921158553  # earth rad/s
     # omegaearth = 0.017202791208627  # sun rad/s
     # omegaearth = 2.0 * pi/365.24221897  # au / day
@@ -4215,11 +4217,10 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     earthrate[0] = 0.0
     earthrate[1] = 0.0
     earthrate[2] = earthrot
+
+    # need to switch these for interplanetary
     # tuday = 58.132440906
     # mu   = 1.32712428e11
-    # need to switch these for interplanetary
-
-    #        constant
 
     small = smalle8
     # ---------- set middle to 0, find deltas to others -----------
@@ -4421,8 +4422,8 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         # input (bigr2)
         rho = - 2.0 * d1 / d - 2.0 * mu * d2 / (bigr2 * bigr2 * bigr2 * d)
         if sh.show:
-            print('bigr2 %11.7f  %11.7f er \n' % (bigr2, bigr2 / re))
-            print('rho %11.7f  %11.7f er \n' % (rho, rho / re))
+            print('bigr2 %11.7f km \n' % bigr2)
+            print('rho %11.7f km \n' % rho)
         r2 = np.zeros(3)
         # --------- find the middle position vector ---------------
         for k in range(3):
