@@ -9,7 +9,7 @@ import orbit_utils as obu
 
 #     -----------------------------------------------------------------
 #
-#                              Ex3_3.m
+#                              Ex3_3
 #
 #  this file demonstrates example 3-3.
 #

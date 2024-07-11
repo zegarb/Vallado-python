@@ -1,42 +1,13 @@
 import math
 import sys
 import numpy as np
+from numpy.polynomial import Polynomial
 from pprint import pprint as pp
 from space_constants import *
 import orbit_utils as obu
 
 #some debug stuff
 from space_constants import sethelp as sh
-
-
-# ------------------------------------------------------------------------------
-#
-#                           FUNCTION BINOMIAL
-#
-#  this function finds the value of a BINOMIAL coefficient
-#
-#  Author        : David Vallado                  719-573-2600    1 Mar 2001
-#
-#  Inputs          Description                    Range / Units
-#    i           -
-#    j           -
-#
-#   Outputs       :
-#     FUNCTION    - answer
-#
-#   Locals        :
-#     None.
-#
-#   Coupling      :
-#     FACTORIAL   - Finds the FACTORIAL of a number
-#
-#  ------------------------------------------------------------------------------
-
-### Just use math.comb(). - zeg
-def binomial(i, j):
-    bino = math.factorial(j) / (math.factorial(i)*math.factorial(j-i))
-    return bino
-
 
 # ------------------------------------------------------------------------------
 #
@@ -66,8 +37,7 @@ def binomial(i, j):
 # [outmat] = rot1mat (xval)
 # ----------------------------------------------------------------------------- }
 
-### could use scipy Rotation class instead. - zeg
-def rot1mat (xval: float):
+def rot1mat(xval: float):
     """this function sets up a rotation matrix for an input angle about the first
     axis.
 
@@ -252,7 +222,7 @@ def rot3mat(xval: float):
 #    none.
 #
 #  coupling      :
-#    site, rot3, binomial, cross, atan2, dot, unit
+#    site, rot3, cross, atan2, dot, unit
 #
 #  references    :
 #    vallado       2001, 774-775, eq 11-3, eq 11-4, eq 11-5
@@ -267,7 +237,7 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
     ground points on a spherical earth.  notice the range will always be
     within the range of values listed since you for not know the direction of
     firing, long or short.  the function will calculate rotating earth ranges
-    if the tof is passed in other than 0.0 . range is calulated in rad and
+    if the tof is passed in other than 0.0. range is calulated in rad and
     converted to er by s = ro, but the radius of the earth = 1 er, so it's
     s = o.
 
@@ -344,8 +314,8 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
                                      - rlu[2] ** 2)
 
     print('phi %11.7f %11.7f \n' % (phi, phi * rad2deg))
-    #        phi = 0.5*math.atan2(-2*.47024*.86603, .47024^2-.86603^2)
-#        fprintf(1, 'phi #11.7f #11.7f \n', phi, phi * rad2deg)
+    # phi = 0.5*math.atan2(-2*.47024*.86603, .47024^2-.86603^2)
+    # fprintf(1, 'phi #11.7f #11.7f \n', phi, phi * rad2deg)
 
     temp = np.array([np.dot(rlch, rlu), np.dot(rlch, rtu), 0.0])
     uprime = rot3(temp, phi) / 6378.137
@@ -370,7 +340,7 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
           * (math.cos(phi) ** (2 * r + 1)))
-    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * s1
+    f1 = math.comb(m, 2 * m) * phi / 2 ** (2 * m) + math.sin(phi) * s1
     r = 0
     m = 2
     s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
@@ -382,8 +352,8 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
           * (math.cos(phi) ** (2 * r + 1)))
-    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * (s1 + s2)
-    funct2 = (1.0 - e ** 2 / 2 * f1 - binomial(2 * m - 3, m - 2) * (e ** 2 * f2)
+    f2 = math.comb(m, 2 * m) * phi / 2 ** (2 * m) + math.sin(phi) * (s1 + s2)
+    funct2 = (1.0 - e ** 2 / 2 * f1 - math.comb(m - 2, 2 * m - 3) * (e ** 2 * f2)
               / (m * 2 ** (2 * m - 2)))
     phi = phi1
     m = 1
@@ -392,7 +362,7 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
           * (math.cos(phi) ** (2 * r + 1)))
-    f1 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * s1
+    f1 = math.comb(m, 2 * m) * phi / 2 ** (2 * m) + math.sin(phi) * s1
     r = 0
     m = 2
     s1 = ((math.factorial(2 * m) * (math.factorial(r)) ** 2)
@@ -404,9 +374,9 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
           / (2 ** (2 * m - 2 * r) * math.factorial(2 * r + 1)
              * (math.factorial(m)) ** 2)
           * (math.cos(phi) ** (2 * r + 1)))
-    f2 = binomial(2 * m, m) * phi / 2 ** (2 * m) + math.sin(phi) * (s1 + s2)
+    f2 = math.comb(m, 2 * m) * phi / 2 ** (2 * m) + math.sin(phi) * (s1 + s2)
     funct1 = (1.0 - e ** 2 / 2 * f1
-              - binomial(2 * m - 3, m - 2) * (e ** 2 * f2)
+              - math.comb(m - 2, 2 * m - 3) * (e ** 2 * f2)
               / (m * 2 ** (2 * m - 2)))
     range_ = (funct2 - funct1) * re
 
@@ -444,7 +414,6 @@ def rngaz(llat: float, llon: float, tlat: float, tlon: float, tof: float):
 # [funvalue] = recovqt (p1, p2, p3, p4, p5, p6, root)
 # ------------------------------------------------------------------------------
 
-
 def recovqt(p1: float, p2: float, p3: float, p4: float, p5: float, p6: float,
             root: float):
     """this function recovers the time and function values in quartic blending
@@ -473,12 +442,10 @@ def recovqt(p1: float, p2: float, p3: float, p4: float, p5: float, p6: float,
     aqit4 = (13 * p1 - 64 * p2 + 126 * p3 - 124 * p4 + 61 * p5 - 12 * p6) * temp
     aqit5 = (- 5 * p1 + 25 * p2 - 50 * p3 + 50 * p4 - 25 * p5 + 5 * p6) * temp
     # ----- recover the variable value
-    funvalue = (aqit5 * root ** 5 + aqit4 * root ** 4
-                + aqit3 * root ** 3 + aqit2 * root ** 2 + aqit1 * root + aqit0)
+    funvalue = (aqit5 * root ** 5 + aqit4 * root ** 4 + aqit3 * root ** 3
+                + aqit2 * root ** 2 + aqit1 * root + aqit0)
     return funvalue
 
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function recovqd
@@ -534,7 +501,6 @@ def recovqd(p1: float, p2: float, p3: float, root: float):
     funvalue = aqd2 * root ** 2 + aqd1 * root + aqd0
     return funvalue
 
-#
 # ------------------------------------------------------------------------------
 #
 #                           function recovpar
@@ -565,7 +531,6 @@ def recovqd(p1: float, p2: float, p3: float, root: float):
 #
 # [funvalue] = recovpar (p1, p2, p3, p4, root)
 # ------------------------------------------------------------------------------
-
 
 def recovpar(p1: float, p2: float, p3: float, p4: float, root: float):
     """this function recovers the time and function values in parabolic
@@ -738,7 +703,10 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     opt = 'U'
     #       [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = ...
 #                   quintic(aqi5, aqi4, aqi3, aqi2, aqi1, aqi0, opt)
-    rt = np.roots(np.array([aqi5, aqi4, aqi3, aqi2, aqi1, aqi0]))
+
+    # rt = np.roots(np.array([aqi5, aqi4, aqi3, aqi2, aqi1, aqi0]))
+    rt = Polynomial([aqi0, aqi1, aqi2, aqi3, aqi4, aqi5]).roots()
+
     # ---------- search through roots to locate answers --------
     for indx2 in range(5):
         root = 99999.9
@@ -1196,64 +1164,7 @@ def printdiff(strin: str, mat1: np.ndarray, mat2: np.ndarray):
 
     print('diffmm:\n', (diffmm))
 
-
-
-# ------------------------------------------------------------------------------
-#
-#                           function matvecmult
-#
-#  this function multiplies a matrix by a vector.
-#
-#  author        : david vallado                  719-573-2600    4 jun 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    mat         - matrix (square)
-#    vec         - vector
-#    size        - dimension of matrix
-#
-#  outputs       :
-#    outvec      - unit vector
-#
-#  locals        :
-#    i, j         - index
-#
-#  coupling      :
-#    none
-#
-# [outvec] = matvecmult (mat, vec, sizeof)
-# ------------------------------------------------------------------------------
-
-def matvecmult(mat: np.ndarray, vec:np.ndarray, sizeof: int):
-    """this function multiplies a matrix by a vector.
-
-    Parameters
-    ----------
-    mat : ndarray
-        matrix
-    vec : ndarray
-        vector
-    sizeof : int
-        dimensions of matrix
-
-    Returns
-    -------
-    outvec: ndarray
-        unit vector
-    """
-    outvec = np.zeros(sizeof)
-    for i in range(sizeof):
-        outvec[i] = 0.0
-        for j in range(sizeof):
-            outvec[i] = outvec[i] + mat[i, j] * vec[j]
-
-    return outvec
-
-
 # ------- two recursion algorithms needed by the lambertbattin routine
-
 def seebatt(v: float):
     """a recursion algorithm used in the lambertbattin routine
 
@@ -1341,7 +1252,6 @@ def seebatt(v: float):
     return seebatt
 
 # ------- two recursion algorithms needed by the lambertbattin routine
-
 def kbat(v: float):
     """a recursion algorithm used by the lamertbattin routine
 
@@ -1627,11 +1537,6 @@ def cubicinterp(p1a: float, p1b: float, p1c: float, p1d: float, p2a: float,
     # cubicinterp
     return answer
 
-
-
-
-
-
 # ------------------------------------------------------------------------------
 #
 #                           function unit
@@ -1706,11 +1611,11 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
     rho2 = (- cc2 + np.sqrt(cc2 ** 2 - 4.0
                             * (magrsite2 ** 2 - magr2in ** 2))) / 2.0
     #rsite1
-#rsite2
+    #rsite2
     r1 = rho1 * los1 + rsite1
     r2 = rho2 * los2 + rsite2
     #rho1
-#r1
+    #r1
 
     print('start of loop  %11.7f  %11.7f  \n' % (magr1in, magr2in))
     magr1 = mag(r1)
@@ -1728,12 +1633,11 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
     # change to negative sign
     rho3 = - np.dot(rsite3, w) / np.dot(los3, w)
     #rho1
-#rho2
-#rho3
-#los1
-#los2
-#los3
-#pause
+    #rho2
+    #rho3
+    #los1
+    #los2
+    #los3
     r3 = np.multiply(rho3, los3) + rsite3
     print('r3')
     print(r3)
@@ -1802,7 +1706,7 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
         deltam12 = (deltah21 + 2 * s * (np.sinh(deltah21 / 2)) ** 2
                     - c * np.sinh(deltah21))
         # what if ends on hperbolic solution.
-# how to pass back deltae32?
+        # how to pass back deltae32?
         deltae32 = deltah32
 
     print('dm32 %11.7f  dm12 %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n'
@@ -2075,68 +1979,67 @@ def newtonm (ecc: float, m: float):
 # ------------------------------------------------------------------------------
 
 def cubic (a3, b2, c1, d0, opt):
-        # --------------------  implementation   ----------------------
-        onethird = 1.0 /3.0
-        r1r = 0.0
-        r1i = 0.0
-        r2r = 0.0
-        r2i = 0.0
-        r3r = 0.0
-        r3i = 0.0
+    onethird = 1.0 / 3.0
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
+    r3r = 0.0
+    r3i = 0.0
 
-        if (abs(a3) > small):
-            # ----------- force coefficients into std form ----------------
-            p = b2/a3
-            q = c1/a3
-            r = d0/a3
+    if (abs(a3) > small):
+        # ----------- force coefficients into std form ----------------
+        p = b2/a3
+        q = c1/a3
+        r = d0/a3
 
-            a3 = onethird*(3.0 *q - p*p)
-            b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
+        a3 = onethird*(3.0 *q - p*p)
+        b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
 
-            delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
+        delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
 
-            # ------------------ use cardans formula ----------------------
-            if (delta > small):
-                temp1 = (-b2*0.5)+math.sqrt(delta)
-                temp2 = (-b2*0.5)-math.sqrt(delta)
-                temp1 = np.sign(temp1)*abs(temp1)**onethird
-                temp2 = np.sign(temp2)*abs(temp2)**onethird
-                r1r = temp1 + temp2 - p*onethird
+        # ------------------ use cardans formula ----------------------
+        if (delta > small):
+            temp1 = (-b2*0.5)+math.sqrt(delta)
+            temp2 = (-b2*0.5)-math.sqrt(delta)
+            temp1 = np.sign(temp1)*abs(temp1)**onethird
+            temp2 = np.sign(temp2)*abs(temp2)**onethird
+            r1r = temp1 + temp2 - p*onethird
 
-                if (opt =='I'):
-                    r2r = -0.5 *(temp1 + temp2) - p*onethird
-                    r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
-                    r3r = -0.5 *(temp1 + temp2) - p*onethird
-                    r3i = -r2i
-                else:
-                    r2r = 99999.9
-                    r3r = 99999.9
+            if (opt =='I'):
+                r2r = -0.5 *(temp1 + temp2) - p*onethird
+                r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
+                r3r = -0.5 *(temp1 + temp2) - p*onethird
+                r3i = -r2i
             else:
-                # --------------- evaluate zero point ---------------------
-                if (abs(delta) < small):
-                    r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
-                    r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
-    #                if (opt =='U')
-    #                    r3r = 99999.9
-    #                  else
-                    r3r = r2r
-    #                  end
-                else:
-                    # ------------ use trigonometric identities -----------
-                    e0 = 2.0 *math.sqrt(-a3*onethird)
-                    cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
-                    sinphi = math.sqrt(1.0 -cosphi*cosphi)
-                    phi = math.atan2(sinphi, cosphi)
-                    if (phi < 0.0):
-                        phi = phi + 2.0*math.pi
-                    r1r = e0*math.cos(phi*onethird) - p*onethird
-                    r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
-                    r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
+                r2r = 99999.9
+                r3r = 99999.9
         else:
-            r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
-            r3r = 99999.9
-            r3i = 99999.9
-        return r1r, r1i, r2r, r2i, r3r, r3i
+            # --------------- evaluate zero point ---------------------
+            if (abs(delta) < small):
+                r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                # if (opt =='U')
+                    # r3r = 99999.9
+                # else
+                r3r = r2r
+
+            else:
+                # ------------ use trigonometric identities -----------
+                e0 = 2.0 *math.sqrt(-a3*onethird)
+                cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
+                sinphi = math.sqrt(1.0 -cosphi*cosphi)
+                phi = math.atan2(sinphi, cosphi)
+                if (phi < 0.0):
+                    phi = phi + 2.0*math.pi
+                r1r = e0*math.cos(phi*onethird) - p*onethird
+                r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
+                r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
+    else:
+        r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
+        r3r = 99999.9
+        r3i = 99999.9
+    return r1r, r1i, r2r, r2i, r3r, r3i
 
 
 
@@ -2183,39 +2086,36 @@ def cubic (a3, b2, c1, d0, opt):
 
 def quadric(a, b, c, opt):
 
-        # --------------------  implementation   ----------------------
-        small = 0.00000001
-        r1r = 0.0
-        r1i = 0.0
-        r2r = 0.0
-        r2i = 0.0
+    small = 0.00000001
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
 
-        discrim = b*b - 4.0 *a*c
-        # ---------------------  real roots  --------------------------
-        if (abs(discrim) < small):
+    discrim = b*b - 4.0 *a*c
+    # ---------------------  real roots  --------------------------
+    if (abs(discrim) < small):
+        r1r = -b / (2.0 *a)
+        r2r = r1r
+        # if (opt =='U')
+            # r2r = 99999.9
+
+    elif abs(a) < small:
+        r1r = -c/b
+    elif (discrim > 0.0):
+        r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
+        r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
+    else:
+        # ------------------ complex roots --------------------
+        if (opt =='I'):
             r1r = -b / (2.0 *a)
             r2r = r1r
-#            if (opt =='U')
-#                r2r = 99999.9
-#              end
+            r1i = math.sqrt(-discrim) / (2.0 *a)
+            r2i = -math.sqrt(-discrim) / (2.0 *a)
         else:
-            if abs(a) < small:
-                r1r = -c/b
-            else:
-                if (discrim > 0.0):
-                    r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
-                    r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
-                else:
-                    # ------------------ complex roots --------------------
-                    if (opt =='I'):
-                        r1r = -b / (2.0 *a)
-                        r2r = r1r
-                        r1i = math.sqrt(-discrim) / (2.0 *a)
-                        r2i = -math.sqrt(-discrim) / (2.0 *a)
-                    else:
-                        r1r = 99999.9
-                        r2r = 99999.9
-        return r1r, r1i, r2r, r2i
+            r1r = 99999.9
+            r2r = 99999.9
+    return r1r, r1i, r2r, r2i
 
 
 # ------------------------------------------------------------------------------
@@ -2552,7 +2452,7 @@ def rot1 (vec: np.ndarray, xval: float):
 # [outvec] = rot2 (vec, xval)
 # ----------------------------------------------------------------------------- }
 
-def rot2 (vec, xval):
+def rot2(vec, xval):
     """this function performs a rotation about the 2nd axis.
 
     Parameters

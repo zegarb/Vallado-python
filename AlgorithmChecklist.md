@@ -31,7 +31,7 @@
 |  29  |  pg 279 (306)  | Sun                                          | sun(), sunalmanac()                  | ex5_1.py                        | pg 280 (307)               |   Y   |
 |  30  |  pg 283 (310)  | SunriseSet                                   | sunriset()                           | ex5_2.py                        | pg 284 (311)               |   Y   |
 |  31  |  pg 288 (315)  | Moon                                         | moon()                               | ex5_3.py                        | pg 288 (315)               |   Y   |
-|  32  |  pg 290 (317)  | MoonRiseSet                                  | moonrise(), moonrise2(), moonrise3() | ex5_4.py                        | pg 292 (319)               |   Y   |
+|  32  |  pg 290 (317)  | MoonRiseSet                                  | moonriset()                          | ex5_4.py                        | pg 292 (319)               |   Y   |
 |  33  |  pg 296 (323)  | PlanetRV                                     | planetrv()                           | ex5_5.py                        | pg 297 (324)               |   Y   |
 |  34  |  pg 301 (328)  | Shadow                                       | shadow()                             | shadowtest.py                   |           -                |   N   |
 |  35  |  pg 308 (335)  | Sight                                        | sight(), light()                     | ex5_6.py                        | pg 309 (336)               |   Y   |

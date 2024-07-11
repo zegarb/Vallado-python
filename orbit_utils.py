@@ -107,7 +107,7 @@ def clean_fwf(lins, maxsp, isint=True, isfloat=False):
 #     hoots, norad spacetrack report #6 1986
 #     hoots, schumacher and glover 2004
 #     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------*/
+#  ----------------------------------------------------------------------------
 
 def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
            s3=None, s4=None, s5=None, sinim=None, ss1=None, ss2=None,
@@ -117,8 +117,6 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
            nodedot=None, xpidot=None, z1=None, z3=None, z11=None, z13=None,
            z21=None, z23=None, z31=None, z33=None, em=None, argpm=None,
            inclm=None, mm=None, nm=None, nodem=None, ecco=None, eccsq=None):
-
-
 
     # --------------------- local variables ------------------------
     aonv = 0.0
@@ -404,7 +402,6 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
 def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
              xbstar=None, xndot=None, xnddot=None, xecco=None,
              xargpo=None, xinclo=None, xmo=None, xno_kozai=None, xnodeo=None):
-    # ------------------------ initialization ---------------------
     # ----------- set all near earth variables to zero ------------
     satrec['isimp'] = 0
     satrec['method'] = 'n'
@@ -8129,10 +8126,10 @@ def moon(jd: float):
 #  references    :
 #    vallado       2007, 292, Alg 32, Ex 5-4
 #
-# [utmoonrise, utmoonset, moonphaseang, error] = moonrise(jd, latgd, lon)
+# [utmoonrise, utmoonset, moonphaseang, error] = moonriset(jd, latgd, lon)
 # -----------------------------------------------------------------------------
 
-def moonrise(jd: float, latgd: float, lon: float):
+def moonriset(jd: float, latgd: float, lon: float):
     """this function finds the universal time for moonrise and moonset given
     the day and site location.
 

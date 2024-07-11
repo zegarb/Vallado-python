@@ -295,7 +295,7 @@ def printcov(covin: np.ndarray, covtype: str, cu: str, anom: str):
 #
 #                           function setcov
 #
-#  this function sets the intilal states for the covariance calculations.
+#  this function sets the initial states for the covariance calculations.
 #
 #  author        : david vallado                  719-573-2600   21 jul 2003
 #
@@ -339,6 +339,50 @@ def printcov(covin: np.ndarray, covtype: str, cu: str, anom: str):
 def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
            jdut1: float, lod: float, xp: float, yp: float, terms: int,
            printopt: str, anom: str, anom1: str, ddpsi: float, ddeps: float):
+    """this function sets the initial states for the covariance calculations.
+
+    Parameters
+    ----------
+    reci: ndarray
+        position vector eci: km
+    veci: ndarray
+        velocity vector eci: km/s
+    ttt : float
+        julian centuries of date: centuries
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lod : float
+        excess length of day: sec
+    xp : float
+        polar motion coefficient: rad
+    yp : float
+        polar motion coefficient: rad
+    terms : int
+        number of terms for ast calculation: 0, 2
+    printopt : str
+        print to terminal == 'y'
+    anom : str
+        anomaly value: 'meana', 'meann', 'truea', 'truen'
+    anom1 : str
+        anomaly value: 'radec', 'latlon'
+    ddpsi : float
+        delta psi correction to gcrf: rad
+    ddeps : float
+        delta eps correction to gcrf: rad
+
+    Returns
+    -------
+    cartstate : ndarray
+        6x1 cartesian state
+    classstate : ndarray
+        6x1 classical state
+    flstate : ndarray
+        6x1 flight orbital elements
+    eqstate : ndarray
+        6x1 equinoctial elements
+    fr : int
+        retrograde factor for orbits with incl > 90: 1 or -1
+    """
 
     fr = 1.0
     cartstate = np.array([[reci[0]], [reci[1]], [reci[2]],
@@ -3113,7 +3157,6 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
 #
 #  coupling      :
 #    mag         - magnitude of a vector
-#    matvecmult  - multiply a square matrix by a vector (single column)
 #
 #  references    :
 #    vallado       2007, 172
@@ -3171,8 +3214,6 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
 
     rrsw = transmat @ reci
     vrsw = transmat @ veci
-    # rrsw = smu.matvecmult(transmat, reci, 3)
-    # vrsw = smu.matvecmult(transmat, veci, 3)
     return rrsw, vrsw, transmat
 
 
@@ -3204,7 +3245,6 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
 #
 #  coupling      :
 #    mag         - magnitude of a vector
-#    matvecmult  - multiply a square matrix by a vector (single column)
 #
 #  references    :
 #    vallado       2007, 172
@@ -3217,8 +3257,8 @@ def rv2ntw(r, v):
     # compute satellite velocity vector magnitude
     vmag = smu.mag(v)
     # in order to work correctly each of the components must be
-#  unit vectors !
-# in-velocity component
+    # unit vectors !
+    # in-velocity component
     tvec = np.divide(v, vmag)
     # cross-track component
     wvec = np.cross(r, v)
@@ -3238,8 +3278,8 @@ def rv2ntw(r, v):
     transmat[2, 0] = wvec[0]
     transmat[2, 1] = wvec[1]
     transmat[2, 2] = wvec[2]
-    rntw = smu.matvecmult(transmat, r, 3)
-    vntw = smu.matvecmult(transmat, v, 3)
+    rntw = transmat @ r
+    vntw = transmat @ v
     return rntw, vntw, transmat
 
 #
@@ -4497,17 +4537,15 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
 def ecef2lle(r, jd):
 
-    small = smalle8        # small value for tolerances
-
     magr = smu.mag(r)
     oneminuse2 = 1.0  - eccearthsqrd
 
     # ---------------- find longitude value  ----------------------
-    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    temp = math.sqrt(r[0]*r[0] + r[1]*r[1])
     if (abs(temp) < small):
-        rtasc = np.sign(r[2])*math.pi*0.5
+        rtasc = np.sign(r[2]) * math.pi * 0.5
     else:
-        rtasc = math.atan2(r[1] , r[0])
+        rtasc = math.atan2(r[1], r[0])
     gst = stu.gstime(jd)
     lon = rtasc - gst
 
@@ -4527,26 +4565,26 @@ def ecef2lle(r, jd):
 
     # ---- iterate to find geocentric and geodetic latitude  -----
     i = 1
-    olddelta = deltalat*100 #have to initialize it to something ???
+    olddelta = deltalat + 10 # init
     while ((abs(olddelta - deltalat) >= small) and (i < 10)):
         olddelta = deltalat
-        rsite = np.sqrt(oneminuse2 / (1.0  - eccearthsqrd *
+        rsite = math.sqrt(oneminuse2 / (1.0  - eccearthsqrd *
                                       (math.cos(latgc))**2))
         latgd = math.atan(math.tan(latgc) / oneminuse2)
         temp = latgd-latgc
         sintemp = math.sin(temp)
-        hellp = (np.sqrt(rsqrd - rsite**2 * sintemp**2)
+        hellp = (math.sqrt(rsqrd - rsite**2 * sintemp**2)
                  - rsite * math.cos(temp))
-        deltalat = math.asin(hellp*sintemp / magr)
+        deltalat = math.asin(hellp * sintemp / magr)
         latgc = decl - deltalat
         i = i + 1
 
     if (i >= 10):
         print('ijktolatlon did not converge\n ')
 
-    latgc = latgc / math.pi*90.0
-    latgd = latgd / math.pi*90.0
-    lon = lon / math.tau*180.0
+    latgc = latgc / math.pi * 90.0
+    latgd = latgd / math.pi * 90.0
+    lon = lon / math.pi * 90.0
 
 
     return latgc, latgd, lon, hellp
@@ -4595,13 +4633,31 @@ def ecef2lle(r, jd):
 # [latgc, latgd, lon, hellp] = ecef2ll (r)
 # ------------------------------------------------------------------------------
 
-def ecef2ll(r):
+def ecef2ll(r : np.ndarray):
+    """these subroutines convert a geocentric equatorial position vector into
+    latitude and longitude.  geodetic and geocentric latitude are found. the
+    input must be ecef. This uses algorithm 12.
 
+    Parameters
+    ----------
+    r : ndarray
+        ecef position vector: km
 
-    magr = np.linalg.norm(r)
+    Returns
+    -------
+    latgc: float
+        geocentric latitude: -pi/2 to pi/2 rad
+    latgd: float
+        geodetic latitude: -pi/2 to pi/2 rad
+    lon: float
+        longitude (west-): -2pi to 2pi rad
+    hellp: float
+        height above the ellipsoid: km
+    """
+    magr = smu.mag(r)
 
     # ----------------- find longitude value  ---------------------
-    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    temp = math.sqrt(r[0]*r[0] + r[1]*r[1])
     if (abs(temp) < small):
         rtasc = np.sign(r[2])*math.pi*0.5
     else:
@@ -4623,16 +4679,16 @@ def ecef2ll(r):
     while ((abs(olddelta - latgd) >= small) and (i < 10)):
         olddelta = latgd
         sintemp = math.sin(latgd)
-        c = re / (np.sqrt(1.0 - eccearthsqrd * sintemp**2))
-        latgd = math.atan((r[2]+c*eccearthsqrd * sintemp) / temp)
+        c = re / (math.sqrt(1.0 - eccearthsqrd * sintemp**2))
+        latgd = math.atan((r[2]+c * eccearthsqrd * sintemp) / temp)
         # print('%3i  c %11.7f gd %11.7f  \n', i, c, latgd * rad2deg)
         i = i + 1
 
     # Calculate height
     if (math.pi*0.5 - abs(latgd)) < (math.pi/180.0):  # 1 deg
-        hellp = (temp/math.cos(latgd)) - c
-    elif latgd ==0: #we added this to deal with z ==0
-        hellp = magr-re
+        hellp = (temp / math.cos(latgd)) - c
+    elif latgd == 0: # we added this to deal with z ==0
+        hellp = magr - re
     else:
         s = c * (1.0 - eccearthsqrd)
         hellp = r[2]/math.sin(latgd) - s
@@ -4687,16 +4743,35 @@ def ecef2ll(r):
 # ------------------------------------------------------------------------------
 
 #this function breaks at math.atan when given [100000, 200000, 0.0]
-def ecef2llb (r):
+def ecef2llb(r):
+    """these subroutines convert a geocentric equatorial position vector into
+    latitude and longitude.  geodetic and geocentric latitude are found. the
+    input must be ecef. This uses algorithm 13 and is faster than ecef2ll().
 
-    magr = np.linalg.norm(r)
+    Parameters
+    ----------
+    r : ndarray
+        ecef position vector: km
+
+    Returns
+    -------
+    latgc: float
+        geocentric latitude: -pi/2 to pi/2 rad
+    latgd: float
+        geodetic latitude: -pi/2 to pi/2 rad
+    lon: float
+        longitude (west-): -2pi to 2pi rad
+    hellp: float
+        height above the ellipsoid: km
+    """
+    magr = smu.mag(r)
 
     # ---------------- find longitude value  ----------------------
-    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    temp = math.sqrt(r[0]**2 + r[1]**2)
     if (abs(temp) < small):
         rtasc = np.sign(r[2])*math.pi*0.5
     else:
-        rtasc = math.atan2(r[1] , r[0])
+        rtasc = math.atan2(r[1], r[0])
     lon = rtasc
     if (abs(lon) >= math.pi):
         if (lon < 0.0):
@@ -4704,28 +4779,27 @@ def ecef2llb (r):
         else:
             lon = lon - twopi
 
-    a = 6378.1363
-    # b = np.sign(r[2]) * 6356.75160056
-    b = np.sign(r[2]) * a * np.sqrt(1.0 - 0.006694385)  # find semiminor axis of the earth
+    a = re
+    b = np.sign(r[2]) * a * math.sqrt(1.0 - eccearthsqrd)  # find semiminor axis of the earth
 
     # -------------- set up initial latitude value  ---------------
-    atemp = 1.0 /(a*temp)
-    e = (b*r[2]-a*a+b*b)*atemp
-    f = (b*r[2]+a*a-b*b)*atemp
-    third = 1.0 /3.0
-    p = 4.0 *third*(e*f + 1.0)
-    q = 2.0 *(e*e - f*f)
+    atemp = 1.0 / (a * temp)
+    e = (b * r[2] - a * a + b * b) * atemp
+    f = (b * r[2] + a * a - b * b) * atemp
+    third = 1.0 / 3.0
+    p = 4.0 * third * (e * f + 1.0)
+    q = 2.0 * (e*e - f*f)
     d = p*p*p + q*q
 
     if (d > 0.0):
-        nu = (np.sqrt(d)-q)**third - (np.sqrt(d)+q)**third
+        nu = (math.sqrt(d) - q)**third - (math.sqrt(d) + q)**third
     else:
-        sqrtp = np.sqrt(-p)
-        nu = 2.0 *sqrtp*math.cos(third*np.arccos(q/(p*sqrtp)))
-    g = 0.5 *(np.sqrt(e*e + nu) + e)
-    t = np.sqrt(g*g + (f-nu*g)/(2.0 *g-e)) - g
+        sqrtp = math.sqrt(-p)
+        nu = 2.0 * sqrtp * math.cos(third * math.acos(q / (p * sqrtp)))
+    g = 0.5 *(math.sqrt(e*e + nu) + e)
+    t = math.sqrt(g*g + (f - nu*g) / (2.0*g - e)) - g
 
-    latgd = math.atan(a*(1.0 -t*t)/(2.0 *b*t))
+    latgd = math.atan(a*(1.0 - t*t)/(2.0 * b * t))
     hellp = (temp-a*t)*math.cos(latgd) + (r[2]-b)*math.sin(latgd)
 
     latgc = math.asin(r[2]/magr)   # all locations
@@ -6473,7 +6547,7 @@ def rv2radec(r: np.ndarray, v: np.ndarray):
     """
     # ------------- calculate angles and rates ----------------
     rr = smu.mag(r)
-    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    temp = math.sqrt(r[0]*r[0] + r[1]*r[1])
     if (temp < small):
         rtasc = math.atan2(v[1] , v[0])
     else:
@@ -6722,7 +6796,7 @@ def rv2tradc(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     drhoeci = veci - vseci
     rho = smu.mag(rhoeci)
     # ------------- calculate azimuth and elevation ---------------
-    temp = np.sqrt(rhoeci[0]**2 + rhoeci[1]**2)
+    temp = math.sqrt(rhoeci[0]**2 + rhoeci[1]**2)
     if (temp < small):
         trtasc = math.atan2(drhoeci[1], drhoeci[0])
     else:
@@ -6886,7 +6960,7 @@ def rv2tradec(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     rho = smu.mag(rhoveci)
 
     # --------------- calculate topocentric rtasc and decl ---------------
-    temp = np.sqrt(rhoveci[0] * rhoveci[0] + rhoveci[1] * rhoveci[1])
+    temp = math.sqrt(rhoveci[0] * rhoveci[0] + rhoveci[1] * rhoveci[1])
     if (temp < small):
         trtasc = math.atan2(drhoveci[1], drhoveci[0])
     else:
@@ -7062,9 +7136,9 @@ def rv2ell (rijk: np.ndarray, vijk: np.ndarray):
 
     # ------------- calculate angles and rates ----------------
     rr = smu.mag(r)
-    temp = np.sqrt(r[0]*r[0] + r[1]*r[1])
+    temp = math.sqrt(r[0]*r[0] + r[1]*r[1])
     if (temp < small):
-        temp1 = np.sqrt(v[0]*v[0] + v[1]*v[1])
+        temp1 = math.sqrt(v[0]*v[0] + v[1]*v[1])
         if (abs(temp1) > small):
             ecllon = math.atan2(v[1] , v[0])
         else:
