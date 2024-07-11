@@ -1,7 +1,7 @@
 #     -----------------------------------------------------------------
 #
-#                              Ex2_2.py 
-#                                 
+#                              Ex2_2
+#
 #                 This file demonstrates Example 2-2.
 #                     (4th edition - pgs. 69-70)
 #
@@ -27,12 +27,12 @@
 #   Given :               Description                   Range / Units
 #     p                  - semiparameter                km
 #     dt                 - change in time               sec
-#     ecc                - eccentricity                 0.0 to 
+#     ecc                - eccentricity                 0.0 to
 #
 #   Intermediate :
 #     np                 - parabolic mean motion        rad/sec
 #
-#   Find : 
+#   Find :
 #     b                  - parabolic anomaly            0.0 to 2pi rad
 
 

@@ -1140,7 +1140,7 @@ def sidereal(jdut1: float, deltapsi: float, meaneps: float, omega: float,
 
 # -----------------------------------------------------------------------------
 #
-#                           function jd2sse.m
+#                           function jd2sse
 #
 #  this function finds the seconds since epoch (1 Jan 2000) given the julian date
 #

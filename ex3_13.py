@@ -8,7 +8,7 @@ import spacetime_utils as stu
 
 #     -----------------------------------------------------------------
 #
-#                              Ex3_13.m
+#                              Ex3_13
 #
 #  this file demonstrates example 3-13.
 #

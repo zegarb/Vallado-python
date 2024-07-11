@@ -7,7 +7,7 @@ from space_constants import *
 
 #     -----------------------------------------------------------------
 #
-#                              Ex2_5.m
+#                              Ex2_5
 #
 #  this file demonstrates example 2-5. it also includes some stressing
 #  cases for the coe and rv conversions for all orbit types.

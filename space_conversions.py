@@ -3334,7 +3334,7 @@ def rv2adbar(reci: np.ndarray, veci: np.ndarray):
 
 # ----------------------------------------------------------------------------
 #
-#                           function adbar2rv.m
+#                           function adbar2rv
 #
 #  this function transforms the adbarv elements (rtasc, decl, fpa, azimuth,
 #    position and velocity magnitude) into eci position and velocity vectors.
@@ -4032,6 +4032,7 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
         if sh.show:
             print("ecc =", ecc)
             print("nu =", nu)
+            print('\n')
 
     else:
        p=None
@@ -7270,7 +7271,7 @@ def rv2flt(reci: np.ndarray, veci: np.ndarray, ttt: float, jdut1: float,
 
 # ----------------------------------------------------------------------------
 #
-#                           function flt2rv.m
+#                           function flt2rv
 #
 #  this function transforms  the flight elements - latgc, lon, fpav, az,
 #    position and velocity magnitude into an eci position and velocity vector.

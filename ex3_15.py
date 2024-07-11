@@ -8,7 +8,7 @@ from space_conversions import ecef2eci, eci2ecef
 
 #     -----------------------------------------------------------------
 #
-#                              ex3_15.m
+#                              ex3_15
 #
 #  this file demonstrates example 3-15.
 #

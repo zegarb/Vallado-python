@@ -8,7 +8,7 @@ from orbit_utils import kepler
 
 #     -----------------------------------------------------------------
 #
-#                              Ex2_4.m
+#                              Ex2_4
 #
 #  this file demonstrates example 2-4.
 #

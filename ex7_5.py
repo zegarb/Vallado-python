@@ -1,6 +1,6 @@
 #     -----------------------------------------------------------------
 #
-#                              Ex7_5.py
+#                              Ex7_5
 #
 #  this file implements example 7-5.note that the intialization has changed
 #  from what is shown in the book, and the example there. The empiracle

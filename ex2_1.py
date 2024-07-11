@@ -1,7 +1,7 @@
 #     -----------------------------------------------------------------
 #
-#                              Ex2_1.py 
-#                                 
+#                              Ex2_1
+#
 #                 This file demonstrates Example 2-1.
 #                     (4th edition - pgs. 66-67)
 #
@@ -25,12 +25,12 @@
 #     *****************************************************************
 #
 #   Given :               Description                   Range / Units
-#     ecc                - eccentricity                 0.0 to 
+#     ecc                - eccentricity                 0.0 to
 #     m                  - mean anomaly                 0.0 to 2pi rad
 #
 #   Find :
 #     e0                 - eccentric anomaly            0.0 to 2pi rad
-#     nu (extra)         - true anomaly                 0.0 to 2pi rad  
+#     nu (extra)         - true anomaly                 0.0 to 2pi rad
 
 
 from spacemath_utils import newtonm

@@ -1,7 +1,7 @@
 #
 #     -----------------------------------------------------------------
 #
-#                               testcov.m
+#                               testcov
 #
 #  this file tests the accuracy of the covariance functions.
 #
