@@ -7,7 +7,7 @@ import space_conversions as sc
 
 #     -----------------------------------------------------------------
 #
-#                              Ex3_8.m
+#                              Ex3_8
 #
 #  this file demonstrates example 3-8.
 #

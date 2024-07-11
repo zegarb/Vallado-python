@@ -7,7 +7,7 @@ from space_conversions import ecef2eciiau06, ecef2eci
 
 #     -----------------------------------------------------------------
 #
-#                              ex3_14.m
+#                              ex3_14
 #
 #  this file demonstrates example 3-14.
 #

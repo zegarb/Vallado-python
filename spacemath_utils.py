@@ -1610,20 +1610,18 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
                             * (magrsite1 ** 2 - magr1in ** 2))) / 2.0
     rho2 = (- cc2 + np.sqrt(cc2 ** 2 - 4.0
                             * (magrsite2 ** 2 - magr2in ** 2))) / 2.0
-    #rsite1
-    #rsite2
+
     r1 = rho1 * los1 + rsite1
     r2 = rho2 * los2 + rsite2
-    #rho1
-    #r1
-
-    print('start of loop  %11.7f  %11.7f  \n' % (magr1in, magr2in))
     magr1 = mag(r1)
     magr2 = mag(r2)
-    print("r1:")
-    print(r1)
-    print("r2:")
-    print(r2)
+
+    if sh.show:
+        print('start of loop  %11.7f  %11.7f  \n' % (magr1in, magr2in))
+        print("r1:")
+        print(r1)
+        print("r2:")
+        print(r2)
 
     if direct == 'y':
         w = np.cross(r1, r2) / (magr1 * magr2)
@@ -1639,10 +1637,11 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
     #los2
     #los3
     r3 = np.multiply(rho3, los3) + rsite3
-    print('r3')
-    print(r3)
     magr3 = mag(r3)
-    print('after 1st mag  %11.7f  %11.7f  %11.7f \n' % (magr1, magr2, magr3))
+    if sh.show:
+        print('r3')
+        print(r3)
+        print('after 1st mag  %11.7f  %11.7f  %11.7f \n' % (magr1, magr2, magr3))
     cosdv21 = np.dot(r2, r1) / (magr2 * magr1)
     if math.isclose(magr2 * magr1, 0.0):
       print("Dont know what to do when we divide by zero here -jmb")
@@ -1709,9 +1708,10 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
         # how to pass back deltae32?
         deltae32 = deltah32
 
-    print('dm32 %11.7f  dm12 %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n'
+    if sh.show:
+        print('dm32 %11.7f  dm12 %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f \n'
           % (deltam32, deltam12, c1, c3, p, a, e, s, c))
-    print('%11.7f %11.7f %11.7f \n' % (dv21, dv31, dv32))
+        print('%11.7f %11.7f %11.7f \n' % (dv21, dv31, dv32))
     f1 = t1 - deltam12 / n
     f2 = t3 - deltam32 / n
     q1 = np.sqrt(f1 ** 2 + f2 ** 2)
@@ -1719,11 +1719,9 @@ def doubler(cc1=None, cc2=None, magrsite1=None, magrsite2=None,
 
 
 
-###
+### returns the cotangent of an angle in radians
 def cot(arg):
     return  1.0/math.tan(arg)
-
-
 
 
 # ------------------------------------------------------------------------------

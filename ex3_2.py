@@ -8,7 +8,7 @@ import spacemath_utils as smu
 
 #     -----------------------------------------------------------------
 #
-#                              Ex3_2.m
+#                              Ex3_2
 #
 #  this file demonstrates example 3-2.
 #

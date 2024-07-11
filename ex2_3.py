@@ -1,7 +1,7 @@
 #     -----------------------------------------------------------------
 #
-#                              Ex2_3.py 
-#                                 
+#                              Ex2_3
+#
 #                 This file demonstrates Example 2-3.
 #                     (4th edition - pgs. 71-72)
 #
@@ -25,13 +25,13 @@
 #     *****************************************************************
 #
 #   Given :               Description                   Range / Units
-#     ecc                - eccentricity                 0.0 to 
+#     ecc                - eccentricity                 0.0 to
 #     m                  - mean anomaly                 0.0 to 2pi rad
 #
 #
-#   Find : 
+#   Find :
 #     h                  - hyperbolic anomaly           0.0 to 2pi rad
-#     nu (extra)         - true anomaly                 0.0 to 2pi rad  
+#     nu (extra)         - true anomaly                 0.0 to 2pi rad
 
 
 from spacemath_utils import newtonm

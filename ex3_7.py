@@ -7,7 +7,7 @@ import spacetime_utils as stu
 
 #     -----------------------------------------------------------------
 #
-#                              Ex3_7.m
+#                              Ex3_7
 #
 #  this file demonstrates example 3-7.
 #

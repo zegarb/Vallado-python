@@ -8,7 +8,7 @@ import space_conversions as sc
 
 #     -----------------------------------------------------------------
 #
-#                              Ex4_1.m
+#                              Ex4_1
 #
 #  this file demonstrates example 4-1.
 #

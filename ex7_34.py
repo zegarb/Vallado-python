@@ -1,6 +1,6 @@
 #     -----------------------------------------------------------------
 #
-#                              Ex7_3.py
+#                              Ex7_3
 #
 #  this file demonstrates example 7-3 and 7-4. it also compares the gibbs and
 #  herrick gibbs appraches.

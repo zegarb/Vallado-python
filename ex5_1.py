@@ -11,7 +11,7 @@ from space_constants import *
 
 #     -----------------------------------------------------------------
 #
-#                              Ex5_1.m
+#                              Ex5_1
 #
 #  this file demonstrates example 5-1.
 #

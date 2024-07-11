@@ -4,7 +4,7 @@ from space_constants import *
 
 #     -----------------------------------------------------------------
 #
-#                              Ex2_6.m
+#                              Ex2_6
 #
 #  this file demonstrates example 2-6.
 #

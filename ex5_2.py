@@ -1,6 +1,6 @@
 #     -----------------------------------------------------------------
 #
-#                              Ex5_2.m
+#                              Ex5_2
 #
 #  this file demonstrates example 5-2 and 5-4 for sun and moon rise/set.
 #
