@@ -3631,7 +3631,8 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
     while (abs(magr1in - magr1old) > tol or abs(magr2in - magr2old) > tol):
 
         ktr = ktr + 1
-        print('%2i ' % (ktr))
+        if sh.show:
+            print('%2i ' % (ktr))
         r2, r3, f1, f2, q1, magr1, magr2, a, deltae32 = \
             smu.doubler(cc1, cc2, magrsite1, magrsite2, magr1in, magr2in, los1,
                         los2, los3, rsite1, rsite2, rsite3, tau12, tau32,
@@ -3677,27 +3678,30 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
         deltar2 = - delta2 / delta
         magr1old = magr1in
         magr2old = magr2in
-        #  may need to limit the amount of the correction
-        if abs(deltar1) > magr1in * pctchg:
-            print('%11.7f \n' % (deltar1))
-            #         deltar1 = sign(deltar1)*magr1in*pctchg
-        if abs(deltar2) > magr2in * pctchg:
-            print('%11.7f \n' % (deltar2))
-            #         deltar2 = sign(deltar2)*magr2in*pctchg
+        if sh.show:
+            #  may need to limit the amount of the correction
+            if abs(deltar1) > magr1in * pctchg:
+                print('%11.7f \n' % (deltar1))
+                #         deltar1 = sign(deltar1)*magr1in*pctchg
+            if abs(deltar2) > magr2in * pctchg:
+                print('%11.7f \n' % (deltar2))
+                #         deltar2 = sign(deltar2)*magr2in*pctchg
         magr1in = magr1in + deltar1
         magr2in = magr2in + deltar2
-        print('qs %11.7f  %11.7f  %11.7f \n' % (q1, q2, q3))
-        print('magr1o %11.7f delr1 %11.7f magr1 %11.7f %11.7f  \n'
+        if sh.show:
+            print('qs %11.7f  %11.7f  %11.7f \n' % (q1, q2, q3))
+            print('magr1o %11.7f delr1 %11.7f magr1 %11.7f %11.7f  \n'
               % (magr1o, deltar1, magr1in, magr1old))
-        print('magr2o %11.7f delr2 %11.7f magr2 %11.7f %11.7f  \n'
+            print('magr2o %11.7f delr2 %11.7f magr2 %11.7f %11.7f  \n'
               % (magr2o, deltar2, magr2in, magr2old))
+            print('=============================================== \n')
         # f = 1.0 - a/magr2*(1.0-cos(deltae32))
         # g = t3 - sqrt(a^3/mu)*(deltae32-sin(deltae32))
         # v2 = (r3 - f*r2)/g
         # [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = rv2coe (r2, v2)
         # fprintf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f\n', ...
         #         p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg)
-        print('=============================================== \n')
+
 
     # needed to get the r2 set properly since the last one was moving r2
     r2, r3, f1, f2, q1, magr1, magr2, a, deltae32 = \
@@ -3805,9 +3809,10 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
 
     tau13 = (jd1 - jd3) * 86400.0 + (jdf1 - jdf3) * 86400.0
     tau32 = (jd3 - jd2) * 86400.0 + (jdf3 - jdf2) * 86400.0
-    print('jd123 %14.6f %14.6f %14.6f %14.6f %14.6f %14.6f  \n'
+    if sh.show:
+        print('jd123 %14.6f %14.6f %14.6f %14.6f %14.6f %14.6f  \n'
           % (jd1, jdf1, jd2, jdf2, jd3, jdf3))
-    print('tau12 %14.6f tau13  %14.6f tau32  %14.6f \n' % (tau12, tau13, tau32))
+        print('tau12 %14.6f tau13  %14.6f tau32  %14.6f \n' % (tau12, tau13, tau32))
     # ----------------  find line of sight unit vectors  ---------------
     los1 = np.zeros(3)
     los1[0] = math.cos(decl1) * math.cos(rtasc1)
@@ -3854,11 +3859,10 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     #[l2eci, vs3, aeci] = ecef2eci(l2', vs, aecef, (jd2-2451545.0)/36525.0, jd2, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
     #[l3eci, vs3, aeci] = ecef2eci(l3', vs, aecef, (jd3-2451545.0)/36525.0, jd3, 0.0, 0.0, 0.0, 0, ddpsi, ddeps)
 
+     # leave these as they come since the topoc radec are already eci
     l1eci = los1
     l2eci = los2
     l3eci = los3
-    # leave these as they come since the topoc radec are already eci
-    print(l1eci)
     # --------- called lmati since it is only used for determ -----
     lmat = np.zeros((3, 3))
     rsmat = np.zeros((3, 3))
@@ -3869,18 +3873,19 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         rsmat[i, 0] = rs1[i]
         rsmat[i, 1] = rs2[i]
         rsmat[i, 2] = rs3[i]
-
-    print(lmat)
     rmt = rsmat.T / re
-    print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
+
+    if sh.show:
+        print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
           % (rmt[0, 0], rmt[0, 1], rmt[0, 2]))
-    # the order is right, but to print out, need '
-    print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
+        # the order is right, but to print out, need '
+        print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
           % (rmt[1, 0], rmt[1, 1], rmt[1, 2]))
-    print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
+        print('rsmat eci %11.7f  %11.7f  %11.7f km \n'
           % (rmt[2, 0], rmt[2, 1], rmt[2, 2]))
-    print(lmat)
-    print('this should be the inverse of what the code finds later\n' % ())
+        print(lmat)
+        print('this should be the inverse of what the code finds later\n' % ())
+
     #li = np.linalg.inv(lmat)
     #li = lmat.T (?)
     # alt way of Curtis not seem to work ------------------
@@ -3901,17 +3906,16 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     lcmat[1, 2] = np.dot(rs2, p3)
     lcmat[2, 2] = np.dot(rs3, p3)
     tau31 = (jd3 - jd1) * 86400.0
-    print(lcmat)
-    aa = 1 / dx * (- lcmat[0, 1] * tau32 / tau31 + lcmat[1, 1]
-                   + lcmat[2, 1] * tau12 / tau31)
-    bb = 1 / (6.0 * dx) * (lcmat[0, 1] * (tau32 * tau32 - tau31 * tau31)
-                           * tau32 / tau31 + lcmat[2, 1]
-                           * (tau31 * tau31 - tau12 * tau12)
-                           * tau12 / tau31)
+
+    # aa = 1 / dx * (- lcmat[0, 1] * tau32 / tau31 + lcmat[1, 1]
+    #                + lcmat[2, 1] * tau12 / tau31)
+    # bb = 1 / (6.0 * dx) * (lcmat[0, 1] * (tau32 * tau32 - tau31 * tau31)
+    #                        * tau32 / tau31 + lcmat[2, 1]
+    #                        * (tau31 * tau31 - tau12 * tau12)
+    #                        * tau12 / tau31)
     # alt way of Curtis not seem to work ------------------
 
     d = np.linalg.det(lmat)
-    print(d)
     lmati = np.zeros((3, 3))
     # ------------------ now assign the inverse -------------------
     lmati[0, 0] = (l2eci[1] * l3eci[2] - l2eci[2] * l3eci[1]) / d
@@ -3923,7 +3927,13 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     lmati[0, 2] = (l2eci[0] * l3eci[1] - l2eci[1] * l3eci[0]) / d
     lmati[1, 2] = (- l1eci[0] * l3eci[1] + l1eci[1] * l3eci[0]) / d
     lmati[2, 2] = (l1eci[0] * l2eci[1] - l1eci[1] * l2eci[0]) / d
-    print(lmati)
+    if sh.show:
+        print('lcmat')
+        print(lcmat)
+        print('lmat determinant:')
+        print(d)
+        print('lmati:')
+        print(lmati)
     lir = lmati @ rsmat
     # ------------ find f and g series at 1st and 3rd obs ---------
     # speed by assuming circ sat vel for udot here ??
@@ -3935,19 +3945,22 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     a3 = - tau12 / (tau32 - tau12)
     a3u = (- (tau12 * ((tau32 - tau12) ** 2 - tau12 * tau12))
            / (6.0 * (tau32 - tau12)))
-    print('a1/a3 %11.7f  %11.7f  %11.7f  %11.7f \n' % (a1, a1u, a3, a3u))
+
     # --- form initial guess of r2 ----
     dl1 = lir[1, 0] * a1 - lir[1, 1] + lir[1, 2] * a3
     dl2 = lir[1, 0] * a1u + lir[1, 2] * a3u
-    print(dl1)
-    print(dl2)
+    if sh.show:
+        print('a1/a3 %11.7f  %11.7f  %11.7f  %11.7f \n' % (a1, a1u, a3, a3u))
+        print('dl1:')
+        print(dl1)
+        print('dl2:')
+        print(dl2)
+
     # ------- solve eighth order poly not same as laplace ---------
     magrs2 = smu.mag(rs2)
     l2dotrs = np.dot(los2, rs2)
-    print('magrs2 %11.7f  %11.7f  \n' % (magrs2, l2dotrs))
     poly = np.zeros(9)
     poly[0] = 1.0
-
     poly[1] = 0.0
     poly[2] = - (dl1 * dl1 + 2.0 * dl1 * l2dotrs + magrs2 ** 2)
     poly[3] = 0.0
@@ -3956,9 +3969,8 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     poly[6] = 0.0
     poly[7] = 0.0
     poly[8] = - mu * mu * dl2 * dl2
-    print(poly)
     rootarr = np.roots(poly)
-    print(rootarr)
+
     #fprintf(1, 'rootarr #11.7f \n', rootarr)
 
     # ------------------ select the correct root ------------------
@@ -3966,15 +3978,20 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # change from 1
     for j in range(8):
         if (rootarr[j] > bigr2) and np.isreal(rootarr[j]):
-            bigr2 = rootarr[j]
-
-    print(bigr2)
+            bigr2 = rootarr[j].real
+    if sh.show:
+        print('magrs2 %11.7f  %11.7f  \n' % (magrs2, l2dotrs))
+        print('poly:')
+        print(poly)
+        print('rootarr:')
+        print(rootarr)
+        print('bigr2:')
+        print(bigr2)
     # ------------ solve matrix with u2 better known --------------
     u = mu / (bigr2 * bigr2 * bigr2)
     c1 = a1 + a1u * u
     c2 = - 1.0
     c3 = a3 + a3u * u
-    print('u %17.14f c1 %11.7f c3 %11.7f %11.7f \n' % (u, c1, c2, c3))
     cmat = np.zeros((3, 3))
     cmat[0, 0] = - c1
     cmat[1, 0] = - c2
@@ -3983,7 +4000,9 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
     rhoold1 = rhomat[0, 0] / c1
     rhoold2 = rhomat[1, 0] / c2
     rhoold3 = rhomat[2, 0] / c3
-    print('rhoold %11.7f %11.7f %11.7f \n' % (rhoold1, rhoold2, rhoold3))
+    if sh.show:
+        print('u %17.14f c1 %11.7f c3 %11.7f %11.7f \n' % (u, c1, c2, c3))
+        print('rhoold %11.7f %11.7f %11.7f \n' % (rhoold1, rhoold2, rhoold3))
     #   fprintf(1, 'rhoold #11.7f #11.7f #11.7f \n', rhoold1/re, rhoold2/re, rhoold3/re)
 
     r1 = np.zeros(3)
@@ -3994,17 +4013,18 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         r2[i] = rhomat[1, 0] * l2eci[i] / c2 + rs2[i]
         r3[i] = rhomat[2, 0] * l3eci[i] / c3 + rs3[i]
 
-    print('r1 %11.7f %11.7f %11.7f \n' % (r1[0], r1[1], r1[2]))
-    print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
-    print('r3 %11.7f %11.7f %11.7f \n' % (r3[0], r3[1], r3[2]))
+    if sh.show:
+        print('r1 %11.7f %11.7f %11.7f \n' % (r1[0], r1[1], r1[2]))
+        print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
+        print('r3 %11.7f %11.7f %11.7f \n' % (r3[0], r3[1], r3[2]))
     # -------- loop through the refining process ------------  while () for
-    print('now refine the answer \n' % ())
     rho2 = infinite
     ll = 0
     while ((abs(rhoold2 - rho2) > 1e-12) and (ll <= 0)):
 
         ll = ll + 1
-        print(' iteration %3i \n' % (ll))
+        if sh.show:
+            print(' iteration %3i \n' % (ll))
         rho2 = rhoold2
         # ---------- now form the three position vectors ----------
         for i in range(3):
@@ -4015,11 +4035,12 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         magr2 = smu.mag(r2)
         magr3 = smu.mag(r3)
         v2, theta, theta1, copa, error = gibbs(r1, r2, r3)
-        print('r1 %16.14f %16.14f %16.14f %11.7f %11.7f %16.14f \n'
+        if sh.show:
+            print('r1 %16.14f %16.14f %16.14f %11.7f %11.7f %16.14f \n'
               % (r1[0], r1[1], r1[2], theta * rad2deg, theta1 * rad2deg, copa * rad2deg))
-        print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
-        print('r3 %11.7f %11.7f %11.7f \n' % (r3[0], r3[1], r3[2]))
-        print('w gibbs km/s       v2 %11.7f %11.7f %11.7f \n'
+            print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
+            print('r3 %11.7f %11.7f %11.7f \n' % (r3[0], r3[1], r3[2]))
+            print('with gibbs km/s       v2 %11.7f %11.7f %11.7f \n'
               % (v2[0], v2[1], v2[2]))
         # check if too close obs
         if ((str(error) == str('ok')) and
@@ -4030,7 +4051,9 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             # --- hgibbs to get middle vector ----
             v2, theta, theta1, copa, error = \
                 hgibbs(r1, r2, r3, jd1 + jdf1, jd2 + jdf2, jd3 + jdf3)
-            print('using hgibbs: ' % ())
+            if sh.show:
+                print('using hgibbs km/s       v2 %11.7f %11.7f %11.7f \n'
+                % (v2[0], v2[1], v2[2]))
         p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = \
             sc.rv2coe(r2, v2, mu)
         ###print('coes init ans %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f\n' % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
@@ -4040,7 +4063,8 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             u = mu / (magr2 * magr2 * magr2)
             rdot = np.dot(r2, v2) / magr2
             udot = (- 3.0 * mu * rdot) / (magr2 ** 4)
-            print('u %17.15f rdot  %11.7f udot %11.7f \n' % (u, rdot, udot))
+            if sh.show:
+                print('u %17.15f rdot  %11.7f udot %11.7f \n' % (u, rdot, udot))
             tausqr = tau12 * tau12
             f1 = 1.0 - 0.5 * u * tausqr - (1.0 / 6.0) * udot * tausqr * tau12
             # - (1.0/24.0) * u*u*tausqr*tausqr
@@ -4057,7 +4081,8 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
                   - (1.0 / 12.0) * udot * tausqr * tausqr)
             # - (1.0/120.0)*u*u*tausqr*tausqr*tau3
             # - (1.0/120.0)*u*udot*tausqr*tausqr*tausqr
-            print('f1 %11.7f g1 %11.7f f3 %11.7f g3 %11.7f \n' % (f1, g1, f3, g3))
+            if sh.show:
+                print('f1 %11.7f g1 %11.7f f3 %11.7f g3 %11.7f \n' % (f1, g1, f3, g3))
         else:
             # -------- use exact method to find f and g -----------
             theta = smu.angl(r1, r2)
@@ -4068,31 +4093,34 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
             g3 = (magr3 * magr2 * math.sin(theta1)) / math.sqrt(p)
         c1 = g3 / (f1 * g3 - f3 * g1)
         c3 = - g1 / (f1 * g3 - f3 * g1)
-        print(' c1 %11.7f c3 %11.7f %11.7f \n' % (c1, c2, c3))
+        if sh.show:
+            print(' c1 %11.7f c3 %11.7f %11.7f \n' % (c1, c2, c3))
         # ----- solve for all three ranges via matrix equation ----
         cmat[0, 0] = - c1
         cmat[1, 0] = - c2
         cmat[2, 0] = - c3
         rhomat = lir @ cmat
-        print(rhomat)
-        print('rhomat %11.7f %11.7f %11.7f \n'
-              % (rhomat[0, 0], rhomat[0, 1], rhomat[0, 2]))
+
         # fprintf(1, 'rhomat #11.7f #11.7f #11.7f \n', rhomat/re)
         rhoold1 = rhomat[0, 0] / c1
         rhoold2 = rhomat[1, 0] / c2
         rhoold3 = rhomat[2, 0] / c3
-        print('rhoold %11.7f %11.7f %11.7f \n' % (rhoold1, rhoold2, rhoold3))
+
         # fprintf(1, 'rhoold #11.7f #11.7f #11.7f \n', rhoold1/re, rhoold2/re, rhoold3/re)
         for i in range(3):
             r1[i] = rhomat[0, 0] * l1eci[i] / c1 + rs1[i]
             r2[i] = rhomat[1, 0] * l2eci[i] / c2 + rs2[i]
             r3[i] = rhomat[2, 0] * l3eci[i] / c3 + rs3[i]
-        print('r1 %11.7f %11.7f %11.7f \n' % (r1[0], r1[1], r1[2]))
-        print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
-        print('r3 %11.7f %11.7f %11.7f \n' % (r3[0], r3[1], r3[2]))
-        print('====================next loop \n' % ())
+        if sh.show:
+            print('rhomat %11.7f %11.7f %11.7f \n'
+              % (rhomat[0, 0], rhomat[0, 1], rhomat[0, 2]))
+            print('rhoold %11.7f %11.7f %11.7f \n' % (rhoold1, rhoold2, rhoold3))
+            print('r1 %11.7f %11.7f %11.7f \n' % (r1[0], r1[1], r1[2]))
+            print('r2 %11.7f %11.7f %11.7f \n' % (r2[0], r2[1], r2[2]))
+            print('r3 %11.7f %11.7f %11.7f \n' % (r3[0], r3[1], r3[2]))
+            print('====================next loop \n' % ())
         # ----------------- check for convergence -----------------
-        print('rhoold while  %16.14f %16.14f \n' % (rhoold2, rho2))
+            print('rhoold while  %16.14f %16.14f \n' % (rhoold2, rho2))
 
 
     # ---------------- find all three vectors ri ------------------
@@ -4101,8 +4129,8 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
         r2[i] = - rhomat[1, 0] * l2eci[i] + rs2[i]
         r3[i] = rhomat[2, 0] * l3eci[i] / c3 + rs3[i]
 
-
-    print('The error is', error)
+    if sh.show:
+        print('The error is', error)
     return r2, v2
 
 # ------------------------------------------------------------------------------
@@ -4236,7 +4264,7 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     los3[1] = math.cos(decl3) * math.sin(rtasc3)
     los3[2] = math.sin(decl3)
 
-    los_test = smu.findlos(np.array([decl1,rtasc1]), np.array([decl2,rtasc2]))
+    #los_test = smu.findlos(np.array([decl1,rtasc1]), np.array([decl2,rtasc2]))
 
     # same- they're both unit vectors
     # l1
@@ -4253,8 +4281,8 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # -------------------------------------------------------------
     s1 = - tau32 / (tau12 * tau13)
     s2 = (tau12 + tau32) / (tau12 * tau32)
-
     s3 = - tau12 / (- tau13 * tau32)
+
     s4 = 2.0 / (tau12 * tau13)
     s5 = 2.0 / (tau12 * tau32)
     s6 = 2.0 / (- tau13 * tau32)
@@ -4264,8 +4292,10 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         ldot[i] = s1 * los1[i] + s2 * los2[i] + s3 * los3[i]
         lddot[i] = s4 * los1[i] + s5 * los2[i] + s6 * los3[i]
 
-    ldot
-    lddot
+    if sh.show:
+        print('ldot and lddot:')
+        print(ldot)
+        print(lddot)
     # ldotmag = smu.mag(ldot)
     # lddotmag = smu.mag(lddot)
     # should these unit vectors use a diff name????????//
@@ -4294,18 +4324,21 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
             rs2dot[i] = s1 * rs1[i] + s2 * rs2[i] + s3 * rs3[i]
             rs2ddot[i] = s4 * rs1[i] + s5 * rs2[i] + s6 * rs3[i]
 
-    rs2dot
-    rs2ddot
+    if sh.show:
+        print('rs2dot and rs2ddot:')
+        print(rs2dot)
+        print(rs2ddot)
+
     dmat = np.zeros((3, 3))
     dmat1 = np.zeros((3, 3))
     dmat2 = np.zeros((3, 3))
     dmat3 = np.zeros((3, 3))
     dmat4 = np.zeros((3, 3))
+
     for i in range(3):
         dmat[i, 0] = los2[i]
         dmat[i, 1] = ldot[i]
         dmat[i, 2] = lddot[i]
-        dmat
         # ----------------  position determinants -----------------
         dmat1[i, 0] = los2[i]
         dmat1[i, 1] = ldot[i]
@@ -4321,14 +4354,23 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         dmat4[i, 1] = rs2[i]
         dmat4[i, 2] = lddot[i]
 
-    dmat1
-    dmat2
+    if sh.show:
+        print('dmats:')
+        print(dmat)
+        print(dmat1)
+        print(dmat2)
+        print(dmat3)
+        print(dmat4)
+
     d = 2.0 * np.linalg.det(dmat)
     d1 = np.linalg.det(dmat1)
     d2 = np.linalg.det(dmat2)
     d3 = np.linalg.det(dmat3)
     d4 = np.linalg.det(dmat4)
-    print('d, di  %11.6g %11.6g %11.6g %11.6g %11.6g \n' % (d, d1, d2, d3, d4))
+
+    if sh.show:
+        print('d, di  %11.6g %11.6g %11.6g %11.6g %11.6g \n' %
+              (d, d1, d2, d3, d4))
 
     # ---------------  iterate to find rho magnitude ----------------
     # magr = 1.5   # first guess
@@ -4364,29 +4406,26 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         ###poly(2)
         ###poly(5)
         ###poly(8)
-        rootarr
         x = rootarr[0]
-        print("rootarr:")
-        print(rootarr)
 
-        ###poly(1) * x ** 8 + poly(3) * x ** 6 + poly(6) * x ** 3 + poly(9)
+        if sh.show:
+            print("rootarr:")
+            print(rootarr)
+
+        #x = rootarr[0]
+        ###poly[0] * x ** 8 + poly[2] * x ** 6 + poly[5] * x ** 3 + poly[8]
         # ------------------ find correct (xx) root ----------------
         bigr2 = 0.0
         for j in range(8):
-            #  if (abs(roots(j, 2)) < small)
-            #      writeln('root ', j, roots(j, 1), ' + ', roots(j, 2), 'j')
-            #  temproot = roots(j, 1)*roots(j, 1)
-            #  temproot = temproot*temproot*temproot*temproot +
-            #             poly(3)*temproot*temproot*temproot + poly(6)*roots(j, 1)*temproot + poly(9)
-            #  writeln(fileout, 'root ', j, roots(j, 1), ' + ', roots(j, 2), 'j  value = ', temproot)
-            if (rootarr[j] > bigr2):
-                bigr2 = rootarr[j]
+            if (rootarr[j] > bigr2 and np.isreal(rootarr[j])):
+                bigr2 = rootarr[j].real
 
-        print('bigr2 %11.7f  %11.7f er \n' % (bigr2, bigr2 / re))
         # fprintf(1, 'keep this root ? ')
         # input (bigr2)
         rho = - 2.0 * d1 / d - 2.0 * mu * d2 / (bigr2 * bigr2 * bigr2 * d)
-        print('rho %11.7f  %11.7f er \n' % (rho, rho / re))
+        if sh.show:
+            print('bigr2 %11.7f  %11.7f er \n' % (bigr2, bigr2 / re))
+            print('rho %11.7f  %11.7f er \n' % (rho, rho / re))
         r2 = np.zeros(3)
         # --------- find the middle position vector ---------------
         for k in range(3):
@@ -4394,8 +4433,6 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
         magr2 = smu.mag(r2)
         # ---------------- find rhodot magnitude ------------------
         rhodot = - d3 / d - mu * d4 / (magr2 * magr2 * magr2 * d)
-        # writeln(fileout, 'rho ', rho:14:7)
-        # writeln(fileout, 'rhodot ', rhodot:14:7)
         # -------------- find middle velocity vector --------------
         v2 = np.zeros(3)
         for i in range(3):

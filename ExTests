@@ -58,7 +58,7 @@ NameError: name 'lowthrust' is not defined
 6_14:Y
 6_15:Y
 7_1: Y
-7_2: inconsistent input data ranges
+7_2: Y (anglesl is a diveregent solution)
 
 7_5: Y
 
@@ -78,5 +78,5 @@ NameError: name 'lowthrust' is not defined
 11_4: Y
 11_5: Y
 
-11_6 (predict.py): Like 10_4 answers are slighlty off from the book.
+11_6 : Like 10_4 answers are slighlty off from the book.
 I suspect it has something to do with the pkepler function
