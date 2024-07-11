@@ -557,13 +557,13 @@ print('ell2rv:')
 print(rijk)
 print(vijk)
 
-rhosez, drhosez = raz2rvs(rho, az, el, drho, daz, del_)
-print('raz2rvs:')
+rhosez, drhosez = raz2sez(rho, az, el, drho, daz, del_)
+print('raz2sez:')
 print(rhosez)
 print(drhosez)
 
-rho, az, el, drho, daz, del_ = rvs2raz(rhosez, drhosez)
-print('rvs2raz:')
+rho, az, el, drho, daz, del_ = sez2raz(rhosez, drhosez)
+print('sez2raz:')
 print('rho %f, az %f, el %f, drho %f, daz %f, del_ %f' %\
         (rho, az, el, drho, daz, del_))
 
