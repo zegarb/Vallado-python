@@ -1900,11 +1900,8 @@ def findtof (ro: float, r: float, p: float):
 #  author        : david vallado                  719-573-2600    14 mar 2006
 #
 #  inputs          description                    range / units
-#    rint        - initial position vector of int km
-#    vint        - initial velocity vector of int km/s
-#    rtgt        - initial position vector of tgt km
-#    vtgt        - initial velocity vector of tgt km/s
-#    dm          - direction of motion for gauss  'l', 's'
+#    reci        - initial position vector of int km
+#    veci        - initial velocity vector of int km/s
 #    kind        - type of propagator             'k', 'p'
 #    dtsec       - time of flight to the int      s
 #
@@ -1927,18 +1924,37 @@ def findtof (ro: float, r: float, p: float):
 # [x, y, z] = makeorbitrv (2455545.0, 'j', [5003.400903511, -3817.812007872, 4720.200666830], [5.489294908, 3.005055561, -3.39013016])
 # ------------------------------------------------------------------------------
 
-def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
+def makeorbitrv(jd: float, kind: 'str', reci: np.ndarray, veci: np.ndarray):
+    """this function propagtes an orbit around for one rev using either kepler
+    or pkepler (secular j2) and writes it out to a file.
+
+    Parameters
+    ----------
+    jd : float
+        julian date
+    kind : str
+        type of propogator: 'k', 'p', 'j'
+    reci : ndarray
+        satellite position vector: km
+    veci : ndarray
+        satellite velocity vector: km/s
+
+    Returns
+    -------
+    x, y, z
+        initial position vector?
+    """
     error = 'ok'
 
     if (kind == 'k'):
         outfile = open(os.path.join(os.path.dirname(__file__),
-                                    "data", 'makeorbrvKep.out'), 'wt')
+                                    "testoutput", 'makeorbrvKep.out'), 'wt')
     elif (kind == 'p'):
         outfile = open(os.path.join(os.path.dirname(__file__),
-                                    "data", 'makeorbrvJ2.out'), 'wt')
+                                    "testoutput", 'makeorbrvJ2.out'), 'wt')
     elif (kind == 'j'):
         outfile = open(os.path.join(os.path.dirname(__file__),
-                                    "data", 'makeorbrvJ4.out'), 'wt')
+                                    "testoutput", 'makeorbrvJ4.out'), 'wt')
 
     # --------------- approximate ast with gst for this simple demo --------------
     #    gmst = gstime(jd)
@@ -1972,7 +1988,7 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
     outfile.write('-------------------------    ---------------    '
                   '---------------    ---------------    ------------    '
                   '------------    ------------\n')
-    for i in range(101):
+    for i in range(1, 101):
         #        dtsec = (i-1)*period/120.0
         dtsec = i * 960.0
         jdut1 = jd + dtsec / 86400.0
@@ -2000,14 +2016,15 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
         #             lon =lon + 2*pi
         #         end
         #        fprintf(outfile, '#11.7f  #11.7f   1.0 \n', latgd * rad2deg, lon * rad2deg)
-        h, m, s = stu.sec2hms(dtsec)
-        outfile.write('1 Jun 2018 %2i:%2i:%7.4f  %16.9f  %16.9f %16.9f  %16.9f'
-                      ' %16.9f  %16.9f \n'
-                      % (h, m, s, reci1[0], reci1[1], reci1[2], veci1[0],
-                         veci1[1], veci1[2]))
+        year, mon, day, h, m, s = stu.invjday(jdut1)
+        outfile.write('%f %f %f %2i:%2i:%7.4f\n %16.9f  %16.9f %16.9f  \n'
+                      '%16.9f %16.9f  %16.9f \n'
+                      % (day, mon, year, h, m, s, reci1[0], reci1[1], reci1[2],
+                         veci1[0], veci1[1], veci1[2]))
+        outfile.close()
         #        x(i, 1) = reci1(1)
-#        y(i, 1) = reci1(2)
-#        z(i, 1) = reci1(3)
+        #        y(i, 1) = reci1(2)
+        #        z(i, 1) = reci1(3)
 
 
     return x, y, z
@@ -2064,6 +2081,40 @@ def makeorbitrv(jd=None, kind=None, reci=None, veci=None):
 # -----------------------------------------------------------------------------
 
 def iau06in():
+    """this function initializes the matricies needed for iau 2006 reduction
+    calculations. the routine uses the files listed as inputs, but they are
+    are not input to the routine as they are static files:
+    iau06xtab5.2.a.dat, iau06ytab5.2.b.dat, iau06stab5.2.d.dat, iau03n.dat,
+    iau03pl.dat, iau06gsttab5.2.e.dat.
+
+    Returns
+    -------
+    axs0 : float
+        real coefficients for x: rad
+    a0xi : float
+        integer coefficients for x
+    ays0 : float
+        real coefficients for y: rad
+    a0yi : float
+        integer coefficients for y
+    ass0 : float
+        real coefficients for s: rad
+    a0si : float
+        integer coefficients for s
+    apn : float
+        real coefficients for nutation: rad
+    apni : float
+        integer coefficients for nutation
+    ape : float
+        real coefficients for obliquity: rad
+    apei : float
+        integer coefficients for obliquity
+    agst : float
+        real coefficients for gst: rad
+    agsti : float
+        integer coefficients for gst
+    """
+
     #function [axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, ape, apei, agst, agsti] = iau06in
 
 
@@ -2227,13 +2278,13 @@ def iau06in():
 #
 #  inputs          description                    range / units
 #    llat        - start geocentric latitude      -pi/2 to  pi/2 rad
-#    llon        - start longitude (west -)       0.0  to 2pi rad
-#    range       - range between points           er
-#    az          - azimuth                        0.0  to 2pi rad
+#    llon        - start longitude (west -)       0.0 to 2pi rad
+#    range       - range between points           0.0 to 2pi rad
+#    az          - azimuth                        0.0 to 2pi rad
 #
 #  outputs       :
-#    tlat        - end geocentric latitude        -pi/2 to  pi/2 rad
-#    tlon        - end longitude (west -)         0.0  to 2pi rad
+#    tlat        - end geocentric latitude        -pi/2 to pi/2 rad
+#    tlon        - end longitude (west -)         0.0 to 2pi rad
 #
 #  locals        :
 #    sindeltan   - sine of delta n                rad
@@ -2249,8 +2300,28 @@ def iau06in():
 # [tlat, tlon] = pathm (llat, llon, range, az)
 # ------------------------------------------------------------------------------
 
-def pathm(llat=None, llon=None, range_=None, az=None):
-    # -------------------------  implementation   -----------------
+def pathm(llat: float, llon: float, range_: float, az: float):
+    """this function determines the end position for a given range and azimuth
+    from a given point.
+
+    Parameters
+    ----------
+    llat : float
+        start geocentric latitude: rad
+    llon : float
+        start gepocentric longitude: rad
+    range_ : float
+        range between points: rad
+    az : float
+        azimuth: rad
+
+    Returns
+    -------
+    tlat: float
+        end geocentric latitude: rad
+    tlon: float
+        end longitude: rad
+    """
     small = 1e-08
     az = math.fmod(az, twopi)
     if (llon < 0.0):
@@ -2258,6 +2329,7 @@ def pathm(llat=None, llon=None, range_=None, az=None):
 
     if (range_ > twopi):
         range_ = math.fmod(range_, twopi)
+
 
     # ----------------- find geocentric latitude  -----------------
     tlat = math.asin(math.sin(llat) * math.cos(range_) + math.cos(llat)
