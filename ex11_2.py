@@ -28,7 +28,11 @@ from space_constants import *
 
 print("---------------------Example 11-2--------------------")
 
-j2 = 0.00108263
+gravc = getgravc('egm08')
+j2 = gravc['j2']
+mu = gravc['mu']
+re = gravc['re']
+
 rate = (360.0 / 365.2421897) * deg2rad / 86164.0989036973
 print(f'{rate=}')
 # intermediate conversions

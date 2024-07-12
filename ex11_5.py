@@ -25,7 +25,10 @@
 import numpy as np
 from space_constants import *
 
-j2 = 0.00108263
+gravc = getgravc('egm08')
+j2 = gravc['j2']
+mu = gravc['mu']
+re = gravc['re']
 # --------  repeat gt calculations
 a = 6570.3358
 

@@ -8705,7 +8705,7 @@ def hms2rad(hr: float, min: float, sec: float):
 
 #  -----------------------------------------------------------------------------
 #
-#                            procedure twoline2rv
+#                            procedure tle2satrec
 #
 #  this function converts the two line element set character string data to
 #    variables and initializes the sgp4 variables. several intermediate varaibles
@@ -8745,7 +8745,7 @@ def hms2rad(hr: float, min: float, sec: float):
 #     satrec      - structure containing all the sgp4 satellite information
 #
 #   coupling      :
-#     getgravconst
+#     getgravc
 #     days2mdhms  - conversion of days to month, day, hour, minute, second
 #     jday        - convert day month year hour minute second into julian date
 #     sgp4init    - initialize the sgp4 variables
@@ -8754,11 +8754,11 @@ def hms2rad(hr: float, min: float, sec: float):
 #     norad spacetrack report #3
 #     vallado, crawford, hujsak, kelso  2006
 #
-# [startmfe, stopmfe, deltamin, satrec] = twoline2rv(longstr1, longstr2, ...
+# [startmfe, stopmfe, deltamin, satrec] = tle2satrec(longstr1, longstr2, ...
 #          typerun, typeinput, opsmode, whichconst)
 #  ----------------------------------------------------------------------------
 
-def twoline2rv(longstr1: str, longstr2: str, typerun: str,
+def tle2satrec(longstr1: str, longstr2: str, typerun: str,
                typeinput, opsmode: str, whichconst: str):
     """this function converts the two line element set character string data to
     variables and initializes the sgp4 variables. several intermediate varaibles
@@ -8788,11 +8788,11 @@ def twoline2rv(longstr1: str, longstr2: str, typerun: str,
     opsmode : str
         satrec opsmode
     whichconst : str
-        which set of constants to use: 721, 72, 84
+        which set of constants to use: wgs721, wgs72, wgs84, egm08
     """
 
     # sgp4fix no longer needed, put in satrec
-    # global tumin radiusearthkm xke j2 j3 j4 j3oj2
+    # global tumin re xke j2 j3 j4 j3oj2
 
     # Needs a constant in space_constants?
     xpdotp   =  1440.0 / (2.0*math.pi)   # 229.1831180523293  # [rev/day]/[rad/min]

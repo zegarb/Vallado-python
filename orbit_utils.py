@@ -100,7 +100,7 @@ def clean_fwf(lins, maxsp, isint=True, isfloat=False):
 #     xno2        -
 #
 #   coupling      :
-#     getgravconst
+#     getgravc
 #
 #   references    :
 #     hoots, roehrich, norad spacetrack report #3 1980
@@ -134,7 +134,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
     zns = 1.19459e-05
     # sgp4fix identify constants and allow alternate values
     # sgp4fix no longer needed, pass xke in
-    # global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+    # global tumin mu re xke j2 j3 j4 j3oj2
 
     # -------------------- deep space initialization ------------
     irez = 0
@@ -328,15 +328,22 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
 #   author        : david vallado                  719-573-2600   28 jun 2005
 #
 #   inputs        :
-#     satn        - satellite number
-#     bstar       - sgp4 type drag coefficient              kg/m2er
-#     ecco        - eccentricity
+#     whichconst  - which set of constants to use                   wgs721, wgs72, wgs84, egm08
+#     opsmode     - satellite operation mode                        'a' = afspc, 'i' = improved,
+#                                                                   's' = standard
+#     satrec      - satellite record (TLE data)
 #     epoch       - epoch time in days from jan 0, 1950. 0 hr
-#     argpo       - argument of perigee (output if ds)
-#     inclo       - inclination
-#     mo          - mean anomaly (output if ds)
-#     no          - mean motion
-#     nodeo      - right ascension of ascending node
+#     xbstar      - sgp4 type drag coefficient                       kg/(m^2*er)
+#     xndot       - time rate change of n (mean motion dot/2)        rad/min^2 %
+#     xnddot      - time accel change of n (dot dot/6)               rad/min^3 %
+#     xecco       - eccentricity
+#     xargpo      - argument of perigee (output if ds)               rad %
+#     xinclo      - inclination                                      rad %
+#     xmo         - mean anomaly (output if ds)                      rad %
+#     no_kozai    - mean motion (kozai type)                         rad/min %
+#     xnodeo      - right ascension of ascending node                rad %
+#
+#     Note %: Converted from deg to rad or rev/day to rad/min on read in.
 #
 #   outputs       :
 #     satrec      - common values for subsequent calls
@@ -385,7 +392,7 @@ def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
 #     z11, z12, z13, z21, z22, z23, z31, z32, z33         -
 #
 #   coupling      :
-#     getgravconst
+#     getgravc
 #     initl       -
 #     dscom       -
 #     dpper       -
@@ -494,7 +501,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
     # satrec.
     # it is possible to streamline the sgp4init call by deleting the "x"
     # variables, but the user would need to set the satrec.* values first. we
-    # include the additional assignment in case twoline2rv is not used.
+    # include the additional assignment in case tle2satrec is not used.
     satrec['bstar'] = xbstar
     # sgp4fix allow additional parameters in the struct
     satrec['ndot'] = xndot
@@ -517,12 +524,12 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
     #     sgp4fix identify constants and allow alternate values
     # sgp4fix switch to satrec['so'] only one call is needed to initialize
     # constants
-    #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
-    satrec['tumin'], satrec['mu'], satrec['radiusearthkm'], satrec['xke'], \
-        satrec['j2'], satrec['j3'], satrec['j4'], satrec['j3oj2'] \
-            = getgravc(whichconst)
-    ss = 78.0 / satrec['radiusearthkm'] + 1.0
-    qzms2t = ((120.0 - 78.0) / satrec['radiusearthkm']) ** 4
+    #global tumin mu re xke j2 j3 j4 j3oj2
+    gravc = getgravc(whichconst)
+    satrec = satrec | gravc #adds gravitional constants to satrec dictionary
+
+    ss = 78.0 / satrec['re'] + 1.0
+    qzms2t = ((120.0 - 78.0) / satrec['re']) ** 4
     x2o3 = 2.0 / 3.0
     # sgp4fix divisor for divide by zero check on inclination
     # the old check used 1.0 + cos(pi-1.0e-9), but then compared it to
@@ -546,18 +553,18 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
 
     if ((omeosq >= 0.0) or (satrec['no'] >= 0.0)):
         satrec['isimp'] = 0
-        if (rp < (220.0 / satrec['radiusearthkm'] + 1.0)):
+        if (rp < (220.0 / satrec['re'] + 1.0)):
             satrec['isimp'] = 1
         sfour = ss
         qzms24 = qzms2t
-        perige = (rp - 1.0) * satrec['radiusearthkm']
+        perige = (rp - 1.0) * satrec['re']
         # - for perigees below 156 km, s and qoms2t are altered -
         if (perige < 156.0):
             sfour = perige - 78.0
             if (perige < 98.0):
                 sfour = 20.0
-            qzms24 = ((120.0 - sfour) / satrec['radiusearthkm']) ** 4.0
-            sfour = sfour / satrec['radiusearthkm'] + 1.0
+            qzms24 = ((120.0 - sfour) / satrec['re']) ** 4.0
+            sfour = sfour / satrec['re'] + 1.0
         pinvsq = 1.0 / posq
         tsi = 1.0 / (ao - sfour)
         satrec['eta'] = ao * satrec['ecco'] * tsi
@@ -791,7 +798,7 @@ def sgp4init(whichconst=None, opsmode=None, satrec=None, epoch=None,
 #     np          -
 #
 #   coupling      :
-#     getgravconst
+#     getgravc
 #     dpper
 #     dspace
 #
@@ -811,8 +818,8 @@ def sgp4(satrec=None, tsince=None):
     temp4 = 1.5e-12
     # sgp4fix identify constants and allow alternate values
     # no longer needed, pass in through satrec
-    #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
-    vkmpersec = satrec['radiusearthkm'] * satrec['xke'] / 60.0
+    #global tumin mu re xke j2 j3 j4 j3oj2
+    vkmpersec = satrec['re'] * satrec['xke'] / 60.0
     # --------------------- clear sgp4 error flag -----------------
     satrec['t'] = tsince
     satrec['error'] = 0
@@ -1019,9 +1026,9 @@ def sgp4(satrec=None, tsince=None):
         # --------- position and velocity (in km and km/sec) ----------
         r = np.zeros(3)
         v = np.zeros(3)
-        r[0] = (mrt * ux) * satrec['radiusearthkm']
-        r[1] = (mrt * uy) * satrec['radiusearthkm']
-        r[2] = (mrt * uz) * satrec['radiusearthkm']
+        r[0] = (mrt * ux) * satrec['re']
+        r[1] = (mrt * uy) * satrec['re']
+        r[2] = (mrt * uz) * satrec['re']
         v[0] = (mvt * ux + rvdot * vx) * vkmpersec
         v[1] = (mvt * uy + rvdot * vy) * vkmpersec
         v[2] = (mvt * uz + rvdot * vz) * vkmpersec
@@ -1096,7 +1103,7 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
           opsmode=None):
     # -------------------- wgs-72 earth constants -----------------
     # sgp4fix identify constants and allow alternate values
-    # global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+    # global tumin mu re xke j2 j3 j4 j3oj2
     x2o3 = 2.0 / 3.0
     #   global opsmode
 
@@ -1582,80 +1589,6 @@ def iau06in():
 
     return axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti
 
-
-
-# -----------------------------------------------------------------------------
-#
-#                           function getgravc
-#
-#  this function gets constants for the propagator. note that mu is identified to
-#    facilitiate comparisons with newer models.
-#
-#  author        : david vallado                  719-573-2600   21 jul 2006
-#
-#  inputs        :
-#    whichconst  - which set of constants to use  721, 72, 84
-#
-#  outputs       :
-#    tumin       - minutes in one time unit
-#    mu          - earth gravitational parameter
-#    radiusearthkm - radius of the earth in km
-#    xke         - reciprocal of tumin
-#    j2, j3, j4  - un-normalized zonal harmonic values
-#    j3oj2       - j3 divided by j2
-#
-#  locals        :
-#
-#  coupling      :
-#
-#  references    :
-#    norad spacetrack report #3
-#    vallado, crawford, hujsak, kelso  2006
-# [tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2] = getgravc(whichconst)
-#  --------------------------------------------------------------------------- */
-
-def getgravc(whichconst=None):
-    #global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
-
-    if 721 == whichconst:
-        # -- wgs-72 low precision str#3 constants --
-        mu = 398600.79964
-        radiusearthkm = 6378.135
-        xke = 0.0743669161
-        tumin = 1.0 / xke
-        j2 = 0.001082616
-        j3 = - 2.53881e-06
-        j4 = - 1.65597e-06
-        j3oj2 = j3 / j2
-
-    elif 72 == whichconst:
-        # ------------ wgs-72 constants ------------
-        mu = 398600.8
-        radiusearthkm = 6378.135
-        xke = 60.0 / math.sqrt(radiusearthkm * radiusearthkm
-                                * radiusearthkm / mu)
-        tumin = 1.0 / xke
-        j2 = 0.001082616
-        j3 = - 2.53881e-06
-        j4 = - 1.65597e-06
-        j3oj2 = j3 / j2
-
-    elif 84 == whichconst:
-        # ------------ wgs-84 constants ------------
-        mu = 398600.5
-        radiusearthkm = 6378.137
-        xke = 60.0 / math.sqrt(radiusearthkm * radiusearthkm
-                                * radiusearthkm / mu)
-        tumin = 1.0 / xke
-        j2 = 0.00108262998905
-        j3 = - 2.53215306e-06
-        j4 = - 1.61098761e-06
-        j3oj2 = j3 / j2
-    else:
-        print('unknown gravity option (%d)\n' % (whichconst))
-
-
-    return tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2
 
 
 # ------------------------------------------------------------------------------
@@ -2476,8 +2409,6 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #
 
 def lambertmin(r1=None, r2=None, dm=None, nrev=None):
-    mu = 398600.4418
-
     # ---- find parameters that are constant for the initial geometry
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
@@ -2557,7 +2488,6 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
 #-----------------------------------------------------------------------------*/
 
 def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
-    mu = 398600.4415
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
@@ -2711,7 +2641,6 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
         direction of motion: 'L', 'S'
     """
     small = 1e-08
-    mu = 398600.4418
 
     oomu = 1.0 / math.sqrt(mu)
 
@@ -2882,7 +2811,6 @@ def lambgettbiu(r1=None, r2=None, order=None):
 
 def lambhodograph(r1=None, v1=None, r2=None, p=None,
                   ecc=None, dnu=None, dtsec=None):
-    mu = 398600.4418
 
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
@@ -3371,7 +3299,7 @@ def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
 #    newtonm     - newton rhapson to find nu and eccentric anomaly
 #
 #  references    :
-#    vallado       2007, 687, alg 64
+#    vallado       2007, 691, alg 64
 #
 # [r, v] = pkeplerj4(ro, vo, dtsec, ndot, nddot)
 # ----------------------------------------------------------------------------- }
@@ -3379,10 +3307,13 @@ def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
 def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     # egm-08
 
-    j2 = 0.00108262617
-    j3 = - 2.53241052e-06
-    j4 = - 1.6198976e-06
-    j6 = - 5.40666576e-07
+    gravc = getgravc('egm08')
+    mu = gravc['mu']
+    re = gravc['re']
+    j2 = gravc['j2']
+    j4 = gravc['j4']
+
+    #j6 = - 5.40666576e-07
     p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper = \
         sc.rv2coe(ro, vo)
     # fprintf(1, '          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg      arglat   truelon    lonper\n')
@@ -3598,7 +3529,7 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
 
     # for sun
     #re = 149597870.0 (this is not the radius of the sun but the atomic unit - mjc)
-    #mu = 1.32712428e11
+    #mu = musun
     magr1in = 2.0 * re
     magr2in = 2.04 * re
     direct = 'y'
@@ -7592,7 +7523,6 @@ def site (latgd: float, lon: float, alt: float):
     # EGM-08 constants used here
     flat = 1.0/298.257223563
     earthrot = 7.292115e-5     # rad/s  old 7.29211514670698e-05
-    mu = 398600.4415      # km3/s2
     mum = 3.986004415e14   # m3/s2
     # derived constants from the base values
     eccearth = math.sqrt(2.0*flat - flat**2)
@@ -10143,7 +10073,7 @@ def predict(reci:np.ndarray, veci:np.ndarray, jdepoch:float, jdend:float,
 
 # ------------------------------------------------------------------------------
 #
-#                           function plantrv
+#                           function planetrv
 #
 #  this function approximates the position and velocity vectors of a planet
 #  with respect to the sun using the mean equator, equinox of IAU-76/FK5 (J2000)

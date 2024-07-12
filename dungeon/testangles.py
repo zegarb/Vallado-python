@@ -32,14 +32,8 @@ import spacetime_utils as stu
 import os
 
 
-#    re = 6378.137;
-#    mu = 3.986004418e5;
-#    tu = 86400.0
-#    re = 6378.145;
-#    mu = 3.986005e5;
-
 #    re = 149597870.0;  # km in 1 au
-#    mu = 1.32712428e11;
+#    mu = musun
 #    tu = 86400.0;
 
 #    re = 1.0;  # 1 au

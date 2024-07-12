@@ -113,14 +113,14 @@ print('\n\n =================== now do teme of date and of epoch example  ======
 rad = 180.0 / np.pi
 opsmode = 'a'
 
-whichconst = 72
+whichconst = 'wgs72'
 eqeterms = 2
 longstr1 = '1 00005U 58002B   00179.78495062  .00000023  00000-0  28098-4 0  4753'
 longstr2 = '2 00005  34.2682 348.7242 1859667 331.7664  19.3264 10.82419157413667     0.0      4320.0       720.00000'
 #       // convert the char string to sgp4 elements
 #       // includes initialization of sgp4
 typerun = 'v'
-startmfe, stopmfe, deltamin, satrec = sc.twoline2rv(longstr1, longstr2,
+startmfe, stopmfe, deltamin, satrec = sc.tle2satrec(longstr1, longstr2,
                                                     typerun,'e', opsmode,
                                                     whichconst)
 print('%11.7f %11.7f %11.7f \n' % (startmfe, stopmfe, deltamin))

@@ -1028,15 +1028,14 @@ print('rinteci EQCM ntw     %20.13f  %20.13f  %20.13f  %20.13f  %20.13f  %20.13f
 # test kozai back and forth for tle
 rad = 180.0 / np.pi
 x2o3 = 2.0 / 3.0
-mu = 398600.8
 
-re = 6378.135
+gravc = getgravc('wgs72')
+mu = gravc['mu']
+re = gravc['re']
+xke = gravc['xke']
+tumin = gravc['tumin']
+j2 = gravc['j2']
 
-xke = 60.0 / np.sqrt(re * re * re / mu)
-
-tumin = 1.0 / xke
-
-j2 = 0.001082616
 xpdotp = 1440.0 / (2.0 * np.pi)
 
 no_kozai = 15.5911407
@@ -1048,7 +1047,7 @@ omeosq = 1.0 - eccsq
 rteosq = np.sqrt(omeosq)
 cosio = np.cos(inclo)
 cosio2 = cosio * cosio
-# twoline2rv:
+# tle2satrec:
 no_kozai = no_kozai / xpdotp
 
 a1 = (no_kozai * tumin) ** (- 2.0 / 3.0)
