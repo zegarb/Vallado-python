@@ -4,19 +4,12 @@
 #  use testhillSTK for te longer runs with perturbed values, etc
 #
 # Uses:
-#  EQCM_to_ECI_RTN_
-#      f_ECI_to_RTN_
+#  hilleqcmtoeci
+#      eci2rsw
 #      newtonnu, newtone
 #      inverselliptic2
 #      elliptic12
-#  ECI_to_EQCM_RTN_
-#
-#
-#
-#
-# STK needs to be running (testhillsc)
-#
-#
+#  eci2hilleqcm
 #
 
 import numpy as np

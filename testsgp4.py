@@ -7,7 +7,7 @@ import space_conversions as sc
 import spacemath_utils as smu
 import spacetime_utils as stu
 
-# script testmat.py
+# script testsgp4.py
 #
 # This script tests the SGP4 propagator.
 
