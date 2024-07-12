@@ -23,297 +23,6 @@ def clean_fwf(lins, maxsp, isint=True, isfloat=False):
     ints = [int(xx) for xx in ints]
   return ints
 
-
-# -----------------------------------------------------------------------------
-#
-#                            procedure dsinit
-#
-#   this procedure provides deep space contributions to mean motion dot due
-#     to geopotential resonance with half day and one day orbits.
-#
-# Author:
-#   Jeff Beck
-#   beckja@alumni.lehigh.edu
-#   1.0 (aug 7, 2006) - update for paper dav
-# original comments from Vallado C++ version:
-#   author        : david vallado                  719-573-2600   28 jun 2005
-#
-#   inputs        :
-#     Cosim, Sinim-
-#     Emsq        - Eccentricity squared
-#     Argpo       - Argument of Perigee
-#     S1, S2, S3, S4, S5      -
-#     Ss1, Ss2, Ss3, Ss4, Ss5 -
-#     Sz1, Sz3, Sz11, Sz13, Sz21, Sz23, Sz31, Sz33 -
-#     T           - Time
-#     Tc          -
-#     GSTo        - Greenwich sidereal time                   rad
-#     Mo          - Mean Anomaly
-#     MDot        - Mean Anomaly dot (rate)
-#     No          - Mean Motion
-#     nodeo       - right ascension of ascending node
-#     nodeDot     - right ascension of ascending node dot (rate)
-#     XPIDOT      -
-#     Z1, Z3, Z11, Z13, Z21, Z23, Z31, Z33 -
-#     Eccm        - Eccentricity
-#     Argpm       - Argument of perigee
-#     Inclm       - Inclination
-#     Mm          - Mean Anomaly
-#     Xn          - Mean Motion
-#     nodem       - right ascension of ascending node
-#
-#   outputs       :
-#     em          - eccentricity
-#     argpm       - argument of perigee
-#     inclm       - inclination
-#     mm          - mean anomaly
-#     nm          - mean motion
-#     nodem       - right ascension of ascending node
-#     irez        - flag for resonance           0-none, 1-one day, 2-half day
-#     atime       -
-#     d2201, d2211, d3210, d3222, d4410, d4422, d5220, d5232, d5421, d5433    -
-#     dedt        -
-#     didt        -
-#     dmdt        -
-#     dndt        -
-#     dnodt       -
-#     domdt       -
-#     del1, del2, del3        -
-#     Ses  , Sghl , Sghs , Sgs  , Shl  , Shs  , Sis  , Sls
-#     theta       -
-#     xfact       -
-#     xlamo       -
-#     xli         -
-#     xni
-#
-#   locals        :
-#     ainv2       -
-#     aonv        -
-#     cosisq      -
-#     eoc         -
-#     f220, f221, f311, f321, f322, f330, f441, f442, f522, f523, f542, f543  -
-#     g200, g201, g211, g300, g310, g322, g410, g422, g520, g521, g532, g533  -
-#     sini2       -
-#     temp        -
-#     temp1       -
-#     theta       -
-#     xno2        -
-#
-#   coupling      :
-#     getgravc
-#
-#   references    :
-#     hoots, roehrich, norad spacetrack report #3 1980
-#     hoots, norad spacetrack report #6 1986
-#     hoots, schumacher and glover 2004
-#     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------
-
-def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
-           s3=None, s4=None, s5=None, sinim=None, ss1=None, ss2=None,
-           ss3=None, ss4=None, ss5=None, sz1=None, sz3=None, sz11=None,
-           sz13=None, sz21=None, sz23=None, sz31=None, sz33=None, t=None,
-           tc=None, gsto=None, mo=None, mdot=None, no=None, nodeo=None,
-           nodedot=None, xpidot=None, z1=None, z3=None, z11=None, z13=None,
-           z21=None, z23=None, z31=None, z33=None, em=None, argpm=None,
-           inclm=None, mm=None, nm=None, nodem=None, ecco=None, eccsq=None):
-
-    # --------------------- local variables ------------------------
-    aonv = 0.0
-    q22 = 1.7891679e-06
-    q31 = 2.1460748e-06
-    q33 = 2.2123015e-07
-    root22 = 1.7891679e-06
-    root44 = 7.3636953e-09
-    root54 = 2.1765803e-09
-    rptim = 0.0043752690880113
-    root32 = 3.7393792e-07
-    root52 = 1.1428639e-07
-    x2o3 = 2.0 / 3.0
-    znl = 0.00015835218
-    zns = 1.19459e-05
-    # sgp4fix identify constants and allow alternate values
-    # sgp4fix no longer needed, pass xke in
-    # global tumin mu re xke j2 j3 j4 j3oj2
-
-    # -------------------- deep space initialization ------------
-    irez = 0
-    if ((nm < 0.0052359877) and (nm > 0.0034906585)):
-        irez = 1
-
-    if ((nm >= 0.00826) and (nm <= 0.00924) and (em >= 0.5)):
-        irez = 2
-
-    d2201 = 0
-    d2211 = 0
-    d3210 = 0
-    d3222 = 0
-    d4410 = 0
-    d4422 = 0
-    d5220 = 0
-    d5232 = 0
-    d5421 = 0
-    d5433 = 0
-    del1 = 0
-    del2 = 0
-    del3 = 0
-    atime = 0
-    xfact = 0
-    xlamo = 0
-    xli = 0
-    xni = 0
-    # ------------------------ do solar terms -------------------
-    ses = ss1 * zns * ss5
-    sis = ss2 * zns * (sz11 + sz13)
-    sls = - zns * ss3 * (sz1 + sz3 - 14.0 - 6.0 * emsq)
-    sghs = ss4 * zns * (sz31 + sz33 - 6.0)
-    shs = - zns * ss2 * (sz21 + sz23)
-    # sgp4fix for 180 deg incl
-    if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
-        shs = 0.0
-
-    if (sinim != 0.0):
-        shs = shs / sinim
-
-    sgs = sghs - cosim * shs
-    # ------------------------- do lunar terms ------------------
-    dedt = ses + s1 * znl * s5
-    didt = sis + s2 * znl * (z11 + z13)
-    dmdt = sls - znl * s3 * (z1 + z3 - 14.0 - 6.0 * emsq)
-    sghl = s4 * znl * (z31 + z33 - 6.0)
-    shll = - znl * s2 * (z21 + z23)
-    # sgp4fix for 180 deg incl
-    if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
-        shll = 0.0
-
-    domdt = sgs + sghl
-    dnodt = shs
-    if (sinim != 0.0):
-        domdt = domdt - cosim / sinim * shll
-        dnodt = dnodt + shll / sinim
-
-    # ----------- calculate deep space resonance effects --------
-    dndt = 0.0
-    theta = math.fmod(gsto + tc * rptim, twopi)
-    em = em + dedt * t
-    inclm = inclm + didt * t
-    argpm = argpm + domdt * t
-    nodem = nodem + dnodt * t
-    mm = mm + dmdt * t
-    #   sgp4fix for negative inclinations
-    #   the following if statement should be commented out
-    # if (inclm < 0.0)
-    #  {
-    #    inclm  = -inclm;
-    #    argpm  = argpm - pi;
-    #    nodem = nodem + pi;
-    #  }
-
-    # - update resonances : numerical (euler-maclaurin) integration -
-    # ------------------------- epoch restart ----------------------
-    #   sgp4fix for propagator problems
-    #   the following integration works for negative time steps and periods
-    #   the specific changes are unknown because the original code was so convoluted
-
-    # -------------- initialize the resonance terms -------------
-    if (irez != 0):
-        aonv = (nm / xke) ** x2o3
-        # ---------- geopotential resonance for 12 hour orbits ------
-        if (irez == 2):
-            cosisq = cosim * cosim
-            emo = em
-            em = ecco
-            emsqo = emsq
-            emsq = eccsq
-            eoc = em * emsq
-            g201 = - 0.306 - (em - 0.64) * 0.44
-            if (em <= 0.65):
-                g211 = 3.616 - 13.247 * em + 16.29 * emsq
-                g310 = - 19.302 + 117.39 * em - 228.419 * emsq + 156.591 * eoc
-                g322 = - 18.9068 + 109.7927 * em - 214.6334 * emsq + 146.5816 * eoc
-                g410 = - 41.122 + 242.694 * em - 471.094 * emsq + 313.953 * eoc
-                g422 = - 146.407 + 841.88 * em - 1629.014 * emsq + 1083.435 * eoc
-                g520 = - 532.114 + 3017.977 * em - 5740.032 * emsq + 3708.276 * eoc
-            else:
-                g211 = - 72.099 + 331.819 * em - 508.738 * emsq + 266.724 * eoc
-                g310 = - 346.844 + 1582.851 * em - 2415.925 * emsq + 1246.113 * eoc
-                g322 = - 342.585 + 1554.908 * em - 2366.899 * emsq + 1215.972 * eoc
-                g410 = - 1052.797 + 4758.686 * em - 7193.992 * emsq + 3651.957 * eoc
-                g422 = - 3581.69 + 16178.11 * em - 24462.77 * emsq + 12422.52 * eoc
-                if (em > 0.715):
-                    g520 = - 5149.66 + 29936.92 * em - 54087.36 * emsq + 31324.56 * eoc
-                else:
-                    g520 = 1464.74 - 4664.75 * em + 3763.64 * emsq
-            if (em < 0.7):
-                g533 = - 919.2277 + 4988.61 * em - 9064.77 * emsq + 5542.21 * eoc
-                g521 = - 822.71072 + 4568.6173 * em - 8491.4146 * emsq + 5337.524 * eoc
-                g532 = - 853.666 + 4690.25 * em - 8624.77 * emsq + 5341.4 * eoc
-            else:
-                g533 = - 37995.78 + 161616.52 * em - 229838.2 * emsq + 109377.94 * eoc
-                g521 = - 51752.104 + 218913.95 * em - 309468.16 * emsq + 146349.42 * eoc
-                g532 = - 40023.88 + 170470.89 * em - 242699.48 * emsq + 115605.82 * eoc
-            sini2 = sinim * sinim
-            f220 = 0.75 * (1.0 + 2.0 * cosim + cosisq)
-            f221 = 1.5 * sini2
-            f321 = 1.875 * sinim * (1.0 - 2.0 * cosim - 3.0 * cosisq)
-            f322 = - 1.875 * sinim * (1.0 + 2.0 * cosim - 3.0 * cosisq)
-            f441 = 35.0 * sini2 * f220
-            f442 = 39.375 * sini2 * sini2
-            f522 = 9.84375 * sinim * (sini2 * (1.0 - 2.0 * cosim - 5.0 * cosisq) + 0.33333333 * (- 2.0 + 4.0 * cosim + 6.0 * cosisq))
-            f523 = sinim * (4.92187512 * sini2 * (- 2.0 - 4.0 * cosim + 10.0 * cosisq) + 6.56250012 * (1.0 + 2.0 * cosim - 3.0 * cosisq))
-            f542 = 29.53125 * sinim * (2.0 - 8.0 * cosim + cosisq * (- 12.0 + 8.0 * cosim + 10.0 * cosisq))
-            f543 = 29.53125 * sinim * (- 2.0 - 8.0 * cosim + cosisq * (12.0 + 8.0 * cosim - 10.0 * cosisq))
-            xno2 = nm * nm
-            ainv2 = aonv * aonv
-            temp1 = 3.0 * xno2 * ainv2
-            temp = temp1 * root22
-            d2201 = temp * f220 * g201
-            d2211 = temp * f221 * g211
-            temp1 = temp1 * aonv
-            temp = temp1 * root32
-            d3210 = temp * f321 * g310
-            d3222 = temp * f322 * g322
-            temp1 = temp1 * aonv
-            temp = 2.0 * temp1 * root44
-            d4410 = temp * f441 * g410
-            d4422 = temp * f442 * g422
-            temp1 = temp1 * aonv
-            temp = temp1 * root52
-            d5220 = temp * f522 * g520
-            d5232 = temp * f523 * g532
-            temp = 2.0 * temp1 * root54
-            d5421 = temp * f542 * g521
-            d5433 = temp * f543 * g533
-            xlamo = math.fmod(mo + nodeo + nodeo - theta - theta, twopi)
-            xfact = mdot + dmdt + 2.0 * (nodedot + dnodt - rptim) - no
-            em = emo
-            emsq = emsqo
-        # ---------------- synchronous resonance terms --------------
-        if (irez == 1):
-            g200 = 1.0 + emsq * (- 2.5 + 0.8125 * emsq)
-            g310 = 1.0 + 2.0 * emsq
-            g300 = 1.0 + emsq * (- 6.0 + 6.60937 * emsq)
-            f220 = 0.75 * (1.0 + cosim) * (1.0 + cosim)
-            f311 = 0.9375 * sinim * sinim * (1.0 + 3.0 * cosim) - 0.75 * (1.0 + cosim)
-            f330 = 1.0 + cosim
-            f330 = 1.875 * f330 * f330 * f330
-            del1 = 3.0 * nm * nm * aonv * aonv
-            del2 = 2.0 * del1 * f220 * g200 * q22
-            del3 = 3.0 * del1 * f330 * g300 * q33 * aonv
-            del1 = del1 * f311 * g310 * q31 * aonv
-            xlamo = math.fmod(mo + nodeo + argpo - theta, twopi)
-            xfact = mdot + xpidot - rptim + dmdt + domdt + dnodt - no
-        # ------------ for sgp4, initialize the integrator ----------
-        xli = xlamo
-        xni = no
-        atime = 0.0
-        nm = no + dndt
-
-
-    return em, argpm, inclm, mm, nm, nodem, irez, atime, d2201, d2211, d3210,\
-           d3222, d4410, d4422, d5220, d5232, d5421, d5433, dedt, didt, dmdt,\
-           dndt, dnodt, domdt, del1, del2, del3, xfact, xlamo, xli, xni
-
 # -----------------------------------------------------------------------------
 #
 #                              procedure sgp4init
@@ -1153,6 +862,919 @@ def initl(xke=None, j2=None, ecco=None, epoch=None, inclo=None, no_kozai=None,
 
     return method, ainv, ao, con41, con42, cosio, cosio2, eccsq, omeosq, posq,\
         rp, rteosq, sinio, gsto, no_unkozai
+
+# -----------------------------------------------------------------------------
+#
+#                            procedure dsinit
+#
+#   this procedure provides deep space contributions to mean motion dot due
+#     to geopotential resonance with half day and one day orbits.
+#
+# Author:
+#   Jeff Beck
+#   beckja@alumni.lehigh.edu
+#   1.0 (aug 7, 2006) - update for paper dav
+# original comments from Vallado C++ version:
+#   author        : david vallado                  719-573-2600   28 jun 2005
+#
+#   inputs        :
+#     Cosim, Sinim-
+#     Emsq        - Eccentricity squared
+#     Argpo       - Argument of Perigee
+#     S1, S2, S3, S4, S5      -
+#     Ss1, Ss2, Ss3, Ss4, Ss5 -
+#     Sz1, Sz3, Sz11, Sz13, Sz21, Sz23, Sz31, Sz33 -
+#     T           - Time
+#     Tc          -
+#     GSTo        - Greenwich sidereal time                   rad
+#     Mo          - Mean Anomaly
+#     MDot        - Mean Anomaly dot (rate)
+#     No          - Mean Motion
+#     nodeo       - right ascension of ascending node
+#     nodeDot     - right ascension of ascending node dot (rate)
+#     XPIDOT      -
+#     Z1, Z3, Z11, Z13, Z21, Z23, Z31, Z33 -
+#     Eccm        - Eccentricity
+#     Argpm       - Argument of perigee
+#     Inclm       - Inclination
+#     Mm          - Mean Anomaly
+#     Xn          - Mean Motion
+#     nodem       - right ascension of ascending node
+#
+#   outputs       :
+#     em          - eccentricity
+#     argpm       - argument of perigee
+#     inclm       - inclination
+#     mm          - mean anomaly
+#     nm          - mean motion
+#     nodem       - right ascension of ascending node
+#     irez        - flag for resonance           0-none, 1-one day, 2-half day
+#     atime       -
+#     d2201, d2211, d3210, d3222, d4410, d4422, d5220, d5232, d5421, d5433    -
+#     dedt        -
+#     didt        -
+#     dmdt        -
+#     dndt        -
+#     dnodt       -
+#     domdt       -
+#     del1, del2, del3        -
+#     Ses  , Sghl , Sghs , Sgs  , Shl  , Shs  , Sis  , Sls
+#     theta       -
+#     xfact       -
+#     xlamo       -
+#     xli         -
+#     xni
+#
+#   locals        :
+#     ainv2       -
+#     aonv        -
+#     cosisq      -
+#     eoc         -
+#     f220, f221, f311, f321, f322, f330, f441, f442, f522, f523, f542, f543  -
+#     g200, g201, g211, g300, g310, g322, g410, g422, g520, g521, g532, g533  -
+#     sini2       -
+#     temp        -
+#     temp1       -
+#     theta       -
+#     xno2        -
+#
+#   coupling      :
+#     getgravc
+#
+#   references    :
+#     hoots, roehrich, norad spacetrack report #3 1980
+#     hoots, norad spacetrack report #6 1986
+#     hoots, schumacher and glover 2004
+#     vallado, crawford, hujsak, kelso  2006
+#  ----------------------------------------------------------------------------
+
+def dsinit(xke=None, cosim=None, emsq=None, argpo=None, s1=None, s2=None,
+           s3=None, s4=None, s5=None, sinim=None, ss1=None, ss2=None,
+           ss3=None, ss4=None, ss5=None, sz1=None, sz3=None, sz11=None,
+           sz13=None, sz21=None, sz23=None, sz31=None, sz33=None, t=None,
+           tc=None, gsto=None, mo=None, mdot=None, no=None, nodeo=None,
+           nodedot=None, xpidot=None, z1=None, z3=None, z11=None, z13=None,
+           z21=None, z23=None, z31=None, z33=None, em=None, argpm=None,
+           inclm=None, mm=None, nm=None, nodem=None, ecco=None, eccsq=None):
+
+    # --------------------- local variables ------------------------
+    aonv = 0.0
+    q22 = 1.7891679e-06
+    q31 = 2.1460748e-06
+    q33 = 2.2123015e-07
+    root22 = 1.7891679e-06
+    root44 = 7.3636953e-09
+    root54 = 2.1765803e-09
+    rptim = 0.0043752690880113
+    root32 = 3.7393792e-07
+    root52 = 1.1428639e-07
+    x2o3 = 2.0 / 3.0
+    znl = 0.00015835218
+    zns = 1.19459e-05
+    # sgp4fix identify constants and allow alternate values
+    # sgp4fix no longer needed, pass xke in
+    # global tumin mu re xke j2 j3 j4 j3oj2
+
+    # -------------------- deep space initialization ------------
+    irez = 0
+    if ((nm < 0.0052359877) and (nm > 0.0034906585)):
+        irez = 1
+
+    if ((nm >= 0.00826) and (nm <= 0.00924) and (em >= 0.5)):
+        irez = 2
+
+    d2201 = 0
+    d2211 = 0
+    d3210 = 0
+    d3222 = 0
+    d4410 = 0
+    d4422 = 0
+    d5220 = 0
+    d5232 = 0
+    d5421 = 0
+    d5433 = 0
+    del1 = 0
+    del2 = 0
+    del3 = 0
+    atime = 0
+    xfact = 0
+    xlamo = 0
+    xli = 0
+    xni = 0
+    # ------------------------ do solar terms -------------------
+    ses = ss1 * zns * ss5
+    sis = ss2 * zns * (sz11 + sz13)
+    sls = - zns * ss3 * (sz1 + sz3 - 14.0 - 6.0 * emsq)
+    sghs = ss4 * zns * (sz31 + sz33 - 6.0)
+    shs = - zns * ss2 * (sz21 + sz23)
+    # sgp4fix for 180 deg incl
+    if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
+        shs = 0.0
+
+    if (sinim != 0.0):
+        shs = shs / sinim
+
+    sgs = sghs - cosim * shs
+    # ------------------------- do lunar terms ------------------
+    dedt = ses + s1 * znl * s5
+    didt = sis + s2 * znl * (z11 + z13)
+    dmdt = sls - znl * s3 * (z1 + z3 - 14.0 - 6.0 * emsq)
+    sghl = s4 * znl * (z31 + z33 - 6.0)
+    shll = - znl * s2 * (z21 + z23)
+    # sgp4fix for 180 deg incl
+    if ((inclm < 0.052359877) or (inclm > math.pi - 0.052359877)):
+        shll = 0.0
+
+    domdt = sgs + sghl
+    dnodt = shs
+    if (sinim != 0.0):
+        domdt = domdt - cosim / sinim * shll
+        dnodt = dnodt + shll / sinim
+
+    # ----------- calculate deep space resonance effects --------
+    dndt = 0.0
+    theta = math.fmod(gsto + tc * rptim, twopi)
+    em = em + dedt * t
+    inclm = inclm + didt * t
+    argpm = argpm + domdt * t
+    nodem = nodem + dnodt * t
+    mm = mm + dmdt * t
+    #   sgp4fix for negative inclinations
+    #   the following if statement should be commented out
+    # if (inclm < 0.0)
+    #  {
+    #    inclm  = -inclm;
+    #    argpm  = argpm - pi;
+    #    nodem = nodem + pi;
+    #  }
+
+    # - update resonances : numerical (euler-maclaurin) integration -
+    # ------------------------- epoch restart ----------------------
+    #   sgp4fix for propagator problems
+    #   the following integration works for negative time steps and periods
+    #   the specific changes are unknown because the original code was so convoluted
+
+    # -------------- initialize the resonance terms -------------
+    if (irez != 0):
+        aonv = (nm / xke) ** x2o3
+        # ---------- geopotential resonance for 12 hour orbits ------
+        if (irez == 2):
+            cosisq = cosim * cosim
+            emo = em
+            em = ecco
+            emsqo = emsq
+            emsq = eccsq
+            eoc = em * emsq
+            g201 = - 0.306 - (em - 0.64) * 0.44
+            if (em <= 0.65):
+                g211 = 3.616 - 13.247 * em + 16.29 * emsq
+                g310 = - 19.302 + 117.39 * em - 228.419 * emsq + 156.591 * eoc
+                g322 = - 18.9068 + 109.7927 * em - 214.6334 * emsq + 146.5816 * eoc
+                g410 = - 41.122 + 242.694 * em - 471.094 * emsq + 313.953 * eoc
+                g422 = - 146.407 + 841.88 * em - 1629.014 * emsq + 1083.435 * eoc
+                g520 = - 532.114 + 3017.977 * em - 5740.032 * emsq + 3708.276 * eoc
+            else:
+                g211 = - 72.099 + 331.819 * em - 508.738 * emsq + 266.724 * eoc
+                g310 = - 346.844 + 1582.851 * em - 2415.925 * emsq + 1246.113 * eoc
+                g322 = - 342.585 + 1554.908 * em - 2366.899 * emsq + 1215.972 * eoc
+                g410 = - 1052.797 + 4758.686 * em - 7193.992 * emsq + 3651.957 * eoc
+                g422 = - 3581.69 + 16178.11 * em - 24462.77 * emsq + 12422.52 * eoc
+                if (em > 0.715):
+                    g520 = - 5149.66 + 29936.92 * em - 54087.36 * emsq + 31324.56 * eoc
+                else:
+                    g520 = 1464.74 - 4664.75 * em + 3763.64 * emsq
+            if (em < 0.7):
+                g533 = - 919.2277 + 4988.61 * em - 9064.77 * emsq + 5542.21 * eoc
+                g521 = - 822.71072 + 4568.6173 * em - 8491.4146 * emsq + 5337.524 * eoc
+                g532 = - 853.666 + 4690.25 * em - 8624.77 * emsq + 5341.4 * eoc
+            else:
+                g533 = - 37995.78 + 161616.52 * em - 229838.2 * emsq + 109377.94 * eoc
+                g521 = - 51752.104 + 218913.95 * em - 309468.16 * emsq + 146349.42 * eoc
+                g532 = - 40023.88 + 170470.89 * em - 242699.48 * emsq + 115605.82 * eoc
+            sini2 = sinim * sinim
+            f220 = 0.75 * (1.0 + 2.0 * cosim + cosisq)
+            f221 = 1.5 * sini2
+            f321 = 1.875 * sinim * (1.0 - 2.0 * cosim - 3.0 * cosisq)
+            f322 = - 1.875 * sinim * (1.0 + 2.0 * cosim - 3.0 * cosisq)
+            f441 = 35.0 * sini2 * f220
+            f442 = 39.375 * sini2 * sini2
+            f522 = 9.84375 * sinim * (sini2 * (1.0 - 2.0 * cosim - 5.0 * cosisq) + 0.33333333 * (- 2.0 + 4.0 * cosim + 6.0 * cosisq))
+            f523 = sinim * (4.92187512 * sini2 * (- 2.0 - 4.0 * cosim + 10.0 * cosisq) + 6.56250012 * (1.0 + 2.0 * cosim - 3.0 * cosisq))
+            f542 = 29.53125 * sinim * (2.0 - 8.0 * cosim + cosisq * (- 12.0 + 8.0 * cosim + 10.0 * cosisq))
+            f543 = 29.53125 * sinim * (- 2.0 - 8.0 * cosim + cosisq * (12.0 + 8.0 * cosim - 10.0 * cosisq))
+            xno2 = nm * nm
+            ainv2 = aonv * aonv
+            temp1 = 3.0 * xno2 * ainv2
+            temp = temp1 * root22
+            d2201 = temp * f220 * g201
+            d2211 = temp * f221 * g211
+            temp1 = temp1 * aonv
+            temp = temp1 * root32
+            d3210 = temp * f321 * g310
+            d3222 = temp * f322 * g322
+            temp1 = temp1 * aonv
+            temp = 2.0 * temp1 * root44
+            d4410 = temp * f441 * g410
+            d4422 = temp * f442 * g422
+            temp1 = temp1 * aonv
+            temp = temp1 * root52
+            d5220 = temp * f522 * g520
+            d5232 = temp * f523 * g532
+            temp = 2.0 * temp1 * root54
+            d5421 = temp * f542 * g521
+            d5433 = temp * f543 * g533
+            xlamo = math.fmod(mo + nodeo + nodeo - theta - theta, twopi)
+            xfact = mdot + dmdt + 2.0 * (nodedot + dnodt - rptim) - no
+            em = emo
+            emsq = emsqo
+        # ---------------- synchronous resonance terms --------------
+        if (irez == 1):
+            g200 = 1.0 + emsq * (- 2.5 + 0.8125 * emsq)
+            g310 = 1.0 + 2.0 * emsq
+            g300 = 1.0 + emsq * (- 6.0 + 6.60937 * emsq)
+            f220 = 0.75 * (1.0 + cosim) * (1.0 + cosim)
+            f311 = 0.9375 * sinim * sinim * (1.0 + 3.0 * cosim) - 0.75 * (1.0 + cosim)
+            f330 = 1.0 + cosim
+            f330 = 1.875 * f330 * f330 * f330
+            del1 = 3.0 * nm * nm * aonv * aonv
+            del2 = 2.0 * del1 * f220 * g200 * q22
+            del3 = 3.0 * del1 * f330 * g300 * q33 * aonv
+            del1 = del1 * f311 * g310 * q31 * aonv
+            xlamo = math.fmod(mo + nodeo + argpo - theta, twopi)
+            xfact = mdot + xpidot - rptim + dmdt + domdt + dnodt - no
+        # ------------ for sgp4, initialize the integrator ----------
+        xli = xlamo
+        xni = no
+        atime = 0.0
+        nm = no + dndt
+
+
+    return em, argpm, inclm, mm, nm, nodem, irez, atime, d2201, d2211, d3210,\
+           d3222, d4410, d4422, d5220, d5232, d5421, d5433, dedt, didt, dmdt,\
+           dndt, dnodt, domdt, del1, del2, del3, xfact, xlamo, xli, xni
+
+# -----------------------------------------------------------------------------
+#
+#                            procedure dspace
+#
+#   this procedure provides deep space contributions to mean elements for
+#     perturbing third body.  these effects have been averaged over one
+#     revolution of the sun and moon.  for earth resonance effects, the
+#     effects have been averaged over no revolutions of the satellite.
+#     (mean motion)
+#
+# Author:
+#   Jeff Beck
+#   beckja@alumni.lehigh.edu
+#   1.0 (aug 6, 2006) - update for paper dav
+# original comments from Vallado C++ version:
+#   author        : david vallado                  719-573-2600   28 jun 2005
+#
+#   inputs        :
+#     d2201, d2211, d3210, d3222, d4410, d4422, d5220, d5232, d5421, d5433       -
+#     dedt        -
+#     del1, del2, del3  -
+#     didt        -
+#     dmdt        -
+#     dnodt       -
+#     domdt       -
+#     irez        - flag for resonance           0-none, 1-one day, 2-half day
+#     argpo       - argument of perigee
+#     argpdot     - argument of perigee dot (rate)
+#     t           - time
+#     tc          -
+#     gsto        - gst
+#     xfact       -
+#     xlamo       -
+#     no          - mean motion
+#     atime       -
+#     em          - eccentricity
+#     ft          -
+#     argpm       - argument of perigee
+#     inclm       - inclination
+#     xli         -
+#     mm          - mean anomaly
+#     xni         - mean motion
+#     nodem      - right ascension of ascending node
+#
+#   outputs       :
+#     atime       -
+#     em          - eccentricity
+#     argpm       - argument of perigee
+#     inclm       - inclination
+#     xli         -
+#     mm          - mean anomaly
+#     xni         -
+#     nodem      - right ascension of ascending node
+#     dndt        -
+#     nm          - mean motion
+#
+#   locals        :
+#     delt        -
+#     ft          -
+#     theta       -
+#     x2li        -
+#     x2omi       -
+#     xl          -
+#     xldot       -
+#     xnddt       -
+#     xndt        -
+#     xomi        -
+#
+#   coupling      :
+#     none        -
+#
+#   references    :
+#     hoots, roehrich, norad spacetrack report #3 1980
+#     hoots, norad spacetrack report #6 1986
+#     hoots, schumacher and glover 2004
+#     vallado, crawford, hujsak, kelso  2006
+#  ----------------------------------------------------------------------------*/
+
+def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
+           d4410=None, d4422=None, d5220=None, d5232=None,
+           d5421=None, d5433=None, dedt=None, del1=None, del2=None,
+           del3=None, didt=None, dmdt=None, dnodt=None, domdt=None,
+           irez=None, argpo=None, argpdot=None, t=None, tc=None,
+           gsto=None, xfact=None, xlamo=None, no=None, atime=None,
+           em=None, argpm=None, inclm=None, xli=None, mm=None,
+           xni=None, nodem=None, nm=None):
+    fasx2 = 0.13130908
+    fasx4 = 2.8843198
+    fasx6 = 0.37448087
+    g22 = 5.7686396
+    g32 = 0.95240898
+    g44 = 1.8014998
+    g52 = 1.050833
+    g54 = 4.4108898
+    rptim = 0.0043752690880113
+    stepp = 720.0
+    stepn = - 720.0
+    step2 = 259200.0
+    # ----------- calculate deep space resonance effects -----------
+    dndt = 0.0
+    theta = math.fmod(gsto + tc * rptim, twopi)
+    em = em + dedt * t
+    inclm = inclm + didt * t
+    argpm = argpm + domdt * t
+    nodem = nodem + dnodt * t
+    mm = mm + dmdt * t
+    #   sgp4fix for negative inclinations
+    #   the following if statement should be commented out
+    #  if (inclm < 0.0)
+    # {
+    #    inclm = -inclm
+    #    argpm = argpm - pi
+    #    nodem = nodem + pi
+    #  }
+
+    # - update resonances : numerical (euler-maclaurin) integration -
+    # ------------------------- epoch restart ----------------------
+
+    #   sgp4fix for propagator problems
+    #   the following integration works for negative time steps and periods
+    #   the specific changes are unknown because the original code was so convoluted
+
+    # sgp4fix take out atime = 0.0 and fix for faster operation
+    ft = 0.0
+    if (irez != 0):
+        # sgp4fix streamline check
+        if ((atime == 0.0) or (t * atime <= 0.0) or (abs(t) < abs(atime))):
+            atime = 0.0
+            xni = no
+            xli = xlamo
+        # sgp4fix move check outside loop
+        if (t >= 0.0):
+            delt = stepp
+        else:
+            delt = stepn
+        iretn = 381
+        iret = 0
+        while (iretn == 381):
+
+            # ------------------- dot terms calculated -------------
+            # ----------- near - synchronous resonance terms -------
+            if (irez != 2):
+                xndt = (del1 * math.sin(xli - fasx2)
+                        + del2 * math.sin(2.0 * (xli - fasx4))
+                        + del3 * math.sin(3.0 * (xli - fasx6)))
+                xldot = xni + xfact
+                xnddt = (del1 * math.cos(xli - fasx2)
+                         + 2.0 * del2 * math.cos(2.0 * (xli - fasx4))
+                         + 3.0 * del3 * math.cos(3.0 * (xli - fasx6)))
+                xnddt = xnddt * xldot
+            else:
+                # --------- near - half-day resonance terms --------
+                xomi = argpo + argpdot * atime
+                x2omi = xomi + xomi
+                x2li = xli + xli
+                xndt = (d2201 * math.sin(x2omi + xli - g22)
+                        + d2211 * math.sin(xli - g22)
+                        + d3210 * math.sin(xomi + xli - g32)
+                        + d3222 * math.sin(- xomi + xli - g32)
+                        + d4410 * math.sin(x2omi + x2li - g44)
+                        + d4422 * math.sin(x2li - g44)
+                        + d5220 * math.sin(xomi + xli - g52)
+                        + d5232 * math.sin(- xomi + xli - g52)
+                        + d5421 * math.sin(xomi + x2li - g54)
+                        + d5433 * math.sin(- xomi + x2li - g54))
+                xldot = xni + xfact
+                xnddt = (d2201 * math.cos(x2omi + xli - g22)
+                         + d2211 * math.cos(xli - g22)
+                         + d3210 * math.cos(xomi + xli - g32)
+                         + d3222 * math.cos(- xomi + xli - g32)
+                         + d5220 * math.cos(xomi + xli - g52)
+                         + d5232 * math.cos(- xomi + xli - g52)
+                         + 2.0 * (d4410 * math.cos(x2omi + x2li - g44)
+                                  + d4422 * math.cos(x2li - g44)
+                                  + d5421 * math.cos(xomi + x2li - g54)
+                                  + d5433 * math.cos(- xomi + x2li - g54)))
+                xnddt = xnddt * xldot
+            # ----------------------- integrator -------------------
+            # sgp4fix move end checks to end of routine
+            if (abs(t - atime) >= stepp):
+                iret = 0
+                iretn = 381
+            else:
+                ft = t - atime
+                iretn = 0
+            if (iretn == 381):
+                xli = xli + xldot * delt + xndt * step2
+                xni = xni + xndt * delt + xnddt * step2
+                atime = atime + delt
+
+        nm = xni + xndt * ft + xnddt * ft * ft * 0.5
+        xl = xli + xldot * ft + xndt * ft * ft * 0.5
+        if (irez != 1):
+            mm = xl - 2.0 * nodem + 2.0 * theta
+            dndt = nm - no
+        else:
+            mm = xl - nodem - argpm + theta
+            dndt = nm - no
+        nm = no + dndt
+
+    return atime, em, argpm, inclm, xli, mm, xni, nodem, dndt, nm
+
+
+#  -----------------------------------------------------------------------------
+#
+#                            procedure dpper
+#
+#   this procedure provides deep space long period periodic contributions
+#     to the mean elements.  by design, these periodics are zero at epoch.
+#     this used to be dscom which included initialization, but it's really a
+#     recurring function.
+#
+# Author:
+#   Jeff Beck
+#   beckja@alumni.lehigh.edu
+#   1.0 (aug 7, 2006) - update for paper dav
+# original comments from Vallado C++ version:
+#   author        : david vallado                  719-573-2600   28 jun 2005
+#
+#   inputs        :
+#     e3          -
+#     ee2         -
+#     peo         -
+#     pgho        -
+#     pho         -
+#     pinco       -
+#     plo         -
+#     se2 , se3 , Sgh2, Sgh3, Sgh4, Sh2, Sh3, Si2, Si3, Sl2, Sl3, Sl4 -
+#     t           -
+#     xh2, xh3, xi2, xi3, xl2, xl3, xl4 -
+#     zmol        -
+#     zmos        -
+#     ep          - eccentricity                           0.0 - 1.0
+#     inclo       - inclination - needed for lyddane modification
+#     nodep       - right ascension of ascending node
+#     argpp       - argument of perigee
+#     mp          - mean anomaly
+#
+#   outputs       :
+#     ep          - eccentricity                           0.0 - 1.0
+#     inclp       - inclination
+#     nodep       - right ascension of ascending node
+#     argpp       - argument of perigee
+#     mp          - mean anomaly
+#
+#   locals        :
+#     alfdp       -
+#     betdp       -
+#     cosip  , sinip  , cosop  , sinop  ,
+#     dalf        -
+#     dbet        -
+#     dls         -
+#     f2, f3      -
+#     pe          -
+#     pgh         -
+#     ph          -
+#     pinc        -
+#     pl          -
+#     sel   , ses   , sghl  , sghs  , shl   , shs   , sil   , sinzf , sis   ,
+#     sll   , sls
+#     xls         -
+#     xnoh        -
+#     zf          -
+#     zm          -
+#
+#   coupling      :
+#     none.
+#
+#   references    :
+#     hoots, roehrich, norad spacetrack report #3 1980
+#     hoots, norad spacetrack report #6 1986
+#     hoots, schumacher and glover 2004
+#     vallado, crawford, hujsak, kelso  2006
+#  ----------------------------------------------------------------------------
+
+def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
+          pinco=None, plo=None, se2=None, se3=None, sgh2=None,
+          sgh3=None, sgh4=None, sh2=None, sh3=None, si2=None,
+          si3=None, sl2=None, sl3=None, sl4=None, t=None,
+          xgh2=None, xgh3=None, xgh4=None, xh2=None, xh3=None,
+          xi2=None, xi3=None, xl2=None, xl3=None, xl4=None,
+          zmol=None, zmos=None, inclo=None, init=None, ep=None,
+          inclp=None, nodep=None, argpp=None, mp=None, opsmode=None):
+    # change to variable passed in
+    # ---------------------- constants -----------------------------
+    zns = 1.19459e-05
+    zes = 0.01675
+    znl = 0.00015835218
+    zel = 0.0549
+    # --------------- calculate time varying periodics -----------
+    zm = zmos + zns * t
+    # be sure that the initial call has time set to zero
+    if (init == 'y'):
+        zm = zmos
+
+    zf = zm + 2.0 * zes * math.sin(zm)
+    sinzf = math.sin(zf)
+    f2 = 0.5 * sinzf * sinzf - 0.25
+    f3 = - 0.5 * sinzf * math.cos(zf)
+    ses = se2 * f2 + se3 * f3
+    sis = si2 * f2 + si3 * f3
+    sls = sl2 * f2 + sl3 * f3 + sl4 * sinzf
+    sghs = sgh2 * f2 + sgh3 * f3 + sgh4 * sinzf
+    shs = sh2 * f2 + sh3 * f3
+    zm = zmol + znl * t
+    if (init == 'y'):
+        zm = zmol
+
+    zf = zm + 2.0 * zel * math.sin(zm)
+    sinzf = math.sin(zf)
+    f2 = 0.5 * sinzf * sinzf - 0.25
+    f3 = - 0.5 * sinzf * math.cos(zf)
+    sel = ee2 * f2 + e3 * f3
+    sil = xi2 * f2 + xi3 * f3
+    sll = xl2 * f2 + xl3 * f3 + xl4 * sinzf
+    sghl = xgh2 * f2 + xgh3 * f3 + xgh4 * sinzf
+    shll = xh2 * f2 + xh3 * f3
+    pe = ses + sel
+    pinc = sis + sil
+    pl = sls + sll
+    pgh = sghs + sghl
+    ph = shs + shll
+    if (init == 'n'):
+        #  0.2 rad = 11.45916 deg
+        pe = pe - peo
+        pinc = pinc - pinco
+        pl = pl - plo
+        pgh = pgh - pgho
+        ph = ph - pho
+        inclp = inclp + pinc
+        ep = ep + pe
+        sinip = math.sin(inclp)
+        cosip = math.cos(inclp)
+        # ----------------- apply periodics directly ------------
+        #  sgp4fix for lyddane choice
+        #  strn3 used original inclination - this is technically feasible
+        #  gsfc used perturbed inclination - also technically feasible
+        #  probably best to readjust the 0.2 limit value and limit discontinuity
+        #  use next line for original strn3 approach and original inclination
+        #  if (inclo >= 0.2)
+        #  use next line for gsfc version and perturbed inclination
+        if (inclp >= 0.2):
+            ph = ph / sinip
+            pgh = pgh - cosip * ph
+            argpp = argpp + pgh
+            nodep = nodep + ph
+            mp = mp + pl
+        else:
+            # ---- apply periodics with lyddane modification ----
+            sinop = math.sin(nodep)
+            cosop = math.cos(nodep)
+            alfdp = sinip * sinop
+            betdp = sinip * cosop
+            dalf = ph * cosop + pinc * cosip * sinop
+            dbet = - ph * sinop + pinc * cosip * cosop
+            alfdp = alfdp + dalf
+            betdp = betdp + dbet
+            nodep = math.fmod(nodep, twopi)
+            # sgp4fix for afspc written intrinsic functions
+            # nodep used without a trigonometric function ahead
+            if ((nodep < 0.0) and (opsmode == 'a')):
+                nodep = nodep + twopi
+            xls = mp + argpp + cosip * nodep
+            dls = pl + pgh - pinc * nodep * sinip
+            xls = xls + dls
+            xnoh = nodep
+            nodep = math.atan2(alfdp, betdp)
+            # sgp4fix for afspc written intrinsic functions
+            # nodep used without a trigonometric function ahead
+            if ((nodep < 0.0) and (opsmode == 'a')):
+                nodep = nodep + twopi
+            if (abs(xnoh - nodep) > math.pi):
+                if (nodep < xnoh):
+                    nodep = nodep + twopi
+                else:
+                    nodep = nodep - twopi
+            mp = mp + pl
+            argpp = xls - mp - cosip * nodep
+
+    return ep, inclp, nodep, argpp, mp
+
+# -----------------------------------------------------------------------------
+#
+#                            procedure dscom
+#
+#   this procedure provides deep space common items used by both the secular
+#     and periodics subroutines.  input is provided as shown. this routine
+#     used to be called dpper, but the functions inside weren't well organized.
+#
+# Author:
+#   Jeff Beck
+#   beckja@alumni.lehigh.edu
+#   1.0 (aug 7, 2006) - update for paper dav
+# original comments from Vallado C++ version:
+#   author        : david vallado                  719-573-2600   28 jun 2005
+#
+#   inputs        :
+#     epoch       -
+#     ep          - eccentricity
+#     argpp       - argument of perigee
+#     tc          -
+#     inclp       - inclination
+#     nodep       - right ascension of ascending node
+#     np          - mean motion
+#
+#   outputs       :
+#     sinim  , cosim  , sinomm , cosomm , snodm  , cnodm
+#     day         -
+#     e3          -
+#     ee2         -
+#     em          - eccentricity
+#     emsq        - eccentricity squared
+#     gam         -
+#     peo         -
+#     pgho        -
+#     pho         -
+#     pinco       -
+#     plo         -
+#     rtemsq      -
+#     se2, se3         -
+#     sgh2, sgh3, sgh4        -
+#     sh2, sh3, si2, si3, sl2, sl3, sl4         -
+#     s1, s2, s3, s4, s5, s6, s7          -
+#     ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1, sz2, sz3         -
+#     sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32, sz33        -
+#     xgh2, xgh3, xgh4, xh2, xh3, xi2, xi3, xl2, xl3, xl4         -
+#     nm          - mean motion
+#     z1, z2, z3, z11, z12, z13, z21, z22, z23, z31, z32, z33         -
+#     zmol        -
+#     zmos        -
+#
+#   locals        :
+#     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10         -
+#     betasq      -
+#     cc          -
+#     ctem, stem        -
+#     x1, x2, x3, x4, x5, x6, x7, x8          -
+#     xnodce      -
+#     xnoi        -
+#     zcosg  , zsing  , zcosgl , zsingl , zcosh  , zsinh  , zcoshl , zsinhl ,
+#     zcosi  , zsini  , zcosil , zsinil ,
+#     zx          -
+#     zy          -
+#
+#   coupling      :
+#     none.
+#
+#   references    :
+#     hoots, roehrich, norad spacetrack report #3 1980
+#     hoots, norad spacetrack report #6 1986
+#     hoots, schumacher and glover 2004
+#     vallado, crawford, hujsak, kelso  2006
+#  ----------------------------------------------------------------------------*/
+def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
+
+    # -------------------------- constants -------------------------
+    zes     =  0.01675;
+    zel     =  0.05490;
+    c1ss    =  2.9864797e-6;
+    c1l     =  4.7968065e-7;
+    zsinis  =  0.39785416;
+    zcosis  =  0.91744867;
+    zcosgs  =  0.1945905;
+    zsings  = -0.98088458;
+
+    # --------------------- local variables ------------------------
+    nm     = np;
+    em     = ep;
+    snodm  = math.sin(nodep);
+    cnodm  = math.cos(nodep);
+    sinomm = math.sin(argpp);
+    cosomm = math.cos(argpp);
+    sinim  = math.sin(inclp);
+    cosim  = math.cos(inclp);
+    emsq   = em * em;
+    betasq = 1.0 - emsq;
+    rtemsq = math.sqrt(betasq);
+
+    # ----------------- initialize lunar solar terms ---------------
+    peo    = 0.0;
+    pinco  = 0.0;
+    plo    = 0.0;
+    pgho   = 0.0;
+    pho    = 0.0;
+    day    = epoch + 18261.5 + tc / 1440.0;
+    xnodce = math.fmod(4.5236020 - 9.2422029e-4 * day, twopi);
+    stem   = math.sin(xnodce);
+    ctem   = math.cos(xnodce);
+    zcosil = 0.91375164 - 0.03568096 * ctem;
+    zsinil = math.sqrt(1.0 - zcosil * zcosil);
+    zsinhl = 0.089683511 * stem / zsinil;
+    zcoshl = math.sqrt(1.0 - zsinhl * zsinhl);
+    gam    = 5.8351514 + 0.0019443680 * day;
+    zx     = 0.39785416 * stem / zsinil;
+    zy     = zcoshl * ctem + 0.91744867 * zsinhl * stem;
+    zx     = math.atan2(zx, zy);
+    zx     = gam + zx - xnodce;
+    zcosgl = math.cos(zx);
+    zsingl = math.sin(zx);
+
+    # ------------------------- do solar terms ---------------------
+    zcosg = zcosgs;
+    zsing = zsings;
+    zcosi = zcosis;
+    zsini = zsinis;
+    zcosh = cnodm;
+    zsinh = snodm;
+    cc    = c1ss;
+    xnoi  = 1.0 / nm;
+
+    for lsflg in range (2):
+        a1  =   zcosg * zcosh + zsing * zcosi * zsinh;
+        a3  =  -zsing * zcosh + zcosg * zcosi * zsinh;
+        a7  =  -zcosg * zsinh + zsing * zcosi * zcosh;
+        a8  =   zsing * zsini;
+        a9  =   zsing * zsinh + zcosg * zcosi * zcosh;
+        a10 =   zcosg * zsini;
+        a2  =   cosim * a7 + sinim * a8;
+        a4  =   cosim * a9 + sinim * a10;
+        a5  =  -sinim * a7 + cosim * a8;
+        a6  =  -sinim * a9 + cosim * a10;
+
+        x1  =  a1 * cosomm + a2 * sinomm;
+        x2  =  a3 * cosomm + a4 * sinomm;
+        x3  = -a1 * sinomm + a2 * cosomm;
+        x4  = -a3 * sinomm + a4 * cosomm;
+        x5  =  a5 * sinomm;
+        x6  =  a6 * sinomm;
+        x7  =  a5 * cosomm;
+        x8  =  a6 * cosomm;
+
+        z31 = 12.0 * x1 * x1 - 3.0 * x3 * x3;
+        z32 = 24.0 * x1 * x2 - 6.0 * x3 * x4;
+        z33 = 12.0 * x2 * x2 - 3.0 * x4 * x4;
+        z1  =  3.0 *  (a1 * a1 + a2 * a2) + z31 * emsq;
+        z2  =  6.0 *  (a1 * a3 + a2 * a4) + z32 * emsq;
+        z3  =  3.0 *  (a3 * a3 + a4 * a4) + z33 * emsq;
+        z11 = -6.0 * a1 * a5 + emsq *  (-24.0 * x1 * x7-6.0 * x3 * x5);
+        z12 = -6.0 *  (a1 * a6 + a3 * a5) + emsq * \
+            (-24.0 * (x2 * x7 + x1 * x8) - 6.0 * (x3 * x6 + x4 * x5));
+        z13 = -6.0 * a3 * a6 + emsq * (-24.0 * x2 * x8 - 6.0 * x4 * x6);
+        z21 =  6.0 * a2 * a5 + emsq * (24.0 * x1 * x5 - 6.0 * x3 * x7);
+        z22 =  6.0 *  (a4 * a5 + a2 * a6) + emsq * \
+            (24.0 * (x2 * x5 + x1 * x6) - 6.0 * (x4 * x7 + x3 * x8));
+        z23 =  6.0 * a4 * a6 + emsq * (24.0 * x2 * x6 - 6.0 * x4 * x8);
+        z1  = z1 + z1 + betasq * z31;
+        z2  = z2 + z2 + betasq * z32;
+        z3  = z3 + z3 + betasq * z33;
+        s3  = cc * xnoi;
+        s2  = -0.5 * s3 / rtemsq;
+        s4  = s3 * rtemsq;
+        s1  = -15.0 * em * s4;
+        s5  = x1 * x3 + x2 * x4;
+        s6  = x2 * x3 + x1 * x4;
+        s7  = x2 * x4 - x1 * x3;
+
+        # ----------------------- do lunar terms -------------------
+        if (lsflg == 0):
+            ss1   = s1;
+            ss2   = s2;
+            ss3   = s3;
+            ss4   = s4;
+            ss5   = s5;
+            ss6   = s6;
+            ss7   = s7;
+            sz1   = z1;
+            sz2   = z2;
+            sz3   = z3;
+            sz11  = z11;
+            sz12  = z12;
+            sz13  = z13;
+            sz21  = z21;
+            sz22  = z22;
+            sz23  = z23;
+            sz31  = z31;
+            sz32  = z32;
+            sz33  = z33;
+            zcosg = zcosgl;
+            zsing = zsingl;
+            zcosi = zcosil;
+            zsini = zsinil;
+            zcosh = zcoshl * cnodm + zsinhl * snodm;
+            zsinh = snodm * zcoshl - cnodm * zsinhl;
+            cc    = c1l;
+
+    zmol = math.fmod(4.7199672 + 0.22997150  * day - gam, twopi);
+    zmos = math.fmod(6.2565837 + 0.017201977 * day, twopi);
+
+    # ------------------------ do solar terms ----------------------
+    se2  =   2.0 * ss1 * ss6;
+    se3  =   2.0 * ss1 * ss7;
+    si2  =   2.0 * ss2 * sz12;
+    si3  =   2.0 * ss2 * (sz13 - sz11);
+    sl2  =  -2.0 * ss3 * sz2;
+    sl3  =  -2.0 * ss3 * (sz3 - sz1);
+    sl4  =  -2.0 * ss3 * (-21.0 - 9.0 * emsq) * zes;
+    sgh2 =   2.0 * ss4 * sz32;
+    sgh3 =   2.0 * ss4 * (sz33 - sz31);
+    sgh4 = -18.0 * ss4 * zes;
+    sh2  =  -2.0 * ss2 * sz22;
+    sh3  =  -2.0 * ss2 * (sz23 - sz21);
+
+    # ------------------------ do lunar terms ----------------------
+    ee2  =   2.0 * s1 * s6;
+    e3   =   2.0 * s1 * s7;
+    xi2  =   2.0 * s2 * z12;
+    xi3  =   2.0 * s2 * (z13 - z11);
+    xl2  =  -2.0 * s3 * z2;
+    xl3  =  -2.0 * s3 * (z3 - z1);
+    xl4  =  -2.0 * s3 * (-21.0 - 9.0 * emsq) * zel;
+    xgh2 =   2.0 * s4 * z32;
+    xgh3 =   2.0 * s4 * (z33 - z31);
+    xgh4 = -18.0 * s4 * zel;
+    xh2  =  -2.0 * s2 * z22;
+    xh3  =  -2.0 * s2 * (z23 - z21);
+
+    return sinim,cosim,sinomm,cosomm,snodm,cnodm,day,e3,ee2,em,emsq,gam,\
+            peo,pgho,pho,pinco,plo,rtemsq,se2,se3,sgh2,sgh3,sgh4,sh2,sh3,si2,\
+            si3,sl2,sl3,sl4,s1,s2,s3,s4,s5,s6,s7,ss1,ss2,ss3,ss4,ss5,ss6,ss7,\
+            sz1,sz2,sz3,sz11,sz12,sz13,sz21,sz22,sz23,sz31,sz32,sz33,xgh2,xgh3,\
+            xgh4,xh2,xh3,xi2,xi3,xl2,xl3,xl4,nm,z1,z2,z3,z11,z12,z13,z21,z22,\
+            z23,z31,z32,z33,zmol,zmos
 
 
 # ------------------------------------------------------------------------------
@@ -7329,6 +7951,98 @@ def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
             los = False
     return los
 
+# ---------------------------------------------------------------------------
+#
+#                           function site
+#
+#  this function finds the position and velocity vectors for a site.  the
+#    answer is returned in the geocentric equatorial (ecef) coordinate system.
+#    note that the velocity is zero because the coordinate system is fixed to
+#    the earth.
+#
+#  author        : david vallado                  719-573-2600   25 jun 2002
+#
+#  revisions
+#    vallado     - fix velocity vector                           23 jul 2002
+#
+#  inputs          description                    range / units
+#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
+#    lon         - longitude of site              -2pi to 2pi rad
+#    alt         - altitude                       km
+#
+#  outputs       :
+#    rs          - ecef site position vector      km
+#    vs          - ecef site velocity vector      km/s
+#
+#  locals        :
+#    sinlat      - variable containing  sin(lat)  rad
+#    temp        - temporary real value
+#    rdel        - rdel component of site vector  km
+#    rk          - rk component of site vector    km
+#    cearth      -
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    vallado       2001, 404-407, alg 47, ex 7-1
+#
+# [rs, vs] = site (latgd, lon, alt)
+# -----------------------------------------------------------------------------
+
+
+def site(latgd: float, lon: float, alt: float):
+    """this function finds the position and velocity vectors for a site.  the
+    answer is returned in the geocentric equatorial (ecef) coordinate system.
+    note that the velocity is zero because the coordinate system is fixed to
+    the earth.
+
+    Parameters
+    ----------
+    latgd : float
+        geodetic latitude: -pi/2 to pi/2 rad
+    lon : float
+        longitude: -2pi to 2pi rad
+    alt : float
+        altitude: km
+
+    Returns
+    -------
+    rs : ndarray
+        ecef site position vector: km
+    vs : ndarray
+        ecef site velocity vector: km/s
+    """
+
+    # EGM-08 constants used here
+    flat = 1.0/298.257223563
+    earthrot = 7.292115e-5     # rad/s  old 7.29211514670698e-05
+    mum = 3.986004415e14   # m3/s2
+    # derived constants from the base values
+    eccearth = math.sqrt(2.0*flat - flat**2)
+    eccearthsqrd = eccearth**2
+    # -------------------------  implementation   -----------------
+    sinlat = math.sin((latgd))
+
+    # ------  find rdel and rk components of site vector  ---------
+    cearth = re / math.sqrt(1.0 - (eccearthsqrd*sinlat*sinlat))
+    rdel = (cearth + alt)*math.cos((latgd))
+    rk = ((1.0-eccearthsqrd)*cearth + alt)*sinlat
+
+    # ---------------  find site position vector  -----------------
+    rs = np.zeros((3))
+    rs[0] = rdel * math.cos((lon))
+    rs[1] = rdel * math.sin((lon))
+    rs[2] = rk
+    rs = rs.T
+
+    # ---------------  find site velocity vector  -----------------
+    #ome = [0.0 0.0 omegaearth]
+    #[vs] = cross(ome, rs)
+    vs = np.zeros((3))
+
+    return rs, vs
+
 
 # ------------------------------------------------------------------------------
 #
@@ -7378,7 +8092,6 @@ def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
 #
 # [rsun, rtasc, decl] = sun (jd)
 # ------------------------------------------------------------------------------
-
 
 def sun(jd: float):
     """this function calculates the geocentric equatorial position vector of
@@ -7456,100 +8169,6 @@ def sun(jd: float):
     decl = math.asin(math.sin(obliquity)*math.sin(eclplong))
 
     return rsun, rtasc, decl
-
-# ---------------------------------------------------------------------------
-#
-#                           function site
-#
-#  this function finds the position and velocity vectors for a site.  the
-#    answer is returned in the geocentric equatorial (ecef) coordinate system.
-#    note that the velocity is zero because the coordinate system is fixed to
-#    the earth.
-#
-#  author        : david vallado                  719-573-2600   25 jun 2002
-#
-#  revisions
-#    vallado     - fix velocity vector                           23 jul 2002
-#
-#  inputs          description                    range / units
-#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
-#    lon         - longitude of site              -2pi to 2pi rad
-#    alt         - altitude                       km
-#
-#  outputs       :
-#    rs          - ecef site position vector      km
-#    vs          - ecef site velocity vector      km/s
-#
-#  locals        :
-#    sinlat      - variable containing  sin(lat)  rad
-#    temp        - temporary real value
-#    rdel        - rdel component of site vector  km
-#    rk          - rk component of site vector    km
-#    cearth      -
-#
-#  coupling      :
-#    none
-#
-#  references    :
-#    vallado       2001, 404-407, alg 47, ex 7-1
-#
-# [rs, vs] = site (latgd, lon, alt)
-# -----------------------------------------------------------------------------
-
-
-def site (latgd: float, lon: float, alt: float):
-    """this function finds the position and velocity vectors for a site.  the
-    answer is returned in the geocentric equatorial (ecef) coordinate system.
-    note that the velocity is zero because the coordinate system is fixed to
-    the earth.
-
-    Parameters
-    ----------
-    latgd : float
-        geodetic latitude: -pi/2 to pi/2 rad
-    lon : float
-        longitude: -2pi to 2pi rad
-    alt : float
-        altitude: km
-
-    Returns
-    -------
-    rs : ndarray
-        ecef site position vector: km
-    vs : ndarray
-        ecef site velocity vector: km/s
-    """
-
-    # EGM-08 constants used here
-    flat = 1.0/298.257223563
-    earthrot = 7.292115e-5     # rad/s  old 7.29211514670698e-05
-    mum = 3.986004415e14   # m3/s2
-    # derived constants from the base values
-    eccearth = math.sqrt(2.0*flat - flat**2)
-    eccearthsqrd = eccearth**2
-    # -------------------------  implementation   -----------------
-    sinlat = math.sin((latgd))
-
-    # ------  find rdel and rk components of site vector  ---------
-    cearth = re / math.sqrt(1.0 - (eccearthsqrd*sinlat*sinlat))
-    rdel = (cearth + alt)*math.cos((latgd))
-    rk = ((1.0-eccearthsqrd)*cearth + alt)*sinlat
-
-    # ---------------  find site position vector  -----------------
-    rs = np.zeros((3))
-    rs[0] = rdel * math.cos((lon))
-    rs[1] = rdel * math.sin((lon))
-    rs[2] = rk
-    rs = rs.T
-
-    # ---------------  find site velocity vector  -----------------
-    #ome = [0.0 0.0 omegaearth]
-    #[vs] = cross(ome, rs)
-    vs = np.zeros((3))
-
-    return rs, vs
-
-
 
 # ------------------------------------------------------------------------------
 #
@@ -7707,31 +8326,6 @@ def sunalmanac(jd: float):
 #
 # [lit] = light (r, jd, whichkind)
 # ------------------------------------------------------------------------------
-
-
-def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
-    """this function determines if a spacecraft is sunlit or in the dark at a
-    particular time.  an oblate earth and cylindrical shadow is assumed.
-
-    Parameters
-    ----------
-    r : ndarray
-        position vector of satellite: er
-    jd : float
-        julian date: days from 4713 bc
-    whichkind : str, optional
-        spherical or ellipsoidal earth: 's', 'e' by default
-
-    Returns
-    -------
-    lit : bool
-        is visible: True or False
-    """
-    rsun, _, _ = sun(jd)
-    rsun = auer*rsun
-
-    lit = sight(rsun, r, whichkind)
-    return lit
 
 
 # -----------------------------------------------------------------------------
@@ -7911,6 +8505,136 @@ def sunriset(jd: float, latgd: float, lon: float, whichkind: str):
             utsunset = uttemp
 
     return utsunrise, utsunset, error
+
+# ------------------------------------------------------------------------------
+#
+#                           function sunill
+#
+#  this function calculates the illumination due to the sun.
+#
+#  author        : david vallado                  719-573-2600    9 jun 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    jd          - julian date                    days
+#    lat         - location latitude              rad
+#    lon         - location longitdue             rad
+#    sunaz       - sun azimuth                    rad
+#    sunel       - sun elevation                  rad
+#
+#  outputs       :
+#    sunillum    - sun illumination
+#
+#  locals        :
+#                -
+#
+#  coupling      :
+#    none.
+#
+#  references    :
+#    vallado       2001, 295-297, eq 5-9
+#
+# [sunillum] = sunill   (jd, lat, lon, sunaz, sunel)
+# ------------------------------------------------------------------------------
+
+def sunill(jd: float, lat: float, lon: float):
+    """this function calculates the illumination due to the sun.
+
+    Parameters
+    ----------
+    jd : float
+        julian date: days from 4713 bc
+    lat : float
+        latitude of site: rad
+    lon : float
+        longitude of site: rad
+
+    Returns
+    -------
+    sunillum : float
+        illumination of the sun
+    """
+    _, srtasc, sdecl = sun(jd)
+
+    lst, _ = stu.lstime(lon, jd)
+    lha = lst - srtasc
+    sinlat, coslat, sindecl, cosdecl, _, coslha = \
+        smu.getsincos(lat, sdecl, lha)
+    sunel = (math.asin(sindecl * sinlat + cosdecl * coslat * coslha))
+    sunel = sunel * rad2deg
+    if (sunel > - 18.01):
+        x = sunel / 90.0
+        if (sunel >= 20):
+            l0 = 3.74
+            l1 = 3.97
+            l2 = - 4.07
+            l3 = 1.47
+        elif (((sunel >= 5.0) and (sunel < 20.0))):
+            l0 = 3.05
+            l1 = 13.28
+            l2 = - 45.98
+            l3 = 64.33
+        elif (((sunel >= - 0.8) and (sunel < 5.0))):
+            l0 = 2.88
+            l1 = 22.26
+            l2 = - 207.64
+            l3 = 1034.3
+        elif (((sunel >= - 5.0)and (sunel < - 0.8))):
+            l0 = 2.88
+            l1 = 21.81
+            l2 = - 258.11
+            l3 = - 858.36
+        elif (((sunel >= - 12.0) and (sunel < - 5.0))):
+            l0 = 2.7
+            l1 = 12.17
+            l2 = - 431.69
+            l3 = - 1899.83
+        elif (((sunel >= - 18.0) and (sunel < - 12.0))):
+            l0 = 13.84
+            l1 = 262.72
+            l2 = 1447.42
+            l3 = 2797.93
+        else:
+            l0 = 0.0
+            l1 = 0.0
+            l2 = 0.0
+            l3 = 0.0
+        l1 = l0 + l1 * x + l2 * x * x + l3 * x * x * x
+        sunillum = 10.0 ** l1
+        if (((sunillum < - 1e+36) or (sunillum > 999.999))):
+            sunillum = 0.0
+    else:
+        sunillum = 0.0
+
+    return sunillum
+
+def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
+    """this function determines if a spacecraft is sunlit or in the dark at a
+    particular time.  an oblate earth and cylindrical shadow is assumed.
+
+    Parameters
+    ----------
+    r : ndarray
+        position vector of satellite: er
+    jd : float
+        julian date: days from 4713 bc
+    whichkind : str, optional
+        spherical or ellipsoidal earth: 's', 'e' by default
+
+    Returns
+    -------
+    lit : bool
+        is visible: True or False
+    """
+    rsun, _, _ = sun(jd)
+    rsun = auer*rsun
+
+    lit = sight(rsun, r, whichkind)
+    return lit
+
+
 
 # ------------------------------------------------------------------------------
 #
@@ -8599,735 +9323,6 @@ def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
                 print('Error - whether entering or exiting is not clear')
 
     return Een, Eex
-
-# -----------------------------------------------------------------------------
-#
-#                            procedure dspace
-#
-#   this procedure provides deep space contributions to mean elements for
-#     perturbing third body.  these effects have been averaged over one
-#     revolution of the sun and moon.  for earth resonance effects, the
-#     effects have been averaged over no revolutions of the satellite.
-#     (mean motion)
-#
-# Author:
-#   Jeff Beck
-#   beckja@alumni.lehigh.edu
-#   1.0 (aug 6, 2006) - update for paper dav
-# original comments from Vallado C++ version:
-#   author        : david vallado                  719-573-2600   28 jun 2005
-#
-#   inputs        :
-#     d2201, d2211, d3210, d3222, d4410, d4422, d5220, d5232, d5421, d5433       -
-#     dedt        -
-#     del1, del2, del3  -
-#     didt        -
-#     dmdt        -
-#     dnodt       -
-#     domdt       -
-#     irez        - flag for resonance           0-none, 1-one day, 2-half day
-#     argpo       - argument of perigee
-#     argpdot     - argument of perigee dot (rate)
-#     t           - time
-#     tc          -
-#     gsto        - gst
-#     xfact       -
-#     xlamo       -
-#     no          - mean motion
-#     atime       -
-#     em          - eccentricity
-#     ft          -
-#     argpm       - argument of perigee
-#     inclm       - inclination
-#     xli         -
-#     mm          - mean anomaly
-#     xni         - mean motion
-#     nodem      - right ascension of ascending node
-#
-#   outputs       :
-#     atime       -
-#     em          - eccentricity
-#     argpm       - argument of perigee
-#     inclm       - inclination
-#     xli         -
-#     mm          - mean anomaly
-#     xni         -
-#     nodem      - right ascension of ascending node
-#     dndt        -
-#     nm          - mean motion
-#
-#   locals        :
-#     delt        -
-#     ft          -
-#     theta       -
-#     x2li        -
-#     x2omi       -
-#     xl          -
-#     xldot       -
-#     xnddt       -
-#     xndt        -
-#     xomi        -
-#
-#   coupling      :
-#     none        -
-#
-#   references    :
-#     hoots, roehrich, norad spacetrack report #3 1980
-#     hoots, norad spacetrack report #6 1986
-#     hoots, schumacher and glover 2004
-#     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------*/
-
-def dspace(d2201=None, d2211=None, d3210=None, d3222=None,
-           d4410=None, d4422=None, d5220=None, d5232=None,
-           d5421=None, d5433=None, dedt=None, del1=None, del2=None,
-           del3=None, didt=None, dmdt=None, dnodt=None, domdt=None,
-           irez=None, argpo=None, argpdot=None, t=None, tc=None,
-           gsto=None, xfact=None, xlamo=None, no=None, atime=None,
-           em=None, argpm=None, inclm=None, xli=None, mm=None,
-           xni=None, nodem=None, nm=None):
-    fasx2 = 0.13130908
-    fasx4 = 2.8843198
-    fasx6 = 0.37448087
-    g22 = 5.7686396
-    g32 = 0.95240898
-    g44 = 1.8014998
-    g52 = 1.050833
-    g54 = 4.4108898
-    rptim = 0.0043752690880113
-    stepp = 720.0
-    stepn = - 720.0
-    step2 = 259200.0
-    # ----------- calculate deep space resonance effects -----------
-    dndt = 0.0
-    theta = math.fmod(gsto + tc * rptim, twopi)
-    em = em + dedt * t
-    inclm = inclm + didt * t
-    argpm = argpm + domdt * t
-    nodem = nodem + dnodt * t
-    mm = mm + dmdt * t
-    #   sgp4fix for negative inclinations
-    #   the following if statement should be commented out
-    #  if (inclm < 0.0)
-    # {
-    #    inclm = -inclm
-    #    argpm = argpm - pi
-    #    nodem = nodem + pi
-    #  }
-
-    # - update resonances : numerical (euler-maclaurin) integration -
-    # ------------------------- epoch restart ----------------------
-
-    #   sgp4fix for propagator problems
-    #   the following integration works for negative time steps and periods
-    #   the specific changes are unknown because the original code was so convoluted
-
-    # sgp4fix take out atime = 0.0 and fix for faster operation
-    ft = 0.0
-    if (irez != 0):
-        # sgp4fix streamline check
-        if ((atime == 0.0) or (t * atime <= 0.0) or (abs(t) < abs(atime))):
-            atime = 0.0
-            xni = no
-            xli = xlamo
-        # sgp4fix move check outside loop
-        if (t >= 0.0):
-            delt = stepp
-        else:
-            delt = stepn
-        iretn = 381
-        iret = 0
-        while (iretn == 381):
-
-            # ------------------- dot terms calculated -------------
-            # ----------- near - synchronous resonance terms -------
-            if (irez != 2):
-                xndt = (del1 * math.sin(xli - fasx2)
-                        + del2 * math.sin(2.0 * (xli - fasx4))
-                        + del3 * math.sin(3.0 * (xli - fasx6)))
-                xldot = xni + xfact
-                xnddt = (del1 * math.cos(xli - fasx2)
-                         + 2.0 * del2 * math.cos(2.0 * (xli - fasx4))
-                         + 3.0 * del3 * math.cos(3.0 * (xli - fasx6)))
-                xnddt = xnddt * xldot
-            else:
-                # --------- near - half-day resonance terms --------
-                xomi = argpo + argpdot * atime
-                x2omi = xomi + xomi
-                x2li = xli + xli
-                xndt = (d2201 * math.sin(x2omi + xli - g22)
-                        + d2211 * math.sin(xli - g22)
-                        + d3210 * math.sin(xomi + xli - g32)
-                        + d3222 * math.sin(- xomi + xli - g32)
-                        + d4410 * math.sin(x2omi + x2li - g44)
-                        + d4422 * math.sin(x2li - g44)
-                        + d5220 * math.sin(xomi + xli - g52)
-                        + d5232 * math.sin(- xomi + xli - g52)
-                        + d5421 * math.sin(xomi + x2li - g54)
-                        + d5433 * math.sin(- xomi + x2li - g54))
-                xldot = xni + xfact
-                xnddt = (d2201 * math.cos(x2omi + xli - g22)
-                         + d2211 * math.cos(xli - g22)
-                         + d3210 * math.cos(xomi + xli - g32)
-                         + d3222 * math.cos(- xomi + xli - g32)
-                         + d5220 * math.cos(xomi + xli - g52)
-                         + d5232 * math.cos(- xomi + xli - g52)
-                         + 2.0 * (d4410 * math.cos(x2omi + x2li - g44)
-                                  + d4422 * math.cos(x2li - g44)
-                                  + d5421 * math.cos(xomi + x2li - g54)
-                                  + d5433 * math.cos(- xomi + x2li - g54)))
-                xnddt = xnddt * xldot
-            # ----------------------- integrator -------------------
-            # sgp4fix move end checks to end of routine
-            if (abs(t - atime) >= stepp):
-                iret = 0
-                iretn = 381
-            else:
-                ft = t - atime
-                iretn = 0
-            if (iretn == 381):
-                xli = xli + xldot * delt + xndt * step2
-                xni = xni + xndt * delt + xnddt * step2
-                atime = atime + delt
-
-        nm = xni + xndt * ft + xnddt * ft * ft * 0.5
-        xl = xli + xldot * ft + xndt * ft * ft * 0.5
-        if (irez != 1):
-            mm = xl - 2.0 * nodem + 2.0 * theta
-            dndt = nm - no
-        else:
-            mm = xl - nodem - argpm + theta
-            dndt = nm - no
-        nm = no + dndt
-
-    return atime, em, argpm, inclm, xli, mm, xni, nodem, dndt, nm
-
-
-#  -----------------------------------------------------------------------------
-#
-#                            procedure dpper
-#
-#   this procedure provides deep space long period periodic contributions
-#     to the mean elements.  by design, these periodics are zero at epoch.
-#     this used to be dscom which included initialization, but it's really a
-#     recurring function.
-#
-# Author:
-#   Jeff Beck
-#   beckja@alumni.lehigh.edu
-#   1.0 (aug 7, 2006) - update for paper dav
-# original comments from Vallado C++ version:
-#   author        : david vallado                  719-573-2600   28 jun 2005
-#
-#   inputs        :
-#     e3          -
-#     ee2         -
-#     peo         -
-#     pgho        -
-#     pho         -
-#     pinco       -
-#     plo         -
-#     se2 , se3 , Sgh2, Sgh3, Sgh4, Sh2, Sh3, Si2, Si3, Sl2, Sl3, Sl4 -
-#     t           -
-#     xh2, xh3, xi2, xi3, xl2, xl3, xl4 -
-#     zmol        -
-#     zmos        -
-#     ep          - eccentricity                           0.0 - 1.0
-#     inclo       - inclination - needed for lyddane modification
-#     nodep       - right ascension of ascending node
-#     argpp       - argument of perigee
-#     mp          - mean anomaly
-#
-#   outputs       :
-#     ep          - eccentricity                           0.0 - 1.0
-#     inclp       - inclination
-#     nodep       - right ascension of ascending node
-#     argpp       - argument of perigee
-#     mp          - mean anomaly
-#
-#   locals        :
-#     alfdp       -
-#     betdp       -
-#     cosip  , sinip  , cosop  , sinop  ,
-#     dalf        -
-#     dbet        -
-#     dls         -
-#     f2, f3      -
-#     pe          -
-#     pgh         -
-#     ph          -
-#     pinc        -
-#     pl          -
-#     sel   , ses   , sghl  , sghs  , shl   , shs   , sil   , sinzf , sis   ,
-#     sll   , sls
-#     xls         -
-#     xnoh        -
-#     zf          -
-#     zm          -
-#
-#   coupling      :
-#     none.
-#
-#   references    :
-#     hoots, roehrich, norad spacetrack report #3 1980
-#     hoots, norad spacetrack report #6 1986
-#     hoots, schumacher and glover 2004
-#     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------
-
-def dpper(e3=None, ee2=None, peo=None, pgho=None, pho=None,
-          pinco=None, plo=None, se2=None, se3=None, sgh2=None,
-          sgh3=None, sgh4=None, sh2=None, sh3=None, si2=None,
-          si3=None, sl2=None, sl3=None, sl4=None, t=None,
-          xgh2=None, xgh3=None, xgh4=None, xh2=None, xh3=None,
-          xi2=None, xi3=None, xl2=None, xl3=None, xl4=None,
-          zmol=None, zmos=None, inclo=None, init=None, ep=None,
-          inclp=None, nodep=None, argpp=None, mp=None, opsmode=None):
-    # change to variable passed in
-    # ---------------------- constants -----------------------------
-    zns = 1.19459e-05
-    zes = 0.01675
-    znl = 0.00015835218
-    zel = 0.0549
-    # --------------- calculate time varying periodics -----------
-    zm = zmos + zns * t
-    # be sure that the initial call has time set to zero
-    if (init == 'y'):
-        zm = zmos
-
-    zf = zm + 2.0 * zes * math.sin(zm)
-    sinzf = math.sin(zf)
-    f2 = 0.5 * sinzf * sinzf - 0.25
-    f3 = - 0.5 * sinzf * math.cos(zf)
-    ses = se2 * f2 + se3 * f3
-    sis = si2 * f2 + si3 * f3
-    sls = sl2 * f2 + sl3 * f3 + sl4 * sinzf
-    sghs = sgh2 * f2 + sgh3 * f3 + sgh4 * sinzf
-    shs = sh2 * f2 + sh3 * f3
-    zm = zmol + znl * t
-    if (init == 'y'):
-        zm = zmol
-
-    zf = zm + 2.0 * zel * math.sin(zm)
-    sinzf = math.sin(zf)
-    f2 = 0.5 * sinzf * sinzf - 0.25
-    f3 = - 0.5 * sinzf * math.cos(zf)
-    sel = ee2 * f2 + e3 * f3
-    sil = xi2 * f2 + xi3 * f3
-    sll = xl2 * f2 + xl3 * f3 + xl4 * sinzf
-    sghl = xgh2 * f2 + xgh3 * f3 + xgh4 * sinzf
-    shll = xh2 * f2 + xh3 * f3
-    pe = ses + sel
-    pinc = sis + sil
-    pl = sls + sll
-    pgh = sghs + sghl
-    ph = shs + shll
-    if (init == 'n'):
-        #  0.2 rad = 11.45916 deg
-        pe = pe - peo
-        pinc = pinc - pinco
-        pl = pl - plo
-        pgh = pgh - pgho
-        ph = ph - pho
-        inclp = inclp + pinc
-        ep = ep + pe
-        sinip = math.sin(inclp)
-        cosip = math.cos(inclp)
-        # ----------------- apply periodics directly ------------
-        #  sgp4fix for lyddane choice
-        #  strn3 used original inclination - this is technically feasible
-        #  gsfc used perturbed inclination - also technically feasible
-        #  probably best to readjust the 0.2 limit value and limit discontinuity
-        #  use next line for original strn3 approach and original inclination
-        #  if (inclo >= 0.2)
-        #  use next line for gsfc version and perturbed inclination
-        if (inclp >= 0.2):
-            ph = ph / sinip
-            pgh = pgh - cosip * ph
-            argpp = argpp + pgh
-            nodep = nodep + ph
-            mp = mp + pl
-        else:
-            # ---- apply periodics with lyddane modification ----
-            sinop = math.sin(nodep)
-            cosop = math.cos(nodep)
-            alfdp = sinip * sinop
-            betdp = sinip * cosop
-            dalf = ph * cosop + pinc * cosip * sinop
-            dbet = - ph * sinop + pinc * cosip * cosop
-            alfdp = alfdp + dalf
-            betdp = betdp + dbet
-            nodep = math.fmod(nodep, twopi)
-            # sgp4fix for afspc written intrinsic functions
-            # nodep used without a trigonometric function ahead
-            if ((nodep < 0.0) and (opsmode == 'a')):
-                nodep = nodep + twopi
-            xls = mp + argpp + cosip * nodep
-            dls = pl + pgh - pinc * nodep * sinip
-            xls = xls + dls
-            xnoh = nodep
-            nodep = math.atan2(alfdp, betdp)
-            # sgp4fix for afspc written intrinsic functions
-            # nodep used without a trigonometric function ahead
-            if ((nodep < 0.0) and (opsmode == 'a')):
-                nodep = nodep + twopi
-            if (abs(xnoh - nodep) > math.pi):
-                if (nodep < xnoh):
-                    nodep = nodep + twopi
-                else:
-                    nodep = nodep - twopi
-            mp = mp + pl
-            argpp = xls - mp - cosip * nodep
-
-    return ep, inclp, nodep, argpp, mp
-
-# -----------------------------------------------------------------------------
-#
-#                            procedure dscom
-#
-#   this procedure provides deep space common items used by both the secular
-#     and periodics subroutines.  input is provided as shown. this routine
-#     used to be called dpper, but the functions inside weren't well organized.
-#
-# Author:
-#   Jeff Beck
-#   beckja@alumni.lehigh.edu
-#   1.0 (aug 7, 2006) - update for paper dav
-# original comments from Vallado C++ version:
-#   author        : david vallado                  719-573-2600   28 jun 2005
-#
-#   inputs        :
-#     epoch       -
-#     ep          - eccentricity
-#     argpp       - argument of perigee
-#     tc          -
-#     inclp       - inclination
-#     nodep       - right ascension of ascending node
-#     np          - mean motion
-#
-#   outputs       :
-#     sinim  , cosim  , sinomm , cosomm , snodm  , cnodm
-#     day         -
-#     e3          -
-#     ee2         -
-#     em          - eccentricity
-#     emsq        - eccentricity squared
-#     gam         -
-#     peo         -
-#     pgho        -
-#     pho         -
-#     pinco       -
-#     plo         -
-#     rtemsq      -
-#     se2, se3         -
-#     sgh2, sgh3, sgh4        -
-#     sh2, sh3, si2, si3, sl2, sl3, sl4         -
-#     s1, s2, s3, s4, s5, s6, s7          -
-#     ss1, ss2, ss3, ss4, ss5, ss6, ss7, sz1, sz2, sz3         -
-#     sz11, sz12, sz13, sz21, sz22, sz23, sz31, sz32, sz33        -
-#     xgh2, xgh3, xgh4, xh2, xh3, xi2, xi3, xl2, xl3, xl4         -
-#     nm          - mean motion
-#     z1, z2, z3, z11, z12, z13, z21, z22, z23, z31, z32, z33         -
-#     zmol        -
-#     zmos        -
-#
-#   locals        :
-#     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10         -
-#     betasq      -
-#     cc          -
-#     ctem, stem        -
-#     x1, x2, x3, x4, x5, x6, x7, x8          -
-#     xnodce      -
-#     xnoi        -
-#     zcosg  , zsing  , zcosgl , zsingl , zcosh  , zsinh  , zcoshl , zsinhl ,
-#     zcosi  , zsini  , zcosil , zsinil ,
-#     zx          -
-#     zy          -
-#
-#   coupling      :
-#     none.
-#
-#   references    :
-#     hoots, roehrich, norad spacetrack report #3 1980
-#     hoots, norad spacetrack report #6 1986
-#     hoots, schumacher and glover 2004
-#     vallado, crawford, hujsak, kelso  2006
-#  ----------------------------------------------------------------------------*/
-def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
-
-    # -------------------------- constants -------------------------
-    zes     =  0.01675;
-    zel     =  0.05490;
-    c1ss    =  2.9864797e-6;
-    c1l     =  4.7968065e-7;
-    zsinis  =  0.39785416;
-    zcosis  =  0.91744867;
-    zcosgs  =  0.1945905;
-    zsings  = -0.98088458;
-
-    # --------------------- local variables ------------------------
-    nm     = np;
-    em     = ep;
-    snodm  = math.sin(nodep);
-    cnodm  = math.cos(nodep);
-    sinomm = math.sin(argpp);
-    cosomm = math.cos(argpp);
-    sinim  = math.sin(inclp);
-    cosim  = math.cos(inclp);
-    emsq   = em * em;
-    betasq = 1.0 - emsq;
-    rtemsq = math.sqrt(betasq);
-
-    # ----------------- initialize lunar solar terms ---------------
-    peo    = 0.0;
-    pinco  = 0.0;
-    plo    = 0.0;
-    pgho   = 0.0;
-    pho    = 0.0;
-    day    = epoch + 18261.5 + tc / 1440.0;
-    xnodce = math.fmod(4.5236020 - 9.2422029e-4 * day, twopi);
-    stem   = math.sin(xnodce);
-    ctem   = math.cos(xnodce);
-    zcosil = 0.91375164 - 0.03568096 * ctem;
-    zsinil = math.sqrt(1.0 - zcosil * zcosil);
-    zsinhl = 0.089683511 * stem / zsinil;
-    zcoshl = math.sqrt(1.0 - zsinhl * zsinhl);
-    gam    = 5.8351514 + 0.0019443680 * day;
-    zx     = 0.39785416 * stem / zsinil;
-    zy     = zcoshl * ctem + 0.91744867 * zsinhl * stem;
-    zx     = math.atan2(zx, zy);
-    zx     = gam + zx - xnodce;
-    zcosgl = math.cos(zx);
-    zsingl = math.sin(zx);
-
-    # ------------------------- do solar terms ---------------------
-    zcosg = zcosgs;
-    zsing = zsings;
-    zcosi = zcosis;
-    zsini = zsinis;
-    zcosh = cnodm;
-    zsinh = snodm;
-    cc    = c1ss;
-    xnoi  = 1.0 / nm;
-
-    for lsflg in range (2):
-        a1  =   zcosg * zcosh + zsing * zcosi * zsinh;
-        a3  =  -zsing * zcosh + zcosg * zcosi * zsinh;
-        a7  =  -zcosg * zsinh + zsing * zcosi * zcosh;
-        a8  =   zsing * zsini;
-        a9  =   zsing * zsinh + zcosg * zcosi * zcosh;
-        a10 =   zcosg * zsini;
-        a2  =   cosim * a7 + sinim * a8;
-        a4  =   cosim * a9 + sinim * a10;
-        a5  =  -sinim * a7 + cosim * a8;
-        a6  =  -sinim * a9 + cosim * a10;
-
-        x1  =  a1 * cosomm + a2 * sinomm;
-        x2  =  a3 * cosomm + a4 * sinomm;
-        x3  = -a1 * sinomm + a2 * cosomm;
-        x4  = -a3 * sinomm + a4 * cosomm;
-        x5  =  a5 * sinomm;
-        x6  =  a6 * sinomm;
-        x7  =  a5 * cosomm;
-        x8  =  a6 * cosomm;
-
-        z31 = 12.0 * x1 * x1 - 3.0 * x3 * x3;
-        z32 = 24.0 * x1 * x2 - 6.0 * x3 * x4;
-        z33 = 12.0 * x2 * x2 - 3.0 * x4 * x4;
-        z1  =  3.0 *  (a1 * a1 + a2 * a2) + z31 * emsq;
-        z2  =  6.0 *  (a1 * a3 + a2 * a4) + z32 * emsq;
-        z3  =  3.0 *  (a3 * a3 + a4 * a4) + z33 * emsq;
-        z11 = -6.0 * a1 * a5 + emsq *  (-24.0 * x1 * x7-6.0 * x3 * x5);
-        z12 = -6.0 *  (a1 * a6 + a3 * a5) + emsq * \
-            (-24.0 * (x2 * x7 + x1 * x8) - 6.0 * (x3 * x6 + x4 * x5));
-        z13 = -6.0 * a3 * a6 + emsq * (-24.0 * x2 * x8 - 6.0 * x4 * x6);
-        z21 =  6.0 * a2 * a5 + emsq * (24.0 * x1 * x5 - 6.0 * x3 * x7);
-        z22 =  6.0 *  (a4 * a5 + a2 * a6) + emsq * \
-            (24.0 * (x2 * x5 + x1 * x6) - 6.0 * (x4 * x7 + x3 * x8));
-        z23 =  6.0 * a4 * a6 + emsq * (24.0 * x2 * x6 - 6.0 * x4 * x8);
-        z1  = z1 + z1 + betasq * z31;
-        z2  = z2 + z2 + betasq * z32;
-        z3  = z3 + z3 + betasq * z33;
-        s3  = cc * xnoi;
-        s2  = -0.5 * s3 / rtemsq;
-        s4  = s3 * rtemsq;
-        s1  = -15.0 * em * s4;
-        s5  = x1 * x3 + x2 * x4;
-        s6  = x2 * x3 + x1 * x4;
-        s7  = x2 * x4 - x1 * x3;
-
-        # ----------------------- do lunar terms -------------------
-        if (lsflg == 0):
-            ss1   = s1;
-            ss2   = s2;
-            ss3   = s3;
-            ss4   = s4;
-            ss5   = s5;
-            ss6   = s6;
-            ss7   = s7;
-            sz1   = z1;
-            sz2   = z2;
-            sz3   = z3;
-            sz11  = z11;
-            sz12  = z12;
-            sz13  = z13;
-            sz21  = z21;
-            sz22  = z22;
-            sz23  = z23;
-            sz31  = z31;
-            sz32  = z32;
-            sz33  = z33;
-            zcosg = zcosgl;
-            zsing = zsingl;
-            zcosi = zcosil;
-            zsini = zsinil;
-            zcosh = zcoshl * cnodm + zsinhl * snodm;
-            zsinh = snodm * zcoshl - cnodm * zsinhl;
-            cc    = c1l;
-
-    zmol = math.fmod(4.7199672 + 0.22997150  * day - gam, twopi);
-    zmos = math.fmod(6.2565837 + 0.017201977 * day, twopi);
-
-    # ------------------------ do solar terms ----------------------
-    se2  =   2.0 * ss1 * ss6;
-    se3  =   2.0 * ss1 * ss7;
-    si2  =   2.0 * ss2 * sz12;
-    si3  =   2.0 * ss2 * (sz13 - sz11);
-    sl2  =  -2.0 * ss3 * sz2;
-    sl3  =  -2.0 * ss3 * (sz3 - sz1);
-    sl4  =  -2.0 * ss3 * (-21.0 - 9.0 * emsq) * zes;
-    sgh2 =   2.0 * ss4 * sz32;
-    sgh3 =   2.0 * ss4 * (sz33 - sz31);
-    sgh4 = -18.0 * ss4 * zes;
-    sh2  =  -2.0 * ss2 * sz22;
-    sh3  =  -2.0 * ss2 * (sz23 - sz21);
-
-    # ------------------------ do lunar terms ----------------------
-    ee2  =   2.0 * s1 * s6;
-    e3   =   2.0 * s1 * s7;
-    xi2  =   2.0 * s2 * z12;
-    xi3  =   2.0 * s2 * (z13 - z11);
-    xl2  =  -2.0 * s3 * z2;
-    xl3  =  -2.0 * s3 * (z3 - z1);
-    xl4  =  -2.0 * s3 * (-21.0 - 9.0 * emsq) * zel;
-    xgh2 =   2.0 * s4 * z32;
-    xgh3 =   2.0 * s4 * (z33 - z31);
-    xgh4 = -18.0 * s4 * zel;
-    xh2  =  -2.0 * s2 * z22;
-    xh3  =  -2.0 * s2 * (z23 - z21);
-
-    return sinim,cosim,sinomm,cosomm,snodm,cnodm,day,e3,ee2,em,emsq,gam,\
-            peo,pgho,pho,pinco,plo,rtemsq,se2,se3,sgh2,sgh3,sgh4,sh2,sh3,si2,\
-            si3,sl2,sl3,sl4,s1,s2,s3,s4,s5,s6,s7,ss1,ss2,ss3,ss4,ss5,ss6,ss7,\
-            sz1,sz2,sz3,sz11,sz12,sz13,sz21,sz22,sz23,sz31,sz32,sz33,xgh2,xgh3,\
-            xgh4,xh2,xh3,xi2,xi3,xl2,xl3,xl4,nm,z1,z2,z3,z11,z12,z13,z21,z22,\
-            z23,z31,z32,z33,zmol,zmos
-
-# ------------------------------------------------------------------------------
-#
-#                           function sunill
-#
-#  this function calculates the illumination due to the sun.
-#
-#  author        : david vallado                  719-573-2600    9 jun 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    jd          - julian date                    days
-#    lat         - location latitude              rad
-#    lon         - location longitdue             rad
-#    sunaz       - sun azimuth                    rad
-#    sunel       - sun elevation                  rad
-#
-#  outputs       :
-#    sunillum    - sun illumination
-#
-#  locals        :
-#                -
-#
-#  coupling      :
-#    none.
-#
-#  references    :
-#    vallado       2001, 295-297, eq 5-9
-#
-# [sunillum] = sunill   (jd, lat, lon, sunaz, sunel)
-# ------------------------------------------------------------------------------
-
-def sunill(jd: float, lat: float, lon: float):
-    """this function calculates the illumination due to the sun.
-
-    Parameters
-    ----------
-    jd : float
-        julian date: days from 4713 bc
-    lat : float
-        latitude of site: rad
-    lon : float
-        longitude of site: rad
-
-    Returns
-    -------
-    sunillum : float
-        illumination of the sun
-    """
-    _, srtasc, sdecl = sun(jd)
-
-    lst, _ = stu.lstime(lon, jd)
-    lha = lst - srtasc
-    sinlat, coslat, sindecl, cosdecl, _, coslha = \
-        smu.getsincos(lat, sdecl, lha)
-    sunel = (math.asin(sindecl * sinlat + cosdecl * coslat * coslha))
-    sunel = sunel * rad2deg
-    if (sunel > - 18.01):
-        x = sunel / 90.0
-        if (sunel >= 20):
-            l0 = 3.74
-            l1 = 3.97
-            l2 = - 4.07
-            l3 = 1.47
-        elif (((sunel >= 5.0) and (sunel < 20.0))):
-            l0 = 3.05
-            l1 = 13.28
-            l2 = - 45.98
-            l3 = 64.33
-        elif (((sunel >= - 0.8) and (sunel < 5.0))):
-            l0 = 2.88
-            l1 = 22.26
-            l2 = - 207.64
-            l3 = 1034.3
-        elif (((sunel >= - 5.0)and (sunel < - 0.8))):
-            l0 = 2.88
-            l1 = 21.81
-            l2 = - 258.11
-            l3 = - 858.36
-        elif (((sunel >= - 12.0) and (sunel < - 5.0))):
-            l0 = 2.7
-            l1 = 12.17
-            l2 = - 431.69
-            l3 = - 1899.83
-        elif (((sunel >= - 18.0) and (sunel < - 12.0))):
-            l0 = 13.84
-            l1 = 262.72
-            l2 = 1447.42
-            l3 = 2797.93
-        else:
-            l0 = 0.0
-            l1 = 0.0
-            l2 = 0.0
-            l3 = 0.0
-        l1 = l0 + l1 * x + l2 * x * x + l3 * x * x * x
-        sunillum = 10.0 ** l1
-        if (((sunillum < - 1e+36) or (sunillum > 999.999))):
-            sunillum = 0.0
-    else:
-        sunillum = 0.0
-
-    return sunillum
-
-
 
 # ------------------------------------------------------------------------------
 #
