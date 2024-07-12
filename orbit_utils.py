@@ -6994,13 +6994,13 @@ def nutation(ttt: float, ddpsi: float, ddeps: float):
     Returns
     -------
     deltapsi : float
-        nutation anglue
+        nutation angle
     trueeps : float
         true obliquity of ecliptic
     meaneps : float
         mean obliquity of ecliptic
-    omega
-
+    omega : float
+        delauney element
     nut : ndarray
         transformation matrix for tod
     """

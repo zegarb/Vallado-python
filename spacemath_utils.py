@@ -2738,14 +2738,31 @@ def polarm(xp: float, yp: float, ttt: float, opt: str):
 
 def fundarg(ttt: float, opt: str):
     """this function calulates the delauany variables and planetary values for
-  several theories.
+    several theories.
 
     Parameters
     ----------
     ttt : float
         julian centuries of tt: centuries
     opt : str
-        theory: '06'(2006), '02'(2000b), '96'(1996), '80'(1980)
+        theory: '06' (2006), '02' (2000b), '96' (1996), '80' (1980)
+
+    Returns
+    -------
+    l : float
+        delauney element
+    l1 : float
+        delauney element
+    f : float
+        delauney element
+    d : float
+        delauney element
+    omega : float
+        delauney element
+    lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep : float
+        planetary longitudes
+    precrate : float
+
     """
 
     # ---- determine coefficients for iau 2000 nutation theory ----

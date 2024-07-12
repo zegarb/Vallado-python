@@ -110,7 +110,6 @@ print('\n\n =================== now do teme of date and of epoch example  ======
 #       //typerun = 'c' compare 1 year of full satcat data
 #       //typerun = 'v' verification run, requires modified elm file with
 #       //              start stop and delta times
-rad = 180.0 / np.pi
 opsmode = 'a'
 
 whichconst = 72
@@ -200,8 +199,8 @@ while ((tsince < stopmfe)):
                   % (tsince, ro[0], ro[1], ro[2], vo[0], vo[1], vo[2]))
             p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = sc.rv2coe(ro, vo)
             print(' %14.6f %8.6f %10.5f %10.5f %10.5f %10.5f %10.5f \n'
-                  % (a, ecc, incl * rad, omega * rad, argp * rad, nu * rad,
-                     m * rad))
+                  % (a, ecc, incl *rad2deg, omega *rad2deg, argp *rad2deg,
+                     nu *rad2deg, m *rad2deg))
 
 
 rteme = np.array([[ro[0]], [ro[1]], [ro[2]]])
