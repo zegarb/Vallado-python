@@ -22,9 +22,9 @@ import spacetime_utils as stu
 #   3.0 (3 jul, 2008) - update for opsmode operation afspc or improved
 #   3.1 (2 dec, 2008) - fix tsince/1440.0 in jd update
 
-# sgp4fix consolidate call to getgravconst in sgp4init
+# sgp4fix consolidate call to getgravc in sgp4init
 # these are set in sgp4init
-# global tumin mu radiusearthkm xke j2 j3 j4 j3oj2
+# global tumin mu re xke j2 j3 j4 j3oj2
 
 directory = os.path.join(os.path.dirname(__file__), "data")
 outdir = os.path.join(os.path.dirname(__file__), 'testoutput')
@@ -51,9 +51,9 @@ if (typerun == 'm'):
 else:
     typeinput = 'e'
 
-# whichconst = input('input constants 721, (72), 84 ');
+# whichconst = input('input constants wgs721, wgs72, wgs84, egm08 ');
 # this is the standard method of operation
-whichconst = 72
+whichconst = 'wgs72'
 # placeholder
 ateme = np.array([0.0, 0.0, 0.0])
 #         // ---------------- setup files for operation ------------------
@@ -106,7 +106,7 @@ while longstr2[-1] == '\n':
         dbgfile.write('this is the debug output\n\n')
     # convert the char string to sgp4 elements
     # includes initialization of sgp4
-    startmfe, stopmfe, deltamin, satrec = sc.twoline2rv(longstr1, longstr2, typerun, typeinput, opsmode, whichconst)
+    startmfe, stopmfe, deltamin, satrec = sc.tle2satrec(longstr1, longstr2, typerun, typeinput, opsmode, whichconst)
     outfile.write('%d xx\n' % (satrec['satnum']))
     print(' %d\n' % (satrec['satnum']))
     # call the propagator to get the initial state vector value
@@ -213,7 +213,7 @@ while longstr2[-1] == '\n':
 
 xpdotp = 1440.0 / (2.0 * np.pi)
 
-whichconst = 72
+whichconst = 'wgs72'
 opsmode = 'a'
 satrec['satnum'] = 8195
 satrec['jdsatepoch'] = 2453911.0

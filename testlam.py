@@ -114,7 +114,6 @@ for kt in range(1, 8):
         dt = 20 * tumin
         direc = 's'
         kepmov = 'n'
-        #    mu = 4.0*pi*pi;
     direc = 's'
     nrev = 0
     dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc)

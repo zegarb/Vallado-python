@@ -2963,7 +2963,7 @@ def fundarg(ttt: float, opt: str):
 #    jj          - index
 #
 #  coupling      :
-#    getgravconst- get the constants for a gravity field for sgp4
+#    getgravc    - get the constants for a gravity field for sgp4
 #    state2satrec- conversion between state and satellite structure
 #    sgp4init    - intiialize sgp4 constants
 #
@@ -2995,7 +2995,6 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
         altered matrix
     """
 
-    #  getgravconst(whichconst, tumin, mu, radiusearthkm, xke, j2, j3, j4, j3oj2)
 
     # chk if perturbing amt is too small. if so, up the percentchg and try again
 # this will execute 5 times, but leaves percentchg the same after each run

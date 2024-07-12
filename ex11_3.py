@@ -30,7 +30,10 @@ from spacetime_utils import lstime
 
 print("--------- Example 11-3 ----------------------")
 
-j2 = 0.00108263
+gravc = getgravc('egm08')
+j2 = gravc['j2']
+mu = gravc['mu']
+re = gravc['re']
 # --------  repeat gt calculations
 alt = 160.0
 
