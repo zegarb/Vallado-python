@@ -1,37 +1,14 @@
 import math
-# ------------------------------------------------------------------------------
-#
-#                           function constmath
-#
-#  this function sets constants for mathematical operations.
-#
-#  author        : david vallado                  719-573-2600    2 apr 2007
-#
-#  revisions
-#
-#  inputs        : description                    range / units
-#    none
-#
-#  outputs       :
-#    rad, twopi, halfpi
-#    ft2m, mile2m, nm2m, mile2ft, mileph2kmph, nmph2kmph
-#
-#  locals        :
-#                -
-#
-#  coupling      :
-#    none.
-#
-# constmath
-# ------------------------------------------------------------------------------
 
+#--------------------------------------------------------------
+#--------------------------constmath --------------------------
+#--------------------------------------------------------------
 
 smalle6 = 1.0e-6
 smalle8 = 1.0e-8
 small = 1.0e-10
 smalle12 = 1.0e-12
 smalle18 = 1.0e-18
-
 
 infinite = math.inf
 undefined = float('nan')
@@ -68,35 +45,9 @@ uarcsec2rad = 1e-06 * arcsec2rad
 
 
 
-# ------------------------------------------------------------------------------
-#
-#                           function constastro
-#
-#  this function sets constants for various astrodynamic operations.
-#
-#  author        : david vallado                  719-573-2600    2 apr 2007
-#
-#  revisions
-#
-#  inputs        : description                    range / units
-#    none
-#
-#  outputs       :
-#    re, flat, earthrot, mu
-#    eccearth, eccearthsqrd
-#    renm, reft, tusec, tumin, tuday, omegaearthradptu, omegaearthradpmin
-#    velkmps, velftps, velradpmin
-#    degpsec, radpday
-#    speedoflight, au, earth2moon, moonradius, sunradius
-#
-#  locals        :
-#                -
-#
-#  coupling      :
-#    none.
-#
-# ------------------------------------------------------------------------------
-
+#--------------------------------------------------------------
+#---------------------constastro-------------------------------
+#--------------------------------------------------------------
 
 # -----------------------  physical constants  ----------------
 # EGM-08 constants used here
@@ -152,7 +103,7 @@ angpenearth = 0.004609804797371252 #rad
 #
 #                           function getgravc
 #
-#  this function gets Earth gravitional constants for the propagator.
+#  this function gets Earth gravitional constants for a propagator.
 #  note that mu is identified to facilitiate comparisons with newer models.
 #
 #  author        : david vallado                  719-573-2600   21 jul 2006
@@ -180,6 +131,27 @@ angpenearth = 0.004609804797371252 #rad
 #  --------------------------------------------------------------------------- */
 
 def getgravc(whichconst=None):
+  """this function gets Earth gravitional constants for a propagator.
+  note that mu is identified to facilitiate comparisons with newer models.
+
+  Parameters
+  ----------
+  whichconst : str
+      which set of constants to use: 'wgs721', 'wgs72', 'wgs84', 'egm08'
+
+  Returns
+  -------
+  gravc : Dict[str, float]
+      gravitional constants dictionary
+              mu - earth gravitational parameter: km^3/s^2
+              re - radius of the earth: km
+              j2, j3, j4 - un-normalized zonal harmonic values
+              j3oj2 - j3 divided by j2
+              xke - reciprocal of tumin
+              tumin - reciprocal of xke (minutes in one time unit)
+
+
+  """
   #global tumin mu re xke j2 j3 j4 j3oj2
   gravc = {}
   if 'wgs721' == whichconst:
@@ -300,7 +272,19 @@ def getgravc(whichconst=None):
 # ------------------------------------------------------------------------------
 
 class sethelp():
+  """this function sets help flags to control intermediate output during
+  debugging
+
+  show : bool
+      general view print flag
+  iauhelp : bool
+      flag used in iau06pnb
+  iauhelp : bool
+      flag used in iau functions
+
+  """
+  show = False;
   iauhelp = False;
   iaupnhelp = True;
-  show = False;
+
 
