@@ -4252,10 +4252,34 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
 # [r2, v2] = anglesdr (decl1, decl2, decl3, rtasc1, rtasc2, rtasc3, jd1, jdf1, jd2, jdf2, jd3, jdf3, rsite1, rsite2, rsite3, re, mu)
 # ------------------------------------------------------------------------------
 
-def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
-             rtasc2=None, rtasc3=None, jd1=None, jdf1=None,
-             jd2=None, jdf2=None, jd3=None, jdf3=None,
-             rsite1=None, rsite2=None, rsite3=None, re=None, mu=None):
+def anglesdr(decl1: float, decl2:float, decl3: float, rtasc1: float,
+             rtasc2: float, rtasc3: float, jd1: float, jdf1: float,
+             jd2: float, jdf2: float, jd3: float, jdf3: float,
+             rsite1: np.ndarray, rsite2: np.ndarray, rsite3: np.ndarray,
+             re: float = re, mu: float = mu):
+    """this function solves the problem of orbit determination using three
+    optical sightings.  the solution function uses the double-r technique.
+
+    Parameters
+    ----------
+    decl1, decl2, decl3 : float
+        declination of sightings: rad
+    rtasc1, rtasc2, rtasc3 : float
+        right ascension of sightings: rad
+    jd1, jdf1, jd2, jdf2, jd3, jdf3 : float
+        julian date + fraction of sightings: days from 4713 bc
+    rsite1, rsite2, rsite3 : np.ndarray
+        eci position vectors of sites: km
+    re : float, optional
+        radius of planet, by default earth
+    mu : float, optional
+        gravitaitonal parameter of planet, by default earth
+
+    Returns
+    -------
+    r2, v2: ndarray
+        position and velocity vectors at sighting 2: km, km/s
+    """
 
     # for sun
     #re = 149597870.0 (this is not the radius of the sun but the atomic unit - mjc)
@@ -4454,11 +4478,32 @@ def anglesdr(decl1=None, decl2=None, decl3=None, rtasc1=None,
 # [r2, v2] = anglesg (decl1, decl2, decl3, rtasc1, rtasc2, rtasc3, jd1, jdf1, jd2, jdf2, jd3, jdf3, rs1, rs2, rs3, re, mu)
 # ------------------------------------------------------------------------------
 
-def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
-            rtasc2=None, rtasc3=None, jd1=None, jdf1=None,
-            jd2=None, jdf2=None, jd3=None, jdf3=None, rs1=None,
-            rs2=None, rs3=None, mu=mu):
-    # -------------------------  implementation   -------------------------
+def anglesg(decl1: float, decl2: float, decl3: float, rtasc1: float,
+            rtasc2: float, rtasc3: float, jd1: float, jdf1: float,
+            jd2: float, jdf2: float, jd3: float, jdf3: float, rs1: np.ndarray,
+            rs2: np.ndarray, rs3: np.ndarray, mu: float = mu):
+    """this function solves the problem of orbit determination using three
+    optical sightings.  the solution function uses the gaussian technique.
+    there are lots of debug statements in here to test various options.
+
+    Parameters
+    ----------
+    decl1, decl2, decl3 : float
+        declination of sightings: rad
+    rtasc1, rtasc2, rtasc3 : float
+        right ascension of sightings: rad
+    jd1, jdf1, jd2, jdf2, jd3, jdf3 : float
+        julian dates of sightings: days from 4713 bc
+    rs1, rs2, rs3 : ndarray
+        eci position vectors of sites: km
+    mu : float, optional
+        gravitational parameter of planet, by default earth
+
+    Returns
+    -------
+    r, v : ndarray
+        position and velocity vectors at position 2: km, km/s
+    """
     ddpsi = 0.0
     ddeps = 0.0
     #magr1in = 2.0 * re
@@ -4867,10 +4912,36 @@ def anglesg(decl1=None, decl2=None, decl3=None, rtasc1=None,
 # [r2, v2] = anglesl (decl1, decl2, decl3, rtasc1, rtasc2, rtasc3, jd1, jdf1, jd2, jdf2, jd3, jdf3, rs1, rs2, rs3)
 # ------------------------------------------------------------------------------
 
-def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
-            rtasc2=None, rtasc3=None, jd1=None, jdf1=None, jd2=None,
-            jdf2=None, jd3=None, jdf3=None, diffsites=None, rs1=None,
-            rs2=None, rs3=None, mu=mu):
+def anglesl(decl1: float, decl2: float, decl3: float, rtasc1: float,
+            rtasc2: float, rtasc3: float, jd1: float, jdf1: float, jd2: float,
+            jdf2: float, jd3: float, jdf3: float, rs1: np.ndarray,
+            rs2: np.ndarray = None, rs3: np.ndarray = None, mu: float = mu):
+    """this function solves the problem of orbit determination using three
+    optical sightings and the method of laplace.
+
+    Parameters
+    ----------
+    decl1, decl2, decl3 : float
+        declination of sightings: rad
+    rtasc1, rtasc2, rtasc3 : float
+        right ascension of sightings: rad
+    jd1, jdf1, jd2, jdf2, jd3, jdf3 : float
+        julian dates of sightings: days from 4713 bc
+    rs1 : ndarray
+        position vector of site: km
+
+        used for all three sightings if either rs2 or rs3 are None
+
+    rs2, rs3 : ndarray, optional
+        position vector of second and third sites, if used: km
+    mu : float, optional
+        gravitational parameter of planet: default earth
+
+    Returns
+    -------
+    r, v : ndarray
+        position and velocity vectors of second sighting: km, km/s
+    """
     # omegaearth = 0.000072921158553  # earth rad/s
     # omegaearth = 0.017202791208627  # sun rad/s
     # omegaearth = 2.0 * pi/365.24221897  # au / day
@@ -4971,9 +5042,9 @@ def anglesl(decl1=None, decl2=None, decl3=None, rtasc1=None,
     # if ((smu.mag(temp) > small) & (smu.mag(temp1) > small))
     # fix this test here
 
-    if diffsites == 'n':
+    if not (rs2 and rs3):
         # ------------ all sightings from one site -----------------
-        rs2dot = np.cross(earthrate, rs2)
+        rs2dot = np.cross(earthrate, rs1)
         rs2ddot = np.cross(earthrate, rs2dot)
     else:
         # ---------- each sighting from a different site ----------
@@ -8398,44 +8469,6 @@ def sunalmanac(jd: float):
 
     return rsun, rtasc, decl
 
-# ------------------------------------------------------------------------------
-#
-#                           function light
-#
-#  this function determines if a spacecraft is sunlit or in the dark at a
-#    particular time.  an oblate earth and cylindrical shadow is assumed.
-#
-#  author        : david vallado                  719-573-2600   27 may 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    r           - position vector of sat         er
-#    jd          - julian date at desired time    days from 4713 bc
-#    whichkind   - spherical or ellipsoidal earth 's', 'e'*default
-#
-#  outputs       :
-#    vis         - visibility flag                'yes', 'no '
-#
-#  locals        :
-#    rtasc       - suns right ascension           rad
-#    decl        - suns declination               rad
-#    rsun        - sun vector                     au
-#    auer        - conversion from au to er
-#
-#  coupling      :
-#    sun         - position vector of sun
-#    lncom1      - multiple a vector by a constant
-#    sight       - does line-of-sight exist beteen vectors
-#
-#  references    :
-#    vallado       2001, 291-295, alg 35, ex 5-6
-#
-# [lit] = light (r, jd, whichkind)
-# ------------------------------------------------------------------------------
-
-
 # -----------------------------------------------------------------------------
 #
 #                           function sunriset
@@ -8718,6 +8751,43 @@ def sunill(jd: float, lat: float, lon: float):
 
     return sunillum
 
+# ------------------------------------------------------------------------------
+#
+#                           function light
+#
+#  this function determines if a spacecraft is sunlit or in the dark at a
+#    particular time.  an oblate earth and cylindrical shadow is assumed.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    r           - position vector of sat         er
+#    jd          - julian date at desired time    days from 4713 bc
+#    whichkind   - spherical or ellipsoidal earth 's', 'e'*default
+#
+#  outputs       :
+#    vis         - visibility flag                'yes', 'no '
+#
+#  locals        :
+#    rtasc       - suns right ascension           rad
+#    decl        - suns declination               rad
+#    rsun        - sun vector                     au
+#    auer        - conversion from au to er
+#
+#  coupling      :
+#    sun         - position vector of sun
+#    lncom1      - multiple a vector by a constant
+#    sight       - does line-of-sight exist beteen vectors
+#
+#  references    :
+#    vallado       2001, 291-295, alg 35, ex 5-6
+#
+# [lit] = light (r, jd, whichkind)
+# ------------------------------------------------------------------------------
+
 def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
     """this function determines if a spacecraft is sunlit or in the dark at a
     particular time.  an oblate earth and cylindrical shadow is assumed.
@@ -8741,8 +8811,6 @@ def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
 
     lit = sight(rsun, r, whichkind)
     return lit
-
-
 
 # ------------------------------------------------------------------------------
 #
@@ -8858,7 +8926,7 @@ def moon(jd: float):
 
 # -----------------------------------------------------------------------------
 #
-#                           function moonrise
+#                           function moonriset
 #
 #  this function finds the universal time for moonrise and moonset given the
 #    day and site location.
@@ -9621,10 +9689,10 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                  statesize: int, percentchg: float, deltaamtchg: float,
                  xnom: np.ndarray):
     """this procedure finds the a and b matrices for the differential correction
-   problem.  remember that it isn't critical for the propagations to use
-   the highest fidelity techniques because we're only trying to find the
-   "slope". k is an index that allows us to do multiple rows at once. it's
-   used for both the b and a matrix calculations.
+    problem.  remember that it isn't critical for the propagations to use
+    the highest fidelity techniques because we're only trying to find the
+    "slope". k is an index that allows us to do multiple rows at once. it's
+    used for both the b and a matrix calculations.
 
     Parameters
     ----------
@@ -9634,7 +9702,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         last observation to use
     obsrecarr : observation array
         array of records containing: time, timef, latgd, lon, alt, ttt,
-        jdut1, xp, yp, noiserng, noiseaz,noiseel, obstype
+        jdut1, xp, yp, noiserng, noiseaz, noiseel, obstype
     statesize : int
         size of state: 6 or 7
     percentchg : float

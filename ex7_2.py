@@ -32,7 +32,6 @@ import spacetime_utils as stu
 import os
 
 answ = '# 0  ans a = 12246.023 km   ecc = 0.2000 deg    incl = 40.00 deg    raan = 330.000 deg'
-diffsites = 'n'
 #typerun = 'l'; # laplace
 #typerun = 'g'; # gauss
 #typerun = 'd'; # doubler
@@ -182,8 +181,7 @@ rsite3, _, _ = sc.ecef2eci(rs3, vs3, a, ttt, jdut1 + jdut1frac, lod, xp,
 # ---- anglesl test ----
 if typerun == 'l' or typerun == 'a':
     r2, v2 = obu.anglesl(decl1, decl2, decl3, rtasc1, rtasc2, rtasc3, jd1,
-                         jdf1, jd2, jdf2, jd3, jdf3, diffsites, rsite1,
-                         rsite2, rsite3)
+                         jdf1, jd2, jdf2, jd3, jdf3, rsite1)
     #                          rtasc3, jd1, jd2, jd3, rs1, rs2, rs3, re, mu, tu );
     processtype = 'anglesl'
     # -------------- write out answer --------------

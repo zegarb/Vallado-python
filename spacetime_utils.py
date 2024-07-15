@@ -936,6 +936,11 @@ def gstime(jdut1: float):
     ----------
     jdut1 : float
         julian date of ut1: days from 4713 bc
+
+    Returns
+    -------
+    gst : float
+        greenwich sidreal time: rad
     """
 
     tut1 = (jdut1 - 2451545.0) / 36525.0
@@ -943,10 +948,10 @@ def gstime(jdut1: float):
     temp = - 6.2e-6 * tut1 * tut1 * tut1 + 0.093104 * tut1 * tut1  \
         + (876600.0 * 3600.0 + 8640184.812866) * tut1 + 67310.54841
 
-  # 360/86400 = 1/240, to deg, to rad
+    # 360/86400 = 1/240, to deg, to rad
     temp = np.fmod(temp*deg2rad/240.0, twopi)
 
-  # ------------------------ check quadrants --------------------
+    # ------------------------ check quadrants --------------------
     if (temp < 0.0):
         temp = temp + twopi
 
