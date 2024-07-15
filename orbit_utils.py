@@ -9394,10 +9394,71 @@ def checkhitearth(altpad: float, r1: np.ndarray, v1t: np.ndarray,
     return hitearth, hitearthstr
 
 
+# ------------------------------------------------------------------------------
+#
+#                              ShadowEntryExit
+#
+#  Determines the approximate entry and exit true anomalies when a
+#  satellite is eclipsed.
+#
+#  author        : david vallado                  719-573-2600
+#
+#  inputs          description                              range / units
+#   Rsun         - inertial Sun position vector             km
+#   a            - semi-major axis                          km
+#   ecc          - eccentricity
+#   incl         - inclination                              rad
+#   raan         - longitude of the ascending node          rad
+#   argp         - argument of periapsis                    rad
+#   rp           - radius of the planet (typically earth)   km
+#
+#  outputs       :
+#    Een         - Eccentric anomaly for entering shadow    rad
+#    Eex         - Eccentric anomaly for exiting shadow     rad
+#
+#  locals        :
+#    P_, Q_      - Perifocal coordinate unit vectors
+#    A0-A4       - Quartic shadow function coefficients
+#
+#  coupling      :
+#    dot         - dot product of vectors
+#    quartic     - finds the roots of a quartic equation
+#
+#  references    :
+#    vallado       2013, 302-304
+#
+# [Een, Eex] = ShadowEntryExit(Rsun, a, ecc, incl, raan, argp, nu, rp)
+# ------------------------------------------------------------------------------
 
-# ALL angles in radians
-def ShadowEntryExit(RSun=None, rp=None, a=None, ecc=None, incl=None,
-                    raan=None, argp=None, nu=None, mu=None):
+def ShadowEntryExit(RSun: np.ndarray, a: float, ecc: float, incl: float,
+                    raan: float, argp: float, rp: float=re):
+    """Determines the approximate entry and exit true anomalies when a
+    satellite is eclipsed.
+
+    Parameters
+    ----------
+    RSun : ndarray
+        inertial Sun position vector: km
+    a : float
+        semi-major axis: km
+    ecc : float
+        eccentricity
+    incl : float
+        inclination: rad
+    raan : float
+        longitude of the ascending node : rad
+    argp : float
+        _argument of periapsis: rad
+    rp : float, optional
+        radius of the planet (by default re): km
+
+    Returns
+    -------
+    Een
+        approximate true anomaly at entry of the shadow: rad
+    Eex
+        approximate true anomaly at exit of the shadow: rad
+    """
     Een = 0.0
     Eex = 0.0
     # Semi-Parameter
@@ -10627,7 +10688,7 @@ if __name__ == '__main__':
 
     rsun, rtasc, decl = sun(jd)
     print(rsun, rtasc, decl)
-    Een, Eex = ShadowEntryExit(rsun, rp, a, ecc, incl, raan, argp, nu, mu)
+    Een, Eex = ShadowEntryExit(rsun, a, ecc, incl, raan, argp, nu, mu, rp)
 
     r1 = np.array([4e6, 5e6, 6e6])
     r2 = np.array([1e6, 2e6, 3e6])
