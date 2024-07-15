@@ -2395,7 +2395,7 @@ def pathm(llat: float, llon: float, range_: float, az: float):
 #    rhohoriz    -
 #    gamma       -
 #    rho         -
-#    fovmin      -
+#    fovmax      -
 #    lat         -
 #    lon         -
 #    maxlat      -
@@ -2412,51 +2412,87 @@ def pathm(llat: float, llon: float, range_: float, az: float):
 #  satfov (incl, az, slatgd, slon, salt, tfov, etactr, fovmax)
 # ------------------------------------------------------------------------------
 
-def satfov(incl=None, az=None, slatgd=None, slon=None, salt=None, tfov=None,
-           etactr=None):
+def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
+           tfov: float, etactr: float):
+    """this function finds parameters relating to a satellite's fov.
+
+    Parameters
+    ----------
+    incl : float
+        inclination of satellite: rad
+    az : float
+        azimuth: rad
+    slatgd : float
+        geodetic latitude of satellite: rad
+    slon : float
+        longitude of satellite: rad
+    salt : float
+        altitude of satellite: km
+    tfov : float
+        field of view of satellite: rad
+    etactr : float
+        sensor look angle: rad
+
+    Returns
+    -------
+    rhomax : float
+        maximum distance of satellite look : km
+    rhomin : float
+        minimum distance of satellite look : km
+    lambda_ : float
+        difference in ground range angles : rad
+    """
+
     # ------- find satellite parameters and limiting cases --------
     r = re + salt
     etahoriz = math.asin(re / r)
     rhohoriz = r * math.cos(etahoriz)
-
-    print('etahoriz %11.7f rhohoriz %11.7f km \n'
-          % (etahoriz * rad2deg, rhohoriz))
     # ---------------- find ground range angle --------------------
-    lambda_ = math.acos(re / r)
-    print('lambda %11.7f  %11.7f km  \n' % (lambda_ * rad2deg, lambda_ * re))
-    print('maximum locations \n' % ())
+    lambdahoriz = math.acos(re / r)
     # -------- for maximum, if the sensor looks off axis ----------
-    fovmin = etactr + tfov * 0.5
-    gamma = math.pi - math.asin(r * math.sin(fovmin) / re)
+    fovmax = etactr + tfov * 0.5
+    gammamax = math.pi - math.asin(r * math.sin(fovmax) / re)
+    rhomax = re * math.cos(gammamax) + r * math.cos(fovmax)
 
-    rhomax = re * math.cos(gamma) + r * math.cos(fovmin)
-    print('fovmin %11.7f gamma %11.7f gamma %11.7f rho %11.7f  \n'
-          % (fovmin * rad2deg, gamma * rad2deg, (math.pi - gamma) * rad2deg,
-             rhomax))
-    # --------------------- slant range --------------------
-    lambda_ = math.asin(rhomax * math.sin(fovmin) / re)
-    rhomin = lambda_ * re
-    print('lambda %11.7f rhomin %11.7f \n' % (lambda_ * rad2deg, rhomin))
-    #         end
-
-    # -------------- find location of center of fov ---------------
     if (abs(etactr) > 1e-05):
-        lat, lon = pathm(slatgd, slon, lambda_, az)
-    else:
-        lat = slatgd
-        lon = slon
+        fovmin = etactr - tfov * 0.5
+        gammamin = math.pi - math.asin(r * math.sin(fovmin) / re)
+        rhomin = re * math.cos(gammamin) + r * math.cos(fovmin)
+        # --------------------- slant range --------------------
+        lambda_ = math.asin(rhomax * math.sin(fovmax) / re) \
+                    - math.asin(rhomin * math.sin(fovmin) / re)
+    else :
+        rhomin  = rhomax
+        lambda_ = math.asin(rhomax * math.sin(fovmax) / re)
 
-    print('max NS lat %11.7f lon %11.7f \n'
-          % ((lat + lambda_) * rad2deg, lon * rad2deg))
-    print('min NS lat %11.7f lon %11.7f \n'
-          % ((lat - lambda_) * rad2deg, lon * rad2deg))
-    print('max EW lat %11.7f lon %11.7f \n'
-          % (lat * rad2deg, (lon + lambda_) * rad2deg))
-    print('min EW lat %11.7f lon %11.7f \n'
-          % (lat * rad2deg, (lon - lambda_) * rad2deg))
-    print('sat ctr of fov lat %11.7f lon %11.7f \n'
-          % (lat * rad2deg, lon * rad2deg))
-    return rhomin, rhomax
+    if sh.show:
+
+        # -------------- find location of center of fov ---------------
+        if (abs(etactr) > 1e-05):
+            lat, lon = pathm(slatgd, slon, lambda_, az)
+        else:
+            lat = slatgd
+            lon = slon
+        print('etahoriz %11.7f rhohoriz %11.7f km \n'
+            % (etahoriz * rad2deg, rhohoriz))
+        print('lambda %11.7f  %11.7f km  \n' % (lambda_ * rad2deg, lambda_ * re))
+        print('maximum locations \n' % ())
+        print('fovmax %11.7f gamma %11.7f gamma %11.7f rho %11.7f  \n'
+            % (fovmax * rad2deg, gammamax * rad2deg,
+               (math.pi - gammamax) * rad2deg, rhomax))
+        print('lambda %11.7f rhomin %11.7f \n' % (lambda_ * rad2deg, rhomin))
+        print('max NS lat %11.7f lon %11.7f \n'
+            % ((lat + lambda_) * rad2deg, lon * rad2deg))
+        print('min NS lat %11.7f lon %11.7f \n'
+            % ((lat - lambda_) * rad2deg, lon * rad2deg))
+        print('max EW lat %11.7f lon %11.7f \n'
+            % (lat * rad2deg, (lon + lambda_) * rad2deg))
+        print('min EW lat %11.7f lon %11.7f \n'
+            % (lat * rad2deg, (lon - lambda_) * rad2deg))
+        print('sat ctr of fov lat %11.7f lon %11.7f \n'
+            % (lat * rad2deg, lon * rad2deg))
+
+    return rhomin, rhomax, lambda_
 
 
 

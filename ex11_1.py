@@ -28,7 +28,7 @@ import orbit_utils as obu
 from space_constants import *
 import space_conversions as sc
 
-print('---------------Example 11-1 --------------------------')
+print('---------------Example 11-1 --------------------------\n')
 
 # --------  satfov calculations
 incl = 60.0 * deg2rad
@@ -39,8 +39,10 @@ salt = 800.0
 
 tfov = 25.0 * deg2rad
 etactr = 0.0 * deg2rad
-rhomin, rhomax = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
-print('\noff axis test \n')
+rhomin, rhomax, lambda_ = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
+print(f'{rhomax = } km, {rhomin = } km, {lambda_ = } rad')
+print(f'lambda = {lambda_ * rad2deg}')
+print('\noff axis test')
 # run twice with +- tfov angles to get the max and min from nadir
 # location
 incl = 60.0 * deg2rad
@@ -51,7 +53,9 @@ salt = 800.0
 
 tfov = 25.0 * deg2rad
 etactr = 40.0 * deg2rad
-rhomin, rhomax = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
+rhomin, rhomax, lambda_ = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
+print(f'{rhomax = } km, {rhomin = } km, {lambda_ = } rad')
+print(f'lambda = {lambda_ * rad2deg}')
 print('\noff axis test 2nd half \n')
 incl = 60.0 * deg2rad
 az = 40.0 * deg2rad
@@ -61,7 +65,7 @@ salt = 800.0
 
 tfov = -25.0 * deg2rad
 etactr = 40.0 * deg2rad
-rhomin, rhomax = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
+rhomin, rhomax, lambda_ = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
 print('\noff axis test circle calcs \n')
 incl = 60.0 * deg2rad
 az = 140.0 * deg2rad
@@ -83,7 +87,7 @@ print('az %11.7f %11.7f u %11.7f  %11.7f \n\n' % (az * rad2deg,
                                                   (np.pi - u) * rad2deg))
 # pick az = 140 deg
 az = 140.0 * deg2rad
-rhomin, rhomax = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
+rhomin, rhomax, lambda_ = obu.satfov(incl, az, slatgd, slon, salt, tfov, etactr)
 # ----- loop around the new circle with the sensor range ------
 for i in range(0, 19):
     az = i * 20.0 * deg2rad
