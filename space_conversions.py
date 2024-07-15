@@ -230,6 +230,7 @@ def printcov(covin: np.ndarray, covtype: str, cu: str, anom: str):
     anom : str
         anomaly: 'mean' or 'true' or 'tau'
     """
+
     print("in printcov, anom is ", anom)
     if (anom == 'truea') or (anom == 'meana'):
         semi = 'a m  '
@@ -375,7 +376,7 @@ def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
     cartstate : ndarray
         6x1 cartesian state
     classstate : ndarray
-        6x1 classical state
+        6x1 classical state [a, ecc, incl, raan, argp, nu/m]
     flstate : ndarray
         6x1 flight orbital elements
     eqstate : ndarray
@@ -563,7 +564,7 @@ def covct2eq (cartcov: np.ndarray, cartstate: np.ndarray, anom: str, fr: int):
     cartcov : ndarray
         6x6 cartesian covariance matrix
     cartstate : ndarray
-        6x1 cartesian orbit state
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
     anom : str
         anomaly: 'meana', 'truea', 'meann', 'truen'
     fr : int
@@ -823,7 +824,7 @@ def covct2fl(cartcov: np.ndarray, cartstate: np.ndarray, anom: str, ttt: float,
     cartcov : ndarray
         6x6 cartesian covariance matrix
     cartstate : ndarray
-        6x1 cartesian orbit state
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
     anom : str
         anomaly: 'latlon', 'radec'
     ttt : float
@@ -1045,7 +1046,7 @@ def covcl2eq (classcov: np.ndarray, classstate: np.ndarray, anom: str, fr: int):
     classcov : ndarray
         6x6 classical covariance matrix
     classstate : ndarray
-        6x1 classical orbit state
+        6x1 classical orbit state [a, ecc, incl, raan, argp, nu/m]
     anom : str
         anomaly: 'meana', 'truea', 'meann', 'truen'
     fr : int
@@ -1192,7 +1193,7 @@ def coveq2ct(eqcov : np.ndarray, eqstate : np.ndarray, anom : str, fr: int):
     eqcov : ndarray
         6x6 equinoctial covariance matrix
     eqstate : ndarray
-        6x1 equinoctial orbit state
+        6x1 equinoctial orbit state [a/n, af, ag, chi, psi, lm/lnu]
     anom : str
         anomaly: 'meana', 'truea', 'meann', 'truen'
     fr : int
@@ -1585,7 +1586,7 @@ def coveq2cl(eqcov : np.ndarray, eqstate : np.ndarray, anom: str, fr: int):
     eqcov : ndarray
         6x6 equinoctial covariance matrix
     eqstate : ndarray
-        6x1 equinoctial orbit state
+        6x1 equinoctial orbit state [a/n, af, ag, chi, psi, lm/lnu]
     anom : str
         anomaly: 'meana', 'truea', 'meann', 'truen'
     fr : int
@@ -1749,7 +1750,7 @@ def covfl2ct(flcov : np.ndarray, flstate : np.ndarray, anom: str, ttt: float,
     flcov : ndarray
         6x6 flight covariance matrix
     flstate : ndarray
-        6x1 flight orbit state
+        6x1 flight orbit state [r, v, latgc, lon, fpa, az]
     anom : str
         anomaly: 'latlon', 'radec'
     ttt : float
@@ -1940,10 +1941,10 @@ def covfl2ct(flcov : np.ndarray, flstate : np.ndarray, anom: str, ttt: float,
 
 # ----------------------------------------------------------------------------
 #
-#                           function covcl2ct
+#                    function covcl2ct (new version)
 #
-#  this function transforms a six by six covariance matrix expressed in classical elements
-#    into one expressed in cartesian elements
+#  this function transforms a six by six covariance matrix expressed in
+#  classical elements into one expressed in cartesian elements
 #
 #  author        : david vallado
 #
@@ -1965,7 +1966,7 @@ def covfl2ct(flcov : np.ndarray, flstate : np.ndarray, anom: str, ttt: float,
 #    a           - semimajor axis                 km
 #    ecc         - eccentricity
 #    incl        - inclination                    0.0  to pi rad
-#    omaga       - longitude of ascending node    0.0  to 2pi rad
+#    omega/raan  - longitude of ascending node    0.0  to 2pi rad
 #    argp        - argument of perigee            0.0  to 2pi rad
 #    nu          - true anomaly                   0.0  to 2pi rad
 #    m           - mean anomaly                   0.0  to 2pi rad
@@ -1983,13 +1984,31 @@ def covfl2ct(flcov : np.ndarray, flstate : np.ndarray, anom: str, ttt: float,
 #   [cartcov, tm] = covcl2ct(classcov, classstate, anom)
 # ----------------------------------------------------------------------------
 
-def covcl2ctnew(classcov, classstate, anom):
+def covcl2ct(classcov: np.ndarray, classstate: np.ndarray, anom: str):
+    """this function transforms a six by six covariance matrix expressed in
+    classical elements into one expressed in cartesian elements
+
+    Parameters
+    ----------
+    classcov : ndarray
+        6x6 classical covariance matrix
+    classstate : ndarray
+        6x1 classical orbit state [a, ecc, incl, raan, argp, nu/m]
+    anom : str
+        anomaly: 'meana', 'truea', 'meann', 'truen'
+
+    Returns
+    -------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
     # -------- define gravitational constant
 
     # --------- determine which set of variables is in use ---------
     # ---- parse the input vector into the classical elements -----
     a = classstate[0]
-
     n = np.sqrt(mum / a ** 3)
     ecc = classstate[1]
     incl = classstate[2]
@@ -2177,10 +2196,10 @@ def covcl2ctnew(classcov, classstate, anom):
 
 # ----------------------------------------------------------------------------
 #
-#                           function covct2cl
+#                       function covct2cl (new version)
 #
-#  this function transforms a six by six covariance matrix expressed in cartesian elements
-#    into one expressed in classical elements
+#  this function transforms a six by six covariance matrix expressed in
+#  cartesian elements into one expressed in classical elements
 #
 #  author        : david vallado                  719-573-2600   21 jun 2002
 #
@@ -2225,7 +2244,26 @@ def covcl2ctnew(classcov, classstate, anom):
 #   [classcov, tm] = covct2cl(cartcov, cartstate, anom)
 # ----------------------------------------------------------------------------
 
-def covct2clnew(cartcov, cartstate, anom):
+def covct2cl(cartcov: np.ndarray, cartstate: np.ndarray, anom: str):
+    """ this function transforms a six by six covariance matrix expressed in
+    cartesian elements into one expressed in classical elements
+
+    Parameters
+    ----------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
+    anom : str
+        anomaly: 'meana', 'truea', 'meann', 'truen'
+
+    Returns
+    -------
+    classcov : ndarray
+        6x6 classical covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
     # -------- parse the input vectors into cartesian and classical components
     rx = cartstate[0, 0] * 1000.0
     ry = cartstate[1, 0] * 1000.0
@@ -2450,13 +2488,99 @@ def covct2clnew(cartcov, cartstate, anom):
 
     return classcov, tm
 
+
+# ----------------------------------------------------------------------------
+#
+#                           function _covctntwtm
+#
+#  this function returns the transformation matrix needed for a cartesian
+#  to ntw frame conversion or ntw frame to cartesian conversion
+#
+#  author        : david vallado                  719-573-2600   20 may 2003
+#
+#  revisions
+#    vallado     - fix indices                                   16 jul 2003
+#    vallado     - send out tm                                   21 jul 2003
+#
+#  inputs          description                    range / units
+#    cartstate   - 6x1 cartesian orbit state      (x y z vx vy vz)
+#
+#  outputs       :
+#    tm          - transformation matrix
+#
+#  locals        :
+#    r           - position vector                m
+#    v           - velocity vector                m/s
+#    temv        - temporary vector
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    none
+#
+#  [tm] = _covctntwtm(cartstate)
+# ----------------------------------------------------------------------------
+
+def _covctntwtm(cartstate: np.ndarray):
+    """this function returns the transformation matrix needed for a cartesian
+    to ntw frame conversion or ntw frame to cartesian conversion
+
+    Parameters
+    ----------
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
+
+    Returns
+    -------
+    tm : ndarray
+        transformation matrix
+    """
+
+    x = cartstate[0, 0]
+    y = cartstate[1, 0]
+    z = cartstate[2, 0]
+    vx = cartstate[3, 0]
+    vy = cartstate[4, 0]
+    vz = cartstate[5, 0]
+    r = np.array([x, y, z])
+    v = np.array([vx, vy, vz])
+    tv = smu.unit(v)
+    temv = np.cross(r, v)
+    wv = smu.unit(temv)
+    nv = np.cross(tv, wv)
+    tm = np.zeros((6, 6))
+
+    tm[0, 0] = nv[0]
+    tm[0, 1] = nv[1]
+    tm[0, 2] = nv[2]
+    tm[1, 0] = tv[0]
+    tm[1, 1] = tv[1]
+    tm[1, 2] = tv[2]
+    tm[2, 0] = wv[0]
+    tm[2, 1] = wv[1]
+    tm[2, 2] = wv[2]
+    tm[3, 3] = nv[0]
+    tm[3, 4] = nv[1]
+    tm[3, 5] = nv[2]
+    tm[4, 3] = tv[0]
+    tm[4, 4] = tv[1]
+    tm[4, 5] = tv[2]
+    tm[5, 3] = wv[0]
+    tm[5, 4] = wv[1]
+    tm[5, 5] = wv[2]
+
+    return tm
+
+
 #
 # ----------------------------------------------------------------------------
 #
 #                           function covct2ntw
+#                        (same as matlab covct2o2)
 #
-#  this function transforms a six by six covariance matrix expressed in cartesian
-#    into one expressed in orbit plane, ntw frame
+#  this function transforms a six by six covariance matrix expressed in
+#  cartesian into one expressed in orbit plane, ntw frame
 #
 #  author        : david vallado                  719-573-2600   20 may 2003
 #
@@ -2472,64 +2596,97 @@ def covct2clnew(cartcov, cartstate, anom):
 #    covntw      - 6x6 orbit plane ntw covariance matrix
 #    tm          - transformation matrix
 #
-#  locals        :
-#    r           - position vector                m
-#    v           - velocity vector                m/s
-#    temv        - temporary vector
-#
 #  coupling      :
 #    none
 #
 #  references    :
 #    none
 #
-#  [covopntw, tm] = covct2ntw(cartcov, cartstate)
+#  [covntw, tm] = covct2ntw(cartcov, cartstate)
 # ----------------------------------------------------------------------------
 
-def covct2ntw(cartcov, cartstate):
-    x = cartstate[0, 0]
-    y = cartstate[1, 0]
-    z = cartstate[2, 0]
-    vx = cartstate[3, 0]
-    vy = cartstate[4, 0]
-    vz = cartstate[5, 0]
-    r = np.array([x, y, z])
-    v = np.array([vx, vy, vz])
-    tv = smu.unit(v)
-    temv = np.cross(r, v)
-    wv = smu.unit(temv)
-    nv = np.cross(tv, wv)
-    tm = np.zeros((6, 6))
+def covct2ntw(cartcov: np.ndarray, cartstate: np.ndarray):
+    """this function transforms a six by six covariance matrix expressed in
+    cartesian into one expressed in orbit plane, ntw frame.
 
-    tm[0, 0] = nv[0]
-    tm[0, 1] = nv[1]
-    tm[0, 2] = nv[2]
-    tm[1, 0] = tv[0]
-    tm[1, 1] = tv[1]
-    tm[1, 2] = tv[2]
-    tm[2, 0] = wv[0]
-    tm[2, 1] = wv[1]
-    tm[2, 2] = wv[2]
-    tm[3, 3] = nv[0]
-    tm[3, 4] = nv[1]
-    tm[3, 5] = nv[2]
-    tm[4, 3] = tv[0]
-    tm[4, 4] = tv[1]
-    tm[4, 5] = tv[2]
-    tm[5, 3] = wv[0]
-    tm[5, 4] = wv[1]
-    tm[5, 5] = wv[2]
+    Parameters
+    ----------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
+
+    Returns
+    -------
+    covntw: ndarray
+        6x6 orbit plane ntw covariance matrix
+    tm: ndarray
+        transformation matrix
+    """
+    tm = _covctntwtm(cartstate)
     covntw = tm @ cartcov @ tm.T
     return covntw, tm
 
-
 #
 # ----------------------------------------------------------------------------
 #
-#                           function covct2o2
+#                           function covntw2ct
+#                       (same as matlab covo22ct)
 #
-#  this function transforms a six by six covariance matrix expressed in cartesian
-#    into one expressed in orbit plane, rsw frame
+#  this function transforms a six by six covariance matrix expressed in the
+#    orbit plane, ntw frame into one expressed in cartesian
+#
+#  author        : david vallado                  719-573-2600   17 jul 2003
+#
+#  revisions
+#    vallado     - send out tm                                   25 jul 2003
+#
+#  inputs          description                    range / units
+#    covntw      - 6x6 orbit plane ntw covariance matrix
+#    cartstate   - 6x1 cartesian orbit state      (x y z vx vy vz)
+#
+#  outputs       :
+#    cartcov     - 6x6 cartesian covariance matrix
+#    tm          - transformation matrix
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    none
+#
+#  [cartcov, tm] = covntw2ct(covntw, cartstate)
+# ----------------------------------------------------------------------------
+
+def covntw2ct(covntw, cartstate):
+    """this function transforms a six by six covariance matrix expressed in the
+    orbit plane, ntw frame into one expressed in cartesian
+
+    Parameters
+    ----------
+    covntw : ndarray
+        6x6 orbit plane ntw covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
+
+    Returns
+    -------
+    cartcov
+        6x6 cartesian covariance matrix
+    tm
+        transformation matrix
+    """
+    tm = _covctntwtm(cartstate).T # transposed
+    cartcov = tm @ covntw @ tm.T
+    return cartcov, tm
+
+
+# ----------------------------------------------------------------------------
+#
+#                           function _covctrswtm
+#
+#  this function returns the transformation matrix needed for a cartesian
+#  to rsw frame conversion or rsw frame to cartesian conversion
 #
 #  author        : david vallado                  719-573-2600   20 may 2003
 #
@@ -2538,11 +2695,9 @@ def covct2ntw(cartcov, cartstate):
 #    vallado     - send out tm                                   21 jul 2003
 #
 #  inputs          description                    range / units
-#    cartcov     - 6x6 cartesian covariance matrix
 #    cartstate   - 6x1 cartesian orbit state      (x y z vx vy vz)
 #
 #  outputs       :
-#    covoprsw    - 6x6 orbit plane rsw covariance matrix
 #    tm          - transformation matrix
 #
 #  locals        :
@@ -2556,86 +2711,24 @@ def covct2ntw(cartcov, cartstate):
 #  references    :
 #    none
 #
-#  [covopntw, tm] = covct2o2(cartcov, cartstate)
+#  [tm] = _covctrswtm(cartstate)
 # ----------------------------------------------------------------------------
 
-def covct2o2(cartcov, cartstate):
-    x = cartstate[0, 0]
-    y = cartstate[1, 0]
-    z = cartstate[2, 0]
-    vx = cartstate[3, 0]
-    vy = cartstate[4, 0]
-    vz = cartstate[5, 0]
-    r = np.array([x, y, z])
-    v = np.array([vx, vy, vz])
-    tv = smu.unit(v)
-    temv = np.cross(r, v)
-    wv = smu.unit(temv)
-    nv = np.cross(tv, wv)
-    tm = np.zeros((6, 6))
+def _covctrswtm(cartstate: np.ndarray):
+    """this function returns the transformation matrix needed for a cartesian
+    to rsw frame conversion or rsw frame to cartesian conversion
 
-    tm[0, 0] = nv[0]
-    tm[0, 1] = nv[1]
-    tm[0, 2] = nv[2]
-    tm[1, 0] = tv[0]
-    tm[1, 1] = tv[1]
-    tm[1, 2] = tv[2]
-    tm[2, 0] = wv[0]
-    tm[2, 1] = wv[1]
-    tm[2, 2] = wv[2]
-    tm[3, 3] = nv[0]
-    tm[3, 4] = nv[1]
-    tm[3, 5] = nv[2]
-    tm[4, 3] = tv[0]
-    tm[4, 4] = tv[1]
-    tm[4, 5] = tv[2]
-    tm[5, 3] = wv[0]
-    tm[5, 4] = wv[1]
-    tm[5, 5] = wv[2]
-    covopntw = tm @ cartcov @ tm.T
-    return covopntw, tm
+    Parameters
+    ----------
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
 
+    Returns
+    -------
+    tm : ndarray
+        transformation matrix
+    """
 
-#
-# ----------------------------------------------------------------------------
-#
-#                           function covct2rsw
-#
-#  this function transforms a six by six covariance matrix expressed in cartesian
-#    into one expressed in orbit plane, rsw frame
-#
-#  author        : david vallado                  719-573-2600   20 may 2003
-#
-#  revisions
-#    vallado     - fix indices                                   16 jul 2003
-#    vallado     - send out tm                                   21 jul 2003
-#
-#  inputs          description                    range / units
-#    cartcov     - 6x6 cartesian covariance matrix
-#    cartstate   - 6x1 cartesian orbit state      (x y z vx vy vz)
-#
-#  outputs       :
-#    covoprsw    - 6x6 orbit plane rsw covariance matrix
-#    tm          - transformation matrix
-#
-#  locals        :
-#    r           - position vector                m
-#    v           - velocity vector                m/s
-#    temv        - temporary vector
-#
-#  coupling      :
-#    none
-#
-#  references    :
-#    none
-#
-#  [covoprsw, tm] = covct2rsw(cartcov, cartstate)
-# ----------------------------------------------------------------------------
-
-def covct2rsw(cartcov, cartstate):
-    if sh.show:
-        print("cartstate:")
-        print(cartstate)
     x = cartstate[0, 0]
     y = cartstate[1, 0]
     z = cartstate[2, 0]
@@ -2668,35 +2761,29 @@ def covct2rsw(cartcov, cartstate):
     tm[5, 3] = wv[0]
     tm[5, 4] = wv[1]
     tm[5, 5] = wv[2]
-    covoprsw = tm @ cartcov @ tm.T
-    return covoprsw, tm
 
+    return tm
 
-#
 # ----------------------------------------------------------------------------
 #
-#                           function covo22ct
+#                           function covct2rsw
 #
-#  this function transforms a six by six covariance matrix expressed in the
-#    orbit plane (ntw) into one expressed in cartesian
+#  this function transforms a six by six covariance matrix expressed in
+#  cartesian into one expressed in orbit plane, rsw frame
 #
-#  author        : david vallado                  719-573-2600   17 jul 2003
+#  author        : david vallado                  719-573-2600   20 may 2003
 #
 #  revisions
-#    vallado     - send out tm                                   25 jul 2003
+#    vallado     - fix indices                                   16 jul 2003
+#    vallado     - send out tm                                   21 jul 2003
 #
 #  inputs          description                    range / units
-#    covopntw    - 6x6 orbit plane ntw covariance matrix
+#    cartcov     - 6x6 cartesian covariance matrix
 #    cartstate   - 6x1 cartesian orbit state      (x y z vx vy vz)
 #
 #  outputs       :
-#    cartcov     - 6x6 cartesian covariance matrix
+#    covrsw      - 6x6 orbit plane rsw covariance matrix
 #    tm          - transformation matrix
-#
-#  locals        :
-#    r           - position vector                m
-#    v           - velocity vector                m/s
-#    temv        - temporary vector
 #
 #  coupling      :
 #    none
@@ -2704,45 +2791,82 @@ def covct2rsw(cartcov, cartstate):
 #  references    :
 #    none
 #
-#  [cartcov, tm] = covo22ct(covopntw, cartstate)
+#  [covrsw, tm] = covct2rsw(cartcov, cartstate)
 # ----------------------------------------------------------------------------
 
-def covo22ct(covopntw, cartstate):
-    x = cartstate[0, 0]
-    y = cartstate[1, 0]
-    z = cartstate[2, 0]
-    vx = cartstate[3, 0]
-    vy = cartstate[4, 0]
-    vz = cartstate[5, 0]
-    r = np.array([x, y, z])
-    v = np.array([vx, vy, vz])
-    tv = smu.unit(v)
-    temv = np.cross(r, v)
-    wv = smu.unit(temv)
-    nv = np.cross(tv, wv)
-    tm = np.zeros((6, 6))
+def covct2rsw(cartcov, cartstate):
+    """this function transforms a six by six covariance matrix expressed in
+    cartesian into one expressed in orbit plane, rsw frame
 
-    tm[0, 0] = nv[0]
-    tm[0, 1] = nv[1]
-    tm[0, 2] = nv[2]
-    tm[1, 0] = tv[0]
-    tm[1, 1] = tv[1]
-    tm[1, 2] = tv[2]
-    tm[2, 0] = wv[0]
-    tm[2, 1] = wv[1]
-    tm[2, 2] = wv[2]
-    tm[3, 3] = nv[0]
-    tm[3, 4] = nv[1]
-    tm[3, 5] = nv[2]
-    tm[4, 3] = tv[0]
-    tm[4, 4] = tv[1]
-    tm[4, 5] = tv[2]
-    tm[5, 3] = wv[0]
-    tm[5, 4] = wv[1]
-    tm[5, 5] = wv[2]
-    tm = tm.T
-    cartcov = tm @ covopntw @ tm.T
-    return cartcov, tm
+    Parameters
+    ----------
+    cartcov : ndarray
+        6x6 cartesian covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
+
+    Returns
+    -------
+    covrsw : ndarray
+        6x6 orbit plane rsw covariance matrix
+    tm : ndarray
+        transformation matrix
+    """
+    tm = _covctrswtm(cartstate)
+    covrsw = tm @ cartcov @ tm.T
+    return covrsw, tm
+
+# ----------------------------------------------------------------------------
+#
+#                           function covrsw2ct
+#
+#  this function transforms a six by six covariance matrix expressed in
+#  orbit plane, rsw frame into cartesian
+#
+#  author        : david vallado                  719-573-2600   20 may 2003
+#
+#  revisions
+#    vallado     - fix indices                                   16 jul 2003
+#    vallado     - send out tm                                   21 jul 2003
+#
+#  inputs          description                              range / units
+#    covrsw      - 6x6 orbit plane rsw covariance matrix
+#    cartstate   - 6x1 cartesian orbit state                (x y z vx vy vz)
+#
+#  outputs       :
+#    cartcov     - 6x6 cartesian covariance matrix
+#    tm          - transformation matrix
+#
+#  coupling      :
+#    none
+#
+#  references    :
+#    none
+#
+#  [cartcov, tm] = covrsw2ct(covrsw, cartstate)
+# ----------------------------------------------------------------------------
+
+def covrsw2ct(cartcov, cartstate):
+    """ this function transforms a six by six covariance matrix expressed in
+    orbit plane, rsw frame into cartesian
+
+    Parameters
+    ----------
+    covrsw : ndarray
+        6x6 orbit plane rsw covariance matrix
+    cartstate : ndarray
+        6x1 cartesian orbit state [x, y, z, vx, vy, vz]
+
+    Returns
+    -------
+    cartcov
+        6x6 cartesian covariance matrix
+    tm
+        transformation matrix
+    """
+    tm = _covctrswtm(cartstate).T
+    covrsw = tm @ cartcov @ tm.T
+    return covrsw, tm
 
 # ----------------------------------------------------------------------------
 #
@@ -2762,14 +2886,15 @@ def covo22ct(covopntw, cartstate):
 #    veci        - eci velocity vector                       km/s
 #
 #  outputs       :
-#    n           - mean motion                               rad
+#    n           - mean motion                               rad/s
 #    a           - semi major axis                           km
 #    af          - component of ecc vector
 #    ag          - component of ecc vector
 #    chi         - component of node vector in eqw
 #    psi         - component of node vector in eqw
-#    meanlon     - mean longitude                            rad
-#    truelon     - true longitude                            rad
+#    meanlonM    - mean longitude from mean anomaly          rad
+#    meanlonNu   - mean longitude from true anomaly          rad
+#    fr          - retrograde factor                          +1 or -1
 #
 #  locals        :
 #    none        -
@@ -2781,7 +2906,7 @@ def covo22ct(covopntw, cartstate):
 #    vallado       2013, 108
 #    chobotov            30
 #
-# [a, n, af, ag, chi, psi, meanlonM, meanlonNu, fr] = rv2eq (r, v)
+# [a, n, af, ag, chi, psi, meanlonM, meanlonNu, fr] = rv2eq(reci, veci)
 # ----------------------------------------------------------------------------
 
 def rv2eq(reci: np.ndarray, veci: np.ndarray):
@@ -2791,14 +2916,14 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
     Parameters
     ----------
     reci : ndarray
-        eci position vector
+        eci position vector: km
     veci : ndarray
-        eci velocity vector
+        eci velocity vector: km/s
 
     Returns
     -------
     n: float
-        mean motion: rad
+        mean motion: rad/s
     a: float
         semi major axis: km
     af
@@ -2809,10 +2934,13 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
         component of node vector in eqw
     psi
         component of node vector in eqw
-    meanlon: float
-        mean longitude: rad
-    truelon: float
-        true longitude: rad
+    meanlonM: float
+        mean longitude from mean anomaly: rad
+    meanlonNu: float
+        mean longitude from true anomaly: rad
+    fr: float
+        retrograde factor: +1.0 or -1.0
+        (+1 for regular orbits, -1 for retrograde)
     """
 
     # -------- convert to classical elements ----------------------
@@ -2954,7 +3082,7 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
 #    veci        - velocity vector                km/s
 #
 #  locals        :
-#    n           - mean motion                    rad
+#    n           - mean motion                    rad/s
 #    temp        - temporary variable
 #    p           - semilatus rectum               km
 #    ecc         - eccentricity
@@ -2972,7 +3100,7 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
 #  references    :
 #    vallado 2013:108
 #
-# [r, v] = eq2rv(a, af, ag, chi, psi, meanlonM, fr)
+# [reci, veci] = eq2rv(a, af, ag, chi, psi, meanlonM, fr)
 # ------------------------------------------------------------------------------
 
 def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
@@ -2983,7 +3111,7 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
     Parameters
     ----------
     a : float
-        semimajor axis
+        semimajor axis: km
     af : float
         component of ecc vector
     ag : float
@@ -2993,16 +3121,16 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
     psi : float
         component of node vector in eqw
     meanlonM : float
-        mean longitude
+        mean longitude: rad
     fr : float
         retrograde factor (+1 for regular orbits, -1 for retrograde)
 
     Returns
     -------
     reci: ndarray
-        eci position vector
+        eci position vector: km
     veci: ndarray
-        eci velocity vector
+        eci velocity vector: km/s
     """
     arglat = undefined
     lonper = undefined
@@ -3134,8 +3262,8 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
 #
 #                           function rv2rsw
 #
-#  this function converts position and velocity vectors into radial, tangential (in-
-#  track), and normal (cross-track) coordinates. note that there are numerous
+#  this function converts position and velocity vectors into radial, tangential
+# (along-track), and normal (cross-track) coordinates. note that there are numerous
 #  nomenclatures for these systems. this is the rsw system of vallado. the reverse
 #  values are found using the transmat transpose.
 #
@@ -3166,8 +3294,8 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
 
 
 def rv2rsw(reci: np.ndarray, veci: np.ndarray):
-    """this function converts position and velocity vectors into radial, tangential (in-
-    track), and normal (cross-track) coordinates. note that there are numerous
+    """this function converts position and velocity vectors into radial, tangential
+    (along-track), and normal (cross-track) coordinates. note that there are numerous
     nomenclatures for these systems. this is the rsw system of vallado. the reverse
     values are found using the transmat transpose.
 
@@ -3176,7 +3304,7 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
     reci : ndarray
         eci position vector: km
     veci : ndarray
-        eci velocity vector ECI: km/s
+        eci velocity vector: km/s
 
     Returns
     -------
@@ -3223,22 +3351,22 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
 #                           function rv2ntw
 #
 #  this function converts position and velocity vectors into normal (in-radial),
-#    tangential (velocity), and normal (cross-track) coordinates. note that sometimes
-#    the first vector is called along-radial. the tangential direction is
-#    always aligned with the velocity vector. this is the ntw system of
-#    vallado.
+#  tangential (velocity), and normal (cross-track) coordinates. note that
+#  sometimes the first vector is called along-radial. the tangential direction
+#  is always aligned with the velocity vector. this is the ntw system of vallado.
 #
 #  author        : david vallado                  719-573-2600    5 jul 2002
 #
 #  revisions
 #                -
 #  inputs          description                    range / units
-#    r           - position vector                km
-#    v           - velocity vector                km/s
+#    reci        - eci position vector            km
+#    veci        - eci velocity vector            km/s
 #
 #  outputs       :
 #    rntw        - ntw position vector            km
 #    vntw        - ntw velocity vector            km/s
+#    transmat    - transformation matrix used to rotate vectors
 #
 #  locals        :
 #    temp        - temporary position vector
@@ -3249,25 +3377,47 @@ def rv2rsw(reci: np.ndarray, veci: np.ndarray):
 #  references    :
 #    vallado       2007, 172
 #
-# [rntw, vntw, transmat] = rv2ntw(r, v)
+# [rntw, vntw, transmat] = rv2ntw(reci, veci)
 # ------------------------------------------------------------------------------
 
 
-def rv2ntw(r, v):
+def rv2ntw(reci: np.ndarray, veci: np.ndarray):
+    """this function converts position and velocity vectors into normal
+    (in-radial), tangential (velocity), and normal (cross-track) coordinates.
+    note that sometimesthe first vector is called along-radial. the tangential
+    direction is always aligned with the velocity vector. this is the ntw
+    system of vallado.
+
+    Parameters
+    ----------
+    reci : ndarray
+        position vector: km
+    veci : ndarray
+        velocity vector: km/s
+
+    Returns
+    -------
+    rntw : ndarray
+        ntw position vector: km
+    vntw : nadarray
+        ntw velocity vector: km/s
+    transmat: ndarray
+        transformation matrix used to rotate vectors
+    """
     # compute satellite velocity vector magnitude
-    vmag = smu.mag(v)
+    vmag = smu.mag(veci)
     # in order to work correctly each of the components must be
     # unit vectors !
     # in-velocity component
-    tvec = np.divide(v, vmag)
+    tvec = np.divide(veci, vmag)
     # cross-track component
-    wvec = np.cross(r, v)
+    wvec = np.cross(reci, veci)
     wvec = smu.unit(wvec)
     # along-radial component
     nvec = np.cross(tvec, wvec)
     nvec = smu.unit(nvec)
     # assemble transformation matrix from to ntw frame (individual
-#  components arranged in row vectors)
+    #  components arranged in row vectors)
     transmat = np.zeros((3, 3))
     transmat[0, 0] = nvec[0]
     transmat[0, 1] = nvec[1]
@@ -3278,8 +3428,8 @@ def rv2ntw(r, v):
     transmat[2, 0] = wvec[0]
     transmat[2, 1] = wvec[1]
     transmat[2, 2] = wvec[2]
-    rntw = transmat @ r
-    vntw = transmat @ v
+    rntw = transmat @ reci
+    vntw = transmat @ veci
     return rntw, vntw, transmat
 
 #
@@ -3317,7 +3467,7 @@ def rv2ntw(r, v):
 #    vallado       2001, xx
 #    chobotov            70
 #
-# [rmag, vmag, rtasc, decl, fpav, az] = rv2adbar (r, v)
+# [rmag, vmag, rtasc, decl, fpav, az] = rv2adbar (reci, veci)
 # ----------------------------------------------------------------------------
 
 def rv2adbar(reci: np.ndarray, veci: np.ndarray):
@@ -3336,7 +3486,7 @@ def rv2adbar(reci: np.ndarray, veci: np.ndarray):
     magr: float
         eci position vector magnitude: km
     magv: float
-        eci velocity vector magnitude: km/sec
+        eci velocity vector magnitude: km/s
     rtasc: float
         right ascension of sateillite: rad
     decl: float
@@ -3406,7 +3556,7 @@ def rv2adbar(reci: np.ndarray, veci: np.ndarray):
 #    vallado       2001, xx
 #    chobotov            70
 #
-# [r, v] = adbar2rv (rmag, vmag, rtasc, decl, fpav, az)
+# [reci, veci] = adbar2rv (rmag, vmag, rtasc, decl, fpav, az)
 # ----------------------------------------------------------------------------
 
 def adbar2rv(magr: float, magv: float, rtasc: float, decl: float, fpav:float,
@@ -3434,7 +3584,7 @@ def adbar2rv(magr: float, magv: float, rtasc: float, decl: float, fpav:float,
     reci: ndarray
         eci position vector: km
     veci: ndarray
-        eci velocity vector: km
+        eci velocity vector: km/s
     """
     # -------- form position vector
     reci = np.zeros(3)
@@ -3475,7 +3625,7 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
     lat : float
         latitude: rad
     lst : float
-        local mean sidreal time
+        local mean sidereal time: 0 to 2pi rad
 
     Returns
     -------
@@ -3523,7 +3673,6 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
 #  inputs          description                    range / units
 #    reci        - eci position vector            km
 #    veci        - eci velocity vector            km/s
-#    rs          - eci site position vector       km
 #    latgd       - geodetic latitude              -pi/2 to pi/2 rad
 #    lon         - longitude of site              -2pi to 2pi rad
 #    alt         - altitude                       km
@@ -3534,7 +3683,7 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
 #    yp          - polar motion coefficient       rad
 #    terms       - number of terms for ast calculation 0, 2
 #    ddpsi       - delta psi correction to gcrf   rad
-#    ddeps       - delta eps correction to gcrf   rad
+#    ddeps       - delta eps corr1ection to gcrf   rad
 #
 #  outputs       :
 #    rho         - satellite range from site      km
@@ -3542,7 +3691,7 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
 #    el          - elevation                      -pi/2 to pi/2 rad
 #    drho        - range rate                     km/s
 #    daz         - azimuth rate                   rad / s
-#    del         - elevation rate                 rad / s
+#    del_        - elevation rate                 rad / s
 #
 #  locals        :
 #    rhoveci     - eci range vector from site     km
@@ -3619,7 +3768,7 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
         range rate: km/s
     daz
         azimuth rate: rad/s
-    del
+    del_
         elevation rate: rad/s
     """
 
@@ -3907,32 +4056,32 @@ def rv2coe(r: np.ndarray, v: np.ndarray, mu=mu):
         ijk position vector
     v : ndarray
         ijk velocity vector
-    mu
+    mu : float
         gravitational parameter: km3 / s2 (default set to earth)
 
     Returns
     -------
-    p
+    p : float
         semilatus rectum: km
-    a
+    a : float
         semimajor axis: km
-    ecc
+    ecc : float
         eccentricity
-    incl
+    incl : float
         inclination: 0.0  to pi rad
-    raan
-        longitude of ascending node: 0.0  to 2pi rad
-    argp
-        argument of perigee: 0.0  to 2pi rad
-    nu
+    raan : float
+        longitude of ascending node: 0.0 to 2pi rad
+    argp : float
+        argument of perigee: 0.0 to 2pi rad
+    nu : float
         true anomaly: 0.0  to 2pi rad
-    m
+    m : float
         mean anomaly: 0.0  to 2pi rad
-    arglat
+    arglat : float
         argument of latitude: Circular Inclined: 0.0  to 2pi rad, else None
-    truelon
+    truelon : float
         true longitude: Circular Equatorial: 0.0  to 2pi rad, else None
-    lonper
+    lonper : float
         longitude of periapsis: Elliptical equatorial: 0.0  to 2pi rad, else None
     """
 
@@ -4229,7 +4378,7 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
 #                           function eci2ecef
 #
 #  this function trsnforms a vector from the mean equator mean equniox frame
-#    (j2000), to an earth fixed (ITRF) frame.  the results take into account
+#    (j2000), to an earth fixed (itrf) frame.  the results take into account
 #    the effects of precession, nutation, sidereal time, and polar motion.
 #
 #  author        : david vallado                  719-573-2600   27 jun 2002
@@ -4284,7 +4433,7 @@ def eci2ecef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float,
              jdut1: float, lod: float, xp: float, yp: float, eqeterms: int,
              ddpsi: float, ddeps: float):
     """this function trsnforms a vector from the mean equator mean equniox frame
-    (j2000), to an earth fixed (ITRF) frame.  the results take into account
+    (j2000), to an earth fixed (itrf) frame.  the results take into account
     the effects of precession, nutation, sidereal time, and polar motion.
 
     Parameters
@@ -4494,8 +4643,9 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 #
 #                           function ecef2lle
 #
-#  these subroutines convert a geocentric equatorial (ijk) position vector into
-#    latitude and longitude.  geodetic and geocentric latitude are found.
+#  this subroutine convert a geocentric equatorial (ijk) position vector into
+#  latitude and longitude.  geodetic and geocentric latitude are found.
+#  this method is from Escobal, "Methods of Orbit Detemination" ([1965] 1985:398–399)
 #
 #  author        : david vallado                  719-573-2600   27 may 2002
 #
@@ -4507,8 +4657,8 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 #    jd          - julian date                    days from 4713 bc
 #
 #  outputs       :
-#    latgc       - geocentric latitude            -pi to pi rad
-#    latgd       - geodetic latitude              -pi to pi rad
+#    latgc       - geocentric latitude            -pi/2 to pi/2 rad
+#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
 #    lon         - longitude (west -)             -2pi to 2pi rad
 #    hellp       - height above the ellipsoid     km
 #
@@ -4537,8 +4687,33 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
 
 def ecef2lle(r, jd):
+    """this subroutine convert a geocentric equatorial (ijk) position vector into
+  latitude and longitude.  geodetic and geocentric latitude are found.
+  this method is from Escobal, "Methods of Orbit Detemination" ([1965] 1985:398–399)
+
+    Parameters
+    ----------
+    r : ndarray
+        ecef position vector: km
+    jd : julian date
+        julian date: days from 4713 bc
+
+    Returns
+    -------
+    latgc: float
+        geocentric latitude: -pi/2 to pi/2 rad
+    latgd: float
+        geodetic latitude: -pi/2 to pi/2 rad
+    lon: float
+        longitude (west-): -2pi to 2pi rad
+    hellp: float
+        height above the ellipsoid: km
+    """
 
     magr = smu.mag(r)
+    if sh.show:
+        print(magr)
+
     oneminuse2 = 1.0  - eccearthsqrd
 
     # ---------------- find longitude value  ----------------------
@@ -4547,24 +4722,23 @@ def ecef2lle(r, jd):
         rtasc = np.sign(r[2]) * math.pi * 0.5
     else:
         rtasc = math.atan2(r[1], r[0])
+    #lon approx - 170 (Vallado, 4th edition)
     gst = stu.gstime(jd)
     lon = rtasc - gst
 
     if (abs(lon) >= math.pi):
         if (lon < 0.0):
-            lon = twopi + lon
+            lon = lon + twopi
         else:
             lon = lon - twopi
 
     # -------------- set up initial latitude value  ---------------
     decl = math.asin(r[2] / magr)
-    latgc = decl
-    deltalat = 100.0
-    if sh.show:
-        print(magr)
     rsqrd = magr*magr
 
     # ---- iterate to find geocentric and geodetic latitude  -----
+    latgc = decl
+    deltalat = 100.0
     i = 1
     olddelta = deltalat + 10 # init
     while ((abs(olddelta - deltalat) >= small) and (i < 10)):
@@ -4581,7 +4755,7 @@ def ecef2lle(r, jd):
         i = i + 1
 
     if (i >= 10):
-        print('ijktolatlon did not converge\n ')
+        print('ijk to latlon did not converge\n ')
 
     latgc = latgc / math.pi * 90.0
     latgd = latgd / math.pi * 90.0
@@ -4596,9 +4770,11 @@ def ecef2lle(r, jd):
 #
 #                           function ecef2ll
 #
-#  these subroutines convert a geocentric equatorial position vector into
-#    latitude and longitude.  geodetic and geocentric latitude are found. the
-#    inputs must be ecef.
+#  this subroutine convert a geocentric equatorial position vector into
+#  latitude and longitude.  geodetic and geocentric latitude are found. the
+#  inputs must be ecef.  this particular algorithm is from Seidelmann's
+#  "Astronomical Alamanac (1992)"
+#
 #
 #  author        : david vallado                  719-573-2600   27 may 2002
 #
@@ -4610,8 +4786,8 @@ def ecef2lle(r, jd):
 #    r           - ecef position vector           km
 #
 #  outputs       :
-#    latgc       - geocentric latitude            -pi to pi rad
-#    latgd       - geodetic latitude              -pi to pi rad
+#    latgc       - geocentric latitude            -pi/2 to pi/2 rad
+#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
 #    lon         - longitude (west -)             -2pi to 2pi rad
 #    hellp       - height above the ellipsoid     km
 #
@@ -4635,9 +4811,10 @@ def ecef2lle(r, jd):
 # ------------------------------------------------------------------------------
 
 def ecef2ll(r : np.ndarray):
-    """these subroutines convert a geocentric equatorial position vector into
-    latitude and longitude.  geodetic and geocentric latitude are found. the
-    input must be ecef. This uses algorithm 12.
+    """this subroutine convert a geocentric equatorial position vector into
+  latitude and longitude.  geodetic and geocentric latitude are found. the
+  inputs must be ecef.  this particular algorithm is from Seidelmann's
+  "Astronomical Alamanac (1992)"
 
     Parameters
     ----------
@@ -4662,21 +4839,21 @@ def ecef2ll(r : np.ndarray):
     if (abs(temp) < small):
         rtasc = np.sign(r[2])*math.pi*0.5
     else:
-        rtasc = math.atan2(r[1], r[0])
+        rtasc = math.atan2(r1[1], r[0])
     lon = rtasc
     if (abs(lon) >= math.pi):   # mod it ?
         if (lon < 0.0):
-            lon = twopi + lon
+            lon = lon + twopi
         else:
             lon = lon - twopi
+
     decl = math.asin(r[2] / magr)
-    latgd = decl
     # print('rd %11.7f rtasc %11.7f lon %11.7f latgd %11.7f \n', temp, rtasc * rad2deg, lon * rad2deg, latgd * rad2deg)
 
     # ------------- iterate to find geodetic latitude -------------
     i = 1
+    latgd = decl #first guess
     olddelta = latgd + 10.0
-
     while ((abs(olddelta - latgd) >= small) and (i < 10)):
         olddelta = latgd
         sintemp = math.sin(latgd)
@@ -4704,8 +4881,10 @@ def ecef2ll(r : np.ndarray):
 #
 #                           function ecef2llb
 #
-#  these subroutines convert a geocentric equatorial (ijk) position vector into
-#    latitude and longitude.  geodetic and geocentric latitude are found.
+#  this subroutine convert a geocentric equatorial (ijk) position vector into
+#  latitude and longitude.  geodetic and geocentric latitude are found.
+#  this particular algorithm is from Borkowski's "Accurate Algorithms to
+#  Transform Geocentric to Geodetic Coordinates" (1989)
 #
 #  author        : david vallado                  719-573-2600    9 jun 2002
 #
@@ -4716,8 +4895,8 @@ def ecef2ll(r : np.ndarray):
 #    r           - ijk position vector            km
 #
 #  outputs       :
-#    latgc       - geocentric latitude            -pi to pi rad
-#    latgd       - geodetic latitude              -pi to pi rad
+#    latgc       - geocentric latitude            -pi/2 to pi/2 rad
+#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
 #    lon         - longitude (west -)             -2pi to 2pi rad
 #    hellp       - height above the ellipsoid     km
 #
@@ -4745,9 +4924,10 @@ def ecef2ll(r : np.ndarray):
 
 #this function breaks at math.atan when given [100000, 200000, 0.0]
 def ecef2llb(r):
-    """these subroutines convert a geocentric equatorial position vector into
-    latitude and longitude.  geodetic and geocentric latitude are found. the
-    input must be ecef. This uses algorithm 13 and is faster than ecef2ll().
+    """this subroutine convert a geocentric equatorial (ijk) position vector into
+  latitude and longitude.  geodetic and geocentric latitude are found.
+  this particular algorithm is from Borkowski's "Accurate Algorithms to
+  Transform Geocentric to Geodetic Coordinates" (1989)
 
     Parameters
     ----------
@@ -4776,7 +4956,7 @@ def ecef2llb(r):
     lon = rtasc
     if (abs(lon) >= math.pi):
         if (lon < 0.0):
-            lon = twopi + lon
+            lon = lon + twopi
         else:
             lon = lon - twopi
 
@@ -4873,7 +5053,7 @@ def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vecef : ndarray
         velocity vector earth fixed: km/s
     aecef : ndarray
-        acceleration vector earth fixed: km/s2
+        acceleration vector earth fixed: km/s^2
     ttt : float
         julian centuries of tt: centuries
     jdut1 : float
@@ -4898,7 +5078,7 @@ def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vmod : ndarray
         velocity vector mod: km/s
     amod : ndarray
-        acceleration vector mod: km/s2
+        acceleration vector mod: km/s^2
     """
 
     # ---- find matrices
@@ -4941,7 +5121,7 @@ def mod2ecef(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray,
     vmod : ndarray
         velocity vector mod: km/s
     amod : ndarray
-        acceleration vector mod: km/s2
+        acceleration vector mod: km/s^2
     ttt : float
         julian centuries of tt: centuries
     jdut1 : float
@@ -4966,7 +5146,7 @@ def mod2ecef(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray,
     vecef: ndarray
         velocity vector ecef: km/s
     aecef: ndarray
-        acceleration vector ecef: km/s2
+        acceleration vector ecef: km/s^2
     """
 
     # ---- find matrices
@@ -5057,7 +5237,7 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vecef : ndarray
         velocity vector earth fixed: km/s
     aecef : ndarray
-        acceleration vector earth fixed: km/s2
+        acceleration vector earth fixed: km/s^2
     ttt : float
         julian centuries of tt: centuries
     jdut1 : float
@@ -5082,7 +5262,7 @@ def ecef2tod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vtod : ndarray
         velocity vector tod: km/s
     atod : ndarray
-        acceleration vector tod: km/s2
+        acceleration vector tod: km/s^2
     """
     # ---- find matrices - note nut is only needed for st argument inputs
     deltapsi, _, meaneps, omega, _ = obu.nutation(ttt, ddpsi, ddeps)
@@ -5120,7 +5300,7 @@ def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
     vtod : ndarray
         velocity vector tod: km/s
     atod : ndarray
-        acceleration vector tod: km/s2
+        acceleration vector tod: km/s^2
     ttt : float
         julian centuries of tt: centuries
     jdut1 : float
@@ -5145,7 +5325,7 @@ def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
     vecef: ndarray
         velocity vector ecef: km/s
     aecef: ndarray
-        acceleration vector ecef: km/s2
+        acceleration vector ecef: km/s^2
     """
 
     # ---- find matrices - note nut is only needed for st argument inputs
@@ -5183,23 +5363,23 @@ def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
 #  revisions
 #
 #  inputs          description                    range / units
-#    recef       - position vector earth fixed    km
-#    vecef       - velocity vector earth fixed    km/s
-#    aecef       - acceleration vector earth fixedkm/s2
-#    opt         - arg to pass through to polarm  -added jmb
-#    xp          - polar motion coefficient       arc sec
-#    yp          - polar motion coefficient       arc sec
-#    ttt         - julian centuries of tt         centuries
+#    recef       - position vector earth fixed          km
+#    vecef       - velocity vector earth fixed          km/s
+#    aecef       - acceleration vector earth fixed      km/s2
+#    opt         - arg to pass through to polarm       '08' or '2000'
+#    xp          - polar motion coefficient             arc sec
+#    yp          - polar motion coefficient             arc sec
+#    ttt         - julian centuries of tt               centuries
 #
 #  outputs       :
-#    rpef        - position pseudo earth fixed    km
-#    vpef        - velocity pseudo earth fixed    km/s
-#    apef        - acceleration pseudo earth fixedkm/s2
+#    rpef        - position pseudo earth fixed          km
+#    vpef        - velocity pseudo earth fixed          km/s
+#    apef        - acceleration pseudo earth fixed      km/s2
 #
 #  locals        :
 #
 #  coupling      :
-#   precess      - rotation for precession        mod - eci
+#   precess      - rotation for precession              mod - eci
 #
 #  references    :
 #    vallado       2001, 219, eq 3-65 to 3-66
@@ -5210,7 +5390,7 @@ def tod2ecef(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray,
 
 def ecef2pef(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
              opt: str, xp: float, yp: float, ttt: float):
-    """this function transforms a vector from the earth fixed itrf frame
+    """this function transforms a vector from the earth fixed itrf
     (itrf), to the pseudo earth fixed frame (pef), or the
     terrestrial intermediate reference system (tirs).
 
@@ -5221,9 +5401,9 @@ def ecef2pef(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vecef : ndarray
         velocity vector earth fixed: km/s
     aecef : ndarray
-        acceleration vector earth fixed: km/s2
+        acceleration vector earth fixed: km/s^2
     opt : str
-        polarm method option: '80' - pef, else tirs
+        polarm method option: '80' = pef, else tirs
     xp : float
         polar motion coefficient: rad
     yp : float
@@ -5238,7 +5418,7 @@ def ecef2pef(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vpef : ndarray
         velocity vector pef: km/s
     apef : ndarray
-        acceleration vector pef: km/s2
+        acceleration vector pef: km/s^2
     """
 
     pm = smu.polarm(xp, yp, ttt, opt)
@@ -5264,9 +5444,9 @@ def pef2ecef(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray,
     vpef : ndarray
         velocity vector pef: km/s
     apef : ndarray
-        acceleration vector pef: km/s2
+        acceleration vector pef: km/s^2
     opt : str
-        polarm method option: '80' - pef, else tirs
+        polarm method option: '80' = pef, else tirs
     xp : float
         polar motion coefficient: rad
     yp : float
@@ -5281,7 +5461,7 @@ def pef2ecef(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray,
     vecef: ndarray
         velocity vector ecef: km/s
     aecef: ndarray
-        acceleration vector ecef: km/s2
+        acceleration vector ecef: km/s^2
     """
 
     pm = smu.polarm(xp, yp, ttt, opt)
@@ -5298,7 +5478,7 @@ def pef2ecef(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray,
 #
 #                           function ecef2teme
 #
-#  this function trsnforms a vector from the earth fixed (ITRF) frame to the
+#  this function trsnforms a vector from the earth fixed (itrf) frame to the
 #    true equator mean equniox frame (teme). the results take into account
 #    the effects of sidereal time, and polar motion.
 #
@@ -5350,7 +5530,7 @@ def ecef2teme(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vecef : ndarray
         velocity vector earth fixed: km/s
     aecef : ndarray
-        acceleration vector earth fixed: km/s2
+        acceleration vector earth fixed: km/s^2
     ttt : float
         julian centuries of tt: centuries
     jdut1 : float
@@ -5371,7 +5551,7 @@ def ecef2teme(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
     vteme : ndarray
         velocity vector teme: km/s
     ateme : ndarray
-        acceleration vector teme: km/s2
+        acceleration vector teme: km/s^2
     """
 
     # ------------------------ find gmst --------------------------
@@ -5429,7 +5609,7 @@ def ecef2teme(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 #                           function teme2ecef
 #
 #  this function trsnforms a vector from the true equator mean equniox frame
-#    (teme), to an earth fixed (ITRF) frame.  the results take into account
+#    (teme), to an earth fixed (itrf) frame.  the results take into account
 #    the effects of sidereal time, and polar motion.
 #
 #  author        : david vallado                  719-573-2600   30 oct 2017
@@ -5470,7 +5650,7 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
               ttt: float, jdut1: float, lod: float, xp: float, yp: float,
               eqeterms: int):
     """this function trsnforms a vector from the true equator mean equniox frame
-    (teme), to an earth fixed (ITRF) frame.  the results take into account
+    (teme), to an earth fixed (itrf) frame.  the results take into account
     the effects of sidereal time, and polar motion.
 
     Parameters
@@ -5480,7 +5660,7 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
     vteme : ndarray
         velocity vector teme: km/s
     ateme : ndarray
-        acceleration vector teme: km/s2
+        acceleration vector teme: km/s^2
     ttt : float
         julain centuries of tt: centuries
     jdut1 : float
@@ -5501,7 +5681,7 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
     vecef: ndarray
         velocity vector earth fixed: km/s
     aecef: ndarray
-        acceleration vector earth fixed: km/s2
+        acceleration vector earth fixed: km/s^2
     """
 
     # ------------------------ find gmst --------------------------
@@ -5558,9 +5738,9 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
 #    vallado     - consolidate with iau 2000                     14 feb 2005
 #
 #  inputs          description                    range / units
-#    reci        - position vector eci          km
-#    veci        - velocity vector eci          km/s
-#    aeci        - acceleration vector eci      km/s2
+#    reci        - position vector eci            km
+#    veci        - velocity vector eci            km/s
+#    aeci        - acceleration vector eci        km/s^2
 #    ttt         - julian centuries of tt         centuries
 #
 #  outputs       :
@@ -5569,7 +5749,7 @@ def teme2ecef(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
 #    vmod        - velocity vector of date
 #                    mean equator, mean equinox   km/s
 #    amod        - acceleration vector of date
-#                    mean equator, mean equinox   km/s2
+#                    mean equator, mean equinox   km/s^2
 #
 #  locals        :
 #    none.
@@ -5606,7 +5786,7 @@ def eci2mod(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray, ttt: float):
     vmod : ndarray
         velocity vector mod: km/s
     amod : ndarray
-        acceleration vector mod: km/s2
+        acceleration vector mod: km/s^2
     """
 
     prec, _, _, _, _ = obu.precess(ttt, '80')
@@ -5669,7 +5849,7 @@ def mod2eci(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray, ttt: float):
     vmod : ndarray
         velocity vector mod: km/s
     amod : ndarray
-        acceleration vector mod: km/s2
+        acceleration vector mod: km/s^2
     ttt : float
         julian centuries of tt: centuries
 
@@ -5680,7 +5860,7 @@ def mod2eci(rmod: np.ndarray, vmod: np.ndarray, amod: np.ndarray, ttt: float):
     veci : ndarray
         velocity vector eci            km/s
     aeci : ndarray
-        acceleration vector eci        km/s2
+        acceleration vector eci        km/s^2
     """
 
     prec, _, _, _, _ = obu.precess(ttt, '80')
@@ -5851,7 +6031,7 @@ def tod2eci(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray, ttt: float,
     vtod : ndarray
         velocity vector tod: km/s
     atod : ndarray
-        acceleration vector tod: km/s2
+        acceleration vector tod: km/s^2
     ttt : float
         julian centuries of tt: centuries
     ddpsi : float
@@ -5866,7 +6046,7 @@ def tod2eci(rtod: np.ndarray, vtod: np.ndarray, atod: np.ndarray, ttt: float,
     veci: ndarray
         velocity vector eci: km/s
     aeci: ndarray
-        acceleration vector eci: km/s2
+        acceleration vector eci: km/s^2
     """
 
     prec, _, _, _, _ = obu.precess(ttt, '80')
@@ -5943,7 +6123,7 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
     veci : ndarray
         velocity vector eci: km/s
     aeci : ndarray
-        acceleration vector eci: kms/2
+        acceleration vector eci: km/s^2
     ttt : float
         julian centuries of  tt: centuries
     jdut1 : float
@@ -5964,7 +6144,7 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
     vpef: ndarray
         velocity vector pseudo earth fixed: km/s
     apef: ndarray
-        acceleration vector pseudo earth fixed: km/s2
+        acceleration vector pseudo earth fixed: km/s^2
     """
 
     prec, _, _, _, _ = obu.precess(ttt, '80')
@@ -6046,7 +6226,7 @@ def pef2eci(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray, ttt: float,
     vpef : ndarray
         velocity vector pef: km/s
     apef : np.ndarray
-        acceleration vector pef: km/s2
+        acceleration vector pef: km/s^2
     ttt : float
         julian centuries from tt: centuries
     jdut1 : float
@@ -6067,7 +6247,7 @@ def pef2eci(rpef: np.ndarray, vpef: np.ndarray, apef: np.ndarray, ttt: float,
     veci: ndarray
         velocity vector eci: km/s
     aeci: ndarray
-        acceleration vector eci: km/s2
+        acceleration vector eci: km/s^2
     """
 
     prec, _, _, _, _ = obu.precess(ttt, '80')
@@ -6136,7 +6316,7 @@ def eci2teme(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
     veci : ndarray
         velocity vector eci: km/s
     aeci : ndarray
-        acceleration vector eci: km/s2
+        acceleration vector eci: km/s^2
     ttt : float
         julian centuries of tt: centuries
     ddpsi : float
@@ -6151,7 +6331,7 @@ def eci2teme(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
     vteme : ndarray
         velocity vector teme: km/s
     ateme : ndarray
-        acceleration vector teme: km/s2
+        acceleration vector teme: km/s^2
     """
 
     prec, _, _, _, _ = obu.precess (ttt, '80')
@@ -6254,7 +6434,7 @@ def teme2eci(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
     veci: ndarray
         velocity vector eci: km/s
     aeci: ndarray
-        acceleration vector eci: km/s2
+        acceleration vector eci: km/s^2
     """
     prec, _, _, _, _ = obu.precess(ttt, '80')
     deltapsi, _, meaneps, _, nut = obu.nutation(ttt, ddpsi, ddeps)
@@ -6291,10 +6471,10 @@ def teme2eci(rteme: np.ndarray, vteme: np.ndarray, ateme: np.ndarray,
 #                -
 #
 #  inputs          description                    range / units
-#    latgd       - geodetic latitude              -pi to pi rad
+#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
 #
 #  outputs       :
-#    latgc       - geocentric latitude            -pi to pi rad
+#    latgc       - geocentric latitude            -pi/2 to pi/2 rad
 #
 #  locals        :
 #    none.
@@ -6315,12 +6495,12 @@ def gd2gc (latgd: float):
     Parameters
     ----------
     latgd : float
-        geodetic latitude: -pi to pi rad
+        geodetic latitude: -pi/2 to pi/2 rad
 
     Returns
     -------
     latgc: float
-        geocentric latitude: -pi to pi rad
+        geocentric latitude: -pi/2 to pi/2 rad
     """
     latgc = math.atan((1.0  - eccearthsqrd) * math.tan(latgd))
     return latgc
@@ -6339,10 +6519,10 @@ def gd2gc (latgd: float):
 #                -
 #
 #  inputs          description                    range / units
-#    latgd       - geodetic latitude              -pi to pi rad
+#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
 #
 #  outputs       :
-#    latgc       - geocentric latitude            -pi to pi rad
+#    latgc       - geocentric latitude            -pi/2 to pi/2 rad
 #
 #  locals        :
 #    none.
@@ -6363,12 +6543,12 @@ def gc2gd(latgc: float):
     Parameters
     ----------
     latgc : float
-        geocentric latitude: -pi to pi rad
+        geocentric latitude: -pi/2 to pi/2 rad
 
     Returns
     -------
     latgd: float
-        geodetic latitude: -pi to pi rad
+        geodetic latitude: -pi/2 to pi/2 rad
     """
     latgd = math.atan(math.tan(latgc)/(1.0  - eccearthsqrd))
 
@@ -6669,167 +6849,6 @@ def radec2rv(rr: float, rtasc: float, decl: float, drr: float, drtasc: float,
     v[2] = drr * sindec + rr * cosdec * ddecl
     return r, v
 
-# ------------------------------------------------------------------------------
-#
-#                           function rv2tradc
-#
-#  this function converts geocentric equatorial (eci) position and velocity
-#    vectors into range, topcentric right acension, declination, and rates.
-#    notice the value of small as it can affect the rate term calculations.
-#    the solution uses the velocity vector to find the singular cases. also,
-#    the right acension and declination rate terms are not observable unless
-#    the acceleration vector is available.
-#
-#  author        : david vallado                  719-573-2600   19 jul 2004
-#
-#  revisions
-#
-#  inputs          description                    range / units
-#    reci        - eci position vector            km
-#    veci        - eci velocity vector            km/s
-#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
-#    lon         - longitude of site              -2pi to 2pi rad
-#    alt         - altitude                       km
-#    ttt         - julian centuries of tt         centuries
-#    jdut1       - julian date of ut1             days from 4713 bc
-#    lod         - excess length of day           sec
-#    xp          - polar motion coefficient       rad
-#    yp          - polar motion coefficient       rad
-#    ddpsi       - delta psi correction to gcrf          rad
-#    ddeps       - delta eps correction to gcrf          rad
-#
-#  outputs       :
-#    rho         - satellite range from site      km
-#    rtasc       - topocentric right ascension    0.0 to 2pi rad
-#    tdecl       - topocentric declination        -pi/2 to pi/2 rad
-#    drho        - range rate                     km/s
-#    daz         - xxazimuth rate                 rad / s
-#    del         - xxelevation rate               rad / s
-#
-#  locals        :
-#    rhoveci     - eci range vector from site     km
-#    drhoveci    - eci velocity vector from site  km / s
-#    rhoeci      - eci range vector from site     km
-#    drhoeci     - sez velocity vector from site  km
-#    wcrossr     - cross product result           km / s
-#    earthrate   - eci earth's rotation rate vec  rad / s
-#    tempvec     - temporary vector
-#    temp        - temporary real*8 value
-#    temp1       - temporary real*8 value
-#    i           - index
-#
-#  coupling      :
-#    mag         - magnitude of a vector
-#    rot3        - rotation about the 3rd axis
-#    rot2        - rotation about the 2nd axis
-#
-#  references    :
-#    vallado       2001, 250-255, alg 27
-#
-# [rho, trtasc, tdecl, drho, dtrtasc, dtdecl] = rv2tradc (reci, veci, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms, ddpsi, ddeps)
-# ------------------------------------------------------------------------------
-
-def rv2tradc(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
-             alt: float, ttt: float, jdut1: float, lod: float, xp: float,
-             yp: float, terms: int, ddpsi: float, ddeps: float) :
-    """this function converts geocentric equatorial (eci) position and velocity
-    vectors into range, topcentric right acension, declination, and rates.
-    notice the value of small as it can affect the rate term calculations.
-    the solution uses the velocity vector to find the singular cases. also,
-    the right acension and declination rate terms are not observable unless
-    the acceleration vector is available.
-
-    Parameters
-    ----------
-    reci : ndarray
-        eci position vector: km
-    veci : ndarray
-        eci velocity vector: km/s
-    latgd : float
-        geodetic latitude of site: -pi/2 to pi/2 rads
-    lon : float
-        longitude of site: -2pi to 2pi rads
-    alt : float
-        altitude of site: km
-    ttt : float
-        julian centuries of tt: centuries
-    jdut1 : float
-        julian date of ut1: days from 4713 bc
-    lod : float
-        excess length of day: sec
-    xp : float
-        polar motion coefficient: rad
-    yp : float
-        polar motion coefficient: rad
-    terms : int
-        # of terms for ast calculation: 0 or 2
-    ddpsi : float
-        delta psi correction to gcrf: rad
-    ddeps : float
-        delta eps correction to gcrf: rad
-
-    Returns
-    -------
-
-    rho: float
-        satellite range from site: km
-    trtasc: float
-        topocentric right ascension: 0 to 2pi rads
-    tdecl: float
-        topocentric declination: -pi/2 to pi/2 rads
-    drho: float:
-        range rate: km/s
-    dtrtasc: float
-
-    dtdecl
-    """
-    # ----------------- get site vector in ecef -------------------
-    rsecef, vsecef = obu.site(latgd, lon, alt)
-
-    # -------------------- convert ecef to eci --------------------
-    a = np.zeros(3)
-    rseci, vseci, _ = ecef2eci(rsecef, vsecef, a, ttt,
-                                jdut1, lod, xp, yp, 2, ddpsi, ddeps)
-
-
-    # ------- find eci range vector from site to satellite -------
-    rhoeci = reci - rseci
-    drhoeci = veci - vseci
-    rho = smu.mag(rhoeci)
-    # ------------- calculate azimuth and elevation ---------------
-    temp = math.sqrt(rhoeci[0]**2 + rhoeci[1]**2)
-    if (temp < small):
-        trtasc = math.atan2(drhoeci[1], drhoeci[0])
-    else:
-        trtasc = math.atan2(rhoeci[1], rhoeci[0])
-
-    if ((temp < small)):
-        tdecl = np.sign(rhoeci[2]) * halfpi
-    else:
-        magrhoeci = smu.mag(rhoeci)
-        tdecl = math.asin(rhoeci[2] / magrhoeci)
-
-    if (trtasc < 0.0):
-        trtasc = trtasc + 2.0 * np.pi
-
-    # ------ calculate range, azimuth and elevation rates ---------
-    temp1 = -rhoeci[1]**2 - rhoeci[0]**2
-    drho = np.dot(rhoeci, drhoeci) / rho
-    if (np.abs(temp1) > small):
-        dtrtasc = (drhoeci[0] * rhoeci[1] - drhoeci[1] * rhoeci[0]) / temp1
-    else:
-        dtrtasc = 0.0
-
-    if (abs(temp) > small):
-        dtdecl = (drhoeci[2] - drho * math.sin(tdecl)) / temp
-    else:
-        dtdecl = 0.0
-
-    return rho, trtasc, tdecl, drho, dtrtasc, dtdecl
-
-#####
-#####  def tradc2rv? -zeg
-#####
 
 # ------------------------------------------------------------------------------
 #
@@ -6940,20 +6959,10 @@ def rv2tradec(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     # ----------------- get site vector in ecef -------------------
     rsecef, vsecef = obu.site (latgd, lon, alt)
 
-    #rs
-    #vs
     # -------------------- convert ecef to eci --------------------
     a = np.zeros(3)
     rseci, vseci, aeci = ecef2eci(rsecef, vsecef, a, ttt, jdut1, lod, xp, yp,
                                   2, ddpsi, ddeps)
-    #rseci
-    #vseci
-
-    #rseci = rs
-    #vseci = vs
-    #[recef, vecef, aecef] = eci2ecef(reci, veci, aeci, ttt, jdut1, lod, xp, yp, 2, 0, 0)
-    #reci = recef
-    #veci = vecef
 
     # ------- find eci slant range vector from site to satellite ---------
     rhoveci = reci - rseci
@@ -6973,11 +6982,12 @@ def rv2tradec(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     else:
         magrhoeci = smu.mag(rhoveci)
         tdecl = math.asin(rhoveci[2] / magrhoeci)
+
     if (trtasc < 0.0):
         trtasc = trtasc + twopi
 
     # ---------- calculate topcentric rtasc and decl rates -------------
-    temp1 = -rhoveci[1] * rhoveci[1] - rhoveci[0] * rhoveci[0]
+    temp1 = -rhoveci[1] **2 - rhoveci[0] **2
     drho = np.dot(rhoveci, drhoveci) / rho
     if (abs(temp1) > small):
         dtrtasc = (drhoveci[0]*rhoveci[1] - drhoveci[1] * rhoveci[0]) / temp1
@@ -7403,7 +7413,7 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
     latgc : float
         geocentric latitude: rad
     lon : float
-        longidute: rad
+        longitude: rad
     fpa : float
         satellite flight path angle: rad
     az : float
@@ -7411,7 +7421,7 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
     ttt : float
         julian centuries of tt: rad
     jdut1 : float
-        julian date of ut1: days from 4712 bc
+        julian date of ut1: days from 4713 bc
     lod : float
         excess length of day: sec
     xp : float
@@ -7682,7 +7692,28 @@ def raz2sez(rho: float, az: float, el: float, drho: float, daz: float,
 # nu = lon2nu (jdut1, 7.020438698/rad, 0.070273056/rad, 19.90450011/rad, 352.5056022/rad)
 #
 
-def lon2nu(jdut1=None, lon=None, incl=None, raan=None, argp=None):
+def lon2nu(jdut1: float, lon: float, incl: float, raan: float, argp: float):
+    """ Finds true anomaly (nu) from julian date, longtitude, and other orbital
+    elements.
+
+    Parameters
+    ----------
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    lon : float
+        longtitude: rad
+    incl : float
+        inclination: 0.0 to pi rad
+    raan : float
+        longitude of ascending node: 0.0 to 2pi rad
+    argp : float
+        argument of perigee: 0.0 to 2pi rad
+
+    Returns
+    -------
+    nu : float
+        true anomaly: 0.0 to 2pi rad
+    """
     # fprintf(' jd #16.8f lon #11.5f  incl #11.5f raan #11.5f argp #11.5f \n', jdut1, lon * rad2deg, incl * rad2deg, raan * rad2deg, argp * rad2deg)
     # need to use their GMST calculation
     ed = jdut1 + 0.0 - 2451544.5
@@ -7710,8 +7741,9 @@ def lon2nu(jdut1=None, lon=None, incl=None, raan=None, argp=None):
     temp = arglat - argp
     nu = temp
     # fprintf(' #11.5f #11.5f #11.5f #11.5f  #16.10f ', lambdau * rad2deg, argp * rad2deg, lon * rad2deg, gmst * rad2deg, temp * rad2deg)
-    print(' lu %11.5f argp %11.5f lon %11.5f gmst %11.5f arglat %11.5f nu %16.10f '
-          % (lambdau * rad2deg, argp * rad2deg, lon * rad2deg, gmst * rad2deg, arglat * rad2deg, temp * rad2deg))
+    if sh.show:
+        print(' lu %11.5f argp %11.5f lon %11.5f gmst %11.5f arglat %11.5f nu %16.10f '
+              % (lambdau * rad2deg, argp * rad2deg, lon * rad2deg, gmst * rad2deg, arglat * rad2deg, temp * rad2deg))
     #     fprintf(' nu = #11.5f deg \n', nu * rad2deg)
     return nu
 
@@ -7729,6 +7761,27 @@ def lon2nu(jdut1=None, lon=None, incl=None, raan=None, argp=None):
 #
 
 def nu2lon(jdut1=None, nu=None, incl=None, raan=None, argp=None):
+    """ Finds longtitude from julian date, true anomaly (nu), and other orbital
+    elements.
+
+    Parameters
+    ----------
+    jdut1 : float
+        julian date of ut1: days from 4713 bc
+    nu : float
+        true anomaly: 0.0 to 2pi rad
+    incl : float
+        inclination: 0.0 to pi rad
+    raan : float
+        longitude of ascending node: 0.0 to 2pi rad
+    argp : float
+        argument of perigee: 0.0 to 2pi rad
+
+    Returns
+    -------
+    lon : float
+        longtitude: rad
+    """
     #    fprintf(' jd #16.8f lon #11.5f  incl #11.5f raan #11.5f argp #11.5f \n', jdut1, lon * rad2deg, incl * rad2deg, raan * rad2deg, argp * rad2deg)
 #    need to use their GMST calculation
     ed = jdut1 - 2451544.5
@@ -7754,7 +7807,7 @@ def nu2lon(jdut1=None, nu=None, incl=None, raan=None, argp=None):
 
     temp = lambdau - gmst + raan
     # fprintf(' xx #11.5f  #11.5f #11.5f #11.5f ', lambdau * rad2deg, arglat * rad2deg, raan * rad2deg, temp * rad2deg)
-# make sure lambdau is 0 to 360 deg
+    # make sure lambdau is 0 to 360 deg
     temp = np.fmod(temp, 2.0 * np.pi)
     lon = temp
     # fprintf(' #11.5f  #11.5f ', nu * rad2deg, raan * rad2deg)
@@ -7768,7 +7821,7 @@ def eci2tirsiau06(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
                   opt: str, ttt: float, jdut1: float, lod: float,
                   ddx: float = None, ddy: float = None):
     """this function transforms a vector from the mean equator, mean equinox
-    frame (GCRF) to the Terrestrial Intermediate Reference System (TIRS).
+    frame (GCRF) to the Terrestrial Intermediate Reference System (tirs).
 
     Parameters
     ----------
@@ -7835,7 +7888,7 @@ def tirs2eciiau06(rtirs: np.ndarray, vtirs: np.ndarray, atirs: np.ndarray,
                   opt: str, ttt: float, jdut1: float, lod: float,
                   ddx: float = None, ddy: float = None):
     """this function transforms a vector from the mean equator, mean equinox
-    frame (GCRF) to the Terrestrial Intermediate Reference System (TIRS).
+    frame (GCRF) to the Terrestrial Intermediate Reference System (tirs).
 
     Parameters
     ----------
@@ -8228,7 +8281,7 @@ def eci2ecefiau06(reci: np.ndarray, veci: np.ndarray, aeci:np.ndarray,
         if option == 'c':
             print('CIRS          IAU-2006 CIO ', (rcirs))
             print(' v ', (vcirs))
-            print('TIRS          IAU-2006 %c   ' % (option))
+            print('tirs          IAU-2006 %c   ' % (option))
             print(rtirs)
             print(' v ', (vtirs))
 

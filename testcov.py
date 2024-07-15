@@ -81,7 +81,12 @@ if testnum == 0:
     timezone = 0
     order = 4 #Should order be 106 like the others? -mjc
     terms = 2
-    cartcov = np.array([[24097166,86695628,- 5509927,- 6294.97,1752.326,17.65861],[86695628,453000000.0,- 28000000.0,- 32967.4,6319.431,90.73355],[- 5509927,- 28000000.0,1771703,2061.582,- 401.582,- 5.67764],[- 6294.97,- 32967.4,2061.582,6949865,- 1352586,0.385006],[1752.326,6319.431,- 401.582,- 1352586,263241.3,2.013476],[17.65861,90.73355,- 5.67764,0.385006,2.013476,33.37338]])
+    cartcov = np.array([[24097166,86695628,- 5509927,- 6294.97,1752.326,17.65861],
+                        [86695628,453000000.0,- 28000000.0,- 32967.4,6319.431,90.73355],
+                        [- 5509927,- 28000000.0,1771703,2061.582,- 401.582,- 5.67764],
+                        [- 6294.97,- 32967.4,2061.582,6949865,- 1352586,0.385006],
+                        [1752.326,6319.431,- 401.582,- 1352586,263241.3,2.013476],
+                        [17.65861,90.73355,- 5.67764,0.385006,2.013476,33.37338]])
 
 # ------- navy test
 if testnum == 1:
@@ -102,7 +107,12 @@ if testnum == 1:
     terms = 2
     timezone = 0
     order = 106
-    cartcov = np.array([[8.04204e-13,- 7.41923e-13,2.02623e-12,- 3.78793e-16,1.77302e-13,- 2.48352e-13],[- 7.41923e-13,2.19044e-12,3.82034e-12,- 1.1901e-15,2.83844e-13,- 3.67925e-13],[2.02623e-12,3.82034e-12,1.9757e-11,- 9.35438e-15,- 1.47386e-12,3.01542e-12],[- 3.78793e-16,- 1.1901e-15,- 9.35438e-15,1.56236e-17,8.86093e-17,4.56974e-16],[1.77302e-13,2.83844e-13,- 1.47386e-12,8.86093e-17,9.67797e-13,7.23072e-13],[- 2.48352e-13,- 3.67925e-13,3.01542e-12,4.56974e-16,7.23072e-13,1.84123e-12]])
+    cartcov = np.array([[8.04204e-13,- 7.41923e-13,2.02623e-12,- 3.78793e-16,1.77302e-13,- 2.48352e-13],
+                        [- 7.41923e-13,2.19044e-12,3.82034e-12,- 1.1901e-15,2.83844e-13,- 3.67925e-13],
+                        [2.02623e-12,3.82034e-12,1.9757e-11,- 9.35438e-15,- 1.47386e-12,3.01542e-12],
+                        [- 3.78793e-16,- 1.1901e-15,- 9.35438e-15,1.56236e-17,8.86093e-17,4.56974e-16],
+                        [1.77302e-13,2.83844e-13,- 1.47386e-12,8.86093e-17,9.67797e-13,7.23072e-13],
+                        [- 2.48352e-13,- 3.67925e-13,3.01542e-12,4.56974e-16,7.23072e-13,1.84123e-12]])
     #  3.06012e-12  1.16922e-11  6.72154e-11  1.28647e-13  4.11455e-13 -3.89727e-12  2.20508e-05
 
 # ------- accuracy sensitivity test
@@ -124,12 +134,19 @@ if testnum == 2:
     timezone = 0
     terms = 2
     order = 106
-    covntw = np.array([[1.0,0.0,0.0,0.0,0.0,0.0],[0.0,10.0,0.0,0.0,0.0,0.0],[0.0,0.0,1.0,0.0,0.0,0.0],[0.0,0.0,0.0,1e-06,0.0,0.0],[0.0,0.0,0.0,0.0,0.0001,0.0],[0.0,0.0,0.0,0.0,0.0,1e-06]])
+    covntw = np.array([[1.0,0.0,0.0,0.0,0.0,0.0],
+                       [0.0,10.0,0.0,0.0,0.0,0.0],
+                       [0.0,0.0,1.0,0.0,0.0,0.0],
+                       [0.0,0.0,0.0,1e-06,0.0,0.0],
+                       [0.0,0.0,0.0,0.0,0.0001,0.0],
+                       [0.0,0.0,0.0,0.0,0.0,1e-06]])
     #, tcg, jdtcg,jdtcgfrac, tcb, jdtcb,jdtcbfrac
-    ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
-    cartstate,classstate,flstate,eqstate = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps) #latlon or radec? -mjc
+    ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = \
+        stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
+    cartstate,classstate,flstate,eqstate = \
+        sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps) #latlon or radec? -mjc
     sc.printcov(covntw,'ct','m',anom)
-    cartcov,tm = sc.covo22ct(covntw,cartstate)
+    cartcov,tm = sc.covntw2ct(covntw,cartstate)
     sc.printcov(cartcov,'ct','m',anom)
 
 # ------- paper test
@@ -151,9 +168,24 @@ if testnum == 3:
     timezone = 0
     terms = 2
     order = 106
-    cartcov = np.array([[100.0,0.01,0.01,0.0001,0.0001,0.0001],[0.01,100.0,0.01,0.0001,0.0001,0.0001],[0.01,0.01,100.0,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,1e-06,1e-06],[0.0001,0.0001,0.0001,1e-06,0.0001,1e-06],[0.0001,0.0001,0.0001,1e-06,1e-06,0.0001]])
-    classcovtrace = np.array([[6.489403,2.979136e-07,2.117582e-22,5.293956e-22,0.03465237,0.009048777],[2.979136e-07,4.353986e-14,6.708473e-27,1.091152e-26,1.059842e-09,2.77089e-10],[2.117582e-22,6.708473e-27,5.652526e-11,6.541195e-14,8.709806e-15,- 4.430849e-23],[5.293956e-22,1.091152e-26,6.541195e-14,5.749008e-11,7.654984e-12,- 7.072071e-23],[0.03465237,1.059842e-09,8.709806e-15,7.654984e-12,0.0002232401,5.830381e-05],[0.009048777,2.77089e-10,- 4.430849e-23,- 7.072071e-23,5.830381e-05,1.522727e-05]])
-    eqcovtrace = np.array([[5.70396e-14,2.56241e-14,2.218139e-12,6.530893e-15,- 1.258488e-18,6.777803e-18],[2.56241e-14,6.348393e-14,- 1.958979e-12,7.398763e-15,- 4.223513e-18,2.274645e-17],[2.218139e-12,- 1.958979e-12,3.562517e-10,2.727333e-16,2.373188e-13,- 1.278121e-12],[6.530893e-15,7.398763e-15,2.727333e-16,1.256922e-15,4.930381e-32,- 1.972152e-31],[- 1.258488e-18,- 4.223513e-18,2.373188e-13,4.930381e-32,2.292326e-14,- 2.061165e-17],[6.777803e-18,2.274645e-17,- 1.278121e-12,- 1.972152e-31,- 2.061165e-17,2.288388e-14]])
+    cartcov = np.array([[100.0,0.01,0.01,0.0001,0.0001,0.0001],
+                        [0.01,100.0,0.01,0.0001,0.0001,0.0001],
+                        [0.01,0.01,100.0,0.0001,0.0001,0.0001],
+                        [0.0001,0.0001,0.0001,0.0001,1e-06,1e-06],
+                        [0.0001,0.0001,0.0001,1e-06,0.0001,1e-06],
+                        [0.0001,0.0001,0.0001,1e-06,1e-06,0.0001]])
+    classcovtrace = np.array([[6.489403,2.979136e-07,2.117582e-22,5.293956e-22,0.03465237,0.009048777],
+                              [2.979136e-07,4.353986e-14,6.708473e-27,1.091152e-26,1.059842e-09,2.77089e-10],
+                              [2.117582e-22,6.708473e-27,5.652526e-11,6.541195e-14,8.709806e-15,- 4.430849e-23],
+                              [5.293956e-22,1.091152e-26,6.541195e-14,5.749008e-11,7.654984e-12,- 7.072071e-23],
+                              [0.03465237,1.059842e-09,8.709806e-15,7.654984e-12,0.0002232401,5.830381e-05],
+                              [0.009048777,2.77089e-10,- 4.430849e-23,- 7.072071e-23,5.830381e-05,1.522727e-05]])
+    eqcovtrace = np.array([[5.70396e-14,2.56241e-14,2.218139e-12,6.530893e-15,- 1.258488e-18,6.777803e-18],
+                           [2.56241e-14,6.348393e-14,- 1.958979e-12,7.398763e-15,- 4.223513e-18,2.274645e-17],
+                           [2.218139e-12,- 1.958979e-12,3.562517e-10,2.727333e-16,2.373188e-13,- 1.278121e-12],
+                           [6.530893e-15,7.398763e-15,2.727333e-16,1.256922e-15,4.930381e-32,- 1.972152e-31],
+                           [- 1.258488e-18,- 4.223513e-18,2.373188e-13,4.930381e-32,2.292326e-14,- 2.061165e-17],
+                           [6.777803e-18,2.274645e-17,- 1.278121e-12,- 1.972152e-31,- 2.061165e-17,2.288388e-14]])
     sc.printcov(cartcov,'ct','m',anom)
     print('Check the xxxx (mat*transpose) of cartcov \n' % ())
     print((np.transpose((cartcov * np.transpose(cartcov)))))
@@ -182,7 +214,13 @@ if testnum == 4:
     timezone = 0
     order = 106
     # ----- in from usstratcom is lower diagonal!!!
-    eqcov = np.array([[4.68914e-11,1.6009e-11,1.64731e-10,- 4.38141e-16,- 1.41195e-10,1.09999e-11,- 8.49933e-12],[1.6009e-11,1.06881e-11,6.39732e-11,6.53124e-16,- 5.60554e-11,2.56099e-11,- 4.4424e-13],[1.64731e-10,6.39732e-11,6.71336e-10,1.04455e-14,- 6.37507e-10,9.40554e-11,7.34847e-12],[- 4.38141e-16,6.53124e-16,1.04455e-14,2.10897e-17,1.59272e-14,1.03081e-14,1.80744e-13],[- 1.41195e-10,- 5.60554e-11,- 6.37507e-10,1.59272e-14,7.59844e-10,- 1.05437e-10,1.77857e-10],[1.09999e-11,2.56099e-11,9.40554e-11,1.03081e-14,- 1.05437e-10,1.86472e-10,3.99631e-11],[- 8.49933e-12,- 4.4424e-13,7.34847e-12,1.80744e-13,1.77857e-10,3.99631e-11,4.67207e-06]])
+    eqcov = np.array([[4.68914e-11,1.6009e-11,1.64731e-10,- 4.38141e-16,- 1.41195e-10,1.09999e-11,- 8.49933e-12],
+                      [1.6009e-11,1.06881e-11,6.39732e-11,6.53124e-16,- 5.60554e-11,2.56099e-11,- 4.4424e-13],
+                      [1.64731e-10,6.39732e-11,6.71336e-10,1.04455e-14,- 6.37507e-10,9.40554e-11,7.34847e-12],
+                      [- 4.38141e-16,6.53124e-16,1.04455e-14,2.10897e-17,1.59272e-14,1.03081e-14,1.80744e-13],
+                      [- 1.41195e-10,- 5.60554e-11,- 6.37507e-10,1.59272e-14,7.59844e-10,- 1.05437e-10,1.77857e-10],
+                      [1.09999e-11,2.56099e-11,9.40554e-11,1.03081e-14,- 1.05437e-10,1.86472e-10,3.99631e-11],
+                      [- 8.49933e-12,- 4.4424e-13,7.34847e-12,1.80744e-13,1.77857e-10,3.99631e-11,4.67207e-06]])
     sc.printcov(eqcovtrace,'eq','t',anom)
     #eqcovt = covunits(eqcovtrace,anom,'eq','m')
     #sc.printcov(eqcovt,'eq','m',anom)
@@ -204,7 +242,13 @@ if testnum == 5:
     terms = 2
     timezone = 0
     order = 106
-    eqcovtrace = np.array([[1.79533e-09,9.35041e-10,- 1.99413e-09,- 1.63427e-13,1.05541e-10,- 5.77137e-10,5.44105e-10],[9.35041e-10,1.04209e-09,- 5.91847e-10,- 9.78886e-14,- 4.0233e-11,- 4.39526e-10,6.10449e-10],[- 1.99413e-09,- 5.91847e-10,3.63062e-09,2.62623e-13,- 3.98481e-10,9.56574e-10,2.86557e-09],[- 1.63427e-13,- 9.78886e-14,2.62623e-13,5.56451e-16,5.18072e-14,- 2.60304e-14,- 2.27216e-12],[1.05541e-10,- 4.0233e-11,- 3.98481e-10,5.18072e-14,1.00164e-09,2.40555e-10,- 1.10189e-10],[- 5.77137e-10,- 4.39526e-10,9.56574e-10,- 2.60304e-14,2.40555e-10,2.05855e-09,- 1.97222e-11],[5.44105e-10,6.10449e-10,2.86557e-09,- 2.27216e-12,- 1.10189e-10,- 1.97222e-11,1.13395e-05]])
+    eqcovtrace = np.array([[1.79533e-09,9.35041e-10,- 1.99413e-09,- 1.63427e-13,1.05541e-10,- 5.77137e-10,5.44105e-10],
+                           [9.35041e-10,1.04209e-09,- 5.91847e-10,- 9.78886e-14,- 4.0233e-11,- 4.39526e-10,6.10449e-10],
+                           [- 1.99413e-09,- 5.91847e-10,3.63062e-09,2.62623e-13,- 3.98481e-10,9.56574e-10,2.86557e-09],
+                           [- 1.63427e-13,- 9.78886e-14,2.62623e-13,5.56451e-16,5.18072e-14,- 2.60304e-14,- 2.27216e-12],
+                           [1.05541e-10,- 4.0233e-11,- 3.98481e-10,5.18072e-14,1.00164e-09,2.40555e-10,- 1.10189e-10],
+                           [- 5.77137e-10,- 4.39526e-10,9.56574e-10,- 2.60304e-14,2.40555e-10,2.05855e-09,- 1.97222e-11],
+                           [5.44105e-10,6.10449e-10,2.86557e-09,- 2.27216e-12,- 1.10189e-10,- 1.97222e-11,1.13395e-05]])
     sc.printcov(eqcovtrace,'eq','t',anom)
     #eqcovt = covunits(eqcovtrace,anom,'eq','m')
     #sc.printcov(eqcovt,'eq','m',anom)
@@ -236,6 +280,7 @@ anomflt = 'latlon'
 ut1,tut1,jdut1,jdut1frac,utc,tai,tt,ttt,jdtt,jdttfrac,tdb,ttdb,jdtdb,jdtdbfrac = stu.convtime(year,mon,day,hr,min,sec,timezone,dut1,dat)
 # --- convert the eci state into the various other state formats (classical, equinoctial, etc)
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anomeq1+anomeq2,anomflt,ddpsi,ddeps)
+
 print('==================== do the sensitivity tests \n' % ())
 print('1.  Cartesian Covariance \n' % ())
 sc.printcov(cartcov,'ct','m',anomeq1+'a')
@@ -409,10 +454,10 @@ print('=========================================================================
 anom = 'meana'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
 print('\n2.  Classical Covariance from Cartesian #1 above (meana) ------------------- \n' % ())
-classcovmeana,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovmeana,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 sc.printcov(classcovmeana,'cl','m',anom)
 print(' \nCartesian Covariance from Classical #2 above \n' % ())
-cartcovmeanarev,tmcl2ct = sc.covcl2ctnew(classcovmeana,classstate,anom)
+cartcovmeanarev,tmcl2ct = sc.covcl2ct(classcovmeana,classstate,anom)
 sc.printcov(cartcovmeanarev,'ct','m',anom)
 smu.printdiff(' cartcov - cartcovmeanarev \n',cartcov,cartcovmeanarev)
 sc.printcov((tmct2cl @ tmcl2ct),'tm','m',anom)
@@ -424,10 +469,10 @@ sc.printcov((tmct2cl @ tmcl2ct),'tm','m',anom)
 print('\n2.  Classical Covariance from Cartesian #1 above (meann) ------------------- \n' % ())
 anom = 'meann'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovmeann,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovmeann,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 sc.printcov(classcovmeann,'cl','m',anom)
 print('\n  Cartesian Covariance from Classical #2 above \n' % ())
-cartcovmeannrev,tmcl2ct = sc.covcl2ctnew(classcovmeann,classstate,anom)
+cartcovmeannrev,tmcl2ct = sc.covcl2ct(classcovmeann,classstate,anom)
 sc.printcov(cartcovmeannrev,'ct','m',anom)
 print('\n' % ())
 #         fprintf(1,'-------- tm cl2ct new ---------\n');
@@ -446,10 +491,10 @@ sc.printcov(tmct2cl @ tmcl2ct,'tm','m',anom)
 print('\n2.  Classical Covariance from Cartesian #1 above (truea) -------------------- \n' % ())
 anom = 'truea'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovtruea,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovtruea,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 sc.printcov(classcovtruea,'cl','m',anom)
 print('\n  Cartesian Covariance from Classical #2 above \n' % ())
-cartcovtruearev,tmcl2ct = sc.covcl2ctnew(classcovtruea,classstate,anom)
+cartcovtruearev,tmcl2ct = sc.covcl2ct(classcovtruea,classstate,anom)
 sc.printcov(cartcovtruearev,'ct','m',anom)
 print('\n' % ())
 tmcl2cttruea = tmcl2ct
@@ -463,10 +508,10 @@ sc.printcov(tmct2cl @ tmcl2ct,'tm','m',anom)
 print('\n2.  Classical Covariance from Cartesian #1 above (truen) -------------------- \n' % ())
 anom = 'truen'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovtruen,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovtruen,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 sc.printcov(classcovtruen,'cl','m',anom)
 print('  Cartesian Covariance from Classical #2 above \n' % ())
-cartcovtruenrev,tmcl2ct = sc.covcl2ctnew(classcovtruen,classstate,anom)
+cartcovtruenrev,tmcl2ct = sc.covcl2ct(classcovtruen,classstate,anom)
 sc.printcov(cartcovtruenrev,'ct','m',anom)
 print('\n' % ())
 tmcl2cttruen = tmcl2ct
@@ -482,7 +527,7 @@ print('=========================================================================
 print('\n3.  Equinoctial Covariance from Classical #2 above (truea) \n' % ())
 anom = 'truea'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovtruea,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovtruea,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 eqcovtruea,tmcl2eq = sc.covcl2eq(classcovtruea,classstate,anom,fr)
 sc.printcov(eqcovtruea,'eq','m',anom)
 #eqcov = eqcovtruea; # save for later
@@ -503,7 +548,7 @@ sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 print('\n3.  Equinoctial Covariance from Classical #2 above (truen) \n' % ())
 anom = 'truen'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovtruen,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovtruen,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 eqcovtruen,tmcl2eq = sc.covcl2eq(classcovtruen,classstate,anom,fr)
 sc.printcov(eqcovtruen,'eq','m',anom)
 #eqcov = eqcovtruen; # save for later
@@ -524,7 +569,7 @@ sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 print('\n3.  Equinoctial Covariance from Classical #2 above (meana) \n' % ())
 anom = 'meana'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovmeana,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovmeana,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 eqcovmeana,tmcl2eq = sc.covcl2eq(classcovmeana,classstate,anom,fr)
 sc.printcov(eqcovmeana,'eq','m',anom)
 print('\n4.  Classical Covariance from Equinoctial #3 above \n' % ())
@@ -541,7 +586,7 @@ sc.printcov(tmcl2eq @ tmeq2cl,'tm','m',anom)
 print('\n3.  Equinoctial Covariance from Classical #2 above (meann) \n' % ())
 anom = 'meann'
 cartstate,classstate,flstate,eqstate,fr = sc.setcov(reci,veci,ttt,jdut1,lod,xp,yp,terms,'y',anom,anomflt,ddpsi,ddeps)
-classcovmeann,tmct2cl = sc.covct2clnew(cartcov,cartstate,anom)
+classcovmeann,tmct2cl = sc.covct2cl(cartcov,cartstate,anom)
 eqcovmeann,tmcl2eq = sc.covcl2eq(classcovmeann,classstate,anom,fr)
 sc.printcov(eqcovmeann,'eq','m',anom)
 print('\n4.  Classical Covariance from Equinoctial #3 above \n' % ())
@@ -663,8 +708,8 @@ smu.printdiff(' classcov - classcovfl \n',classcovmeana,classcovfl)
 # temp testing !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #         fprintf(1,'2.temp testing!!  find original transformations \n');
-#         [classco, tmct2clO]  = covct2clnewO( cartcov,cartstate,strcat(anomeq1,'a') );
-#         [cartcov1, tmcl2ctO] = covcl2ctnewO( classco,classstate,strcat(anomeq1,'a') );
+#         [classco, tmct2clO]  = covct2clO( cartcov,cartstate,strcat(anomeq1,'a') );
+#         [cartcov1, tmcl2ctO] = covcl2ctO( classco,classstate,strcat(anomeq1,'a') );
 
 #         fprintf(1,'-------- tm cl2ct old ---------\n');
 #         printcov( tmcl2ctO,'tm','m',strcat(anomeq1,'a') );
@@ -775,9 +820,9 @@ print('pct differences if over %4e \n' % (small))
 print((np.transpose(diffmm)))
 
 #anom = 'true';
-classcovrev,tm = sc.covct2clnew(cartcov,cartstate,anomeq1+anomeq2)
+classcovrev,tm = sc.covct2cl(cartcov,cartstate,anomeq1+anomeq2)
 sc.printcov(classcovrev,'cl','m',anomeq1+anomeq2)
-#        [cartcov1, tm]   = covcl2ctnew( classco1,classstate,strcat(anomeq1,anomeq2) );
+#        [cartcov1, tm]   = covcl2ct( classco1,classstate,strcat(anomeq1,anomeq2) );
 #        printcov( cartcov1,'ct','m',strcat(anomeq1,anomeq2) );
 
 
@@ -787,12 +832,12 @@ sc.printcov(eqcov,'eq','m',anom)
 classco,tm = sc.coveq2cl(eqcov,eqstate,anom,fr)
 print("classco")
 print(classco)
-cartco,tm = sc.covcl2ctnew(classco,classstate,anom)
+cartco,tm = sc.covcl2ct(classco,classstate,anom)
 print("cartco")
 print(cartco)
 print("-----")
 # First element (0,0) is off in classco - mjc
-classco,tm = sc.covct2clnew(cartco,cartstate,anom)
+classco,tm = sc.covct2cl(cartco,cartstate,anom)
 print("classco")
 print(classco)
 eqcovmeannrev,tm = sc.covcl2eq(classco,classstate,anom,fr)
@@ -818,7 +863,7 @@ print('initial cartesian covariance \n' % ())
 sc.printcov(cartcov,'ct','m',anom)
 print(' -------- classical covariance conversions --------- \n' % ())
 print(' -----  cartesian to classical covariance  --------- \n' % ())
-classcov,tm = sc.covct2clnew(cartcov,cartstate,anom)
+classcov,tm = sc.covct2cl(cartcov,cartstate,anom)
 print('tm check:')
 print(tm)
 sc.printcov(classcov,'cl','m',anom)
@@ -859,7 +904,7 @@ tmold = np.linalg.inv(tm)
 #        fprintf(1,'#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f\n',diffm' );
 
 print('----- classical to cartesian covariance  ---------- \n' % ())
-cartco,tm = sc.covcl2ctnew(classcov,classstate,anom)
+cartco,tm = sc.covcl2ct(classcov,classstate,anom)
 sc.printcov(cartco,'ct','m',anom)
 print('tm cl2ct \n' % ())
 print((np.transpose(tm)))
@@ -1058,9 +1103,9 @@ for testnumbb in np.arange(1,12+1).reshape(-1):
     # ------ do conversions
     classcov,tm = sc.coveq2cl(eqcov,eqstate,anom,fr)
     sc.printcov(classcov,'cl','m',anom)
-    cartcov,tm = sc.covcl2ctnew(classcov,classstate,anom)  #jmb change
+    cartcov,tm = sc.covcl2ct(classcov,classstate,anom)  #jmb change
     sc.printcov(cartcov,'ct','m',anom)
-    classco,tm = sc.covct2clnew(cartcov,cartstate,anom)  #jmb change
+    classco,tm = sc.covct2cl(cartcov,cartstate,anom)  #jmb change
     sc.printcov(classco,'cl','m',anom)
     eqcovmeannrev,tm = sc.covcl2eq(classco,classstate,anom,fr)
     if doall != 'y':

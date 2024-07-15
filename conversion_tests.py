@@ -426,11 +426,11 @@ print('     arglat   truelon    lonper ',\
 #alt, terms needs init
 alt = 0.0
 terms = 2
-rho, trtasc, tdecl, drho, dtrtasc, dtdecl = rv2tradc(reci, veci, latgd, lon,
+rho, trtasc, tdecl, drho, dtrtasc, dtdecl = rv2tradec(reci, veci, latgd, lon,
                                                         alt, ttt, jdut1, lod,
                                                         xp, yp, terms, ddpsi,
                                                         ddeps)
-print("rv2tradc")
+print("rv2tradec")
 print('rho %f trtasc %f tdecl %f drho %f dtrtasc %f dtdecl %f' %
         (rho, trtasc, tdecl, drho, dtrtasc, dtdecl))
 

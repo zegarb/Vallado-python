@@ -9787,7 +9787,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                         currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
         else:
             rngnom, trtascnom, tdeclnom, drngnom, dtrtascnom, dtdeclnom = \
-            sc.rv2tradc(reci1.T, veci1.T, currobsrec['latgd'],
+            sc.rv2tradec(reci1.T, veci1.T, currobsrec['latgd'],
                         currobsrec['lon'], currobsrec['alt'],
                         currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                         currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -9846,7 +9846,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
             #  end # if obstype
             if (currobsrec['obstype'] == 3):
                 trrpert, trtascpert, tdeclpert, tdrrpert, tdrtascpert, tddeclpert =\
-                      sc.rv2tradc(reci3.T, veci3.T, currobsrec['latgd'],
+                      sc.rv2tradec(reci3.T, veci3.T, currobsrec['latgd'],
                                   currobsrec['lon'], currobsrec['alt'],
                                   currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                                   currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
