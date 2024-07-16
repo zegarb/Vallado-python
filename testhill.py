@@ -24,7 +24,7 @@ ang_step = 1e-08
 # outfilehill = open(strcat('d:/STKFiles Educational Files/Hills/thillc', int2str(casenumo),'n', int2str(casetest),'.out'),'wt')
 casenumo = 1
 outfilehill = open(os.path.join(os.path.dirname(__file__), 'testoutput',
-                    'thillinitial.out'), 'wt')
+                    'thill.out'), 'wt')
 # -----------------------------------------------------------------------------------------------
 # -------------------------------- do initial accuracy checks fwd, back, ------------------------
 # -----------------------------------------------------------------------------------------------
