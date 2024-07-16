@@ -110,9 +110,9 @@ for i in range(1, 3):
     print('radec  %14.7f %14.7f %14.7f %14.7f %14.12f %14.12f\n'
           % (rr, rtasc * rad2deg, decl * rad2deg, drr, drtasc * rad2deg, ddecl * rad2deg))
 
-    reci, veci = sc.radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
-    print('r    %14.7f %14.7f %14.7f' % (reci[0], reci[1], reci[2]))
-    print(' v %14.9f %14.9f %14.9f\n' % (veci[0], veci[1], veci[2]))
+    r, v = sc.radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
+    print('r    %14.7f %14.7f %14.7f' % (r[0], r[1], r[2]))
+    print(' v %14.9f %14.9f %14.9f\n' % (v[0], v[1], v[2]))
 
     # topoc
     ddpsi = 0.0
@@ -128,17 +128,12 @@ for i in range(1, 3):
     print(' %14.7f %14.12f %14.12f\n' % (tdrr, tdrtasc * rad2deg,
                                          tddecl * rad2deg))
 
-    #          [r, v] = tradc2rv(trr, trtasc, tdecl, tdrr, tdrtasc, tddecl, latgd, lon, alt, ttt, jdut1, lod, xp, yp, terms)
-    #         print('r    %14.7f%14.7f%14.7f', r )
-    #         print(' v %14.9f%14.9f%14.9f\n', v )
+    r, v = sc.tradec2rv(trr, trtasc, tdecl, tdrr, tdrtasc, tddecl, latgd, lon,
+                        alt, ttt, jdut1 + jdut1frac, lod, xp, yp, terms, ddpsi, ddeps)
+    print(f'r    %14.7f %14.7f %14.7f' % (r[0], r[1], r[2]))
+    print(f'v    %14.9f %14.9f %14.9f\n' % (v[0], v[1], v[2]))
 
     #horiz
-
-
-
-
-    ###skipping rv2razel
-    # print("SKIPPING rv2razel")
     rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt,
                                                ttt, jdut1 + jdut1frac, lod, xp,
                                                yp, terms, ddpsi, ddeps)
