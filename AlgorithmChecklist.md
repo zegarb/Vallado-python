@@ -10,7 +10,7 @@
 |  8   |  pg 93 (120)   | Kepler                                       | kepler()                             | ex2_4.py                        | pg 94 (121)                |   Y   |
 |  9   |  pg 113 (140)  | RV2COE                                       | rv2coe()                             | ex2_5.py                        | pg 114 (141)               |   Y   |
 |  10  |  pg 118 (145)  | COE2RV                                       | coe2rv()                             | ex2_6.py                        | pg 119 (146)               |   Y   |
-|  11  |  pg 126 (153)  | FindTOF                                      | findtof()                            |                -                |           -                |   N   |
+|  11  |  pg 126 (153)  | FindTOF                                      | findtof()                            |                -                |           -                |   Y   |
 |  12  |  pg 172 (199)  | ECEF To LatLon                               | ecef2ll()                            | ex3_3.py                        | pg 173 (200)               |   Y   |
 |  13  |  pg 173 (200)  | ECEF To LatLon (B)                           | ecef2llb()                           | ex3_3.py                        | pg 173 (200)               |   Y   |
 |  14  |  pg 183 (210)  | Julian Date                                  | jday()                               | ex3_4.py                        | pg 184 (211)               |   Y   |
@@ -26,7 +26,7 @@
 |  24  |  pg 228 (255)  | IAU-76/FK5 Reduction                         | eci2ecef()                           | ex3_15.py                       | pg 230 (257)               |   Y   |
 |  25  |  pg 259 (286)  | Geocentric RaDec                             | rv2radec()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  26  |  pg 260 (287)  | Topocentric                                  | rv2tradec()                          | ex4_1.py                        | pg 273 (300)               |   Y   |
-|  27  |  pg 265 (292)  | RAZEL                                        | rv2razel()                           | ex4_1.py                        | pg 273 (300)               |   N   |
+|  27  |  pg 265 (292)  | RAZEL                                        | rv2razel()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  28  |  pg 268 (295)  | AzELToRaDec                                  | azel2radec()                         |                -                |           -                |   N   |
 |  29  |  pg 279 (306)  | Sun                                          | sun(), sunalmanac()                  | ex5_1.py                        | pg 280 (307)               |   Y   |
 |  30  |  pg 283 (310)  | SunriseSet                                   | sunriset()                           | ex5_2.py                        | pg 284 (311)               |   Y   |

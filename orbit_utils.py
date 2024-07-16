@@ -1781,9 +1781,9 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
 #
 #                           function findtof
 #
-#  this function finds the time of flight given the initial position vectors,
-#    semi-parameter, and the sine and cosine values for the change in true
-#    anomaly.  the result uses p-iteration theory to analytically find the result.
+#  this function finds the time of flight given the initial position vector,
+#  target position vector, and the semi-parameter. the result uses
+#  p-iteration theory to analytically find the result.
 #
 #  author        : david vallado                  719-573-2600   27 may 2002
 #
@@ -1825,10 +1825,10 @@ def dscom (epoch, ep, argpp, tc, inclp, nodep, np):
 # [tof] = findtof (ro, r, p)
 # ------------------------------------------------------------------------------
 
-def findtof (ro: float, r: float, p: float):
+def findtof(ro: float, r: float, p: float, mu: float = mu):
     """this function finds the time of flight given the initial position vectors,
-    semi-parameter, and the sine and cosine values for the change in true
-    anomaly.  the result uses p-iteration theory to analytically find the result.
+    target position vector, and semi-parameter.  the result uses p-iteration
+    theory to analytically find the result.
 
     Parameters
     ----------
@@ -1838,6 +1838,8 @@ def findtof (ro: float, r: float, p: float):
         target position vector: km
     p : float
         semiparameter
+    mu : float
+        gravitational constant, default earth
 
     Returns
     -------
@@ -2021,12 +2023,11 @@ def makeorbitrv(jd: float, kind: 'str', reci: np.ndarray, veci: np.ndarray):
                       '%16.9f %16.9f  %16.9f \n'
                       % (day, mon, year, h, m, s, reci1[0], reci1[1], reci1[2],
                          veci1[0], veci1[1], veci1[2]))
-        outfile.close()
         #        x(i, 1) = reci1(1)
         #        y(i, 1) = reci1(2)
         #        z(i, 1) = reci1(3)
 
-
+    outfile.close()
     return x, y, z
 
 
@@ -10688,7 +10689,7 @@ if __name__ == '__main__':
 
     rsun, rtasc, decl = sun(jd)
     print(rsun, rtasc, decl)
-    Een, Eex = ShadowEntryExit(rsun, a, ecc, incl, raan, argp, nu, mu, rp)
+    Een, Eex = ShadowEntryExit(rsun, a, ecc, incl, raan, argp, rp)
 
     r1 = np.array([4e6, 5e6, 6e6])
     r2 = np.array([1e6, 2e6, 3e6])
@@ -10704,6 +10705,21 @@ if __name__ == '__main__':
     v1t = np.array([1e3, 1e3, 99e3])
     v2t = np.array([1e3, 50e3, 50e3])
     altpad = 10.
+
+    tofr1 = np.array([-2574.9533, 4267.0671, 4431.5026])
+    tofr2 = np.array([2700.6738, -43035378, -43582499])
+    tof = findtof(tofr1, tofr2, 6681.571)
+    print(f'{tof = }\n')
+
+    tofmerc1 = np.array([-4.974459260525929E+07,
+                         1.536089266793509E+07,
+                         1.336506847781501E+07])
+    tofmerc2 = np.array([-4.984423844883884E+07,
+                         1.521920301798446E+07,
+                         1.329972097503253E+07])
+    mercp = 57.909E6 * (1 - 0.2056**2)
+    tof = findtof(tofmerc1, tofmerc2, mercp, musun)
+    print(f'mercury {tof = }')
 
     hitearth, hitearthstr = checkhitearth(altpad, r1, v1t, r2, v2t, 3)
     print("checkhitearth returned ", hitearth, hitearthstr)
@@ -10760,31 +10776,3 @@ if __name__ == '__main__':
     print('U %r, P %r' % (pen,umb))
     #s = 2.0 * smu.mag(reci) * ang1
     #print(' %11.7f  %11.7f \n' % (s,(s / smu.mag(veci)) / 60.0))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
