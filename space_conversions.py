@@ -8911,7 +8911,7 @@ def tle2satrec(longstr1: str, longstr2: str, typerun: str,
     longstr2 = "".join(longstr2)
 
     # parse first line
-    carnumb =float(longstr1[0])
+    carnumb = float(longstr1[0])
     satrec['satnum'] = float(longstr1[2:7])
     satrec['classification'] = longstr1[7]
     satrec['intldesg'] = longstr1[9:17]
@@ -8991,59 +8991,61 @@ def tle2satrec(longstr1: str, longstr2: str, typerun: str,
                                                            hr, minute, sec)
 
     # default values
-    #startmfe = 0.0
-    #stopmfe  = 1440.0
-    #deltamin = 1.0
+    startmfe = 0.0
+    stopmfe  = 1440.0
+    deltamin = 1.0
 
     # input start stop times manually
-    # if ((typerun != 'v') and (typerun != 'c')  and (typerun != 'u')):
-    #     # ------------- enter start/stop ymd hms values --------------------
-    #     if (typeinput == 'e'):
-    #         startyear = input('input start year')
-    #         startmon  = input('input start mon')
-    #         startday  = input('input start day')
-    #         starthr   = input('input start hr')
-    #         startmin  = input('input start min')
-    #         startsec  = input('input start sec')
-    #         jdstart, jdstartf = stu.jday(startyear, startmon, startday,
-    #                                      starthr, startmin, startsec)
+    if ((typerun != 'v') and (typerun != 'c')  and (typerun != 'u')):
+        # ------------- enter start/stop ymd hms values --------------------
+        if (typeinput == 'e'):
+            startyear = int(input('input start year: '))
+            startmon  = int(input('input start mon: '))
+            startday  = int(input('input start day: '))
+            starthr   = int(input('input start hr: '))
+            startmin  = int(input('input start min: '))
+            startsec  = float(input('input start sec: '))
+            jdstart, jdstartf = stu.jday(startyear, startmon, startday,
+                                         starthr, startmin, startsec)
 
-    #         stopyear = input('input stop year')
-    #         stopmon  = input('input stop mon')
-    #         stopday  = input('input stop day')
-    #         stophr   = input('input stop hr')
-    #         stopmin  = input('input stop min')
-    #         stopsec  = input('input stop sec')
-    #         jdstop, jdstopf = stu.jday(stopyear, stopmon, stopday, stophr,
-    #                                    stopmin, stopsec)
+            stopyear = int(input('input stop year: '))
+            stopmon  = int(input('input stop mon: '))
+            stopday  = int(input('input stop day: '))
+            stophr   = int(input('input stop hr: '))
+            stopmin  = int(input('input stop min: '))
+            stopsec  = float(input('input stop sec: '))
+            jdstop, jdstopf = stu.jday(stopyear, stopmon, stopday, stophr,
+                                       stopmin, stopsec)
 
-    #         startmfe = (jdstart + jdstartf - satrec['jdsatepoch']
-    #                     - satrec['jdsatepochf']) * 1440.0
-    #         stopmfe  = (jdstop + jdstopf - satrec['jdsatepoch']
-    #                     - satrec['jdsatepochf']) * 1440.0
-    #         deltamin = input('input time step in minutes ')
+            startmfe = (jdstart + jdstartf - satrec['jdsatepoch']
+                        - satrec['jdsatepochf']) * 1440.0
+            stopmfe  = (jdstop + jdstopf - satrec['jdsatepoch']
+                        - satrec['jdsatepochf']) * 1440.0
+            deltamin = float(input('input time step in minutes: '))
 
-    #     # -------- enter start/stop year and days of year values -----------
-    #     if (typeinput == 'd'):
-    #         startyear    = input('input start year')
-    #         startdayofyr = input('input start dayofyr')
-    #         stopyear     = input('input stop year')
-    #         stopdayofyr  = input('input stop dayofyr')
+        # -------- enter start/stop year and days of year values -----------
+        if (typeinput == 'd'):
+            startyear    = int(input('input start year: '))
+            startdayofyr = float(input('input start dayofyr: '))
+            stopyear     = int(input('input stop year: '))
+            stopdayofyr  = float(input('input stop dayofyr: '))
 
-    #         [mon,day,hr,minute,sec] = days2mdh ( startyear,startdayofyr)
-    #         [jdstart,jdstartf] = jday( startyear,mon,day,hr,minute,sec)
-    #         [mon,day,hr,minute,sec] = days2mdh ( stopyear,stopdayofyr)
-    #         [jdstop, jdstopf] = jday( stopyear,mon,day,hr,minute,sec)
+            mon, day, hr, minute, sec = stu.days2mdh(startyear, startdayofyr)
+            jdstart, jdstartf = stu.jday(startyear, mon, day, hr, minute, sec)
+            mon, day, hr, minute, sec = stu.days2mdh(stopyear, stopdayofyr)
+            jdstop, jdstopf = stu.jday(stopyear, mon, day, hr, minute, sec)
 
-    #         startmfe = (jdstart + jdstartf - satrec['jdsatepoch'] - satrec['jdsatepochf']) * 1440.0
-    #         stopmfe  = (jdstop + jdstopf - satrec['jdsatepoch'] - satrec['jdsatepochf']) * 1440.0
-    #         deltamin = input('input time step in minutes ')
+            startmfe = (jdstart + jdstartf - satrec['jdsatepoch']
+                        - satrec['jdsatepochf']) * 1440.0
+            stopmfe  = (jdstop + jdstopf - satrec['jdsatepoch']
+                        - satrec['jdsatepochf']) * 1440.0
+            deltamin = float(input('input time step in minutes: '))
 
-    #     # ------------------ enter start/stop mfe values -------------------
-    #     if (typeinput == 'm'):
-    #         startmfe = input('input start mfe: ')
-    #         stopmfe  = input('input stop mfe: ')
-    #         deltamin = input('input time step in minutes: ')
+        # ------------------ enter start/stop mfe values -------------------
+        if (typeinput == 'm'):
+            startmfe = float(input('input start mfe: '))
+            stopmfe  = float(input('input stop mfe: '))
+            deltamin = float(input('input time step in minutes: '))
 
 
 
