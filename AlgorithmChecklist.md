@@ -1,12 +1,12 @@
 |Algorithm #|4th Ed. Page # (PDF)|          Book Name           |                    Function Name                      | Test Program | Example Page # (If Applicable) | Verified Working |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |
-|  1   |  pg 63 (90)    |  Find C2C3                                   | findc2c3() (used within lambertu())  | ex7_5.py                        |           -                |   Y   |
+|  1   |  pg 63 (90)    |  Find C2C3                                   | findc2c3() (used within kepler())    | ex2_4.py                        |           -                |   Y   |
 |  2   |  pg 65 (92)    | KepEqtnE                                     | newtonm()                            | ex2_1.py                        | pg 66 (93)                 |   Y   |
 |  3   |  pg 69 (96)    | KepEqtnP                                     | newtonm()                            | ex2_2.py                        | pg 69 (96)                 |   Y   |
 |  4   |  pg 71 (98)    | KepEqtnH                                     | newtonm()                            | ex2_3.py                        | pg 71 (98)                 |   Y   |
 |  5   |  pg 77 (104)   | v to Anomaly                                 | newtonnu()                           | ex2_2.py                        |           -                |   Y   |
 |  6   |  pg 77 (104)   | Anomaly to v                                 | newtone()                            | ex2_2.py                        |           -                |   Y   |
-|  7   |  pg 81 (108)   | KeplerCOE                                    | N/A                                  |                -                |           -                |   -   |
+|  7   |  pg 81 (108)   | KeplerCOE                                    | keplercoe()                          | ex2_4.py                        | pg.81-82 (108-109)         |   Y   |
 |  8   |  pg 93 (120)   | Kepler                                       | kepler()                             | ex2_4.py                        | pg 94 (121)                |   Y   |
 |  9   |  pg 113 (140)  | RV2COE                                       | rv2coe()                             | ex2_5.py                        | pg 114 (141)               |   Y   |
 |  10  |  pg 118 (145)  | COE2RV                                       | coe2rv()                             | ex2_6.py                        | pg 119 (146)               |   Y   |
