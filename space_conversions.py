@@ -7373,14 +7373,26 @@ def rv2flt(reci: np.ndarray, veci: np.ndarray, ttt: float, jdut1: float,
 
     #decl = math.atan2(reci[2] , sqrt(reci[0]**2 + reci[1]**2))
     decl = math.asin(reci[2] / magr)
+
+    sindecl,cosdecl,sinrtasc,cosrtasc = smu.getsincos(decl,rtasc)
+    eci2sez = np.array([[cosrtasc*sindecl, sinrtasc*sindecl, -cosdecl],
+                         [-sinrtasc, cosrtasc, 0],
+                         [cosdecl*cosrtasc, sinrtasc*cosdecl, sindecl]])
+    vsez = eci2sez @ veci
+    #az = math.atan2(vsez[1],-vsez[0]) (alternative way to find az)
+    fpa = math.acos(vsez[2]/smu.mag(vsez))
+
     h = np.cross(reci, veci)
-    hmag = smu.mag(h)
-    rdotv = np.dot(reci, veci)
-    fpav = math.atan2(hmag, rdotv)
-    fpa = np.pi * 0.5 - fpav
+    # This calculation for fpa is not correct - mjc
+    #hmag = smu.mag(h)
+    #rdotv = np.dot(reci, veci)
+    #fpav = math.atan2(hmag, rdotv)
+    #fpa = np.pi * 0.5 - fpav
+
     hcrossr = np.cross(h, reci)
     az = math.atan2(reci[0] * hcrossr[1] - reci[1] * hcrossr[0],
                     hcrossr[2] * magr)
+
     return lon, latgc, rtasc, decl, fpa, az, magr, magv
 
 # ----------------------------------------------------------------------------
@@ -7497,16 +7509,19 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
     # -------- form velocity vector
     fpav = math.pi * 0.5 - fpa
     veci = np.zeros(3)
+
     veci[0] = magv * (-math.cos(rtasc) * math.sin(decl)
-                      * (math.cos(az) * math.cos(fpav) - math.sin(rtasc)
-                         * math.sin(az) * math.cos(fpav))
-                      + math.cos(rtasc) * math.sin(decl) * math.sin(fpav))
+                      * math.cos(az) * math.cos(fpav) - math.sin(rtasc)
+                         * math.sin(az) * math.cos(fpav)
+                      + math.cos(rtasc) * math.cos(decl) * math.sin(fpav))
     veci[1] = magv * (-math.sin(rtasc) * math.sin(decl)
-                      * (math.cos(az) * math.cos(fpav) + math.cos(rtasc)
-                         * math.sin(az) * math.cos(fpav))
+                      * math.cos(az) * math.cos(fpav) + math.cos(rtasc)
+                         * math.sin(az) * math.cos(fpav)
                       + math.sin(rtasc) * math.cos(decl) * math.sin(fpav))
+    # math.sin(fpav) NOT math.cos(fpav) - errata to 4th edition has an error
     veci[2] = magv * (math.sin(decl) * math.sin(fpav)
                       + math.cos(decl) * math.cos(az) * math.cos(fpav))
+
     reci = reci.T
     veci = veci.T
     return reci, veci

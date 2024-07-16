@@ -1,6 +1,7 @@
 from space_conversions import *
 import numpy as np
 from pprint import pprint as pp
+import spacetime_utils as stu
 
 latgc = math.pi*0.20
 latgd = gc2gd(latgc)
@@ -516,7 +517,7 @@ print ('rr %f, rtasc %f, decl %f, drr %f, drtasc %f, ddecl %f' \
         % (rr,rtasc,decl,drr,drtasc,ddecl))
 
 r, v = radec2rv(rr, rtasc, decl, drr, drtasc, ddecl)
-print('radec2rv')
+print('radec2rv:')
 print(r)
 print(v)
 
@@ -546,6 +547,15 @@ reci, veci = razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt, ttt,
 print('razel2rv:')
 print(reci)
 print(veci)
+
+# angles are not comparable for some reason - mjc
+# lst,_ = stu.lstime(lon, jdut1)
+# rtasc2, decl2 = azel2radec(az,el,latgd,lst)
+
+# print('azel2radec compared to rv2radec:')
+# print ('rv2radec:  rtasc %f, decl %f' % (rtasc,decl))
+# print ('azel2radec:  rtasc2 %f, decl2 %f' % (rtasc2,decl2))
+
 
 rr, ecllon, ecllat, drr, decllon, decllat = rv2ell(reci, veci)
 print('rv2ell')
