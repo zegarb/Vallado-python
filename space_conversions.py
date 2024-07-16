@@ -540,7 +540,7 @@ def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
 #    m           - mean anomaly                   0.0  to 2pi rad
 #    e0          - eccentric anomaly              0.0  to 2pi rad
 #    tau         - time from perigee passage
-#    n           - mean motion                    rad
+#    n           - mean motion                    rad/s
 #    af          - component of ecc vector
 #    ag          - component of ecc vector
 #    chi         - component of node vector in eqw
@@ -591,7 +591,7 @@ def covct2eq (cartcov: np.ndarray, cartstate: np.ndarray, anom: str, fr: int):
     magv = smu.mag(veci) # m
 
     a = 1.0 / (2.0/magr - magv**2/mum)
-    n = np.sqrt(mum / a**3)
+    n = np.sqrt(mum / np.abs(a**3))
 
     hx = ry*vz - rz*vy
     hy = -rx*vz + rz*vx
@@ -1063,7 +1063,7 @@ def covcl2eq (classcov: np.ndarray, classstate: np.ndarray, anom: str, fr: int):
     # --------- determine which set of variables is in use ---------
     # -------- parse the orbit state
     a = classstate[0]  # in m
-    n = np.sqrt(mum/a**3)
+    n = np.sqrt(mum/np.abs(a**3))
     ecc = classstate[1]
     incl = classstate[2]
     omega = classstate[3]
@@ -1165,7 +1165,7 @@ def covcl2eq (classcov: np.ndarray, classstate: np.ndarray, anom: str, fr: int):
 #    tm          - transformation matrix
 #
 #  locals        :
-#    n           - mean motion                    rad
+#    n           - mean motion                    rad/s
 #    af          - component of ecc vector
 #    ag          - component of ecc vector
 #    chi         - component of node vector in eqw
@@ -1211,7 +1211,7 @@ def coveq2ct(eqcov : np.ndarray, eqstate : np.ndarray, anom : str, fr: int):
     # -------- parse the orbit state
     if (anom == 'truea') or (anom == 'meana'):
         a = eqstate[0] * 1000.0  # in m
-        n = np.sqrt(mum/a**3)  # mum
+        n = np.sqrt(mum/np.abs(a**3))  # mum
     elif (anom == 'truen') or (anom == 'meann'):
         n = eqstate[0]  # rad
         a = (mum / n**2)**(1/3)   # in m
@@ -1561,7 +1561,7 @@ def coveq2ct(eqcov : np.ndarray, eqstate : np.ndarray, anom : str, fr: int):
 #    tm          - transformation matrix
 #
 #  locals        :
-#    n           - mean motion                    rad
+#    n           - mean motion                    rad/s
 #    af          - component of ecc vector
 #    ag          - component of ecc vector
 #    chi         - component of node vector in eqw
@@ -1604,7 +1604,7 @@ def coveq2cl(eqcov : np.ndarray, eqstate : np.ndarray, anom: str, fr: int):
     # --------- determine which set of variables is in use ---------
     if (anom == 'truea') or (anom == 'meana'):
         a = eqstate[0]  # in m
-        n = np.sqrt(mum/a**3)
+        n = np.sqrt(mum/np.abs(a**3))
     elif (anom == 'truen') or (anom == 'meann'):
         n = eqstate[0]
         a = (mum / n**2)**(1/3)
@@ -2009,7 +2009,7 @@ def covcl2ct(classcov: np.ndarray, classstate: np.ndarray, anom: str):
     # --------- determine which set of variables is in use ---------
     # ---- parse the input vector into the classical elements -----
     a = classstate[0]
-    n = np.sqrt(mum / a ** 3)
+    n = np.sqrt(mum / np.abs(a ** 3))
     ecc = classstate[1]
     incl = classstate[2]
     raan = classstate[3]
@@ -2279,7 +2279,7 @@ def covct2cl(cartcov: np.ndarray, cartstate: np.ndarray, anom: str):
     p, a, ecc, _, _, _, nu, _, _, _, _ = rv2coe(reci, veci)
     p = p * 1000.0
     a = a * 1000.0
-    n = math.sqrt(mum / a ** 3)
+    n = math.sqrt(mum / np.abs(a ** 3))
     # -------- calculate common quantities
     # sqrt1me2 = np.sqrt(1.0 - ecc * ecc)
     magr = math.sqrt(rx ** 2 + ry ** 2 + rz ** 2)
@@ -2971,7 +2971,7 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
             if ((incl < small) or (np.abs(incl - np.pi) < small)):
                 argp = lonper
                 omega = 0.0
-        n = np.sqrt(mu / (a * a * a))
+        n = np.sqrt(mu / np.abs(a * a * a))
         af = ecc * np.cos(fr * omega + argp)
         ag = ecc * np.sin(fr * omega + argp)
         if (fr > 0):
@@ -2991,7 +2991,7 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
         magr = smu.mag(reci)
         magv = smu.mag(veci)
         a = 1.0 / (2.0 / magr - magv ** 2 / mu)
-        n = np.sqrt(mu / (a * a * a))
+        n = np.sqrt(mu / np.abs(a * a * a))
         wvec = np.cross(reci, veci) / smu.mag(np.cross(reci, veci))
         chi = wvec[0] / (1.0 + fr * wvec[2])
         psi = - wvec[1] / (1.0 + fr * wvec[2])
@@ -3213,7 +3213,7 @@ def eq2rv(a: float, af: float, ag: float, chi: float, psi: float,
 
         F = F1
         F = np.fmod(F + twopi, twopi)
-        n = np.sqrt(mu / (a * a * a))
+        n = np.sqrt(mu / np.abs(a * a * a))
         b = 1.0 / (1.0 + np.sqrt(1.0 - af ** 2 - ag ** 2))
         sinL = (((1.0 - af ** 2 * b) * np.sin(F) + ag * af * b * np.cos(F) - ag)
                 / (1.0 - ag * np.sin(F) - af * np.cos(F)))
@@ -4346,7 +4346,7 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
             argp = lonper
             omega = 0.0
     if sh.show:
-        print("here, argp =%.3f, omega =%.3f, nu =%.3f" % (argp, omega, nu))
+        print("argp =%.3f, omega =%.3f, nu =%.3f" % (argp, omega, nu))
     # ----------  form pqw position and velocity vectors ----------
     cosnu = math.cos(nu)
     sinnu = math.sin(nu)

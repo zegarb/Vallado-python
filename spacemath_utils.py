@@ -2196,9 +2196,10 @@ def newtonnu (ecc: float, nu: float):
 
     # -------------------- hyperbolic  --------------------
     elif (ecc > 1.0 + small):
-        if ((ecc > 1.0) and
-            (abs(nu)+0.00001 < math.pi-math.acos(1.0 /ecc))):
-            #print("here?")
+        nu_check = nu
+        if nu_check > math.pi:
+            nu_check = nu_check - twopi
+        if (abs(nu_check)+0.00001 < math.pi-math.acos(1.0 /ecc)):
             sine = ((math.sqrt(ecc*ecc-1.0) * math.sin(nu))
                     / (1.0  + ecc*math.cos(nu)))
             e0 = math.asinh(sine)
@@ -2207,7 +2208,10 @@ def newtonnu (ecc: float, nu: float):
 
     # ----------------- parabolic ---------------------
     else:
-        if (abs(nu) < 168.0*math.pi/180.0):
+        nu_check = nu
+        if nu_check > math.pi:
+            nu_check = nu_check - twopi
+        if (abs(nu_check) < 168.0*math.pi/180.0):
             e0= math.tan(nu*0.5)
             m = e0 + (e0*e0*e0)/3.0
             #print("m is ", m)

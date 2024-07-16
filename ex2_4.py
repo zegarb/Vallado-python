@@ -2,7 +2,7 @@ import numpy as np
 
 from space_conversions import coe2rv
 from space_constants import *
-from orbit_utils import kepler
+from orbit_utils import kepler, keplercoe
 
 
 
@@ -57,6 +57,15 @@ print('v1 %16.8f %16.8f %16.8f er/tu \n' % (v1[0]/velkmps, v1[1]/velkmps,
                                             v1[2]/velkmps))
 print('v1 %16.8f %16.8f %16.8f km/s \n\n\n' % (v1[0], v1[1], v1[2]))
 
+r1, v1 = keplercoe(ro, vo, dtsec)
+
+print('keplercoe test:')
+print('r1 %16.8f %16.8f %16.8f er \n' % (r1[0]/re, r1[1]/re, r1[2]/re))
+print('r1 %16.8f %16.8f %16.8f km \n' % (r1[0], r1[1], r1[2]))
+print('v1 %16.8f %16.8f %16.8f er/tu \n' % (v1[0]/velkmps, v1[1]/velkmps,
+                                            v1[2]/velkmps))
+print('v1 %16.8f %16.8f %16.8f km/s \n' % (v1[0], v1[1], v1[2]))
+
 
 # alt tests
 # initial coes with more than one period = 6281.815597 sec
@@ -102,4 +111,12 @@ print('v1 %16.8f %16.8f %16.8f er/tu \n' % (v1[0]/velkmps, v1[1]/velkmps,
                                             v1[2]/velkmps))
 print('v1 %16.8f %16.8f %16.8f km/s \n' % (v1[0], v1[1], v1[2]))
 
+r1, v1 = keplercoe(ro, vo, dtsec)
+
+print('keplercoe test:')
+print('r1 %16.8f %16.8f %16.8f er \n' % (r1[0]/re, r1[1]/re, r1[2]/re))
+print('r1 %16.8f %16.8f %16.8f km \n' % (r1[0], r1[1], r1[2]))
+print('v1 %16.8f %16.8f %16.8f er/tu \n' % (v1[0]/velkmps, v1[1]/velkmps,
+                                            v1[2]/velkmps))
+print('v1 %16.8f %16.8f %16.8f km/s \n' % (v1[0], v1[1], v1[2]))
 

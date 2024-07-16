@@ -3583,8 +3583,120 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
                                        + np.cross(nvec, r2) / magr2)
     return v1t, v2t
 
+# ------------------------------------------------------------------------------
+#
+#                           function keplercoe
+#
+#  this function solves keplers problem for orbit determination and returns a
+#    future geocentric equatorial (ijk) position and velocity vector.  the
+#    solution involves classical orbital elements.
+#
+#  author        : david vallado                  719-573-2600   22 jun 2002
+#
+#  revisions
+#    courville   - added this function                           16 jun 2024
+#
+#  inputs          description                    range / units
+#    ro          - ijk position vector - initial  km
+#    vo          - ijk velocity vector - initial  km / s
+#    dtseco      - length of time to propagate    s
+#    mu          - gravitional constant           km3/s2
+#
+#  outputs       :
+#    r           - ijk position vector            km
+#    v           - ijk velocity vector            km / s
+#
+#  locals        :
+#    p           - semi-paramter                  km
+#    a           - semior axis                    km
+#    ecc         - eccentricity
+#    incl        - inclination                    rad
+#    raan        - longitude of the asc node      rad
+#    argp        - argument of periapsis          rad
+#    e0          - eccentric anomaly              rad
+#    m           - mean anomaly                   rad/sec
+#    arglat      - argument of latitude           rad
+#    truelon     - true longitude of vehicle      rad
+#    lonper      - longitude of periapsis         rad
+#    n           - mean angular motion            rad/sec
+#    nu          - true anomaly                   rad
+#
+#  coupling      :
+#    rv2coe
+#    coe2rv
+#    newtonu
+#    newtonm
+#
+#  references    :
+#    vallado       2013, 81-82, alg 7
+#
+# [r, v] = keplercoe(ro, vo, dtsec)
+# ------------------------------------------------------------------------------
+def keplercoe(ro: np.ndarray, vo: np.ndarray, dtseco: float, mu:float = mu):
+    """this function solves keplers problem for orbit determination and returns a
+    future geocentric equatorial (ijk) position and velocity vector.  the
+    solution involves classical orbital elements.
 
+    Parameters
+    ----------
+    ro : ndarray
+        ijk position vector - initial: km
+    vo : ndarray
+        ijk velocity vector - initial: km/s
+    dtseco : float
+        _length of time to propagate: s
+    mu : float, optional
+        gravitional constant , by default mu of earth: km3/s2
 
+    Returns
+    -------
+    r: ndarray
+        ijk position vector
+    v: ndarray
+        ijk velocity vector
+    """
+    p,a,ecc,incl,raan,argp,nu,m,arglat,truelon,lonper = sc.rv2coe(ro,vo,mu)
+    if sh.show:
+        print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg\n')
+        print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % \
+                (p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
+        print("arglat, truelon, lonper: ", arglat, truelon, lonper)
+
+    if ecc > small:
+        e0,_ = smu.newtonnu(ecc, nu)
+    else:
+        # ----------------  circular equatorial ---------------
+        if (incl < small) or (abs(incl-math.pi) < small):
+            e0 = truelon
+        # --------------  circular inclined ---------------
+        else:
+            e0 = arglat
+
+    if ecc > (1.0 + small):
+        n = math.sqrt(mu/(-a**3))
+        m = ecc * math.sinh(e0) - e0 + n * dtseco
+    elif ecc < (1.0 + small):
+        n = math.sqrt(mu / (a**3))
+        m = e0 - ecc * math.sin(e0) + n * dtseco
+    else:
+        n = 2.0 * math.sqrt(mu/p**3)
+        m = n * dtseco
+
+    if ecc > small:
+        e0,nu = smu.newtonm(ecc, m)
+    else:
+        nu = m
+        # ----------------  circular equatorial ---------------
+        if (incl < small) or (abs(incl-math.pi) < small):
+            truelon = m
+        # --------------  circular inclined ---------------
+        else:
+            arglat = m
+
+    if sh.show:
+        print(f'nu is {nu}')
+    r, v = sc.coe2rv(p,ecc,incl,raan,argp,nu,arglat,truelon,lonper,mu)
+    return r,v
 
 # ------------------------------------------------------------------------------
 #
@@ -3602,7 +3714,7 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
 #  inputs          description                    range / units
 #    ro          - ijk position vector - initial  km
 #    vo          - ijk velocity vector - initial  km / s
-#    dtsec       - length of time to propagate    s
+#    dtseco       - length of time to propagate    s
 #
 #  outputs       :
 #    r           - ijk position vector            km
@@ -3914,12 +4026,13 @@ def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
     p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper \
         = sc.rv2coe(ro, vo)
     #print(p, a, ecc, incl, raan, argp, nu, m, arglat, truelon, lonper)
-    #print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg\n')
-    #print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % \
-    #        (p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
-    #print("arglat, truelon, lonper: ", arglat, truelon, lonper)
+    if sh.show:
+        print('          p km       a km      ecc      incl deg     raan deg     argp deg      nu deg      m deg\n')
+        print('coes %11.4f%11.4f%13.9f%13.7f%11.5f%11.5f%11.5f%11.5f\n' % \
+                (p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg))
+        print("arglat, truelon, lonper: ", arglat, truelon, lonper)
 
-    n = math.sqrt(mu / (a * a * a))
+    n = math.sqrt(mu / np.abs(a * a * a))
 
      # ------------- find the value of j2 perturbations -------------
     j2op2 = (n * 1.5 * re**2 * j2) / (p * p)
@@ -3968,7 +4081,7 @@ def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
     #Ex 11_6 test
     #print(f'raan is {raan}')
     #print(f'argp is {argp}')
-    #print(f'nu is {nu}')
+    print(f'nu is {nu}')
     r, v = sc.coe2rv(p, ecc, incl, raan, argp, nu, arglat, truelon, lonper)
     r = r.T
     v = v.T
@@ -4051,7 +4164,7 @@ def pkeplerj4(ro=None, vo=None, dtsec=None, ndot=None, nddot=None):
     # printf(1, 'coes #11.4f#11.4f#13.9f#13.7f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f#11.5f\n', ...
     # p, a, ecc, incl * rad2deg, raan * rad2deg, argp * rad2deg, nu * rad2deg, m * rad2deg, ...
     # arglat * rad2deg, truelon * rad2deg, lonper * rad2deg)
-    n = math.sqrt(mu / (a * a * a))
+    n = math.sqrt(mu / np.abs(a * a * a))
     cosargp = math.cos(argp)
     sinargp = math.sin(argp)
     cosi = math.cos(incl)
