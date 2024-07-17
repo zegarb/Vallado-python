@@ -3605,12 +3605,46 @@ def adbar2rv(magr: float, magv: float, rtasc: float, decl: float, fpav:float,
 
 
 
-# azl2radc
+
+# radec2azel
+# this function finds the azimuth and elevation values given the
+# right ascension and declination, using equations 4-11 to 4-14.
+def radec2azel(rtasc: float, decl: float, lat: float, lst: float):
+    """this function finds the azimuth and elevation values given the
+    right ascension and declination
+
+    Parameters
+    ----------
+    rtasc : float
+        right ascension of observed object: rad
+    decl : float
+        declination of observed object: rad
+    lat : float
+        latitude of site: rad
+    lst : float
+        local mean sidreal time of site: 0 to 2pi rad
+
+    Returns
+    -------
+    az : float
+        azimuth : rad
+    el : float
+        elevation : rad
+    """
+    lha = lst - rtasc
+    el = math.asin(math.sin(lat) * math.sin(decl) +
+                   math.cos(lat) * math.cos(decl) * math.cos(lha))
+    sinaz = -math.sin(lha) * math.cos(decl) / math.cos(el)
+    cosaz = ((math.sin(decl) - math.sin(el) * math.sin(lat))
+             / math.cos(el) * math.cos(lat))
+    az = math.atan2(sinaz, cosaz)
+
+    return az, el
+
+# azel2radec
 #
-# this function finds the rtasc decl values given the az-el
-#
-#
-#
+# this function finds the right ascension and declination values given
+# the azimuth and elevation, using algorithm 28
 
 def azel2radec(az: float, el: float, lat: float, lst: float):
     """This function finds the right ascension and declination values
@@ -3619,13 +3653,13 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
     Parameters
     ----------
     az : float
-        azimuth: rad
+        azimuth of observed object: rad
     el : float
-        elevation: rad
+        elevation of observed object: rad
     lat : float
-        latitude: rad
+        latitude of site: rad
     lst : float
-        local mean sidereal time: 0 to 2pi rad
+        local mean sidereal time of site: 0 to 2pi rad
 
     Returns
     -------
@@ -3644,7 +3678,7 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
     #    print(' lha1 #13.7f \n', lha1 * rad2deg)
 
     # alt approach
-    slha2 = - (math.sin(az) * math.cos(el)) / (math.cos(decl))
+    slha2 = -(math.sin(az) * math.cos(el)) / (math.cos(decl))
     clha2 = ((math.cos(lat) * math.sin(el) - math.sin(lat) * math.cos(el)
               * math.cos(az)) / (math.cos(decl)))
     lha2 = math.atan2(slha2, clha2)
