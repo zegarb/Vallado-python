@@ -1855,13 +1855,14 @@ def newtonm (ecc: float, m: float):
         true anomaly: 0 to 2pi rad
     """
 
+    #could be reduced for time efficiency
     numiter = 50
 
     # -------------------------- hyperbolic  ----------------------
     if ((ecc-1.0) > small):
         # -------------------  initial guess -----------------------
         if (ecc < 1.6):
-            if (((m < 0.0) and (m > -math.pi)) or (m > math.pi)):
+            if ((m > -math.pi) and (m < 0.0) or (m > math.pi) and (m < twopi)):
                 e0 = m - ecc
             else:
                 e0 = m + ecc
@@ -1895,7 +1896,7 @@ def newtonm (ecc: float, m: float):
     # -------------------- elliptical ----------------------
     elif (ecc > small):
         # -----------  initial guess -------------
-        if (((m < 0.0) and (m > -math.pi)) or (m > math.pi)):
+        if ((m > -math.pi) and (m < 0.0) or (m > math.pi) and (m < twopi)):
             e0 = m - ecc
         else:
             e0 = m + ecc

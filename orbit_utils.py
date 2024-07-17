@@ -10177,15 +10177,15 @@ def shadow(reci: np.ndarray, rsun: np.ndarray, angumb: float = angumbearth,
     Parameters
     ----------
     reci : ndarray
-        satellite ijk position vector
+        satellite ijk position vector: km
     rsun : ndarray
-        sun ijk position vector
+        sun ijk position vector: km
 
     Umbra and penumbra angle default uses mean sun-earth distance
     angumb : float, optional
-        unbra angle
+        unbra angle: rad
     angpen : float, optional
-        penumbra angle
+        penumbra angle: rad
 
     Returns
     -------
@@ -10893,7 +10893,10 @@ if __name__ == '__main__':
     reci1 = np.array([- 41221.79149309,8864.59854079,0.0])
     veci1 = np.array([- 0.646416796,- 3.005940793,- 0.0])
     # +50 and -80 seem to work here to get the proper angles
-    dtsec = 21000
+    dtsec = 50
+    #dtsec = -80
+    #dtsec = 4100
+    #dtsec = 4150
     reci,veci,error = kepler(reci1,veci1,dtsec)
     year = 2008
     mon = 3

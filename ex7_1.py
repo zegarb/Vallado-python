@@ -33,15 +33,16 @@ import space_conversions as sc
 print('\n-------- site test \n')
 latgd = 39.007 * deg2rad
 lon = -104.883 * deg2rad
-alt = 2.187
 rs, vs = obu.site(latgd, lon, alt)
 print('site %14.7f%14.7f%14.7f%14.7f%14.7f%14.7f\n'
       % (rs[0], rs[1], rs[2], vs[0], vs[1], vs[2]))
 print('--------------- razel tests ----------------------------\n')
-rho = 604.68
+alt = 2.187 #km
+rho = 604.68 #km
+
 az = 205.6 * deg2rad
 el = 30.7 * deg2rad
-drho = 2.08
+drho = 2.08 #km/s
 daz = 0.15 * deg2rad
 del_ = 0.17 * deg2rad
 year = 1995
@@ -86,24 +87,17 @@ print('v  \n', (veci))
 rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt, ttt,
                                       jdut1 + jdut1frac, lod, xp, yp, terms, ddpsi,
                                       ddeps)
-print('rv2razel: rho = %14.7f az = %14.7f el = %14.7f drho = %14.7f '
-      'daz = %14.7fdel = %14.7f\n'
+print('\n         rho          az                el            drho          daz         del_\n')
+print('rvraz %14.7f%14.7f%14.7f%14.7f%14.7f%14.7f\n'
       % (rho, az * rad2deg, el * rad2deg, drho, daz * rad2deg, del_ * rad2deg))
 
 p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = sc.rv2coe(reci, veci)
 
-# print(p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper)
-
-print('          p km       a km      ecc      incl deg     raan deg     '
-      'argp deg      nu deg      m deg      arglat   truelon    lonper\n')
+print('          p km       a km        ecc      incl deg     raan deg     '
+      'argp deg      nu deg      m deg      arglat\n')
 print('coes %11.4f %11.4f %13.9f %13.7f %11.5f %11.5f %11.5f %11.5f %11.5f\n'
       % (p, a, ecc, incl * rad2deg, omega * rad2deg, argp * rad2deg,
          nu * rad2deg, m * rad2deg, arglat * rad2deg))
-
-if truelon:
-  print("truelon: ", truelon * rad2deg)
-if lonper:
-  print("lonper: ", lonper * rad2deg)
 
 
 
