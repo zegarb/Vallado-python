@@ -1,4 +1,4 @@
-|Algorithm #|4th Ed. Page # (PDF)|          Book Name           |                    Function Name                      | Test Program | Example Page # (If Applicable) | Verified Working |
+|4th Ed. Algorithm # (5th Ed.)|4th Ed. Page # (PDF)|       Book Name           |                    Function Name                      | Test Program | Example Page # (If Applicable) | Verified Working |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |
 |  1   |  pg 63 (90)    |  Find C2C3                                   | findc2c3() (used within kepler())    | ex2_4.py                        |           -                |   Y   |
 |  2   |  pg 65 (92)    | KepEqtnE                                     | newtonm()                            | ex2_1.py                        | pg 66 (93)                 |   Y   |
@@ -22,7 +22,7 @@
 |  20  |  pg 198 (225)  | RADtoHMS                                     | rad2hms()                            | ex3_9.py                        | pg 199 (226)               |   Y   |
 |  21  |  pg 199 (226)  | TimeToHMS                                    | sec2hms()                            | ex3_10.py                       | pg 199 (226)               |   Y   |
 |  22  |  pg 202 (229)  | JDtoGregorianDate                            | invjday()                            | ex3_13.py                       | pg 203 (230)               |   Y   |
-|  23  |  pg 219 (246)  | IAU-2000, CIO-Based                          | ecef2eci() (IAU-2006)                | ex3_14.py                       | pg 220 (247)               |   Y   |
+|  23  |  pg 219 (246)  | IAU-2006/2000, CIO-Based                     | ecef2eci() (IAU-2006)                | ex3_14.py                       | pg 220 (247)               |   Y   |
 |  24  |  pg 228 (255)  | IAU-76/FK5 Reduction                         | eci2ecef()                           | ex3_15.py                       | pg 230 (257)               |   Y   |
 |  25  |  pg 259 (286)  | Geocentric RaDec                             | rv2radec()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  26  |  pg 260 (287)  | Topocentric                                  | rv2tradec()                          | ex4_1.py                        | pg 273 (300)               |   Y   |
@@ -56,29 +56,30 @@
 |  54  |  pg 460 (487)  | Gibbs                                        | gibbs()                              | ex7_34.py                       | pg 461 (488)               |   Y   |
 |  55  |  pg 466 (493)  | Herrick-Gibbs                                | hgibbs()                             | ex7_34.py                       | pg 467 (494)               |   Y   |
 |  56  |  pg 475 (502)  | Lambert's Problem - Minimum Energy           | lambertmin()                         | ex7_5.py                        | pg 497 (524)               |  Y/N  |
-|  57  |  pg 478 (505)  | Lambert - Gauss's Solution                   | N/A                                  |                -                |           -                |   -   |
-|  58  |  pg 492 (519)  | Lambert - Universal Variables                | lambertu()                           | ex7_5.py                        | pg 497 (524)               |  Y/N  |
-|  59  |  pg 494 (521)  | Lambert - Battin Method                      | lambertb()                           | ex7_5.py                        | pg 497 (524)               |  Y/N  |
-|  60  |  pg 503 (530)  | Hit Earth                                    | checkhitearth()                      |                -                |           -                |   N   |
-|  61  |  pg 503 (530)  | Target                                       | target()                             |                -                |           -                |   N   |
-|  62  |  pg 525 (552)  | ENCKE                                        | N/A                                  |                -                |           -                |   -   |
-|  63  |  pg 558 (585)  | Ap2Kp                                        | ap2kp()                              |                -                |           -                |   N   |
-|  63  |  pg 558 (585)  | Ap2Kp                                        | kp2ap()                              |                -                |           -                |   N   |
-|  64  |  pg 591 (618)  | Numerical Integration                        | N/A                                  |                -                |           -                |   -   |
-|  65  |  pg 691 (718)  | PKepler                                      | pkepler()                            | ex10_4.py & ex10_5.py           | pg 769 (796) & 775 (802)   |  Y/N  |
-|  66  |  pg 766 (793)  | Nominal State                                | N/A                                  | ex10_4.py?                      | pg 769 (796)               |   -   |
-|  67  |  pg 768 (795)  | Differential Correction                      | N/A                                  | ex10_4.py                       | pg 769 (796)               |   -   |
-|  68  |  pg 785 (812)  | Kalman Filter - Linear System                | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
-|  69  |  pg 791 (818)  | Linearized                                   | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
-|  70  |  pg 793 (820)  | Extended Kalman Filter                       | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
-|  71  |  pg 873 (900)  | Repeat Ground Track                          | repeatgt()                           | ex11_3.py                       |       -                    |   N   |
-|  72  |  pg 879 (906)  | Main Repeat Groundtrack                      | N/A                                  | ex11_4.py                       | pg 893 (920)               |   -   |
-|  73  |  pg 885 (912)  | Minimum Altitude Variation                   | N/A                                  | ex11_5.py                       | pg 895 (922)               |   -   |
-|  74  |  pg 911 (938)  | Predict                                      | predict()                            | ex11_6.py                       | pg 912 (939)               |   Y   |
-|  75  |  pg 916 (943)  | Rise/Set                                     | N/A                                  | ex11_7.py (DNE)                 | pg 918 (945)               |   -   |
-|  76  |  pg 935 (962)  | Close Approach                               | N/A                                  |                -                |           -                |   -   |
-|  77  |  pg 953 (980)  | Patched Conic                                | N/A                                  |                -                |           -                |   -   |
-|  78  |  pg 962 (989)  | Algorithm B-plane I                          | N/A                                  |                -                |           -                |   -   |
-|  79  |  pg 963 (990)  | Algorithm B-plane II                         | N/A                                  |                -                |           -                |   -   |
+|  N/A (57)     |        -       | Lambert's Problem - Minimum Time             | lambertminT()                        |                -                |                            |   N   |
+|  57 (59)      |  pg 478 (505)  | Lambert - Gauss's Solution                   | N/A                                  |                -                |           -                |   -   |
+|  58 (60)      |  pg 492 (519)  | Lambert - Universal Variables                | lambertu()                           | ex7_5.py                        | pg 497 (524)               |  Y/N  |
+|  59 (61)      |  pg 494 (521)  | Lambert - Battin Method                      | lambertb()                           | ex7_5.py                        | pg 497 (524)               |  Y/N  |
+|  60 (58)      |  pg 503 (530)  | Hit Earth                                    | checkhitearth()                      |                -                |           -                |   N   |
+|  61 (N/A)     |  pg 503 (530)  | Target                                       | target()                             |                -                |           -                |   N   |
+|  N/A (62)     |        -       | Perturbed Lambert                            | N/A                                  |                -                |                            |   -   |
+|  62 (63)      |  pg 525 (552)  | ENCKE                                        | N/A                                  |                -                |           -                |   -   |
+|  63 (64)      |  pg 558 (585)  | Ap2Kp Conversion                             | ap2kp(), kp2ap()                     |                -                |           -                |   N   |
+|  64 (65)      |  pg 591 (618)  | Numerical Integration (Acceleration)         | N/A                                  |                -                |           -                |   -   |
+|  65 (66)      |  pg 691 (718)  | PKepler                                      | pkepler()                            | ex10_4.py & ex10_5.py           | pg 769 (796) & 775 (802)   |  Y/N  |
+|  66 (67)      |  pg 766 (793)  | Nominal State                                | N/A                                  | ex10_4.py?                      | pg 769 (796)               |   -   |
+|  67 (68)      |  pg 768 (795)  | Differential Correction                      | N/A                                  | ex10_4.py                       | pg 769 (796)               |   -   |
+|  68 (69)      |  pg 785 (812)  | Kalman Filter - Linear System                | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
+|  69 (70)      |  pg 791 (818)  | Linearized Kalman Filter                     | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
+|  70 (71)      |  pg 793 (820)  | Extended Kalman Filter                       | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
+|  71 (72)      |  pg 873 (900)  | Repeat Ground Track                          | repeatgt()                           | ex11_3.py                       |       -                    |   N   |
+|  72 (73)      |  pg 879 (906)  | Main Repeat Groundtrack                      | N/A                                  | ex11_4.py                       | pg 893 (920)               |   -   |
+|  73 (74)      |  pg 885 (912)  | Minimum Altitude Variation                   | N/A                                  | ex11_5.py                       | pg 895 (922)               |   -   |
+|  74 (75)      |  pg 911 (938)  | Predict                                      | predict()                            | ex11_6.py                       | pg 912 (939)               |   Y   |
+|  75 (76)      |  pg 916 (943)  | Rise/Set                                     | N/A                                  | ex11_7.py (DNE)                 | pg 918 (945)               |   -   |
+|  76 (77)      |  pg 935 (962)  | Close Approach                               | N/A                                  |                -                |           -                |   -   |
+|  77 (78)      |  pg 953 (980)  | Patched Conic                                | N/A                                  |                -                |           -                |   -   |
+|  78 (79)      |  pg 962 (989)  | Algorithm B-plane I                          | N/A                                  |                -                |           -                |   -   |
+|  79 (80)      |  pg 963 (990)  | Algorithm B-plane II                         | N/A                                  |                -                |           -                |   -   |
 
 
