@@ -71,7 +71,7 @@ print('%11.7f %11.7f s \n' % (tbiru[3, 0], tbiru[3, 1]))
 print('%11.7f %11.7f s \n' % (tbiru[4, 0], tbiru[4, 1]))
 minenergyv, aminenergy, tminenergy, tminabs = obu.lambertmin(r1, r2, 'L', 0)
 print(' minenergyv %16.8f %16.8f %16.8f a %11.7f  dt %11.7f  %11.7f \n' % (minenergyv[0], minenergyv[1], minenergyv[2], aminenergy, tminenergy, tminabs))
-minenergyv, aminenergy, tminenergy, tminabs = obu.lambertmin(r1, r2, 'H', 0)
+minenergyv, aminenergy, tminenergy, tminabs = obu.lambertmin(r1, r2, 'S', 0)
 print(' minenergyv %16.8f %16.8f %16.8f a %11.7f  dt %11.7f  %11.7f \n' % (minenergyv[0], minenergyv[1], minenergyv[2], aminenergy, tminenergy, tminabs))
 dtwait = 0.0
 

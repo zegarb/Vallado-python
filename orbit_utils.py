@@ -3128,7 +3128,7 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #  inputs          description                    range / units
 #    r1          - ijk position vector 1          km
 #    r2          - ijk position vector 2          km
-#    dm          - direction of motion            'l', 's'
+#    dm          - direction of motion            'L', 'S'
 #    nrev        - multiple revoluions            0, 1, ...
 #
 #  outputs       :
@@ -3139,7 +3139,32 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
 #
 #
 
-def lambertmin(r1=None, r2=None, dm=None, nrev=None):
+def lambertmin(r1: np.ndarray, r2:np.ndarray, dm: str, nrev: int):
+    """this function finds the minimum energy transfer for lambert's problem.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    r2 : ndarray
+        ijk position vector 2: km
+    dm : str
+        direction of motion: 'L' for long, 'S' for short
+    nrev : int
+        number of revolutions
+
+    Returns
+    -------
+    v : ndarray
+        velocity vector : km/s
+    aminenergy : float
+        semimajor axis min energy : km/s
+    tminenergy : float
+        time min energy : km/s
+    tminabs : float
+        time min energy - parabolic: km/s
+    """
+
     # ---- find parameters that are constant for the initial geometry
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
@@ -3149,19 +3174,16 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
     aminenergy = 0.5 * s
     alphae = math.pi
     betae = 2.0 * math.asin(math.sqrt((s - c) / s))
-    if (dm == 'L'):
+    if (dm.casefold() == 's'):
         tminenergy = (math.sqrt(aminenergy ** 3 / mu)
                       * (2.0 * nrev * math.pi + alphae - (betae - math.sin(betae))))
-        #tminabs1 = sqrt(s^3/(8.0*mu))*(alphae - (betae-sin(betae)))
     else:
         tminenergy = (math.sqrt(aminenergy ** 3 / mu)
                       * (2.0 * nrev * math.pi + alphae + (betae - math.sin(betae))))
-        #tminabs1 = sqrt(s^3/(8.0*mu))*(alphae + (betae-sin(betae)))
 
     # find parabolic tof - this will be the minimum limit for tof
-# negative sign should be smallest
+    # negative sign should be smallest
     tminabs = 1.0 / 3.0 * math.sqrt(2.0 / mu) * (s ** 1.5 - (s - c) ** 1.5)
-    #tminabs = 1.0/3.0*sqrt(2.0/mu)*(s^1.5+(s-c)^1.5)
 
     # if calc min velocity
     rcrossr = np.cross(r1, r2)
@@ -3181,7 +3203,7 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
 
 #------------------------------------------------------------------------------
 #
-#                           procedure lambertminT
+#                           procedure lambertmintof
 #
 #  this procedure solves lambert's problem and finds the miniumum time for
 #  multi-revolution cases.
@@ -3191,8 +3213,7 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
 # inputs          description                    range / units
 #    r1          - ijk position vector 1          km
 #    r2          - ijk position vector 2          km
-#    dm          - direction of motion            'l', 's'
-#    df          - direction of flight            'd', 'r'
+#    dm          - direction of motion            'L', 'S'
 #    nrev        - number of revs to complete     0, 1, 2, 3, ...
 #
 #  outputs       :
@@ -3216,9 +3237,34 @@ def lambertmin(r1=None, r2=None, dm=None, nrev=None):
 #  references    :
 #    vallado       2013, 494, Alg 59, ex 7-5
 #    prussing      JAS 2000
-#-----------------------------------------------------------------------------*/
+#-----------------------------------------------------------------------------
 
-def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
+def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
+    """this procedure solves lambert's problem and finds the miniumum time for
+    multi-revolution cases.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    r2 : ndarray
+        ijk position vector 2: km
+    dm : str
+        direction of motion : 'S': short, 'L': long
+    nrev : int
+        number of revolutions
+
+    Returns
+    -------
+    tmin : float
+        minimum time of flight: sec
+    tminp : float
+        minimum parabolic tof : sec
+    tminenergy
+        minimum energy tof : sec
+    v : ndarray
+        velocity vector : km/s
+    """
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
@@ -3227,7 +3273,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
         cosdeltanu = 1.0 * np.sign(cosdeltanu)
 
     rcrossr = np.cross(r1, r2)
-    if (de == 'L'):
+    if (dm.casefold() == 's'):
         sindeltanu = smu.mag(rcrossr) / (magr1 * magr2)
     else:
         sindeltanu = - smu.mag(rcrossr) / (magr1 * magr2)
@@ -3249,13 +3295,8 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     #magr2 = 1.0
     #mu = 1.0
 
-    # these are the same
-    #    if (de == 'L')
     chord = math.sqrt(magr1 * magr1 + magr2 * magr2
                     - 2.0 * magr1 * magr2 * cosdeltanu)
-    #    else
-    #    chord = -sqrt(magr1 * magr1 + magr2 * magr2 - 2.0 * magr1 * magr2 * cosdeltanu)
-    #    end
     #chord = smu.mag(r2 - r1)
 
     s = (magr1 + magr2 + chord) * 0.5
@@ -3263,7 +3304,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     eta = 0.0
     # ------------- calc tmin parabolic tof to see if the orbit is possible
     # ----- no ellitpical orbits exist below this --------
-    if (dm == 'S'):
+    if (dm.casefold() == 's'):
         tminp = ((1.0 / 3.0) * math.sqrt(2.0 / mu)
                  * ((s ** 1.5) - (s - chord) ** 1.5))
     else:
@@ -3275,7 +3316,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
     amin = 0.5 * s
     #alpha = pi
     beta = 2.0 * math.asin(math.sqrt((s - chord) / s))
-    if (dm == 'S'):
+    if (dm.casefold == 's'):
         tminenergy = ((amin ** 1.5)
                       * ((2.0 * nrev + 1.0) * math.pi - beta + math.sin(beta))
                       / math.sqrt(mu))
@@ -3293,7 +3334,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
         a = an
         alp = 1.0 / a
         alpha = 2.0 * math.asin(math.sqrt(0.5 * s * alp))
-        if (de == 'L'):
+        if (dm.casefold() == 'S'):
             beta = 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
         else:
             beta = - 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
@@ -3306,7 +3347,7 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
                   * (math.sin(xi) + eta) - 8.0 * math.sin(xi))
                  * (- alp * math.tan(0.5 * alpha))
                  + ((6.0 * nrev * math.pi + 3.0 * xi - eta)
-                    * (- math.cos(xi) - math.cos(alpha)) + (- 3.0 - math.cos(beta))
+                    * (-math.cos(xi) - math.cos(beta)) + (-3.0 - math.cos(beta))
                     * (math.sin(xi) + eta) + 8.0 * math.sin(xi))
                  * (- alp * math.tan(0.5 * beta)))
         del_ = fa / fadot
@@ -3314,31 +3355,21 @@ def lambertminT(r1=None, r2=None, dm=None, de=None, nrev=None):
         #        fprintf(1, '#2i #8.4f #11.5f #11.5f  #11.5f  #11.5f  #11.5f  #11.5f  #11.5f \n', i, dnu * rad2deg, alpha * rad2deg, beta * rad2deg, xi, eta, fa, fadot, an)
         i = i + 1
 
-
-    print('iter %2i ' % (i))
+    if sh.show:
+        print('iter %2i ' % (i))
     # could update beta one last time with alpha too????
-    if (dm == 'S'):
-        tmin = (an ** 1.5) * (2.0 * math.pi * nrev + xi - eta) / math.sqrt(mu)
-    else:
-        tmin = (an ** 1.5) * (2.0 * math.pi * nrev + xi + eta) / math.sqrt(mu)
 
-    #      dm = 'S'
-    #      de = 'L'
-    #      nrev = 0
-    #      blair
-    #      r1 = [6778.136300000, 0.000000, 0.000000 ]
-    #      r2 = [-6694.857334274, -1180.483980026, 0.000000 ]
-    #      v1 = [0.000000, 7.668558568, 0.000000 ]
-    #      moving
-    #      r1 = [ -6175.1034, 2757.0706, 1626.6556 ]
-    #      v1 = [ 2.376641, 1.139677, 7.078097]
-    #      r2 = [ -1078.007289, 8796.641859, 1890.7135 ]
-
-    #      [tmin, tminp, tminenergy] = lambertminT(r1, r2, dm, de, nrev)
-
-    print('%c  %c %i  %f  %f  %f  \n'
-          % (dm, de, nrev, tmin, tminp, tminenergy))
-    return tmin, tminp, tminenergy
+    tmin = math.sqrt(an**3 / mu) * (2.0 * math.pi * nrev + xi - eta)
+    emin = math.sqrt(1 - (4 * ((s - magr1) * (s - magr2)) / chord**2)
+                     * math.sin((alpha + beta) / 2)**2)
+    pmin = an * (1 - emin**2)
+    v = ((math.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu))
+         * (r2 - (1 - (magr2 / pmin) * (1 - cosdeltanu)) * r1))
+    if sh.show:
+        print('%c  %c %i  %f  %f  %f  \n'
+            % (dm, nrev, tmin, tminp, tminenergy))
+        print(v)
+    return tmin, tminp, tminenergy, v
 
 # -------------------------------------------------------------------------
 # find the minimum psi values for the universal variable lambert problem
@@ -8306,21 +8337,12 @@ def site(latgd: float, lon: float, alt: float):
     vs : ndarray
         ecef site velocity vector: km/s
     """
-
-    # EGM-08 constants used here
-    flat = 1.0/298.257223563
-    earthrot = 7.292115e-5     # rad/s  old 7.29211514670698e-05
-    mum = 3.986004415e14   # m3/s2
-    # derived constants from the base values
-    eccearth = math.sqrt(2.0*flat - flat**2)
-    eccearthsqrd = eccearth**2
-    # -------------------------  implementation   -----------------
-    sinlat = math.sin((latgd))
+    sinlat = math.sin(latgd)
 
     # ------  find rdel and rk components of site vector  ---------
-    cearth = re / math.sqrt(1.0 - (eccearthsqrd*sinlat*sinlat))
-    rdel = (cearth + alt)*math.cos((latgd))
-    rk = ((1.0-eccearthsqrd)*cearth + alt)*sinlat
+    cearth = re / math.sqrt(1.0 - (eccearthsqrd * sinlat * sinlat))
+    rdel = (cearth + alt) * math.cos(latgd)
+    rk = ((1.0-eccearthsqrd) * cearth + alt) * sinlat
 
     # ---------------  find site position vector  -----------------
     rs = np.zeros((3))
