@@ -3610,8 +3610,8 @@ def adbar2rv(magr: float, magv: float, rtasc: float, decl: float, fpav:float,
 # this function finds the azimuth and elevation values given the
 # right ascension and declination, using equations 4-11 to 4-14.
 def radec2azel(rtasc: float, decl: float, lat: float, lst: float):
-    """this function finds the azimuth and elevation values given the
-    right ascension and declination
+    """this function finds the approximate azimuth and elevation values given
+    the right ascension and declination
 
     Parameters
     ----------
@@ -3627,9 +3627,9 @@ def radec2azel(rtasc: float, decl: float, lat: float, lst: float):
     Returns
     -------
     az : float
-        azimuth : rad
+        azimuth of observed object: rad
     el : float
-        elevation : rad
+        elevation of observed object: rad
     """
     lha = lst - rtasc
     el = math.asin(math.sin(lat) * math.sin(decl) +
@@ -3638,7 +3638,8 @@ def radec2azel(rtasc: float, decl: float, lat: float, lst: float):
     cosaz = ((math.sin(decl) - math.sin(el) * math.sin(lat))
              / math.cos(el) * math.cos(lat))
     az = math.atan2(sinaz, cosaz)
-
+    if az < 0:
+        az = az + twopi
     return az, el
 
 # azel2radec
@@ -3647,8 +3648,8 @@ def radec2azel(rtasc: float, decl: float, lat: float, lst: float):
 # the azimuth and elevation, using algorithm 28
 
 def azel2radec(az: float, el: float, lat: float, lst: float):
-    """This function finds the right ascension and declination values
-    given the azimuth and elevation
+    """This function finds the approximate right ascension and declination
+    values given the azimuth and elevation
 
     Parameters
     ----------
@@ -3664,27 +3665,29 @@ def azel2radec(az: float, el: float, lat: float, lst: float):
     Returns
     -------
     rtasc : float
-        right ascension: rad
+        right ascension of observed object: rad
     decl : float
-        declination: rad
+        declination of observed object: rad
     """
     decl = math.asin(math.sin(el) * math.sin(lat)
                      + math.cos(el) * math.cos(lat) * math.cos(az))
-    slha1 = (-(math.sin(az) * math.cos(el) * math.cos(lat))
-             / (math.cos(decl) * math.cos(lat)))
+    slha1 = -math.sin(az) * math.cos(el) / math.cos(decl)
     clha1 = ((math.sin(el) - math.sin(lat) * math.sin(decl))
              / (math.cos(decl) * math.cos(lat)))
     lha1 = math.atan2(slha1, clha1)
+
     #    print(' lha1 #13.7f \n', lha1 * rad2deg)
 
     # alt approach
-    slha2 = -(math.sin(az) * math.cos(el)) / (math.cos(decl))
-    clha2 = ((math.cos(lat) * math.sin(el) - math.sin(lat) * math.cos(el)
-              * math.cos(az)) / (math.cos(decl)))
-    lha2 = math.atan2(slha2, clha2)
+    # slha2 = -(math.sin(az) * math.cos(el)) / (math.cos(decl))
+    # clha2 = ((math.cos(lat) * math.sin(el) - math.sin(lat) * math.cos(el)
+    #           * math.cos(az)) / (math.cos(decl)))
+    # lha2 = math.atan2(slha2, clha2)
     #    print(' lha2 #13.7f \n', lha2 * rad2deg)
 
     rtasc = lst - lha1
+    if rtasc < 0:
+        rtasc = rtasc + twopi
     return rtasc, decl
 
 # ------------------------------------------------------------------------------
@@ -9405,11 +9408,11 @@ def fk4(rb1950: np.ndarray = np.array([]), vb1950: np.ndarray = np.array([]),
     vb1950 : np.ndarray, optional
         b1950 eci velocity vector, by default np.array([]): er/s, km/s, etc
     option : str, optional
-        transformation approach (systems tool kit, original, or 6 dimension), \
+        transformation approach (systems tool kit, original, or 6 dimension),
         by default 'org': 'org','stk','6d'
 
-    Note: if only trying to only return transformation martix, input an empty \
-        numpy array for rb1950 and vb1950
+    Note: if only trying to only return transformation martix, input an empty
+    numpy array for rb1950 and vb1950
 
     Returns
     -------
@@ -9571,11 +9574,11 @@ def fk4i(rj2000i: np.ndarray = np.array([]), vj2000i: np.ndarray = np.array([]),
     vj2000i : np.ndarray, optional
         j2000 eci velocity vector, by default np.array([]): er/s, km/s, etc
     option : str, optional
-        transformation approach (systems tool kit, original, or 6 dimension), \
+        transformation approach (systems tool kit, original, or 6 dimension),
         by default 'org': 'org','stk','6d'
 
-    Note: if only trying to return transformation martix, input an empty \
-        numpy array for rj2000i and vj2000i
+    Note: if only trying to return transformation martix, input an empty
+    numpy array for rj2000i and vj2000i
 
     Returns
     -------
