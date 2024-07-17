@@ -85,7 +85,7 @@ nu = lon2nu (jdut1, 7.020438698 * deg2rad, 0.070273056 * deg2rad, 19.90450011 * 
                 352.5056022 * deg2rad)
 print("nu is ", nu)
 lon = nu2lon(jdut1,nu,0.070273056 * deg2rad, 19.90450011 * deg2rad, 352.5056022 * deg2rad)
-print("lon is ", lon)
+print("lon is ", lon * rad2deg)
 
 #--------------------------------ecef2--------------------------------------------------------------
 rpef, vpef, apef = ecef2pef(recef, vecef, aecef, '80', xp, yp, ttt)
@@ -540,7 +540,7 @@ rho, az, el, drho, daz, del_ = rv2razel(reci, veci, latgd, lon, alt, ttt,
                                         jdut1, lod, xp, yp, terms, ddpsi,
                                         ddeps)
 print('rv2razel:')
-print(f'rho {rho}, az {az}, drho {drho}, daz {daz}, del {del_}')
+print(f'rho {rho}, az {az}, el {el}, drho {drho}, daz {daz}, del {del_}')
 
 reci, veci = razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt, ttt,
                         jdut1, lod, xp, yp, terms, ddpsi, ddeps)
@@ -549,8 +549,16 @@ print(reci)
 print(veci)
 
 # angles are not comparable for some reason - mjc
-# lst,_ = stu.lstime(lon, jdut1)
-# rtasc2, decl2 = azel2radec(az,el,latgd,lst)
+lst,_ = stu.lstime(lon, jdut1)
+az = 5 * deg2rad
+el = 20 * deg2rad
+rtasc2, decl2 = azel2radec(az,el,latgc,lst)
+az2, el2 = radec2azel(rtasc2, decl2, latgc, lst)
+print(f'start az: {az}, el: {el}')
+print('azel2radec:')
+print(f'{rtasc2 = }, {decl2 = }')
+print('radec2azel:')
+print(f'{az2 = }, {el2 = }')
 
 # print('azel2radec compared to rv2radec:')
 # print ('rv2radec:  rtasc %f, decl %f' % (rtasc,decl))

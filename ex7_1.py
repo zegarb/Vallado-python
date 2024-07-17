@@ -38,9 +38,7 @@ rs, vs = obu.site(latgd, lon, alt)
 print('site %14.7f%14.7f%14.7f%14.7f%14.7f%14.7f\n'
       % (rs[0], rs[1], rs[2], vs[0], vs[1], vs[2]))
 print('--------------- razel tests ----------------------------\n')
-alt = 2.187
 rho = 604.68
-
 az = 205.6 * deg2rad
 el = 30.7 * deg2rad
 drho = 2.08
@@ -78,7 +76,7 @@ print(' xp %8.6f "' % (xp))
 print(' yp %8.6f "' % (yp))
 print(' lod %8.6f s\n' % (lod))
 print('           range km        az deg      el    deg     rngrt km/s      '
-      'azrate deg/s  elrate deg/s\n')
+      'azrate deg/s  elrate deg/s')
 print('rvraz %14.7f%14.7f%14.7f%14.7f%14.7f%14.7f\n'
       % (rho, az * rad2deg, el * rad2deg, drho, daz * rad2deg, del_ * rad2deg))
 reci, veci = sc.razel2rv(rho, az, el, drho, daz, del_, latgd, lon, alt, ttt,
@@ -88,11 +86,13 @@ print('v  \n', (veci))
 rho, az, el, drho, daz, del_ = sc.rv2razel(reci, veci, latgd, lon, alt, ttt,
                                       jdut1 + jdut1frac, lod, xp, yp, terms, ddpsi,
                                       ddeps)
-print('rvraz %14.7f%14.7f%14.7f%14.7f%14.7f%14.7f\n'
+print('rv2razel: rho = %14.7f az = %14.7f el = %14.7f drho = %14.7f '
+      'daz = %14.7fdel = %14.7f\n'
       % (rho, az * rad2deg, el * rad2deg, drho, daz * rad2deg, del_ * rad2deg))
+
 p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper = sc.rv2coe(reci, veci)
 
-print(p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper)
+# print(p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper)
 
 print('          p km       a km      ecc      incl deg     raan deg     '
       'argp deg      nu deg      m deg      arglat   truelon    lonper\n')

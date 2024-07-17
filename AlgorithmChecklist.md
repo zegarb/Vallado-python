@@ -27,13 +27,13 @@
 |  25  |  pg 259 (286)  | Geocentric RaDec                             | rv2radec()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  26  |  pg 260 (287)  | Topocentric                                  | rv2tradec()                          | ex4_1.py                        | pg 273 (300)               |   Y   |
 |  27  |  pg 265 (292)  | RAZEL                                        | rv2razel()                           | ex4_1.py                        | pg 273 (300)               |   Y   |
-|  28  |  pg 268 (295)  | AzELToRaDec                                  | azel2radec()                         |                -                |           -                |   N   |
+|  28  |  pg 268 (295)  | AzELToRaDec                                  | azel2radec()                         |                -                |           -                |   Y   |
 |  29  |  pg 279 (306)  | Sun                                          | sun(), sunalmanac()                  | ex5_1.py                        | pg 280 (307)               |   Y   |
 |  30  |  pg 283 (310)  | SunriseSet                                   | sunriset()                           | ex5_2.py                        | pg 284 (311)               |   Y   |
 |  31  |  pg 288 (315)  | Moon                                         | moon()                               | ex5_3.py                        | pg 288 (315)               |   Y   |
 |  32  |  pg 290 (317)  | MoonRiseSet                                  | moonriset()                          | ex5_4.py                        | pg 292 (319)               |   Y   |
 |  33  |  pg 296 (323)  | PlanetRV                                     | planetrv()                           | ex5_5.py                        | pg 297 (324)               |   Y   |
-|  34  |  pg 301 (328)  | Shadow                                       | shadow()                             | shadowtest.py                   |           -                |   N   |
+|  34  |  pg 301 (328)  | Shadow                                       | shadow()                             | shadowtest.py                   |           -                |   Y   |
 |  35  |  pg 308 (335)  | Sight                                        | sight(), light()                     | ex5_6.py                        | pg 309 (336)               |   Y   |
 |  36  |  pg 325 (352)  | Hohmann Transfer                             | hohmann()                            | ex6_1.py                        | pg 326 (353)               |   Y   |
 |  37  |  pg 326 (353)  | Bi-elliptic Transfer                         | biellip()                            | ex6_2.py                        | pg 327 (354)               |   Y   |
@@ -50,9 +50,9 @@
 |  48  |  pg 396 (423)  | Hill's Equation                              | hillsr(), hillsv()                   | ex6_14.py and ex6_15.py         | pg 397 (424) & 410 (437)   |   Y   |
 |  49  |  pg 414 (441)  | HillEQCM to ECI                              | hilleqcm2eci()                       |                                 |           -                |   Y   |
 |  50  |  pg 415 (442)  | ECI to HillEQCM                              | eci2hilleqcm()                       |               -                 |           -                |   Y   |
-|  51  |  pg 430 (457)  | Site-Track                                   | site()                               | ex7_1.py                        | pg 431 (458)               |   -   |
-|  52  |  pg 442 (469)  | Angles-Only Gauss                            | anglesg()                            | ex7_2.py                        | pg 447 (474)               |   N   |
-|  53  |  pg 460 (487)  | Angles-Double-R                              | anglesdr()                           | ex7_2.py                        | pg 447 (474)               |   N   |
+|  51  |  pg 430 (457)  | Site-Track                                   | razel2rv()                           | ex7_1.py                        | pg 431 (458)               |   Y   |
+|  52  |  pg 442 (469)  | Angles-Only Gauss                            | anglesg()                            | ex7_2.py                        | pg 447 (474)               |   Y   |
+|  53  |  pg 460 (487)  | Angles-Double-R                              | anglesdr()                           | ex7_2.py                        | pg 447 (474)               |   Y   |
 |  54  |  pg 460 (487)  | Gibbs                                        | gibbs()                              | ex7_34.py                       | pg 461 (488)               |   Y   |
 |  55  |  pg 466 (493)  | Herrick-Gibbs                                | hgibbs()                             | ex7_34.py                       | pg 467 (494)               |   Y   |
 |  56  |  pg 475 (502)  | Lambert's Problem - Minimum Energy           | lambertmin()                         | ex7_5.py                        | pg 497 (524)               |  Y/N  |
