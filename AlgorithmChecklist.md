@@ -56,7 +56,7 @@
 |  54  |  pg 460 (487)  | Gibbs                                        | gibbs()                              | ex7_34.py                       | pg 461 (488)               |   Y   |
 |  55  |  pg 466 (493)  | Herrick-Gibbs                                | hgibbs()                             | ex7_34.py                       | pg 467 (494)               |   Y   |
 |  56  |  pg 475 (502)  | Lambert's Problem - Minimum Energy           | lambertmin()                         | ex7_5.py                        | pg 497 (524)               |  Y/N  |
-|  N/A (57)     |        -       | Lambert's Problem - Minimum Time             | lambertminT()                        |                -                |                            |   N   |
+|  N/A (57)     |        -       | Lambert's Problem - Minimum Time             | lambertmintof()                        |                -                |                            |   N   |
 |  57 (59)      |  pg 478 (505)  | Lambert - Gauss's Solution                   | N/A                                  |                -                |           -                |   -   |
 |  58 (60)      |  pg 492 (519)  | Lambert - Universal Variables                | lambertu()                           | ex7_5.py                        | pg 497 (524)               |  Y/N  |
 |  59 (61)      |  pg 494 (521)  | Lambert - Battin Method                      | lambertb()                           | ex7_5.py                        | pg 497 (524)               |  Y/N  |

@@ -1258,7 +1258,7 @@ def kbat(v: float):
     Parameters
     ----------
     v : float
-        _description_
+        value
     """
     d = np.zeros(21)
     d[0] = 1.0 / 3.0
@@ -1282,6 +1282,21 @@ def kbat(v: float):
     d[18] = 2968.0 / 11655.0
     d[19] = 3190.0 / 12987.0
     d[20] = 3658.0 / 14391.0
+
+    # test computations -zeg
+    # d = np.zeros(21)
+    # for n in range(0, 21):
+    #     i = n
+    #     if n % 2 == 0:
+    #         d[n] = (2 * (3*i + 1) * (6*i - 1)) / (9 * (4*i - 1) * (4*i + 1))
+    #         num = 2 * (3*i + 1) * (6*i - 1)
+    #         den = 9 * (4*i - 1) * (4*i + 1)
+    #         print(num, den)
+    #     else:
+    #         d[n] = (2 * (3*i + 2) * (6*i + 1)) / (9 * (4*i + 1) * (4*i + 3))
+    #         num = 2 * (3*i + 2) * (6*i + 1)
+    #         den = 9 * (4*i + 1) * (4*i + 3)
+    #         print(num, den)
     # ----------------- process forwards ------------------------
     sum1 = d[0]
     delold = 1.0

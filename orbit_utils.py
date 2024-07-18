@@ -2555,7 +2555,7 @@ def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
 # ------------------------------------------------------------------------------
 
 
-def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
+def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
 
     numiter = 20
     errorl = 'ok'
@@ -2579,7 +2579,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
     if abs(cosdeltanu) > 1.0:
         cosdeltanu = np.sign(cosdeltanu) * 1.0
-    if (dm == 'L'):  #dm == 'l'
+    if (dm.casefold() == 'l'):  #dm == 'l'
         vara = -math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
     else:
         vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
@@ -2889,7 +2889,7 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
 #    r2          - ijk position vector 2          km
 #    dm          - dir of motion (long, short)        'l', 's'
 #                  this is really a period discriminator
-#    df          - dir of flight (direct, retrograde) 'd', 'r'
+#    de          - dir of energy (high, low) 'h', 'l'
 #                  this is the inclination discriminator
 #    nrev        - number of revs to complete     0, 1, ...
 #    dtsec       - time between r1 and r2         s
@@ -2923,14 +2923,44 @@ def lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbi, outfile):
 #    sinh        - hyperbolic sine
 #
 #  references    :
-#    vallado       2013, 493-497, ex 7-5
+#    vallado       2022, 506-510, Alg. 61 ex 7-5
 #    thompson      2018
 #
 # [v1dv, v2dv, errorb] = lambertb (r1, v1, r2, dm, df, nrev, dtsec)
 # ------------------------------------------------------------------------------
 
-def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
-             dtsec=None):
+def lambertb(r1: np.ndarray, v1: np.ndarray, r2: np.ndarray, dm: str, de: str,
+             nrev: int, dtsec: float):
+    """this function solves lambert's problem using battins method. the method is
+    developed in battin (1987) and explained by Thompson 2018. it uses continued
+    fractions to speed the solution and has several parameters that are defined
+    differently than the traditional gaussian technique.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    v1 : ndarray
+        ijk velocity vector 1: km/s - this is only needed for transfers where
+        delta nu is equal to 180 degrees.
+    r2 : ndarray
+        ijk position vector 2: km
+    dm : str
+        direction of motion: 'l'-long, 's'-short
+    de : str
+        direction of energy: 'h'-high, 'l'-low
+    nrev : int
+        number of revolutions
+    dtsec : float
+        time between r1 and r2
+
+    Returns
+    -------
+    v1dv : ndarray
+        ijk transfer velocity vector 1: km/s
+    v2dv : ndarray
+        ijk transfer velocity vector 2: km/s
+    """
     errorb = 'ok'
     y = 0.0
     k2 = 0.0
@@ -2944,12 +2974,10 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     if (abs(cosdeltanu) > 1.0):
         cosdeltanu = 1.0 * np.sign(cosdeltanu)
 
-    rcrossr = np.cross(r1, r2)
-    magrcrossr = smu.mag(rcrossr)
-    if df == 'd':
-        sindeltanu = magrcrossr / (magr1 * magr2)
+    if dm.casefold() == 's':
+        sindeltanu = math.sqrt(1 - cosdeltanu**2)
     else:
-        sindeltanu = - magrcrossr / (magr1 * magr2)
+        sindeltanu = -math.sqrt(1 - cosdeltanu**2)
 
     dnu = math.atan2(sindeltanu, cosdeltanu)
     # the angle needs to be positive to work for the long way
@@ -2966,57 +2994,49 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
     eps = ror - 1.0
     lam = 1.0 / s * math.sqrt(magr1 * magr2) * math.cos(dnu * 0.5)
     L = ((1.0 - lam) / (1.0 + lam)) ** 2
-    m = 8.0 * mu * dtsec * dtsec / (s ** 3 * (1.0 + lam) ** 6)
+    m = 8.0 * mu * dtsec**2 / (s**3 * (1.0 + lam)**6)
 
-    #        tan2w = 0.25*eps*eps / (sqrt(ror) + ror * (2.0 + sqrt(ror)))
-    #        rp = sqrt(magr1*magr2)*((cos(dnu*0.25))^2 + tan2w)
-    #        if (dnu < pi)
-    #            L = ((sin(dnu*0.25))^2 + tan2w) / ((sin(dnu*0.25))^2 + tan2w + cos(dnu*0.5))
-    #        else
-    #            L = ((cos(dnu*0.25))^2 + tan2w - cos(dnu*0.5)) / ((cos(dnu*0.25))^2 + tan2w)
-    #        end
-    #        m = mu * dtsec*dtsec / (8.0*rp*rp*rp)
-
-
-
-    #    lim1 = sqrt(m/L)
     # alt approach for high energy (long way, retro multi-rev) case
-    if (dm == 'l') and (nrev > 0):
+    if (de.casefold() == 'h') and (nrev > 0):
         xn = 1e-20
         x = 10.0
         loops = 1
         while ((abs(xn - x) >= small) and (loops <= 20)):
 
             x = xn
-            temp = 1.0 / (2.0 * (L - x * x))
+            temp = 1.0 / (2.0 * (L - x**2))
             temp1 = math.sqrt(x)
             temp2 = (nrev * math.pi * 0.5 + math.atan(temp1)) / temp1
             h1 = temp * (L + x) * (1.0 + 2.0 * x + L)
-            h2 = temp * m * temp1 * ((L - x * x) * temp2 - (L + x))
-            b = 0.25 * 27.0 * h2 / ((temp1 * (1.0 + h1)) ** 3)
+            h2 = temp * m * temp1 * ((L - x**2) * temp2 - (L + x))
+            b = 0.25 * 27.0 * h2 / ((temp1 * (1.0 + h1))**3)
             if b < 0.0:
                 f = 2.0 * math.cos(1.0 / 3.0 * math.acos(math.sqrt(b + 1.0)))
             else:
                 A = (math.sqrt(b) + math.sqrt(b + 1.0)) ** (1.0 / 3.0)
                 f = A + 1.0 / A
             y = 2.0 / 3.0 * temp1 * (1.0 + h1) * (math.sqrt(b + 1.0) / f + 1.0)
-            xn = 0.5 * ((m / (y * y) - (1.0 + L))
-                        - math.sqrt((m / (y * y) - (1.0 + L)) ** 2
-                                  - 4.0 * L))
-            print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f '
-                  '%11.7f \n'
-                  % (loops, y, x, h1, h2, b, f))
+            xn = 0.5 * ((m / y**2 - (1.0 + L))
+                        - math.sqrt((m / y**2 - (1.0 + L))**2 - 4.0 * L))
+            if sh.show:
+                print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f '
+                    '%11.7f \n'
+                    % (loops, y, x, h1, h2, b, f))
             loops = loops + 1
 
-        print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f %11.7f\n'
-              % (loops, y, x, h1, h2, b, f))
+        if sh.show:
+            print(' %3i yh %11.6f x %11.6f h1 %11.6f h2 %11.6f b %11.6f f %11.7f\n'
+                % (loops, y, x, h1, h2, b, f))
+
         x = xn
-        a = s * (1.0 + lam) ** 2 * (1.0 + x) * (L + x) / (8.0 * x)
-        p = ((2.0 * magr1 * magr2 * (1.0 + x) * math.sin(dnu * 0.5) ** 2)
-             / (s * (1 + lam) ** 2 * (L + x)))
+        a = s * (1.0 + lam)**2 * (1.0 + x) * (L + x) / (8.0 * x)
+        p = ((2.0 * magr1 * magr2 * ((1.0 + x)/ (L + x)) * math.sin(dnu * 0.5)**2)
+             / (s * (1 + lam)**2))
         ecc = math.sqrt(1.0 - p / a)
         v1dv, v2dv = lambhodograph(r1, v1, r2, p, ecc, dnu, dtsec)
-        print('high v1t %16.8f %16.8f %16.8f \n' % (v1dv))
+
+        if sh.show:
+            print('high v1t %16.8f %16.8f %16.8f \n' % (v1dv))
     else:
         # standard processing
         # note that the dr nrev =0 case is not represented
@@ -3027,19 +3047,18 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
             xn = L
 
         loops = 1
-        y1 = 0.0
         x = 10.0
         while ((abs(xn - x) >= small) and (loops <= 30)):
 
             if (nrev > 0):
                 x = xn
 
-                temp = 1.0 / ((1.0 + 2.0 * x + L) * (4.0 * x ** 2))
+                temp = 1.0 / ((1.0 + 2.0 * x + L) * (4.0 * x**2))
                 temp1 = (nrev * math.pi * 0.5
                          + math.atan(math.sqrt(x))) / math.sqrt(x)
-                h1 = (temp * (L + x) ** 2
-                      * (3.0 * (1.0 + x) ** 2 * temp1 - (3.0 + 5.0 * x)))
-                h2 = (temp * m * ((x * x - x * (1.0 + L) - 3.0 * L)
+                h1 = (temp * (L + x)**2
+                      * (3.0 * (1.0 + x)**2 * temp1 - (3.0 + 5.0 * x)))
+                h2 = (temp * m * ((x**2 - (1.0 + L) * x - 3.0 * L)
                                   * temp1 + (3.0 * L + x)))
             else:
                 x = xn
@@ -3050,70 +3069,28 @@ def lambertb(r1=None, v1=None, r2=None, dm=None, df=None, nrev=None,
                 h2 = m * (x - L + tempx) * denom
             # ----------------------- evaluate cubic ------------------
             b = 0.25 * 27.0 * h2 / ((1.0 + h1) ** 3)
-            #        if b < -1.0 # reset the initial condition
-            #fprintf(1, 'xx #11.6f  #11.6f  #11.6f \n', L, xn, b)
-            #            xn = 1.0 - 2.0*L
-            #        end
-            #        else
-            #            if y1 > lim1
-            #                xn = xn * (lim1/y1)
-            #            end
-            #            else
             u = 0.5 * b / (1.0 + math.sqrt(1.0 + b))
             k2 = smu.kbat(u)
             y = (((1.0 + h1) / 3.0) * (2.0 + math.sqrt(1.0 + b)
-                                       / (1.0 + 2.0 * u * k2 * k2)))
-            xn = (math.sqrt(((1.0 - L) * 0.5) ** 2 + m / (y * y))
+                                       / (1.0 + 2.0 * u * k2**2)))
+            xn = (math.sqrt(((1.0 - L) * 0.5)**2 + m / (y**2))
                   - (1.0 + L) * 0.5)
-
-            #                    xn = sqrt(l*l + m/(y*y)) - (1.0 - l) alt, doesn't seem to work
-            #            end
-            #        end
-            y1 = math.sqrt(m / ((L + x) * (1.0 + x)))
             loops = loops + 1
-            print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 '
-                  '%11.7f \n'
-                  % (loops, y, x, k2, b, u, y1))
+            if sh.show:
+                print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f \n'
+                        % (loops, y, x, k2, b, u))
 
-        print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f y1 %11.7f\n'
-              % (loops, y, x, k2, b, u, y1))
+        if sh.show:
+            print(' %3i yb %11.6f x %11.6f k2 %11.6f b %11.6f u %11.6f \n'
+                % (loops, y, x, k2, b, u))
         if (loops < 30):
-            # blair approach use y from solution
-            #       lam = 1.0/s * sqrt(magr1*magr2) * cos(dnu*0.5)
-            #       m = 8.0*mu*dtsec*dtsec / (s^3*(1.0 + lam)^6)
-            #       L = ((1.0 - lam)/(1.0 + lam))^2
-            #a = s*(1.0 + lam)^2*(1.0 + x)*(lam + x) / (8.0*x)
-            # p = (2.0*magr1*magr2*(1.0 + x)*sin(dnu*0.5)^2)^2 / (s*(1 + lam)^2*(lam + x))  # loechler, not right?
-            p = (2.0 * magr1 * magr2 * y * y * (1.0 + x) ** 2
-                 * math.sin(dnu * 0.5) ** 2) / (m * s * (1 + lam) ** 2)
-            ecc = math.sqrt((eps ** 2 + 4.0 * magr2 / magr1
-                           * math.sin(dnu * 0.5) ** 2 * ((L - x) / (L + x)) ** 2)
-                           / (eps ** 2 + 4.0 * magr2 / magr1
-                              * math.sin(dnu * 0.5) ** 2))
+            p = (2.0 * magr1 * magr2 * y**2 * (1.0 + x)**2
+                 * math.sin(dnu * 0.5)**2) / (m * s * (1 + lam)**2)
+            ecc = math.sqrt((eps**2 + 4.0 * magr2 / magr1
+                           * math.sin(dnu * 0.5)**2 * ((L - x) / (L + x))**2)
+                           / (eps**2 + 4.0 * magr2 / magr1
+                              * math.sin(dnu * 0.5)**2))
             v1dv, v2dv = lambhodograph(r1, v1, r2, p, ecc, dnu, dtsec)
-            #            fprintf(1, 'oldb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dv, smu.mag(v1dv))
-            #         r_180 = 0.001  # 1 meter
-            #         [v1dvh, v2dvh] = lambert_vel(r1, v1, r2, dnu, p, ecc, mu, dtsec, r_180)
-            #         fprintf(1, 'newb v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvh, smu.mag(v1dvh))
-                        # Battin solution to orbital parameters (and velocities)
-            # thompson 2011, loechler 1988
-            if dnu > math.pi:
-                lam = - math.sqrt((s - chord) / s)
-            else:
-                lam = math.sqrt((s - chord) / s)
-            #      x = xn
-            # loechler pg 21 seems correct!
-            v1dvl = (1.0 / (lam * (1.0 + lam))
-                     * math.sqrt(mu * (1.0 + x) / (2.0 * s ** 3 * (L + x)))
-                     * ((r2 - r1) + s * (1.0 + lam) ** 2 * (L + x)
-                        / (magr1 * (1.0 + x)) * r1))
-            # added v2
-            v2dvl = (1.0 / (lam * (1.0 + lam))
-                     * math.sqrt(mu * (1.0 + x) / (2.0 * s ** 3 * (L + x)))
-                     * ((r2 - r1) - s * (1.0 + lam) ** 2 * (L + x)
-                        / (magr2 * (1.0 + x)) * r2))
-            #fprintf(1, 'loe v1t #16.8f #16.8f #16.8f #16.8f\n', v1dvl, smu.mag(v1dvl))
-            #fprintf(1, 'loe v2t #16.8f #16.8f #16.8f #16.8f\n', v2dvl, smu.mag(v2dvl))
 
     return v1dv, v2dv, errorb
 
@@ -3568,32 +3545,62 @@ def lambgettbiu(r1=None, r2=None, order=None):
 #  references    :
 #    Thompson JGCD 2013 v34 n6 1925
 #    Thompson AAS GNC 2018
+#    Vallado 2022, Algorithm 61 page 509-510
 # [v1t, v2t] = lambhodograph(r1, v1, r2, p, a, ecc, dnu, dtsec)
 # ------------------------------------------------------------------------------
 
-def lambhodograph(r1=None, v1=None, r2=None, p=None,
-                  ecc=None, dnu=None, dtsec=None):
+def lambhodograph(r1: np.ndarray, v1:np.ndarray, r2:np.ndarray, p: float,
+                  ecc: float, dnu: float, dtsec: float):
+    """this function accomplishes 180 deg transfer (and 360 deg) for lambert
+    problem.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        ijk position vector 1: km
+    v1 : ndarray
+        ijk velocity vector 1: km/s - only used for dnu of 180 or 360 degree
+        transfers
+    r2 : ndarray
+        ijk position vector 2: km
+    p : float
+        semiparameter
+    ecc : float
+        eccentricity
+    dnu : float
+        delta nu: rad
+    dtsec : float
+        change in time between points
+
+    Returns
+    -------
+    v1t : ndarray
+        ijk transition velocity vector 1: km/s
+    v2t : ndarray
+        ijk transition velocity vector 2: km/s
+    """
 
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
     eps = 0.001 / magr2
 
     a = mu * (1.0 / magr1 - 1.0 / p)
-
     b = (mu * ecc / p) ** 2 - a ** 2
+
     if b <= 0.0:
         x1 = 0.0
     else:
-        x1 = - math.sqrt(b)
+        x1 = -math.sqrt(b)
 
     # 180 deg, and multiple 180 deg transfers
     if abs(math.sin(dnu)) < eps:
         nvec = np.cross(r1, v1) / smu.mag(np.cross(r1, v1))
         if ecc < 1.0:
-            ptx = twopi * math.sqrt(p ** 3 / (mu * (1.0 - ecc ** 2) ** 3))
-            if (np.mod(dtsec, ptx) > ptx * 0.5):
-                x1 = - x1
-        print('less than\n' % ())
+            ptx = twopi * math.sqrt(p**3 / (mu * (1.0 - ecc**2) ** 3))
+            if (dtsec % ptx) > (ptx * 0.5):
+                x1 = -x1
+        if sh.show:
+            print('less than\n')
     else:
         # more common path?
         y2a = mu / p - x1 * math.sin(dnu) + a * math.cos(dnu)
@@ -3603,14 +3610,13 @@ def lambhodograph(r1=None, v1=None, r2=None, p=None,
         # depending on the cross product, this will be normal or in plane,
         # or could even be a fan
         nvec = np.cross(r1, r2) / smu.mag(np.cross(r1, r2))
-        if (np.mod(dnu, twopi) > math.pi):
-            nvec = - nvec
-        # fprintf(1, 'gtr than\n')
+        if ((dnu % twopi) > math.pi):
+            nvec = -nvec
 
-    v1t = (math.sqrt(mu * p) / magr1) * ((x1 / mu) * r1
+    v1t = (math.sqrt(mu * p) / magr1) * (x1 * r1 / mu
                                        + np.cross(nvec, r1) / magr1)
     x2 = x1 * math.cos(dnu) + a * math.sin(dnu)
-    v2t = (math.sqrt(mu * p) / magr2) * ((x2 / mu) * r2
+    v2t = (math.sqrt(mu * p) / magr2) * (x2 * r2 / mu
                                        + np.cross(nvec, r2) / magr2)
     return v1t, v2t
 
@@ -10856,7 +10862,12 @@ if __name__ == '__main__':
     tof = findtof(tofmerc1, tofmerc2, mercp, musun)
     print(f'mercury {tof = }')
 
-    hitearth, hitearthstr = checkhitearth(altpad, r1, v1t, r2, v2t, 3)
+    # values pulled from 5th ed. page 515
+    r1 = np.array([-6175.1034, 2757.0706, 1626.6556])
+    r2 = np.array([-1078.007289, 8796.641859, 1890.7135])
+    v1 = np.array([2.376641, 1.139677, 7.078097])
+    v2 = np.array([2.654700, 1.1018600, 7.015400])
+    hitearth, hitearthstr = checkhitearth(altpad, r1, v1, r2, v2, 3)
     print("checkhitearth returned ", hitearth, hitearthstr)
 
     axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, appl, appli, agst, agsti = iau06in()

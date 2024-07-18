@@ -110,7 +110,7 @@ print(' v2t \n',  (v2t))
 
 
 print('\n-------- lambertb test \n' % ())
-v1t, v2t, errorl = obu.lambertb(r1, v1, r2, 'L', 'L', 1, dtsec)
+v1t, v2t, errorl = obu.lambertb(r1, v1, r2, 's', 'l', 0, dtsec)
 print(' v1dv \n',  (v1t))
 print(' v2dv \n',  (v2t))
 

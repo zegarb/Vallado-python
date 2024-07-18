@@ -46,9 +46,9 @@ def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc):
 
         # lambertu needs tbi value -zeg
         # vtrans1, vtrans2, errorl = obu.lambertu(rinto, vtgto, rtgt1, direc, 'H', nrev, None, dt, tbi, outfile)
-        flights = ['d', 'r']
-        for flight in flights:
-            vtrans1, vtrans2, errorl = obu.lambertb(rinto, vinto, rtgt1, direc, flight, nrev, dt )
+        energys = ['l', 'h']
+        for energy in energys:
+            vtrans1, vtrans2, errorl = obu.lambertb(rinto, vinto, rtgt1, direc, energy, nrev, dt )
             if errorl == 'ok' and errork == 'ok':
                 [p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper ] = sc.rv2coe(rinto, vtrans1); # of trans orbit
                 dv1 = smu.mag(vinto - vtrans1)
@@ -58,7 +58,7 @@ def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc):
                 outfile.write('  0  0 %s \n' % errorl)
 
 st = 'y'
-outpath = os.path.join(os.path.dirname(__file__), 'testoutput', 'fig712.out')
+outpath = os.path.join(os.path.dirname(__file__), 'testoutput', 'testlam.out')
 outfile = open(outpath, 'wt')
 for kt in range(1, 8):
     # ---- use for fixed r and r locations, and fig 7-12, 16, and 20 ---- }

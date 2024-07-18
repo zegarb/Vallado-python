@@ -60,7 +60,7 @@ NameError: name 'lowthrust' is not defined
 7_1: values slightly off from book, but book uses old constats
 7_2: Y (anglesl is a divergent solution)
 
-7_5: Y
+7_5: lambertb giving the wrong values
 
 7_34: Y
 10_1: Y
