@@ -1312,6 +1312,10 @@ def kbat(v: float):
         delold = del_
         termold = term
 
+    # value = d[20] * v
+    # for i in range(19, -1, -1):
+    #     value = d[i] / (1 + value * v)
+
 
     sum2 = 0.0
     term2 = 1.0 + d[ktr-1] * v
