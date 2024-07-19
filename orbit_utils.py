@@ -10798,6 +10798,69 @@ def mincomb(rinit: float, rfinal: float, einit: float, efinal: float,
 
     return deltai, deltai1, deltava, deltavb, dttu
 
+
+# obsarr contains: 'rng', 'az', 'el', 'year', 'mon', 'day', 'hr', 'min',
+# 'sec', 'xp', 'yp'
+# vectormethod: 'h' for hgibbs,  'g' for gibbs,
+# 'a' for angles only (not implemented)
+def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
+                 velmethod: str):
+    """this function take a number of observations of a satellite and returns a
+    nominal state vector.
+
+    Parameters
+    ----------
+    latgd : float
+        latitude of observation site: rad
+    lon : float
+        longitude of observation site: rad
+    alt : float
+        altitude of observation site: km
+    obsarr : list[dict]
+        list of observations containing: range: 'rng', azimuth: 'az',
+        elevation: 'el', year: 'year', month: 'mon', day: 'day', hour: 'hr',
+        minutes: 'min', seconds: 'sec',
+        polar motion coefficients: 'xp' and 'yp'
+    velmethod : str
+        method used to get velocities: 'h' for hgibbs, 'g' for gibbs,
+
+    Returns
+    -------
+    xnom : ndarray
+        the nominal state vector for the observations.
+    """
+    reciarr = []
+    timearr = []
+    for obs in obsarr:
+        _, _, jdut1, jdut1frac, _, _, _, ttt, _, _, _, _, _, _, _ = \
+            stu.convtime(obs['year'], obs['mon'], obs['day'], obs['hr'],
+                           obs['min'], obs['sec'], 0, obs['dut1'], obs['dat'])
+        reci, _ = sc.razel2rv(obs['rng'], obs['az'], obs['el'], 0, 0, 0, latgd,
+                              lon, alt, ttt, jdut1 + jdut1frac, 0, obs['xp'],
+                              obs['yp'], 2, 0, 0)
+        reciarr.append(reci)
+        timearr.append(jdut1 + jdut1frac)
+
+    raverage = np.zeros(3)
+    vaverage = np.zeros(3)
+
+    for i in range(1, len(reciarr) - 1):
+        jd1 = obsarr[i-1]['']
+        if velmethod.casefold() == 'h':
+            veci, _, _, _, _ = hgibbs(reciarr[i-1], reciarr[i], reciarr[i+1], timearr[i-1],
+                          timearr[i], timearr[i+1])
+        elif velmethod.casefold() == 'g':
+            veci, _, _ = gibbs(reciarr[i-1], reciarr[i], reciarr[i+1])
+
+        # book recommends a 'more accurace scheme' than pkepler -zeg
+        r, v = pkepler(reciarr[i], veci, timearr[-1] - timearr[i], 0, 0)
+        raverage = raverage + r
+        vaverage = vaverage + v
+    average = np.concat((raverage, vaverage), axis=1)
+    xnom = average / (len(reciarr) - 2)
+    return xnom
+
+
 ##############################################################################################################
 ##############################################################################################################
 ##############################################################################################################
