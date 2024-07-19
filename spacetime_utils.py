@@ -775,6 +775,38 @@ def convtime(year: int, mon: int, day: int, hr: int, min: int, sec: float,
         delta of ut1 - utc: sec
     dat : float
         delta of tai - utc: sec
+
+    Returns:
+    ut1 : float
+        universal time: sec
+    tut1 : float
+        julian centuries of ut1
+    jdut1 : float
+        julian date (days only): days from 4713 bc
+    jdut1frac : float
+        julian date (fraction of a day): days from 0 hr of the day
+    utc : float
+        coordinated universal time: sec
+    tai : float
+        atomic time: sec
+    tt : float
+        terrestrial time: sec
+    ttt : float
+        julian centuries of tt
+    jdtt : float
+        julian date (days only): days from 4713 bc
+    jdttfrac : float
+        julian date (fraction of a day): days from 0 hr of the day
+    tdb : float
+        terrestrial barycentric dynamical time: sec
+    ttdb : float
+        julian centuries of tdb
+    jdtdb : float
+        julian date of tdb: days from 4713 bc
+    jdtdb : float
+        julian date (days only): days from 4713 bc
+    jdtdbfrac : float
+        julian date (fraction of a day): days from 0 hr of the day
     """
 
     jd, jdfrac = jday(year, mon, day, hr + timezone, min, sec)
