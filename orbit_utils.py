@@ -2676,8 +2676,9 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
             else:
                 y = magr1 + magr2
             # outfile
-            print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
-                    % (y, lower, c2new, psinew, ynegktr))
+            if sh.show:
+                print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
+                        % (y, lower, c2new, psinew, ynegktr))
             ynegktr = ynegktr + 1
 
     if (abs(c2new) > small):
@@ -2717,9 +2718,10 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                     else:
                         y = magr1 + magr2
                     # outfile
-                    print('yneg %3i  y %11.7f lower %11.7f c2 %11.7f psinew '
-                          '%11.7f yneg %3i \n'
-                          % (loops, y, lower, c2new, psinew, ynegktr))
+                    if sh.show:
+                        print('yneg %3i  y %11.7f lower %11.7f c2 %11.7f psinew '
+                            '%11.7f yneg %3i \n'
+                            % (loops, y, lower, c2new, psinew, ynegktr))
                     ynegktr = ynegktr + 1
 
             loops = loops + 1
@@ -2772,10 +2774,11 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                 # ------------- find c2 and c3 functions ----------
                 c2new, c3new = smu.findc2c3(psinew)
                 #if nrev > 0
-                print('%3i  y %11.7f x %11.7f %11.7f dtnew %11.7f %11.7f '
-                      '%11.7f psinew %11.7f %11.7f \n' %
-                    (loops, y, xold, dtsec, dtnew, lower, upper, psinew,
-                     dtdpsi)) #(dtnew - dtsec)/dtdpsi)( # c2dot, c3dot
+                if sh.show:
+                    print('%3i  y %11.7f x %11.7f %11.7f dtnew %11.7f %11.7f '
+                        '%11.7f psinew %11.7f %11.7f \n' %
+                        (loops, y, xold, dtsec, dtnew, lower, upper, psinew,
+                        dtdpsi)) #(dtnew - dtsec)/dtdpsi)( # c2dot, c3dot
                 psilast = psiold  # keep previous iteration
                 psiold = psinew
                 dtold = dtnew
@@ -2864,7 +2867,8 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                  psinew, math.acos(cosdeltanu) * 180.0 / math.pi))
     else:
         #fprintf(outfile, '#s \n', errorl)
-        print('#s \n', errorl)
+        if sh.show:
+            print('#s \n', errorl)
 
     return v1dv, v2dv, errorl
 
