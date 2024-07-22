@@ -1259,6 +1259,11 @@ def kbat(v: float):
     ----------
     v : float
         value
+
+    Returns
+    -------
+    kbatt : float
+        the resulting continued fraction
     """
     d = np.zeros(21)
     d[0] = 1.0 / 3.0
@@ -1283,27 +1288,23 @@ def kbat(v: float):
     d[19] = 3190.0 / 12987.0
     d[20] = 3658.0 / 14391.0
 
-    # test computations -zeg
-    # d = np.zeros(21)
-    # for n in range(0, 21):
-    #     i = n
-    #     if n % 2 == 0:
-    #         d[n] = (2 * (3*i + 1) * (6*i - 1)) / (9 * (4*i - 1) * (4*i + 1))
-    #         num = 2 * (3*i + 1) * (6*i - 1)
-    #         den = 9 * (4*i - 1) * (4*i + 1)
-    #         print(num, den)
-    #     else:
-    #         d[n] = (2 * (3*i + 2) * (6*i + 1)) / (9 * (4*i + 1) * (4*i + 3))
-    #         num = 2 * (3*i + 2) * (6*i + 1)
-    #         den = 9 * (4*i + 1) * (4*i + 3)
-    #         print(num, den)
+    # test constants against book algorithms -zeg
+    # e = np.zeros(21)
+    # for n in range(0, 10):
+    #     e[2*n] = (2 * (3*n + 1) * (6*n - 1)) / (9 * (4*n - 1) * (4*n + 1))
+    #     e[2*n + 1] = (2 * (3*n + 2) * (6*n + 1)) / (9 * (4*n + 1) * (4*n + 3))
+    # n = 10
+    # e[20] = (2 * (3*n + 1) * (6*n - 1)) / (9 * (4*n - 1) * (4*n + 1))
+    # print(d)
+    # print(e)
+
     # ----------------- process forwards ------------------------
     sum1 = d[0]
     delold = 1.0
     termold = d[0]
-    i = 2
-    ktr = 21
-    while ((i < ktr) and (np.abs(termold) > 1e-08)):
+    i = 0
+    ktr = 20
+    while ((i <= ktr) and (np.abs(termold) > 1e-08)):
 
         del_ = 1.0 / (1.0 + d[i] * v * delold)
         term = termold * (del_ - 1.0)
@@ -1312,32 +1313,29 @@ def kbat(v: float):
         delold = del_
         termold = term
 
-    # value = d[20] * v
-    # for i in range(19, -1, -1):
-    #     value = d[i] / (1 + value * v)
+    return sum1
 
+#     sum2 = 0.0
+#     term2 = 1.0 + d[ktr] * v
+#     for i in range(ktr - 1):
+#         sum2 = d[ktr - i] * v / term2
+#         term2 = 1.0 + sum2
 
-    sum2 = 0.0
-    term2 = 1.0 + d[ktr-1] * v
-    for i in range(ktr - 3):
-        sum2 = d[ktr - i - 1] * v / term2
-        term2 = 1.0 + sum2
-
-    kbatt = d[0] / term2
-    #            test = d[0] / ...
-#                   (1 + (d[1]*v / ...
-#                         (1 + (d(3)*v / ...
-#                               (1 + (d(4)*v / ...
-#                                     (1 + (d(5)*v / ...
-#                                           (1 + (d(6)*v / ...
-#                                                 (1 + (d(7)*v / ...
-#                                                       (1 + (d(8)*v / ...
-#                                                             (1 + (d(9)*v / ...
-#                                                                  (1 + (d(10)*v / ...
-#                                                                        (1 + (d(11)*v)))))))) ...
-#                                                                       ))))))))))))
-#kbatt = test
-    return kbatt
+#     kbatt = d[0] / term2
+#     #            test = d[0] / ...
+# #                   (1 + (d[1]*v / ...
+# #                         (1 + (d(3)*v / ...
+# #                               (1 + (d(4)*v / ...
+# #                                     (1 + (d(5)*v / ...
+# #                                           (1 + (d(6)*v / ...
+# #                                                 (1 + (d(7)*v / ...
+# #                                                       (1 + (d(8)*v / ...
+# #                                                             (1 + (d(9)*v / ...
+# #                                                                  (1 + (d(10)*v / ...
+# #                                                                        (1 + (d(11)*v)))))))) ...
+# #                                                                       ))))))))))))
+# #kbatt = test
+#     return kbatt
 
 # ------------------------------------------------------------------------------
 #
