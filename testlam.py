@@ -47,7 +47,7 @@ def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy):
 
         tbi, tbil = obu.lambgettbiu(rinto, rtgt1, 5)
 
-        outfile.write(f'{direc = }, {energy = }, {nrev = }, {dt = }\n')
+        outfile.write(f'{direc = }, {energy = }, {nrev = }, {i = }, {dt = }\n')
         vtrans1, vtrans2, errorl = \
             obu.lambertu(rinto, vtgto, rtgt1, direc, energy, nrev, 0,
                             dt, tbi, outfile)
@@ -122,8 +122,11 @@ for kt in range(1, 8):
     energys = ['l', 'h']
     for nrev in range(0, 3):
         for direc in direcs:
-            for energy in energys:
-                dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy)
+            if nrev == 0:
+                dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, 'l')
+            else:
+                for energy in energys:
+                    dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy)
 
     # direc = 's'
     # nrev = 0
