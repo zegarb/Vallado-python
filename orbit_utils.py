@@ -2584,9 +2584,6 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
     else:
         vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
 
-    # setup variables for speed
-    oomu = 1.0 / math.sqrt(mu)
-
     # --------- set up initial bounds for the bissection ----------
     if (nrev == 0):
         lower = -16.0 * math.pi * math.pi  # allow hyperbolic and parabolic solutions
@@ -2598,7 +2595,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
         # adjust based on long or short way if dm == 'l'
         #if ((dm == 'l') and (df == 'd')) or ((dm == 's') and (df == 'r'))
         #if ((df == 'r') and (dm == 's')) or ((df == 'd') and (dm == 'l'))
-        if (de == 'H'): #  and (dm == 'L')) or ((de == 'L') and (dm == 'L'))
+        if (de.casefold() == 'h'): #  and (dm == 'L')) or ((de == 'L') and (dm == 'L'))
             upper = tbi[nrev, 0]
         else:
             lower = tbi[nrev, 0]
@@ -2651,14 +2648,17 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
     oosqrtmu = 1.0 / math.sqrt(mu)
 
     # find initial dtold from psiold
-    print(magr1, magr2, vara, psiold, c3new)
-    print(1.0 - psiold * c3new)
-    print(vara * (1.0 - psiold * c3new))
+    if sh.show:
+        print(magr1, magr2, vara, psiold, c3new)
+        print(1.0 - psiold * c3new)
+        print(vara * (1.0 - psiold * c3new))
     if (abs(c2new) > small):
         y = magr1 + magr2 - (vara * (1.0 - psiold * c3new) / math.sqrt(c2new))
     else:
         y = magr1 + magr2
-    print(y, c2new)
+
+    if sh.show:
+        print(y, c2new)
 
     # ----------- check for negative values of y ----------
     if ((vara > 0.0) and (y < 0.0)):  # (vara > 0.0) &
@@ -2668,8 +2668,8 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                                         *math.sqrt(c2new)/vara)
             # -------- find c2 and c3 functions -----------
             c2new, c3new = smu.findc2c3(psinew)
+            # lower = psiold
             psiold = psinew
-            lower = psiold
             if (abs(c2new) > small):
                 y = magr1 + magr2 - (vara*(1.0-psiold*c3new)
                                     / math.sqrt(c2new))
@@ -2693,7 +2693,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
         ynegktr = 1  # y neg ktr
         dtnew = -10.0
 
-        while ((abs(dtnew-dtsec) >= small)
+        while ((abs(dtnew-dtsec) >= smalle8)
                and (loops < numiter) and (ynegktr <= 10)):
             # print('%3i  dtnew-dtsec %11.7f yneg %3i \n', loops, dtnew-dtsec, ynegktr)
             if (abs(c2new) > small):
@@ -2709,8 +2709,8 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                                                     * math.sqrt(c2new) / vara)
                     # -------- find c2 and c3 functions -----------
                     c2new, c3new = smu.findc2c3(psinew)
+                    # lower = psiold
                     psiold = psinew
-                    lower = psiold
                     if (abs(c2new) > small):
                         y = magr1 + magr2 - (vara*(1.0-psiold*c3new)
                                             / math.sqrt(c2new))
@@ -2721,8 +2721,6 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                           '%11.7f yneg %3i \n'
                           % (loops, y, lower, c2new, psinew, ynegktr))
                     ynegktr = ynegktr + 1
-                #end # while
-            #end  # if  y neg
 
             loops = loops + 1
 
@@ -2732,7 +2730,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                 else:
                     xold = 0.0
                 xcubed = xold**3
-                dtnew = (xcubed * c3new + vara*math.sqrt(y)) * oomu
+                dtnew = (xcubed * c3new + vara*math.sqrt(y)) * oosqrtmu
 
                 # try newton rhapson iteration to update psi
                 if (abs(psiold) > 1e-5):
@@ -2751,20 +2749,20 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                              - 5.0 * psiold**4 / math.factorial(13))
                 dtdpsi = (xcubed * (c3dot - 3.0 * c3new * c2dot / (2.0 * c2new))
                           + 0.125*vara
-                          * (3.0*c3new*math.sqrt(y)/c2new + vara/xold)) * oomu
+                          * (3.0*c3new*math.sqrt(y)/c2new + vara/xold)) * oosqrtmu
                 # Newton iteration test to see if it keeps within the bounds
                 psinew = psiold - (dtnew - dtsec)/dtdpsi
 
                 # check if newton guess for psi is outside bounds (too steep a slope)
                 if ((psinew > upper) or (psinew < lower)):
                     # --------  readjust upper and lower bounds -------
-                    if ((de == 'L') or (nrev == 0)):
-                        if (dtold < dtsec):
+                    if ((de.casefold() == 'l') or (nrev == 0)):
+                        if (dtold <= dtsec):
                             lower = psiold
                         else:
                             upper = psiold
                     else:
-                        if (dtold < dtsec):
+                        if (dtold <= dtsec):
                             upper = psiold
                         else:
                             lower = psiold
@@ -2791,7 +2789,6 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
             #              print('%3i  y %11.7f x %11.7f dtnew %11.7f psinew %11.7f \n', loops, y/re, x/math.sqrt(re), dtnew/tusec, psinew)
             #              print('%3i  y %11.7f x %11.7f dtnew %11.7f psinew %11.7f \n', loops, y/re, x/math.sqrt(re), dtnew/60.0, psinew)
             ynegktr = 1
-        #end # while loop
 
         if ((loops >= numiter) or (ynegktr >= 10)):
             errorl = 'g not conv ' + str(abs(dtnew - dtsec))
@@ -2854,13 +2851,13 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
     if (errorl != 'ok'):
         print("\n\n-----Error found in lambertu: ", errorl)
         print("\n\n")
-        p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
-         = sc.rv2coe(r1, v1dv)
-        print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f '
-              '%11.7f %11.7f %11.7f case %11.7f %11.7f %11.7f %11.7f %11.7f '
-              % (errorl, loops, nrev, dm, de, dtnew, y, xold, v1dv[0], v1dv[1],
-                 v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew,
-                 dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
+        # p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
+        #  = sc.rv2coe(r1, v1dv)
+        # print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f '
+        #       '%11.7f %11.7f %11.7f case %11.7f %11.7f %11.7f %11.7f %11.7f '
+        #       % (errorl, loops, nrev, dm, de, dtnew, y, xold, v1dv[0], v1dv[1],
+        #          v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew,
+        #          dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
         print('C%3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f  '
               '%11.7f dnu %11.7f \n'
               % (loops, nrev, dm, de, dtnew, magr1, magr2, vara, y, xold,
@@ -2892,7 +2889,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
 #    de          - dir of energy (high, low) 'h', 'l'
 #                  this is the inclination discriminator
 #    nrev        - number of revs to complete     0, 1, ...
-#    dtsec       - time between r1 and r2         s
+#    dtsec       - time between r1 and r2         sec
 #
 #  outputs       :
 #    v1t         - ijk velocity vector            km / s
@@ -3039,7 +3036,7 @@ def lambertb(r1: np.ndarray, v1: np.ndarray, r2: np.ndarray, dm: str, de: str,
             print('high v1t %16.8f %16.8f %16.8f \n' % (v1dv))
     else:
         # standard processing
-        # note that the dr nrev =0 case is not represented
+        # note that the dr nrev = 0 case is not represented
          # initial guess
         if (nrev > 0):
             xn = 1.0 + 4.0 * L
@@ -4118,7 +4115,8 @@ def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
     #Ex 11_6 test
     #print(f'raan is {raan}')
     #print(f'argp is {argp}')
-    print(f'nu is {nu}')
+    if sh.show:
+        print(f'nu is {nu}')
     r, v = sc.coe2rv(p, ecc, incl, raan, argp, nu, arglat, truelon, lonper)
     r = r.T
     v = v.T
@@ -9950,7 +9948,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
     atwbacc = np.array([[0], [0], [0], [0], [0], [0]])
     # ------------- reset these since they will accumulate ---------
-# zero out matrices
+    # zero out matrices
     atwa = np.zeros((statesize, statesize))
     atwb = np.zeros((statesize, 1))
     rnom = np.zeros(3)
@@ -9968,7 +9966,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # rs(2) = currobsrec['rsecef'](2)
         # rs(3) = currobsrec['rsecef'](3)
         # temporary sensor for now
-#  getsensorparams(currobsrec.sennum, currsenrec)
+        #  getsensorparams(currobsrec.sennum, currsenrec)
         # --------- propagate the nominal vector to the epoch time -----------
         # sgp4 (whichconst, satrec,  currobsrec.dtmin, rteme, vteme)
         dtsec = (currobsrec['time'] + currobsrec['timef'] -
@@ -9984,13 +9982,13 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # ------------------------- find b matrix ----------------------------
         if currobsrec['obstype'] != 3:
             rngnom, aznom, elnom, drngnom, daznom, delnom = \
-            sc.rv2razel(reci1.T, veci1.T, currobsrec['latgd'],
+            sc.rv2razel(reci1, veci1, currobsrec['latgd'],
                         currobsrec['lon'], currobsrec['alt'],
                         currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                         currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
         else:
             rngnom, trtascnom, tdeclnom, drngnom, dtrtascnom, dtdeclnom = \
-            sc.rv2tradec(reci1.T, veci1.T, currobsrec['latgd'],
+            sc.rv2tradec(reci1, veci1, currobsrec['latgd'],
                         currobsrec['lon'], currobsrec['alt'],
                         currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                         currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -10806,7 +10804,7 @@ def mincomb(rinit: float, rfinal: float, einit: float, efinal: float,
 def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
                  velmethod: str):
     """this function take a number of observations of a satellite and returns a
-    nominal state vector.
+    nominal state vector. Epoch time is the time of first obsevation.
 
     Parameters
     ----------
@@ -10822,7 +10820,7 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
         minutes: 'min', seconds: 'sec',
         polar motion coefficients: 'xp' and 'yp'
     velmethod : str
-        method used to get velocities: 'h' for hgibbs, 'g' for gibbs,
+        method used to get velocities: 'h' for hgibbs, 'g' for gibbs
 
     Returns
     -------
@@ -10832,7 +10830,7 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
     reciarr = []
     timearr = []
     for obs in obsarr:
-        _, _, jdut1, jdut1frac, _, _, _, ttt, _, _, _, _, _, _, _ = \
+        _, _, jdut1, jdut1frac, _, _, _, ttt, _, _, _, _, _, _ = \
             stu.convtime(obs['year'], obs['mon'], obs['day'], obs['hr'],
                            obs['min'], obs['sec'], 0, obs['dut1'], obs['dat'])
         reci, _ = sc.razel2rv(obs['rng'], obs['az'], obs['el'], 0, 0, 0, latgd,
@@ -10845,7 +10843,6 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
     vaverage = np.zeros(3)
 
     for i in range(1, len(reciarr) - 1):
-        jd1 = obsarr[i-1]['']
         if velmethod.casefold() == 'h':
             veci, _, _, _, _ = hgibbs(reciarr[i-1], reciarr[i], reciarr[i+1], timearr[i-1],
                           timearr[i], timearr[i+1])
@@ -10853,10 +10850,11 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
             veci, _, _ = gibbs(reciarr[i-1], reciarr[i], reciarr[i+1])
 
         # book recommends a 'more accurace scheme' than pkepler -zeg
-        r, v = pkepler(reciarr[i], veci, timearr[-1] - timearr[i], 0, 0)
+        r, v = pkepler(reciarr[i], veci, (timearr[0] - timearr[i]) * 86400,
+                       0, 0)
         raverage = raverage + r
         vaverage = vaverage + v
-    average = np.concat((raverage, vaverage), axis=1)
+    average = np.concatenate([raverage, vaverage])
     xnom = average / (len(reciarr) - 2)
     return xnom
 

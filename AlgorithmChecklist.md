@@ -66,8 +66,8 @@
 |  62 (63)      |  pg 525 (552)  | ENCKE                                        | N/A                                  |                -                |           -                |   -   |
 |  63 (64)      |  pg 558 (585)  | Ap2Kp Conversion                             | ap2kp(), kp2ap()                     |                -                |           -                |   N   |
 |  64 (65)      |  pg 591 (618)  | Numerical Integration (Acceleration)         | N/A                                  |                -                |           -                |   -   |
-|  65 (66)      |  pg 691 (718)  | PKepler                                      | pkepler()                            | ex10_4.py & ex10_5.py           | pg 769 (796) & 775 (802)   |  Y/N  |
-|  66 (67)      |  pg 766 (793)  | Nominal State                                | nominalstate()                       | ex10_4.py?                      | pg 769 (796)               |   N   |
+|  65 (66)      |  pg 691 (718)  | PKepler                                      | pkepler()                            | ex10_4.py & ex10_5.py           | pg 769 (796) & 775 (802)   |   Y   |
+|  66 (67)      |  pg 766 (793)  | Nominal State                                | nominalstate()                       | ex10_4.py?                      | pg 769 (796)               |   Y   |
 |  67 (68)      |  pg 768 (795)  | Differential Correction                      | N/A                                  | ex10_4.py                       | pg 769 (796)               |   -   |
 |  68 (69)      |  pg 785 (812)  | Kalman Filter - Linear System                | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |
 |  69 (70)      |  pg 791 (818)  | Linearized Kalman Filter                     | N/A                                  | ex10_6.py                       | pg 786 (813)               |   -   |

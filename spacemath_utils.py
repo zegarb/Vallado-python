@@ -1302,7 +1302,7 @@ def kbat(v: float):
     sum1 = d[0]
     delold = 1.0
     termold = d[0]
-    i = 0
+    i = 1
     ktr = 20
     while ((i <= ktr) and (np.abs(termold) > 1e-08)):
 
