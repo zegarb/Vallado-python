@@ -79,6 +79,12 @@ print('\n-------- lambertu test \n' % ())
 v1t, v2t, errorl = obu.lambertu(r1, v1, r2, dm, de, nrev, dtwait, dtsec, tbidu, fid)
 print(' v1t \n',  (v1t))
 print(' v2t \n',  (v2t))
+
+print('\n-------- lambertb test \n' % ())
+v1t, v2t, errorl = obu.lambertb(r1, v1, r2, dm, de, nrev, dtsec)
+print(' v1dv \n',  (v1t))
+print(' v2dv \n',  (v2t))
+
 # run the 6 cases
 print(' ------------- new time to accomodate 1 rev \n' % ())
 dtsec = 21000.0
@@ -109,8 +115,4 @@ print('uv1t \n',  (v1t))
 print(' v2t \n',  (v2t))
 
 
-print('\n-------- lambertb test \n' % ())
-v1t, v2t, errorl = obu.lambertb(r1, v1, r2, 's', 'l', 0, dtsec)
-print(' v1dv \n',  (v1t))
-print(' v2dv \n',  (v2t))
 
