@@ -26,7 +26,7 @@
 import numpy as np
 from space_constants import *
 from spacetime_utils import jday, convtime
-from orbit_utils import kepler, hgibbs, findatwaatwb, site, nominalstate, pkepler
+from orbit_utils import kepler, hgibbs, findatwaatwb, site, nominalstate, pkepler, diffcorrect
 from space_conversions import razel2rv, rv2coe
 from spacemath_utils import mag
 import os
@@ -164,10 +164,15 @@ xnom[2, 0] = reci[2]
 xnom[3, 0] = veci[0]
 xnom[4, 0] = veci[1]
 xnom[5, 0] = veci[2]
+
 # set parameters for finite differencing
 percentchg = 0.01
-
 deltaamtchg = 0.01
+
+# diffcorrect test -zeg
+difftest = diffcorrect(firstobs, lastobs, obsrecarr, xnom, percentchg,
+                       deltaamtchg, 1e-6)
+print(f'{difftest = }')
 
 r1 = np.zeros(3)
 v1 = np.zeros(3)

@@ -3019,7 +3019,7 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
 
 
     # chk if perturbing amt is too small. if so, up the percentchg and try again
-# this will execute 5 times, but leaves percentchg the same after each run
+    # this will execute 5 times, but leaves percentchg the same after each run
     jj = 1
     deltaamt = 0.0
     xnomp = np.copy(xnom)
@@ -3029,7 +3029,7 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
             print('too large\n')
         deltaamt = xnom[pertelem] * percentchg
         xnomp[pertelem, 0] = xnom[pertelem, 0] + deltaamt
-        #          state2satrec(xnom, scalef, statetype, statesize, eTo, satrec)
+        # state2satrec(xnom, scalef, statetype, statesize, eTo, satrec)
         if (np.abs(deltaamt) < deltaamtchg):
             percentchg = percentchg * 1.4
             print(' %i percentchg chgd %11.8f \n' % (jj, percentchg))

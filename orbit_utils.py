@@ -10017,8 +10017,8 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
             if (abs(b[0, 0]) > math.pi):
                 b[0, 0] = b[0, 0] - np.sign(b[0, 0]) * 2.0 * math.pi
             b[1, 0] = currobsrec['tdecl'] - tdeclnom
-        #printf("rnom #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f #8.3f \n",
-            #  rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
+            # printf("rnom #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f #8.3f \n",
+            # rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
         # ------------------------ find a matrix -----------------------------
         # ------------- reset the perturbed vector to the nominal ------------
         #  satrecp = satrec
@@ -10028,7 +10028,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # ----- perturb each element in the state (elements or vectors) ------
         for j in range(statesize):
             deltaamt, xnomp = smu.finitediff(j, percentchg, deltaamtchg, xnom)
-            #   sgp4 (whichconst, satrecp,  currobsrec['dtmin'], r3, v3)
+            # sgp4 (whichconst, satrecp,  currobsrec['dtmin'], r3, v3)
             dtsec = (currobsrec['time'] + currobsrec['timef']
                      - obsrecarr[0]['time'] - obsrecarr[0]['timef']) * 86400
             rnomp[0] = xnomp[0, 0]
@@ -10037,18 +10037,18 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
             vnomp[0] = xnomp[3, 0]
             vnomp[1] = xnomp[4, 0]
             vnomp[2] = xnomp[5, 0]
-            #  [reci3, veci3] = kepler (rnomp, vnomp, dtsec)
+            # [reci3, veci3] = kepler (rnomp, vnomp, dtsec)
             reci3, veci3 = pkepler(rnomp, vnomp, dtsec, 0, 0)
             # teme to itrf if observation type
-            #  if (currobsrec['obstype'] ~= 4)
-            #      mfme = currobsrec['hr'](j) * 60 + currobsrec['min'](j) + currobsrec['sec'](j)/60.0
-            #      findeopparam (currobsrec['jd'], mfme, interp, eoparr, jdeopstart,
-            #                     dut1, dat, lod, xp, yp, ddpsi, ddeps,
-            #                     iaudx, dy, icrsx, y, s, deltapsi, deltaeps)
-            #      [ut1, tut1, jdut1, utc, tai, tt, ttt, jdtt, tdb, ttdb, jdtdb ] ...
-            #       = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
-            #      iau76fk5_itrf_teme(ritrf, vitrf, aitrf, eFrom, r3, v3, ateme, ttt, xp, yp, jdut1, lod, trans)
-            #  end # if obstype
+            # if (currobsrec['obstype'] ~= 4)
+            #     mfme = currobsrec['hr'](j) * 60 + currobsrec['min'](j) + currobsrec['sec'](j)/60.0
+            #     findeopparam (currobsrec['jd'], mfme, interp, eoparr, jdeopstart,
+            #                   dut1, dat, lod, xp, yp, ddpsi, ddeps,
+            #                   iaudx, dy, icrsx, y, s, deltapsi, deltaeps)
+            #     [ut1, tut1, jdut1, utc, tai, tt, ttt, jdtt, tdb, ttdb, jdtdb ] ...
+            #     = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
+            #     iau76fk5_itrf_teme(ritrf, vitrf, aitrf, eFrom, r3, v3, ateme, ttt, xp, yp, jdut1, lod, trans)
+
             if (currobsrec['obstype'] == 3):
                 trrpert, trtascpert, tdeclpert, tdrrpert, tdrtascpert, tddeclpert =\
                       sc.rv2tradec(reci3.T, veci3.T, currobsrec['latgd'],
@@ -10860,6 +10860,44 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
         vaverage = vaverage + v
     average = np.concatenate([raverage, vaverage])
     xnom = average / (len(reciarr) - 2)
+    return xnom
+
+def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
+                           xnom: np.ndarray, percentchg: float,
+                           deltaamtchg: float, tol: float):
+    """this function takes a set of observations and a nominal state vector
+    and returns a more accurate vector. The nominal state vector should be for
+    the first observation in the list.
+
+    Parameters
+    ----------
+    firstobs : int
+        first observation to use in the list
+    lastobs : int
+        last observation to use in the list
+    obsrecarr : list[dict]
+        array of observations
+    xnom : ndarray
+        nominal state vector of first observation
+     percentchg : float
+        amount to modify vectors by in finite differencing
+    deltaamtchg : float
+        tolerance for small matching in finite differencing
+    tol : float
+        tolerance for convergence
+
+    Returns
+    -------
+    xnom : ndarray
+        updated state vector
+    """
+    deltax = np.full((6, 1), 10)
+    while (deltax > tol).any():
+        atwa, atwb, _, _, _, _, _ = \
+            findatwaatwb(firstobs, lastobs, obsrecarr, 6,
+                         percentchg, deltaamtchg, xnom)
+        deltax = np.linalg.inv(atwa) @ atwb
+        xnom = xnom + deltax
     return xnom
 
 
