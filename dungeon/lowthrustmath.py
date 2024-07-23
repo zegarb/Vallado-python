@@ -4,9 +4,12 @@ if __name__ == '__main__':
     import math
     import numpy as np
     import spacemath_utils as smu
+    import time
 
     #x = 0.446269201
-    x = 0.367174867668404
+    # x = 0.2607981246513296
+    x = 1 - 0.2607981246513296
+    #x = 1 - 0.25390388419897175
     x1 = 1 - x
     a0 = 1.38629436112
     a1 = 0.09666344259
@@ -100,43 +103,111 @@ if __name__ == '__main__':
 
     acurr = 1.0314
     lambacofi = -0.54
-    bigX = (math.pi/(2*lambacofi)) * math.sqrt(1/acurr)
-    bigZ = bigX**-2
-
-    alpha0 = 0.0
-    alpha1 =  2.467410607
-    alpha2 = -1.907470562
-    alpha3 = 35.892442177
-    alpha4 = -214.67979624
-    alpha5 = 947.773272608
-    alpha6 = -2114.861134906
-    alpha7 = 2271.240058672
-    alpha8 = -1127.457440108
-    alpha9 = 192.953875268
-    alpha10 = 8.577733773
-    alphaco = np.array([alpha0,alpha1,alpha2,alpha3,alpha4,alpha5,alpha6,alpha7,alpha8,alpha9,alpha10])
-
-    beta0 = 1.0
-    beta1 = 0.4609698838
-    beta2 = 13.7756315324
-    beta3 = -69.1245316678
-    beta4 = 279.067183250
-    beta5 = -397.6628952136
-    beta6 = -70.0139935047
-    beta7 = 528.0334266841
-    beta8 = -324.9303836520
-    beta9 = 20.5838245170
-    beta10 = 18.8165370778
-    betaco = np.array([beta0,beta1, beta2, beta3, beta4, beta5, beta6, beta7, beta8, beta9, beta10])
-
-    cv = 0.0
-    sumalpha =  0.0
-    sumbeta = 0.0
-    for i in range(11):
-        sumalpha = sumalpha + (alphaco[i] * bigZ**i)
-        sumbeta = sumbeta + (betaco[i] * bigZ**i)
-
-    cv = sumalpha * sumbeta
-    print(cv)
 
 
+    def findcontrol(boundary1, boundary2, lambacofi):
+
+        N = 1000
+        acurr_array = np.linspace(boundary1,boundary2,N+1)
+        cv_array = np.zeros(np.size(acurr_array))
+
+        atlimit = True
+        while (atlimit == True):
+            j = 0
+            for acurr in acurr_array:
+                atlimit = False
+                bigX = (math.pi/(2*lambacofi)) * math.sqrt(1/acurr)
+                bigZ = bigX**-2
+
+                alpha0 = 0.0
+                alpha1 =  2.467410607
+                alpha2 = -1.907470562
+                alpha3 = 35.892442177
+                alpha4 = -214.67979624
+                alpha5 = 947.773272608
+                alpha6 = -2114.861134906
+                alpha7 = 2271.240058672
+                alpha8 = -1127.457440108
+                alpha9 = 192.953875268
+                alpha10 = 8.577733773
+                alphaco = np.array([alpha0,alpha1,alpha2,alpha3,alpha4,alpha5,alpha6,alpha7,alpha8,alpha9,alpha10])
+
+                beta0 = 1.0
+                beta1 = 0.4609698838
+                beta2 = 13.7756315324
+                beta3 = -69.1245316678
+                beta4 = 279.067183250
+                beta5 = -397.6628952136
+                beta6 = -70.0139935047
+                beta7 = 528.0334266841
+                beta8 = -324.9303836520
+                beta9 = 20.5838245170
+                beta10 = 18.8165370778
+                betaco = np.array([beta0,beta1, beta2, beta3, beta4, beta5, beta6, beta7, beta8, beta9, beta10])
+
+                cv = 0.0
+                sumalpha =  0.0
+                sumbeta = 0.0
+                for i in range(11):
+                    sumalpha = sumalpha + (alphaco[i] * bigZ**i)
+                    sumbeta = sumbeta + (betaco[i] * bigZ**i)
+
+
+                cv = sumalpha / sumbeta
+                # print(cv)
+                if cv < 0 or cv > 1.0:
+                    atlimit = True
+                    print('lambda old 1:')
+                    print(lambacofi)
+                    print('acurr')
+                    print(acurr)
+                    lambacofi = lambacofi + 0.05
+                    print('lambda new 1:')
+                    print(lambacofi)
+                    break
+                #     break
+                cv_array[j] = cv
+                j = j + 1
+
+        return cv_array, acurr_array, lambacofi
+
+
+    start = time.time()
+    # 45 degrees initial test
+    #delta_i = 28.5 * (np.pi/180)
+    delta_i = 63 * (np.pi/180)
+    delta_i_new = 5000
+    lambacofi = -0.63
+    while(np.abs(delta_i - delta_i_new) > 0.0001):
+        N = 1000
+        boundary1 = 1
+        #boundary2 = 6.4090
+        boundary2 = 6.6
+        cv,acurr,lambacofi = findcontrol(boundary1, boundary2, lambacofi)
+        temp = np.arange(cv.size, dtype=float)
+        halfpi_array = np.full_like(temp,np.pi/2)
+        K, E, _ = smu.elliptic12(halfpi_array, cv)
+        # mu = 1
+        y = ((2/np.pi) * np.sqrt(acurr) * ((1/np.sqrt(cv)) * E + (np.sqrt(cv) - 1/np.sqrt(cv)) * K)) / ((4/np.pi) * np.sqrt(acurr**3) * np.sqrt(1-cv) * K)
+        y_right = y[1:]
+        y_left = y[:-1]
+        adot = (boundary2 - boundary1) / N
+        delta_i_new = (adot/2) * np.sum(y_right + y_left)
+
+        #print('lambda:')
+        #print(lambacofi)
+        print('new delta i')
+        print(delta_i_new)
+        if (delta_i - delta_i_new) > 0.0001:
+            lambacofi = lambacofi - (delta_i - delta_i_new) / 3
+        elif (delta_i - delta_i_new) < -0.0001:
+            lambacofi = lambacofi + (delta_i - delta_i_new) / 3
+        else:
+            break
+        print('lambda new 2')
+        print(lambacofi)
+
+
+    end = time.time()
+    print('Time:')
+    print(end-start)
