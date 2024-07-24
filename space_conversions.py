@@ -3927,7 +3927,7 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
 #    tempvec     - temporary vector
 #
 #  coupling      :
-#    raz2sez     - find r and v from site in topocentric horizon (sez) system
+#    razel2sez     - find r and v from site in topocentric horizon (sez) system
 #
 #  references    :
 #    vallado       2001, 250-255, alg 27
@@ -3989,7 +3989,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
 
     # -------------------------  implementation   -----------------
     # -----------  find sez range and velocity vectors ------------
-    rhosez, drhosez = raz2sez(rho, az, el, drho, daz, del_)
+    rhosez, drhosez = razel2sez(rho, az, el, drho, daz, del_)
     # -----------  perform sez to ijk (ecef) transformation -------
     # tempvec = smu.rot2(rhosez, latgd - halfpi)
     # rhoecef = smu.rot3(tempvec, -lon)
@@ -7565,11 +7565,11 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
 
 # ------------------------------------------------------------------------------
 #
-#                           function sez2raz
+#                           function sez2razel
 #
-#  this function converts range, azimuth, and elevation values with slant
-#    range and velocity vectors for a satellite from a radar site in the
-#    topocentric horizon (sez) system.
+#  this function converts coordinates in the topocentric horizon (sez) system to
+#  range, azimuth, and elevation values with slant range and velocity vectors
+#  for a satellite from a radar site.
 #
 #  author        : david vallado                  719-573-2600   22 jun 2002
 #
@@ -7602,13 +7602,13 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
 #  references    :
 #    vallado       2001, 250-251, eq 4-4, eq 4-5
 #
-# [rho, az, el, drho, daz, del] = sez2raz (rhosez, drhosez)
+# [rho, az, el, drho, daz, del] = sez2razel (rhosez, drhosez)
 # ------------------------------------------------------------------------------
 
-def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
-    """this function converts range, azimuth, and elevation values with slant
-    range and velocity vectors for a satellite from a radar site in the
-    topocentric horizon (sez) system.
+def sez2razel(rhosez: np.ndarray, drhosez: np.ndarray):
+    """this function converts coordinates in the topocentric horizon (sez) system to
+    range, azimuth, and elevation values with slant range and velocity vectors
+    for a satellite from a radar site.
 
     Parameters
     ----------
@@ -7619,7 +7619,6 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 
     Returns
     -------
-
     rho : float
         satellite range from site: km
     az : float
@@ -7627,11 +7626,11 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
     el : float
         elevation: -pi/2 to pi/2 rad
     drho : float
-        range rate: km / s
+        range rate: km/s
     daz : float
-        azimuth rate: rad / s
+        azimuth rate: rad/s
     del_ : float
-        elevation rate: rad / s
+        elevation rate: rad/s
     """
 
     small = 1e-08
@@ -7671,11 +7670,11 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 
 # ------------------------------------------------------------------------------
 #
-#                           function raz2sez
+#                           function razel2sez
 #
 #  this function converts range, azimuth, and elevation values with slant
-#    range and velocity vectors for a satellite from a radar site in the
-#    topocentric horizon (sez) system.
+#    range and velocity vectors for a satellite from a radar site to
+#    coordinates in the topocentric horizon (sez) system.
 #
 #  author        : david vallado                  719-573-2600   10 jun 2002
 #
@@ -7708,14 +7707,14 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 #  references    :
 #    vallado       2001, 250-251, eq 4-4, eq 4-5
 #
-# [rhosez, drhosez] = raz2sez (rho, az, el, drho, daz, del)
+# [rhosez, drhosez] = razel2sez (rho, az, el, drho, daz, del)
 # ------------------------------------------------------------------------------
 
-def raz2sez(rho: float, az: float, el: float, drho: float, daz: float,
+def razel2sez(rho: float, az: float, el: float, drho: float, daz: float,
             del_: float):
     """this function converts range, azimuth, and elevation values with slant
-    range and velocity vectors for a satellite from a radar site in the
-    topocentric horizon (sez) system.
+    range and velocity vectors for a satellite from a radar site to coordinates
+    in the topocentric horizon (sez) system.
 
     Parameters
     ----------
