@@ -61,7 +61,7 @@ dat = 29
 dut1 = 0.3261068
 
 lod = 0.0
-xp = - 0.11554 * arcsec2rad
+xp = -0.11554 * arcsec2rad
 
 yp = 0.48187 * arcsec2rad
 rs, vs = site(latgd, lon, alt)
@@ -146,11 +146,11 @@ veci = veci / (lastobs - firstobs - 1)
 print(f'rnom {reci} km ')
 print(f'vnom {veci} \n')
 
+jdepoch = obsrecarr[0]['time'] + obsrecarr[0]['timef']
 #add in a nominalstate() test -zeg
-xnomtest = nominalstate(latgd, lon, alt, obsrecarr[0:10], 'h')
+xnomtest = nominalstate(latgd, lon, alt, obsrecarr[0:10], jdepoch, 'h')
 print(f'{xnomtest = }')
 
-jdepoch = obsrecarr[0]['time'] + obsrecarr[0]['timef']
 # use a vector that's farther off to see iterations take effect
 reci = np.array([5975.2904, 2568.64, 3120.5845])
 veci = np.array([3.983846, -2.071159, -5.917095])
@@ -170,7 +170,7 @@ percentchg = 0.01
 deltaamtchg = 0.01
 
 # diffcorrect test -zeg
-difftest = diffcorrect(firstobs, lastobs, obsrecarr, xnom, percentchg,
+difftest = diffcorrect(firstobs, lastobs, obsrecarr, xnom, jdepoch, percentchg,
                        deltaamtchg, 1e-6)
 print(f'{difftest = }')
 
@@ -180,7 +180,7 @@ for j in range(5):
     # ---- accumulate obs and assemble matrices
     atwa, atwb, atw, b, drng2, daz2, del2 = \
         findatwaatwb(firstobs, lastobs, obsrecarr, 6, percentchg, deltaamtchg,
-                     xnom)
+                     xnom, jdepoch)
     if j == 0:
         np.set_printoptions(precision=1)
         print('atwa = \n')

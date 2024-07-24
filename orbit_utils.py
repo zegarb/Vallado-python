@@ -9892,7 +9892,7 @@ def target (rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
 
 def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                  statesize: int, percentchg: float, deltaamtchg: float,
-                 xnom: np.ndarray):
+                 xnom: np.ndarray, jdepoch: float):
     """this procedure finds the a and b matrices for the differential correction
     problem.  remember that it isn't critical for the propagations to use
     the highest fidelity techniques because we're only trying to find the
@@ -9916,6 +9916,8 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         tolerance for small value in finite differencing
     xnom : ndarray
         state vector
+    jdepoch : float
+        julian date of epoch: days from 4713 bc
 
     Returns
     -------
@@ -9974,7 +9976,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # --------- propagate the nominal vector to the epoch time -----------
         # sgp4 (whichconst, satrec,  currobsrec.dtmin, rteme, vteme)
         dtsec = (currobsrec['time'] + currobsrec['timef'] -
-                 obsrecarr[0]['time'] - obsrecarr[0]['timef']) * 86400.0
+                 jdepoch) * 86400.0
         rnom[0] = xnom[0, 0]
         rnom[1] = xnom[1, 0]
         rnom[2] = xnom[2, 0]
@@ -10051,7 +10053,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
 
             if (currobsrec['obstype'] == 3):
                 trrpert, trtascpert, tdeclpert, tdrrpert, tdrtascpert, tddeclpert =\
-                      sc.rv2tradec(reci3.T, veci3.T, currobsrec['latgd'],
+                      sc.rv2tradec(reci3, veci3, currobsrec['latgd'],
                                   currobsrec['lon'], currobsrec['alt'],
                                   currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                                   currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -10059,7 +10061,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                 bstarpert = currobsrec['bstar'] * (1.0 + percentchg)
             else:
                 rngpert, azpert, elpert, drhopert, dazpert, delpert =\
-                    sc.rv2razel(reci3.T, veci3.T, currobsrec['latgd'],
+                    sc.rv2razel(reci3, veci3, currobsrec['latgd'],
                                 currobsrec['lon'], currobsrec['alt'],
                                 currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                                 currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -10806,9 +10808,9 @@ def mincomb(rinit: float, rfinal: float, einit: float, efinal: float,
 # vectormethod: 'h' for hgibbs,  'g' for gibbs,
 # 'a' for angles only (not implemented)
 def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
-                 velmethod: str):
+                 jdepoch: float, velmethod: str):
     """this function take a number of observations of a satellite and returns a
-    nominal state vector. Epoch time is the time of first obsevation.
+    nominal state vector.
 
     Parameters
     ----------
@@ -10823,13 +10825,15 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
         elevation: 'el', year: 'year', month: 'mon', day: 'day', hour: 'hr',
         minutes: 'min', seconds: 'sec',
         polar motion coefficients: 'xp' and 'yp'
+    jdepoch : float
+        julian date of epoch: days from 4713 bc
     velmethod : str
         method used to get velocities: 'h' for hgibbs, 'g' for gibbs
 
     Returns
     -------
     xnom : ndarray
-        the nominal state vector for the observations.
+        the nominal state vector for the observations at the epoch
     """
     reciarr = []
     timearr = []
@@ -10854,7 +10858,7 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
             veci, _, _ = gibbs(reciarr[i-1], reciarr[i], reciarr[i+1])
 
         # book recommends a 'more accurace scheme' than pkepler -zeg
-        r, v = pkepler(reciarr[i], veci, (timearr[0] - timearr[i]) * 86400,
+        r, v = pkepler(reciarr[i], veci, (jdepoch - timearr[i]) * 86400,
                        0, 0)
         raverage = raverage + r
         vaverage = vaverage + v
@@ -10863,11 +10867,10 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
     return xnom
 
 def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
-                           xnom: np.ndarray, percentchg: float,
+                           xnom: np.ndarray, jdepoch: float, percentchg: float,
                            deltaamtchg: float, tol: float):
     """this function takes a set of observations and a nominal state vector
-    and returns a more accurate vector. The nominal state vector should be for
-    the first observation in the list.
+    and returns a more accurate vector.
 
     Parameters
     ----------
@@ -10879,7 +10882,9 @@ def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
         array of observations
     xnom : ndarray
         nominal state vector of first observation
-     percentchg : float
+    jdepoch : float
+        julian date of epoch / nominal state vector: days from 4713 bc
+    percentchg : float
         amount to modify vectors by in finite differencing
     deltaamtchg : float
         tolerance for small matching in finite differencing
@@ -10895,7 +10900,7 @@ def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
     while (deltax > tol).any():
         atwa, atwb, _, _, _, _, _ = \
             findatwaatwb(firstobs, lastobs, obsrecarr, 6,
-                         percentchg, deltaamtchg, xnom)
+                         percentchg, deltaamtchg, xnom, jdepoch)
         deltax = np.linalg.inv(atwa) @ atwb
         xnom = xnom + deltax
     return xnom
