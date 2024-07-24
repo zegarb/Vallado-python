@@ -10905,6 +10905,57 @@ def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
         xnom = xnom + deltax
     return xnom
 
+def linearkalman(stateest: np.ndarray, stateesttime: float, covest: np.ndarray,
+                 procnoise: np.ndarray, noisemat: np.ndarray, obsarr: np.ndarray,
+                 sitelatgd: float, sitelon: float):
+
+    ecef2sez = np.array([[sinlat*coslon, sinlat*sinlon, -coslat],
+                         [-sinlon, coslon, 0],
+                         [coslat*coslon, coslat*sinlon, sinlat]])
+    estsez, _ = sc.razel2sez(stateest[0], stateest[1], stateest[2],
+                             0, 0, 0)
+    sinlat, coslat, sinlon, coslon = smu.getsincos(sitelatgd, sitelon)
+    recef = ecef2sez.T @ estsez
+    F = np.zeros([6, 6])
+    F[0, 3] = 1
+    F[1, 4] = 1
+    F[2, 5] = 1
+    F[3, 0] = (-mu/rho**3) + (3 * mu * recef[0]**2) / rho**5
+    F[3, 1] = 3 * mu * recef[0] * recef[1] / rho**5
+    F[3, 2] = 3 * mu * recef[0] * recef[2] / rho**5
+    F[4, 0] = F[3, 1]
+    F[4, 1] = (-mu/rho**3) + (3 * mu * recef[1]**2) / rho**5
+    F[4, 2] = 3 * mu * recef[1] * recef[2] / rho**5
+    F[5, 0] = F[3, 2]
+    F[5, 1] = F[4, 2]
+    F[5, 2] = (-mu/rho**3) + (3 * mu * recef[2]**2) / rho**5
+
+    for obs in obsarr:
+        rhosez = sc.razel2sez(obs['rng'], obs['az'], obs['el'], 0, 0, 0)
+        rho = smu.mag(rhosez)
+        temp = np.array([[rhosez[0]/rho, rhosez[1]/rho, rhosez[2]/rho],
+                        [0, 0, 0],
+                        [0, 0, 0]])
+
+        temp[1, 0] = rhosez[1] / ((rhosez[1]**2 / rhosez[0]**2 + 1) * rhosez[0]**2)
+        temp[1, 1] = -1 / ((rhosez[1]**2 / rhosez[0]**2 + 1) * rhosez[0])
+        # temp [1, 2] = 0
+        temp[2, 0] = -(rhosez[0] * rhosez[2]) / (rho**3
+                                        * math.sqrt(-rhosez[2]**2 / rho**2 + 1))
+        temp[2, 1] = -(rhosez[1] * rhosez[2]) / (rho**3
+                                        * math.sqrt(-rhosez[2]**2 / rho**2 + 1))
+        temp[2, 2] = (rho**2 - rhosez[2]**2) / (rho**3
+                                            * math.sqrt(-rhosez[2]**2 / rho**2 + 1))
+
+        H = np.cross(temp, ecef2sez)
+        dt = obs['time'] + obs['timef'] - stateesttime
+        stm = np.eye([6, 6]) + F * dt + F**2 * dt**2 / 2
+        rest = stateest[[0, 1 ,2]]
+        vest = stateest[[3, 4, 5]]
+        xnomk1 = pkepler(rest, vest, dt, 0, 0)
+
+
+
 
 ##############################################################################################################
 ##############################################################################################################
