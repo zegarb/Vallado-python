@@ -3183,10 +3183,10 @@ def elliptic12(u: np.ndarray, m: np.ndarray, tol: float = None):
         while (abs(c[i, :]) > tol).any(): # Arithmetic-Geometric Mean of A, B and C
 
             i = i + 1
-            if i > a.shape[0]:
-                np.append(a, np.zeros((1, mumax)), axis=0)
-                np.append(b, np.zeros((1, mumax)), axis=0)
-                np.append(c, np.zeros((1, mumax)), axis=0)
+            if i > a.shape[0] - 1:
+                a = np.concatenate((a, np.zeros((1, mumax))), axis=0)
+                b = np.concatenate((b, np.zeros((1, mumax))), axis=0)
+                c = np.concatenate((c, np.zeros((1, mumax))), axis=0)
 
             a[i, :] = 0.5 * (a[i - 1, :] + b[i - 1, :])
             b[i, :] = np.sqrt(a[i - 1, :] * b[i - 1, :])
