@@ -1134,7 +1134,7 @@ def sidereal(jdut1: float, deltapsi: float, meaneps: float, omega: float,
     gmst = gstime(jdut1)
 
     # ------------------------ find mean ast ----------------------
-    # after 1997, kinematic terms apply as well as gemoetric in eqe
+    # after 1997, kinematic terms apply as well as geometric in eqe
     if (jdut1 > 2450449.5) and (eqeterms > 0):
         ast = gmst + deltapsi* math.cos(meaneps) \
             + 0.00264 * arcsec2rad * math.sin(omega) \

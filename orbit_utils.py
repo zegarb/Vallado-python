@@ -10598,7 +10598,7 @@ def repeatgt(krev2rep : float, kday2rep: float, ecc: float, incl: float):
         semimajor axis: rad
     """
     revpday = krev2rep / kday2rep
-    n = revpday * 2 * math.pi / 86400.0
+    n = revpday * revday2radsec
     a = (mu * (1 / n) ** 2) ** 0.33333
     lonshiftrev = (2 * math.pi * kday2rep) / krev2rep
 

@@ -31,6 +31,7 @@ import space_conversions as sc
 
 # ---- site
 print('\n-------- site test \n')
+alt = 2.187 #km
 latgd = 39.007 * deg2rad
 lon = -104.883 * deg2rad
 alt = 2.187 #km
