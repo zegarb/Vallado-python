@@ -10905,33 +10905,49 @@ def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
         xnom = xnom + deltax
     return xnom
 
-def linearkalman(stateest: np.ndarray, stateesttime: float, covest: np.ndarray,
-                 procnoise: np.ndarray, noisemat: np.ndarray, obsarr: np.ndarray,
-                 sitelatgd: float, sitelon: float):
+def linearkalman(xnom: np.ndarray, pnom: np.ndarray,
+                 Q: np.ndarray, R: np.ndarray, obsarr: np.ndarray,
+                 sitelatgd: float, sitelon: float, sitealt: float, ttt: float,
+                 xnomjd: float, lod: float, xp: float, yp: float, ddx: float,
+                 ddy: float):
 
+    sinlat, coslat, sinlon, coslon = smu.getsincos(sitelatgd, sitelon)
     ecef2sez = np.array([[sinlat*coslon, sinlat*sinlon, -coslat],
                          [-sinlon, coslon, 0],
                          [coslat*coslon, coslat*sinlon, sinlat]])
-    estsez, _ = sc.razel2sez(stateest[0], stateest[1], stateest[2],
-                             0, 0, 0)
-    sinlat, coslat, sinlon, coslon = smu.getsincos(sitelatgd, sitelon)
-    recef = ecef2sez.T @ estsez
+
+    recef, _, _ = sc.eci2ecefiau06(xnom[[0, 1, 2]], xnom[[3, 4, 5]],
+                                   np.zeros(3), ttt, xnomjd, lod, xp, yp, 'c',
+                                   ddx, ddy)
+    rmag = smu.mag(recef)
     F = np.zeros([6, 6])
     F[0, 3] = 1
     F[1, 4] = 1
     F[2, 5] = 1
-    F[3, 0] = (-mu/rho**3) + (3 * mu * recef[0]**2) / rho**5
-    F[3, 1] = 3 * mu * recef[0] * recef[1] / rho**5
-    F[3, 2] = 3 * mu * recef[0] * recef[2] / rho**5
+    F[3, 0] = (-mu/rmag**3) + (3 * mu * recef[0]**2) / rmag**5
+    F[3, 1] = 3 * mu * recef[0] * recef[1] / rmag**5
+    F[3, 2] = 3 * mu * recef[0] * recef[2] / rmag**5
     F[4, 0] = F[3, 1]
-    F[4, 1] = (-mu/rho**3) + (3 * mu * recef[1]**2) / rho**5
-    F[4, 2] = 3 * mu * recef[1] * recef[2] / rho**5
+    F[4, 1] = (-mu/rmag**3) + (3 * mu * recef[1]**2) / rmag**5
+    F[4, 2] = 3 * mu * recef[1] * recef[2] / rmag**5
     F[5, 0] = F[3, 2]
     F[5, 1] = F[4, 2]
-    F[5, 2] = (-mu/rho**3) + (3 * mu * recef[2]**2) / rho**5
+    F[5, 2] = (-mu/rmag**3) + (3 * mu * recef[2]**2) / rmag**5
 
+    H = []
+    dxbar = []
+    dxhat = []
+    xbar = []
+    xhat = []
+    pbar = []
+    phat = []
+    z = []
+    b = []
+    K = []
+
+    i = 0
     for obs in obsarr:
-        rhosez = sc.razel2sez(obs['rng'], obs['az'], obs['el'], 0, 0, 0)
+        rhosez, _ = sc.razel2sez(obs['rng'], obs['az'], obs['el'], 0, 0, 0)
         rho = smu.mag(rhosez)
         temp = np.array([[rhosez[0]/rho, rhosez[1]/rho, rhosez[2]/rho],
                         [0, 0, 0],
@@ -10939,7 +10955,7 @@ def linearkalman(stateest: np.ndarray, stateesttime: float, covest: np.ndarray,
 
         temp[1, 0] = rhosez[1] / ((rhosez[1]**2 / rhosez[0]**2 + 1) * rhosez[0]**2)
         temp[1, 1] = -1 / ((rhosez[1]**2 / rhosez[0]**2 + 1) * rhosez[0])
-        # temp [1, 2] = 0
+        # temp[1, 2] = 0
         temp[2, 0] = -(rhosez[0] * rhosez[2]) / (rho**3
                                         * math.sqrt(-rhosez[2]**2 / rho**2 + 1))
         temp[2, 1] = -(rhosez[1] * rhosez[2]) / (rho**3
@@ -10947,14 +10963,42 @@ def linearkalman(stateest: np.ndarray, stateesttime: float, covest: np.ndarray,
         temp[2, 2] = (rho**2 - rhosez[2]**2) / (rho**3
                                             * math.sqrt(-rhosez[2]**2 / rho**2 + 1))
 
-        H = np.cross(temp, ecef2sez)
-        dt = obs['time'] + obs['timef'] - stateesttime
-        stm = np.eye([6, 6]) + F * dt + F**2 * dt**2 / 2
-        rest = stateest[[0, 1 ,2]]
-        vest = stateest[[3, 4, 5]]
-        xnomk1 = pkepler(rest, vest, dt, 0, 0)
+        H.append(np.cross(temp, ecef2sez))
+        dt = (obs['time'] + obs['timef'] - xnomjd) * 86400
+        stm = np.eye([6, 6]) + F
+        temp1 = 10
+        j = 1
+        while temp1 > 1e-12:
+            temp1 = dt**j / math.factorial(j)
+            stm = stm + F**j * temp1
 
+        rest = xnom[[0, 1 ,2]]
+        vest = xnom[[3, 4, 5]]
+        rbar, vbar = pkepler(rest, vest, dt, 0, 0)
+        xbar.append(np.append(rbar, vbar))
 
+        reci, _ = sc.razel2rv(obs['rng'], obs['az'], obs['el'], 0, 0, 0,
+                                 sitelatgd, sitelon, sitealt, ttt,
+                                 obs['jdut1'], obs['lod'], obs['xp'],
+                                 obs['yp'], 0, obs['ddpsi'], obs['ddeps'])
+        z.append(reci)
+        #initial xhat = 0
+        if i == 0:
+            xbar.append(stm @ np.zeros((6, 1)))
+            pbar.append(stm @ pnom @ stm.T + Q)
+        else:
+            xbar.append(stm @ xhat[i - 1])
+            pbar.append(stm @ phat[i - 1] @ stm.T + Q)
+
+        # H is 3x3, xbar is 6x1 - this won't work! -zeg
+        b.append(z - H[i] @ xbar[i])
+        K.append(phat[i] @ H[i].T @ (H[i] @ pbar[i] @ H[i].T + R)**-1)
+        dxhat.append(dxbar[i] + K[i] @ (b[i] - H[i] @ dxbar[i]))
+        phat.append(pbar[i] - K[i] @ H[i] @ pbar[i])
+        xhat.append(xbar[i] + dxhat[i])
+        i = i + 1
+
+    return xhat, phat
 
 
 ##############################################################################################################
