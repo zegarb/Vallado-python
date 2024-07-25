@@ -10833,7 +10833,7 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
     Returns
     -------
     xnom : ndarray
-        the nominal state vector for the observations at the epoch
+        the nominal state vector for the observations at the epoch, ECI
     """
     reciarr = []
     timearr = []
@@ -10894,7 +10894,7 @@ def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
     Returns
     -------
     xnom : ndarray
-        updated state vector
+        updated state vector, ECI
     """
     deltax = np.full((6, 1), 10)
     while (deltax > tol).any():

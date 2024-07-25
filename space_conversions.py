@@ -3954,7 +3954,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
         range rate: km/s
     daz : float
         azimuth rate: rad/s
-    del_ : float
+    del\_ : float
         elevation rate: rad/s
     latgd : float
         geodetic latitude of site: -pi/2 to pi2 rad
@@ -3973,7 +3973,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
     yp : float
         polar motion coefficient: rad
     terms : int
-        # of terms for ast calculation: 0,2
+        number of terms for ast calculation: 0,2
     ddpsi : float
         delta psi correction to gcrf: rad
     ddeps : float
