@@ -3805,7 +3805,7 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
         range rate: km/s
     daz
         azimuth rate: rad/s
-    del_
+    del\_
         elevation rate: rad/s
     """
 
@@ -3817,7 +3817,6 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     a = np.array([[0],[0],[0]])
     recef, vecef, _ = eci2ecef(reci, veci, a, ttt, jdut1, lod, xp, yp, terms,
                                  ddpsi, ddeps)
-
     #print('sat recef    %14.7f %14.7f %14.7f \n', recef)
     # simplified - just use sidereal time rotation
     # thetasa = earthrot * (1.0  - 0.0/86400.0)
