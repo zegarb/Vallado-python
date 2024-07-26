@@ -710,22 +710,15 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     # ---------- search through roots to locate answers --------
     for indx2 in range(5):
         root = 99999.9
-        if (indx2 == 0):
-            root = rt[indx2]
-        if (indx2 == 1):
-            root = rt[indx2]
-        if (indx2 == 2):
-            root = rt[indx2]
-        if (indx2 == 3):
-            root = rt[indx2]
-        if (indx2 == 4):
-            root = rt[indx2]
+        if (np.isreal(rt[indx2])):
+            root = np.real(rt[indx2])
+
         if ((root >= 0.0) and (root <= 1.0)):
             minfound = 'y'
             rootf = root
             #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
             ans = recovqt(p1, p2, p3, p4, p5, p6, root)
-            print("recovqt:". ans)
+            print("recovqt:", ans)
             # ----- recover the function value derivative
             funrate = (5.0 * aqi5 * root ** 4
                        + 4.0 * aqi4 * root ** 3
