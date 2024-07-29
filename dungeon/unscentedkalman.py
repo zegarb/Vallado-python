@@ -2,10 +2,12 @@ import numpy as np
 import math
 
 # from the book page 798: 4th edition, or 814: 5th edition
-# reci and veci NEED to be 1d arrays!
 def unscentedkalman(reci: np.ndarray, veci: np.ndarray, covariance: np.ndarray):
     s = math.sqrt(6) * np.linalg.cholesky(covariance)
     sigmapts = np.zeros([6, 12])
+    #reci, veci need to be 1D
+    reci = reci.flatten()
+    veci = veci.flatten()
     for i in range(6):
         jj = i * 2
         sigmapts[0:3, jj] = reci + s[0:3, i]
