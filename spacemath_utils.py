@@ -444,7 +444,9 @@ def recovqt(p1: float, p2: float, p3: float, p4: float, p5: float, p6: float,
     # ----- recover the variable value
     funvalue = (aqit5 * root ** 5 + aqit4 * root ** 4 + aqit3 * root ** 3
                 + aqit2 * root ** 2 + aqit1 * root + aqit0)
-    return funvalue
+    funrate = (5.0 * aqit5 * root ** 4 + 4.0 * aqit4 * root ** 3 +
+               3.0 * aqit3 * root ** 2 + 2.0 * aqit2 * root + aqit1)
+    return funvalue, funrate
 
 # ------------------------------------------------------------------------------
 #
@@ -717,13 +719,12 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
             minfound = 'y'
             rootf = root
             #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
-            ans = recovqt(p1, p2, p3, p4, p5, p6, root)
-            print("recovqt:", ans)
+            ans, funrate = recovqt(p1, p2, p3, p4, p5, p6, root)
             # ----- recover the function value derivative
-            funrate = (5.0 * aqi5 * root ** 4
-                       + 4.0 * aqi4 * root ** 3
-                       + 3.0 * aqi3 * root ** 2
-                       + 2.0 * aqi2 * root + aqi1)
+            # funrate = (5.0 * aqi5 * root ** 4
+            #            + 4.0 * aqi4 * root ** 3
+            #            + 3.0 * aqi3 * root ** 2
+            #            + 2.0 * aqi2 * root + aqi1)
 
     return minfound, rootf, funrate
 

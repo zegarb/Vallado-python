@@ -8322,10 +8322,10 @@ def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
 #  revisions
 #    vallado     - fix velocity vector                           23 jul 2002
 #
-#  inputs          description                    range / units
-#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
-#    lon         - longitude of site              -2pi to 2pi rad
-#    alt         - altitude                       km
+#  inputs          description                          range / units
+#    latgd       - geodetic latitude                    -pi/2 to pi/2 rad
+#    lon         - longitude of site                    -2pi to 2pi rad
+#    hellp       - height above the ellipsoid (alt)     - km
 #
 #  outputs       :
 #    rs          - ecef site position vector      km
@@ -8344,11 +8344,11 @@ def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
 #  references    :
 #    vallado       2001, 404-407, alg 47, ex 7-1
 #
-# [rs, vs] = site (latgd, lon, alt)
+# [rs, vs] = site (latgd, lon, hellp)
 # -----------------------------------------------------------------------------
 
 
-def site(latgd: float, lon: float, alt: float):
+def site(latgd: float, lon: float, hellp: float):
     """this function finds the position and velocity vectors for a site.  the
     answer is returned in the geocentric equatorial (ecef) coordinate system.
     note that the velocity is zero because the coordinate system is fixed to
@@ -8360,7 +8360,7 @@ def site(latgd: float, lon: float, alt: float):
         geodetic latitude: -pi/2 to pi/2 rad
     lon : float
         longitude: -2pi to 2pi rad
-    alt : float
+    hellp : float
         altitude: km
 
     Returns
@@ -8370,12 +8370,12 @@ def site(latgd: float, lon: float, alt: float):
     vs : ndarray
         ecef site velocity vector: km/s
     """
-    sinlat = math.sin(latgd)
+    sinlat, coslat = smu.getsincos(latgd)
 
     # ------  find rdel and rk components of site vector  ---------
     cearth = re / math.sqrt(1.0 - (eccearthsqrd * sinlat * sinlat))
-    rdel = (cearth + alt) * math.cos(latgd)
-    rk = ((1.0-eccearthsqrd) * cearth + alt) * sinlat
+    rdel = (cearth + hellp) * coslat
+    rk = ((1.0-eccearthsqrd) * cearth + hellp) * sinlat
 
     # ---------------  find site position vector  -----------------
     rs = np.zeros((3))
