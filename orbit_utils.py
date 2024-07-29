@@ -2555,7 +2555,8 @@ def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
 # ------------------------------------------------------------------------------
 
 
-def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
+def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi,
+             outfile = None):
 
     numiter = 20
     errorl = 'ok'
@@ -2853,6 +2854,8 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
 
     if (errorl != 'ok'):
         print("\n\n-----Error found in lambertu: ", errorl)
+        if outfile:
+            outfile.write(f'Error found in lambertu: {errorl}\n')
         print("\n\n")
         # p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
         #  = sc.rv2coe(r1, v1dv)
@@ -3217,7 +3220,8 @@ def lambertmin(r1: np.ndarray, r2:np.ndarray, dm: str, nrev: int):
 #    prussing      JAS 2000
 #-----------------------------------------------------------------------------
 
-def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
+def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int,
+                  outfile = None):
     """this procedure solves lambert's problem and finds the miniumum time for
     multi-revolution cases.
 
@@ -3228,7 +3232,7 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
     r2 : ndarray
         ijk position vector 2: km
     dm : str
-        direction of motion : 'S': short, 'L': long
+        direction of motion: 'S'-short, 'L'-long
     nrev : int
         number of revolutions
 
@@ -3237,11 +3241,11 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
     tmin : float
         minimum time of flight: sec
     tminp : float
-        minimum parabolic tof : sec
+        minimum parabolic tof: sec
     tminenergy
-        minimum energy tof : sec
+        minimum energy tof: sec
     v : ndarray
-        velocity vector : km/s
+        velocity vector: km/s
     """
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
@@ -3311,23 +3315,35 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
 
         a = an
         alp = 1.0 / a
-        alpha = 2.0 * math.asin(math.sqrt(0.5 * s * alp))
-        if (dm.casefold() == 'S'):
-            beta = 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
+
+        atemp = math.sqrt(0.5 * s * alp)
+        if abs(atemp) > 1.0:
+            if outfile:
+                outfile.write(f'{atemp = }, greater than 1\n')
+            atemp = 1.0 * np.sign(atemp)
+        alpha = 2.0 * math.asin(atemp)
+
+        btemp = math.sqrt(0.5 * (s - chord) * alp)
+        if abs(btemp) > 1.0:
+            if outfile:
+                outfile.write(f'{btemp = }, greater than 1\n')
+            btemp = 1.0 * np.sign(btemp)
+        if (dm.casefold() == 's'):
+            beta = 2.0 * math.asin(btemp)
         else:
-            beta = - 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
+            beta = -2.0 * math.asin(btemp)
+
         xi = alpha - beta
         eta = math.sin(alpha) - math.sin(beta)
-        fa = ((6.0 * nrev * math.pi + 3.0 * xi - eta) * (math.sin(xi) + eta)
-              - 8.0 * (1.0 - math.cos(xi)))
-        fadot = (((6.0 * nrev * math.pi + 3.0 * xi - eta)
-                  * (math.cos(xi) + math.cos(alpha)) + (3.0 - math.cos(alpha))
-                  * (math.sin(xi) + eta) - 8.0 * math.sin(xi))
-                 * (- alp * math.tan(0.5 * alpha))
-                 + ((6.0 * nrev * math.pi + 3.0 * xi - eta)
-                    * (-math.cos(xi) - math.cos(beta)) + (-3.0 - math.cos(beta))
-                    * (math.sin(xi) + eta) + 8.0 * math.sin(xi))
-                 * (- alp * math.tan(0.5 * beta)))
+        temp1 = 6 * nrev * math.pi + 3 * xi - eta
+        temp2 = math.sin(xi) + eta
+        fa = (temp1 * temp2 - 8.0 * (1.0 - math.cos(xi)))
+        fadot = ((temp1 * (math.cos(xi) + math.cos(alpha))
+                  + (3.0 - math.cos(alpha)) * temp2 - 8.0 * math.sin(xi))
+                 * (-alp * math.tan(0.5 * alpha))
+                 + (temp1 * (-math.cos(xi) - math.cos(beta))
+                    + (-3.0 + math.cos(beta)) * temp2 + 8.0 * math.sin(xi))
+                 * (-alp * math.tan(0.5 * beta)))
         del_ = fa / fadot
         an = a - del_
         #        fprintf(1, '#2i #8.4f #11.5f #11.5f  #11.5f  #11.5f  #11.5f  #11.5f  #11.5f \n', i, dnu * rad2deg, alpha * rad2deg, beta * rad2deg, xi, eta, fa, fadot, an)
@@ -3341,12 +3357,19 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
     emin = math.sqrt(1 - (4 * ((s - magr1) * (s - magr2)) / chord**2)
                      * math.sin((alpha + beta) / 2)**2)
     pmin = an * (1 - emin**2)
-    v = ((math.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu))
-         * (r2 - (1 - (magr2 / pmin) * (1 - cosdeltanu)) * r1))
-    if sh.show:
-        print('%c  %c %i  %f  %f  %f  \n'
-            % (dm, nrev, tmin, tminp, tminenergy))
-        print(v)
+
+
+    if pmin == 0:
+        v = np.zeros(3)
+        if outfile:
+            outfile.write('v could not be computed\n')
+    else:
+        v = ((math.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu))
+            * (r2 - (1 - (magr2 / pmin) * (1 - cosdeltanu)) * r1))
+        if sh.show:
+            print('%c  %c %i  %f  %f  %f  \n'
+                % (dm, nrev, tmin, tminp, tminenergy))
+            print(v)
     return tmin, tminp, tminenergy, v
 
 # -------------------------------------------------------------------------
@@ -3434,8 +3457,9 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
                 else:
                     y = magr1 + magr2
                 # outfile
-                print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
-                        % (y, lower, c2, psinew, ynegktr))
+                if sh.show:
+                    print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
+                            % (y, lower, c2, psinew, ynegktr))
                 ynegktr = ynegktr + 1
 
         if (abs(c2) > small):
@@ -3495,9 +3519,10 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
     dtnew = (x ** 3 * c3 + vara * sqrty) * oomu
     tof = dtnew
     psib = psinew
-    print(' %3i %12.4f %12.4f %12.4f %12.4f %11.4f %12.4f %12.4f %11.4f %11.4f\n'
-          % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi,
-             dtdpsi2, lower, upper))
+    if sh.show:
+        print(' %3i %12.4f %12.4f %12.4f %12.4f %11.4f %12.4f %12.4f %11.4f %11.4f\n'
+            % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi,
+                dtdpsi2, lower, upper))
     #       fprintf(1, ' nrev #3i  dtnew #12.5f psi #12.5f  lower #10.3f upper #10.3f #10.6f #10.6f \n', nrev, dtnew, psiold, lower, upper, c2, c3)
     #   end # for checking multi rev cases
 

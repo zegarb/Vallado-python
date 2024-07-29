@@ -6,9 +6,9 @@ import space_conversions as sc
 import orbit_utils as obu
 
 
-def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy):
+def dolam(kt, outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy):
     outfile.write('xx  \n')
-    outfile.write('xx 501    psinew         dt       x      a          e \n\n')
+    outfile.write('xx \n')
     for i in range((nrev) * 100 , 501):
         dt = (i+1) * 60.0
         # make target moving...
@@ -45,34 +45,40 @@ def dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy):
         #           % (np.arccos(cosdeltanu) * 180 / np.pi, chord, s, amin,
         #              betam, ttran, tmin, tpar))
 
-        tbi, tbil = obu.lambgettbiu(rinto, rtgt1, 5)
 
-        outfile.write(f'{direc = }, {energy = }, {nrev = }, {i = }, {dt = }\n')
-        vtrans1, vtrans2, errorl = \
-            obu.lambertu(rinto, vtgto, rtgt1, direc, energy, nrev, 0,
-                            dt, tbi, outfile)
-        outfile.write(f'Univ:\n{vtrans1 = }, \n{vtrans2 = }\n')
-        if errorl == 'ok' and errork == 'ok':
-            p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
-                = sc.rv2coe(rinto, vtrans1); # of trans orbit
-            dv1 = smu.mag(vinto - vtrans1)
-            dv2 = smu.mag(vtrans2 - vtgt1)
-            outfile.write(' %11.5f %11.5f %11.5f %11.5f %11.5f \n'
-                            % (a, ecc, dv1, dv2, dv1+dv2))
-        else:
-            outfile.write('  0  0 %s \n' % errorl)
 
-        vtrans1, vtrans2, errorl = obu.lambertb(rinto, vinto, rtgt1, direc, energy, nrev, dt )
-        outfile.write(f'Batt:\n{vtrans1 = }, \n{vtrans2 = }\n')
-        if errorl == 'ok' and errork == 'ok':
-            p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
-                = sc.rv2coe(rinto, vtrans1); # of trans orbit
-            dv1 = smu.mag(vinto - vtrans1)
-            dv2 = smu.mag(vtrans2 - vtgt1)
-            outfile.write(' %11.5f %11.5f %11.5f %11.5f %11.5f \n\n'
-                            % (a, ecc, dv1, dv2, dv1+dv2) )
+
+        outfile.write(f'{kt = }, {direc = }, {energy = }, {nrev = }, {i = }, {dt = }\n')
+        tmin, _, _, _ = obu.lambertmintof(rinto, rtgt1, direc, nrev, outfile)
+        if dt < tmin:
+            outfile.write(f'dt is less than minimum tof \n')
         else:
-            outfile.write('  0  0 %s \n' % errorl)
+            tbi, _ = obu.lambgettbiu(rinto, rtgt1, nrev + 1)
+            vtrans1, vtrans2, errorl = \
+                obu.lambertu(rinto, vtgto, rtgt1, direc, energy, nrev, 0,
+                                dt, tbi, outfile)
+            outfile.write(f'Univ:\n{vtrans1 = }, \n{vtrans2 = }\n')
+            if errorl == 'ok' and errork == 'ok':
+                p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
+                    = sc.rv2coe(rinto, vtrans1); # of trans orbit
+                dv1 = smu.mag(vinto - vtrans1)
+                dv2 = smu.mag(vtrans2 - vtgt1)
+                outfile.write(' %11.5f %11.5f %11.5f %11.5f %11.5f \n'
+                                % (a, ecc, dv1, dv2, dv1+dv2))
+            else:
+                outfile.write('  0  0 %s \n' % errorl)
+
+            vtrans1, vtrans2, errorl = obu.lambertb(rinto, vinto, rtgt1, direc, energy, nrev, dt )
+            outfile.write(f'Batt:\n{vtrans1 = }, \n{vtrans2 = }\n')
+            if errorl == 'ok' and errork == 'ok':
+                p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
+                    = sc.rv2coe(rinto, vtrans1); # of trans orbit
+                dv1 = smu.mag(vinto - vtrans1)
+                dv2 = smu.mag(vtrans2 - vtgt1)
+                outfile.write(' %11.5f %11.5f %11.5f %11.5f %11.5f \n\n'
+                                % (a, ecc, dv1, dv2, dv1+dv2) )
+            else:
+                outfile.write('  0  0 %s \n' % errorl)
 
 st = 'y'
 outpath = os.path.join(os.path.dirname(__file__), 'testoutput', 'testlam.out')
@@ -112,9 +118,9 @@ for kt in range(1, 8):
         kepmov = 'y'
     if kt == 7:
         trangle = 90.0 * deg2rad
-        rinto = np.array([1.0, 0.0, 0.0])
+        rinto = np.array([1.0, 0.0, 0.0]) * re
         vinto = np.array([2.604057,-7.105717,- 0.263218])
-        rtgto = np.array([1.0 * math.cos(trangle), 1.0 * math.sin(trangle), 0.0])
+        rtgto = np.array([1.0 * math.cos(trangle), 1.0 * math.sin(trangle), 0.0]) * re
         vtgto = np.array([-1.962372, 7.323674, 0.0])
         kepmov = 'n'
 
@@ -123,10 +129,12 @@ for kt in range(1, 8):
     for nrev in range(0, 3):
         for direc in direcs:
             if nrev == 0:
-                dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, 'l')
+                dolam(kt, outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, 'l')
+                print(f'{kt = }, {direc = }, {nrev = }')
             else:
                 for energy in energys:
-                    dolam(outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy)
+                    dolam(kt, outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy)
+                    print(f'{kt = }, {direc = }, {nrev = }, {energy = }')
 
     # direc = 's'
     # nrev = 0
