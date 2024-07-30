@@ -5,6 +5,41 @@ import spacetime_utils as stu
 import orbit_utils as obu
 import spacemath_utils as smu
 
+
+def azse_quadcheck(az, sez_array):
+    S = -0.0
+    E = -0.0
+
+    if az < 0.0:
+        az + 2 * math.pi
+
+    if az == 0.0 or az == 2*math.pi:
+        S = -1
+        E = 0
+    elif az == math.pi/2:
+        S = 0
+        E = 1
+    elif az == math.pi:
+        S = 1
+        E = 0
+    elif az == 3*math.pi/2:
+        S = 0
+        E = -1
+    elif az > 0.0 and az < math.pi/2:
+        S = -1
+        E = 1
+    elif az > math.pi/2 and az < math.pi:
+        S = 1
+        E = 1
+    elif az > math.pi and az < 3*math.pi/2:
+        S = 1
+        E = -1
+    elif az >  3*math.pi/2 and az < 2*math.pi:
+        S = -1
+        E = -1
+
+
+
 # Make sure time is in UTC
 def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, lod, xp, yp, ddpsi, ddeps, rholim, azlim, ellim):
 
@@ -59,8 +94,8 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
         rho, az, el, _, _, _ = sc.sez2razel(rhosat_sez_array[i], drhosat_sez_array[i])
 
         frange[i] = rho - rholim
-        faz_high[i] = rhosat_sez_array[i][1] - rhosat_sez_array[i][0] * math.tan(max(azlim))
-        faz_low[i] = rhosat_sez_array[i][1] - rhosat_sez_array[i][0] * math.tan(min(azlim))
+        faz_high[i] = rhosat_sez_array[i][1] + rhosat_sez_array[i][0] * math.tan(max(azlim))
+        faz_low[i] = rhosat_sez_array[i][1] + rhosat_sez_array[i][0] * math.tan(min(azlim))
 
         rsatmag = smu.mag(rsat_ecef_new)
         fel_high[i] = (np.arccos(np.cos(el)/rsatmag) - el) - (np.arccos(np.cos(max(ellim))/rsatmag) - max(ellim))
@@ -96,13 +131,8 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
     combined_root = -0.0
     minfound = False
     for i in range(0,480):
-        # if i > 273 and i < 297:
+
         print(i)
-            # print('frange: ',frange[i],frange[i+1],frange[i+2],frange[i+3],frange[i+4],frange[i+5])
-            # print('faz_high: ',faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
-            # print('faz_low: ',faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
-            # print('fel_high: ',fel_high[i],fel_high[i+1],fel_high[i+2],fel_high[i+3],fel_high[i+4],fel_high[i+5])
-            # print('fel_low: ',fel_low[i],fel_low[i+1],fel_low[i+2],fel_low[i+3],fel_low[i+4],fel_low[i+5])
         minfound1, rootf1, funrate1  = smu.quartbln(frange[i],frange[i+1],frange[i+2],frange[i+3],frange[i+4],frange[i+5])
         if minfound1 == True:
             minfound = True
@@ -112,6 +142,7 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
         minfound2, rootf2, funrate2 = smu.quartbln(faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
         if minfound2 == True:
             print('faz_high: ',faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
+            print(funrate2)
             minfound = True
             combined_root = rootf2
             print('root 2: ', rootf2)
@@ -119,6 +150,7 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
         minfound3, rootf3, funrate3 = smu.quartbln(faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
         if minfound3 == True:
             print('faz_low: ',faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
+            print(funrate3)
             minfound = True
             combined_root = rootf3
             print('root 3: ', rootf3)
@@ -146,8 +178,9 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
             rhosat_sez = np.array([rhosat_s,rhosat_e,rhosat_z])
             drhosat_sez = np.array([drhosat_s,drhosat_e,drhosat_z])
             rho,az,el, drho, daz,del_ = sc.sez2razel(rhosat_sez,drhosat_sez)
-            if az < 0.0:
-                az = math.pi + az
+
+            # if az < 0.0:
+            #     az = 2 * math.pi + az
 
 
             if minfound1 and drho < 0.0:
@@ -187,7 +220,7 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
             print('az: ', az)
             print('el: ', el)
             print('del;', del_)
-            #print('range: ', rho)
+            print('range: ', rho)
 
             if newview == True and newview != oldview:
                 print('in view at (s): ', view_time)
@@ -243,7 +276,7 @@ if __name__ == '__main__':
     hellp = 2.918
     rholim = 100000 #km
     # Superimposed circle over actual
-    azlim = (0*deg2rad,360*deg2rad)
+    azlim = (10*deg2rad,350*deg2rad)
     ellim = (30*deg2rad, 90*deg2rad)
 
     # Sat Object 8 data
