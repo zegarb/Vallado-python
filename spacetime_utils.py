@@ -5,94 +5,7 @@ from pprint import pprint as pp
 from space_constants import *
 import spacemath_utils as smu
 
-# ------------------------------------------------------------------------------
-#
-#                           function jdayall
-#
-#  this function finds the julian date given the year, month, day, and time.
-#    the julian date is defined by each elapsed day since noon, jan 1, 4713 bc.
-#
-#  author        : david vallado                  719-573-2600   27 may 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    year        - year                           1900 .. 2100
-#    mon         - month                          1 .. 12
-#    day         - day                            1 .. 28, 29, 30, 31
-#    hr          - universal time hour            0 .. 23
-#    min         - universal time min             0 .. 59
-#    sec         - universal time sec             0.0 .. 59.999
-#    whichtype   - julian or gregorian calender   'j' or 'g'
-#
-#  outputs       :
-#    jd          - julian date                    days from 4713 bc
-#
-#  locals        :
-#    b           - var to aid gregorian dates
-#
-#  coupling      :
-#    none.
-#
-#  references    :
-#    vallado       2001, 187
-#
-# [jd, jdfrac] = jdayall(year, mon, day, hr, min, sec, whichtype)
-# -----------------------------------------------------------------------------
 
-def jdayall(year: int, mon: int, day: int, hr: int, min: int, sec: float,
-            whichtype: str):
-    """this function finds the julian date given the year, month, day, and time.
-    the julian date is defined by each elapsed day since noon, jan 1, 4713 bc.
-
-    Parameters
-    ----------
-    year : int
-        year: 1900 to 2100
-    mon : int
-        month: 1 to 12
-    day : int
-        day: 1 to 31
-    hr : int
-        hour: 0 to 23
-    min : int
-        minutes: 0 to 59
-    sec : float
-        seconds: 0 to 59.99
-    whichtype : str
-        Julian or gegorian: 'j' or 'g'
-
-    Returns
-    -------
-    jd: float
-        julian date: days from 4713 bc
-    """
-
-    if mon <= 2:
-        year = year - 1
-        mon = mon + 12
-
-    if whichtype == 'j':
-        # --------- use for julian calender, every 4 years --------
-        b = 0.0
-    else:
-        # ---------------------- use for gregorian ----------------
-        b = (2 - int(np.floor(year * 0.01))
-             + int(np.floor(int(np.floor(year * 0.01)) * 0.25)))
-
-    jd = (int(np.floor(365.25 * (year + 4716)))
-          + int(np.floor(30.6001 * (mon + 1))) + day + b - 1524.5)
-    jdfrac = (sec + min * 60.0 + hr * 3600.0) / 86400.0
-    # check jdfrac
-    if jdfrac > 1.0:
-        jd = jd + int(np.floor(jdfrac))
-        jdfrac = jdfrac - int(np.floor(jdfrac))
-
-    return jd, jdfrac
-
-
-#
 # -----------------------------------------------------------------------------
 #
 #                           function getintday
@@ -462,7 +375,7 @@ def jday(yr: int, mon: int, day: int, hr: int, min: int, sec: float):
 # [year, mon, day, hr, min, sec] = invjday (jd, jdfrac)
 # -----------------------------------------------------------------------------
 
-def invjday (jd: float, jdfrac: float = None):
+def invjday (jd: float, jdfrac: float = 0):
     """this function finds the year, month, day, hour, minute and second
     given the julian date. tu can be ut1, tdt, tdb, etc.
 
@@ -471,7 +384,7 @@ def invjday (jd: float, jdfrac: float = None):
     jd : float
         julian date: days from 4713 bc
     jdfrac: float, optional
-        julian date fraction of a day: 0.0 to 1.0 , default None
+        julian date fraction of a day: 0.0 to 1.0 , default 0
 
     Returns
     -------
@@ -488,9 +401,6 @@ def invjday (jd: float, jdfrac: float = None):
     sec : float
         seconds: 0 to 59.99
     """
-    if (jdfrac == None):
-        jdfrac = jd - math.floor(jd)
-        jd = math.floor(jd)
 
     # check jdfrac for multiple days
     if (abs(jdfrac) >= 1.0):
@@ -521,6 +431,91 @@ def invjday (jd: float, jdfrac: float = None):
     mon, day, hr, min, sec = days2mdh(year, days + jdfrac)
     return year, mon, day, hr, min, sec
 
+# ------------------------------------------------------------------------------
+#
+#                           function jdayall
+#
+#  this function finds the julian date given the year, month, day, and time.
+#    the julian date is defined by each elapsed day since noon, jan 1, 4713 bc.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    year        - year                           1900 .. 2100
+#    mon         - month                          1 .. 12
+#    day         - day                            1 .. 28, 29, 30, 31
+#    hr          - universal time hour            0 .. 23
+#    min         - universal time min             0 .. 59
+#    sec         - universal time sec             0.0 .. 59.999
+#    whichtype   - julian or gregorian calender   'j' or 'g'
+#
+#  outputs       :
+#    jd          - julian date                    days from 4713 bc
+#
+#  locals        :
+#    b           - var to aid gregorian dates
+#
+#  coupling      :
+#    none.
+#
+#  references    :
+#    vallado       2001, 187
+#
+# [jd, jdfrac] = jdayall(year, mon, day, hr, min, sec, whichtype)
+# -----------------------------------------------------------------------------
+
+def jdayall(year: int, mon: int, day: int, hr: int, min: int, sec: float,
+            whichtype: str):
+    """this function finds the julian date given the year, month, day, and time.
+    the julian date is defined by each elapsed day since noon, jan 1, 4713 bc.
+
+    Parameters
+    ----------
+    year : int
+        year: 1900 to 2100
+    mon : int
+        month: 1 to 12
+    day : int
+        day: 1 to 31
+    hr : int
+        hour: 0 to 23
+    min : int
+        minutes: 0 to 59
+    sec : float
+        seconds: 0 to 59.99
+    whichtype : str
+        Julian or gegorian: 'j' or 'g'
+
+    Returns
+    -------
+    jd: float
+        julian date: days from 4713 bc
+    """
+
+    if mon <= 2:
+        year = year - 1
+        mon = mon + 12
+
+    if whichtype == 'j':
+        # --------- use for julian calender, every 4 years --------
+        b = 0.0
+    else:
+        # ---------------------- use for gregorian ----------------
+        b = (2 - int(np.floor(year * 0.01))
+             + int(np.floor(int(np.floor(year * 0.01)) * 0.25)))
+
+    jd = (int(np.floor(365.25 * (year + 4716)))
+          + int(np.floor(30.6001 * (mon + 1))) + day + b - 1524.5)
+    jdfrac = (sec + min * 60.0 + hr * 3600.0) / 86400.0
+    # check jdfrac
+    if jdfrac > 1.0:
+        jd = jd + int(np.floor(jdfrac))
+        jdfrac = jdfrac - int(np.floor(jdfrac))
+
+    return jd, jdfrac
 
 # ------------------------------------------------------------------------------
 #
@@ -958,7 +953,6 @@ def convtime(year: int, mon: int, day: int, hr: int, min: int, sec: float,
 #
 # gst = gstime(jdut1)
 # -----------------------------------------------------------------------------
-
 
 def gstime(jdut1: float):
     """this function finds the greenwich sidereal time (iau-82).

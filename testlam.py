@@ -53,9 +53,9 @@ def dolam(kt, outfile, nrev, kepmov, rtgto, vtgto, rinto, direc, energy):
         if dt < tmin:
             outfile.write(f'dt is less than minimum tof \n')
         else:
-            tbi, _ = obu.lambgettbiu(rinto, rtgt1, nrev + 1)
+            tbi, _ = obu.lambgettbiu(rinto, rtgt1, nrev)
             vtrans1, vtrans2, errorl = \
-                obu.lambertu(rinto, vtgto, rtgt1, direc, energy, nrev, 0,
+                obu.lambertu(rinto, vtgto, rtgt1, direc, energy, nrev,
                                 dt, tbi, outfile)
             outfile.write(f'Univ:\n{vtrans1 = }, \n{vtrans2 = }\n')
             if errorl == 'ok' and errork == 'ok':

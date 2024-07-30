@@ -1933,7 +1933,7 @@ def makeorbitrv(jd: float, kind: 'str', reci: np.ndarray, veci: np.ndarray):
     Parameters
     ----------
     jd : float
-        julian date
+        julian date: days from 4713 bc
     kind : str
         type of propogator: 'k', 'p', 'j'
     reci : ndarray
@@ -2311,7 +2311,7 @@ def pathm(llat: float, llon: float, range_: float, az: float):
         start geocentric latitude: rad
     llon : float
         start gepocentric longitude: rad
-    range_ : float
+    range\_ : float
         range between points: rad
     az : float
         azimuth: rad
@@ -2440,7 +2440,7 @@ def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
         maximum distance of satellite look : km
     rhomin : float
         minimum distance of satellite look : km
-    lambda_ : float
+    lambda\_ : float
         difference in ground range angles : rad
     """
 
@@ -2555,10 +2555,48 @@ def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
 # ------------------------------------------------------------------------------
 
 
-def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi,
-             outfile = None):
+def lambertu(r1: np.ndarray, v1: np.ndarray, r2: np.ndarray, dm: str, de: str,
+             nrev: int, dtsec: float, tbi: np.ndarray, outfile = None):
+    """this function solves the lambert problem for orbit determination and returns
+    the velocity vectors at each of two given position vectors.  the solution
+    uses universal variables for calculation and a bissection technique
+    updating psi.
 
-    numiter = 20
+    Parameters
+    ----------
+    r1 : ndarray
+        position vector 1: km
+    v1 : ndarray
+        velocity vector 1: km/s,
+        only used for 180 degree transfers, can ignore otherwise
+    r2 : ndarray
+        position vector 2: km
+    dm : str
+        direction of motion: 's' short, 'l' long
+    de : str
+        direction of energy: 'l' low, 'h' high,
+        only needed for multi-rev cases
+    nrev : int
+        number of revolutions
+    dtsec : float
+        time between r1 and r2
+    tbi : ndarray
+        time of the bottom interval - only needed for multi-rev cases.
+        this is a two-dimension array of psi and tof
+    outfile : TextIOWrapper, optional
+        optional error output file
+
+    Returns
+    -------
+    v1 : ndarray
+        velocity vector at position 1: km/s
+    v2 : ndarray
+        velocity vector at position 2: km/s
+    error: str
+        error message
+    """
+
+    numiter = 40
     errorl = 'ok'
     v1dv = np.zeros((3))
     v2dv = np.zeros((3))
@@ -2853,10 +2891,9 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi,
     # end  # if  var a > 0.0
 
     if (errorl != 'ok'):
-        print("\n\n-----Error found in lambertu: ", errorl)
+        print("\n-----Error found in lambertu: ", errorl)
         if outfile:
             outfile.write(f'Error found in lambertu: {errorl}\n')
-        print("\n\n")
         # p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
         #  = sc.rv2coe(r1, v1dv)
         # print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f '
@@ -2865,7 +2902,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi,
         #          v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew,
         #          dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
         print('C%3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f  '
-              '%11.7f dnu %11.7f \n'
+              '%11.7f dnu %11.7f\n'
               % (loops, nrev, dm, de, dtnew, magr1, magr2, vara, y, xold,
                  psinew, math.acos(cosdeltanu) * 180.0 / math.pi))
     else:
@@ -3137,11 +3174,11 @@ def lambertmin(r1: np.ndarray, r2:np.ndarray, dm: str, nrev: int):
     Returns
     -------
     v : ndarray
-        velocity vector : km/s
+        velocity vector: km/s
     aminenergy : float
-        semimajor axis min energy : km/s
+        semimajor axis min energy: km/s
     tminenergy : float
-        time min energy : km/s
+        time min energy: km/s
     tminabs : float
         time min energy - parabolic: km/s
     """
@@ -3390,7 +3427,7 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int,
 
 def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
     """find the minimum psi values for the universal variable lambert problem
-       for multi-rev cases
+    for multi-rev cases
 
     Parameters
     ----------
@@ -3402,6 +3439,13 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
         max # of revolutions: 0, 1, 2 ...
     dm : str
         direction of motion: 'L', 'S'
+
+    Returns
+    -------
+    psib : float
+        minimum psi value
+    tof : float
+        time of flight: sec
     """
     small = 1e-08
 
@@ -3414,7 +3458,7 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
-    if (dm == 'L'):
+    if (dm.casefold() == 'l'):
         vara = - math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
     else:
         vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
@@ -3534,17 +3578,34 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
 #
 # [tbiu, tbilu] = lambgettbiu(r1, r2, 3)
 
-def lambgettbiu(r1=None, r2=None, order=None):
-    tbi = np.zeros((order, 2))
+def lambgettbiu(r1: np.ndarray, r2: np.ndarray, nrev: int):
+    """a function that forms the minimum time and universal variable matrix for
+    the lambert universal variables function.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        position vector 1: km
+    r2 : ndarray
+        position vector 2: km
+    nrev : int
+        number of revolutions. needs to be bigger than nrevs used in lambertu
+
+    Returns
+    -------
+    tbi, tbil : ndarray
+        minimum psi, tof at each nrev for short and long directions of motion
+    """
+    tbi = np.zeros((nrev + 1, 2))
     #tbi = [0 0 0 0 0 0 0 0 0 0]
-    for i in range(order):
-        psib, tof = lambertumins(r1, r2, i, 'S')
+    for i in range(nrev + 1):
+        psib, tof = lambertumins(r1, r2, i, 's')
         tbi[i, 0] = psib
         tbi[i, 1] = tof
 
-    tbil = np.zeros((order, 2))
-    for i in range(order):
-        psib, tof = lambertumins(r1, r2, i, 'L')
+    tbil = np.zeros((nrev + 1, 2))
+    for i in range(nrev + 1):
+        psib, tof = lambertumins(r1, r2, i, 'l')
         tbil[i, 0] = psib
         tbil[i, 1] = tof
 
@@ -3707,7 +3768,7 @@ def keplercoe(ro: np.ndarray, vo: np.ndarray, dtseco: float, mu:float = mu):
     vo : ndarray
         ijk velocity vector - initial: km/s
     dtseco : float
-        _length of time to propagate: s
+        length of time to propagate: sec
     mu : float, optional
         gravitional constant , by default mu of earth: km3/s2
 
@@ -5104,7 +5165,7 @@ def anglesl(decl1: float, decl2: float, decl3: float, rtasc1: float,
     rtasc1, rtasc2, rtasc3 : float
         right ascension of sightings: rad
     jd1, jdf1, jd2, jdf2, jd3, jdf3 : float
-        julian dates of sightings: days from 4713 bc
+        julian dates + fractions of sightings: days from 4713 bc
     rs1 : ndarray
         position vector of site: km
 
@@ -7097,6 +7158,21 @@ def iau06pna(ttt: float):
     ttt : float
         julian centuries of tt: centuries
 
+    Returns
+    -------
+    deltapsi : float
+        change in longitude: rad
+    pnb : ndarray
+        combiined precession-nutation matrix
+    prec : ndarray
+        transformation matrix for precession
+    nut : ndarray
+        transformation matrix for nutation
+    l, l1, f, d, omega : float
+        delauney elements
+    lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep: float
+        planetary longitudes
+    precrate
     """
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
@@ -7110,7 +7186,7 @@ def iau06pna(ttt: float):
     #        [axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, ape, apei, agst, agsti] = iau06in
     pnsum = 0.0
     ensum = 0.0
-    for i in range(677, -1, -1):
+    for i in range(677):
         tempval = (apni[i, 0] * l + apni[i, 1] * l1 + apni[i, 2]
                    * f + apni[i, 3] * d + apni[i, 4] * omega)
         tempval = np.mod(tempval, 2 * math.pi)
@@ -7138,7 +7214,6 @@ def iau06pna(ttt: float):
 
     #  add planetary and luni-solar components.
     deltapsi = pnsum + pplnsum
-
     deltaeps = ensum + eplnsum
     if sh.iauhelp:
         print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
@@ -7318,21 +7393,13 @@ def iau06pnb(ttt: float):
     deltapsi : float
         change in longitude: rad
     pnb : ndarray
-        matrix
+        combiined precession-nutation matrix
     prec : ndarray
-        matrix
+        transformation matrix for precession
     nut : ndarray
-        transformation matrix for ire-grcf
-    l : float
-        delauney element
-    l1 : float
-        delauney element
-    f : float
-        delauney element
-    d : float
-        delauney element
-    omega : float
-        delauney element
+        transformation matrix for nutation
+    l, l1, f, d, omega : float
+        delauney elements
     lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep: float
         planetary longitudes
     precrate
@@ -7354,7 +7421,7 @@ def iau06pnb(ttt: float):
 
     pnsum = 0.0
     ensum = 0.0
-    for i in range(76, -1, -1):
+    for i in range(76):
         tempval = (apni[i, 0] * l + apni[i, 1] * l1 + apni[i, 2] * f
                    + apni[i, 3] * d + apni[i, 4] * omega)
         pnsum = (pnsum + (apn[i, 0] + apn[i, 1] * ttt) * math.sin(tempval)
@@ -8957,7 +9024,7 @@ def sunill(jd: float, lat: float, lon: float):
 # [lit] = light (r, jd, whichkind)
 # ------------------------------------------------------------------------------
 
-def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
+def light(r: np.ndarray, jd: float, whichkind: str = 'e'):
     """this function determines if a spacecraft is sunlit or in the dark at a
     particular time.  an oblate earth and cylindrical shadow is assumed.
 
@@ -9617,7 +9684,7 @@ def ShadowEntryExit(RSun: np.ndarray, a: float, ecc: float, incl: float,
     raan : float
         longitude of the ascending node : rad
     argp : float
-        _argument of periapsis: rad
+        argument of periapsis: rad
     rp : float, optional
         radius of the planet (by default re): km
 
@@ -9778,9 +9845,9 @@ def ShadowEntryExit(RSun: np.ndarray, a: float, ecc: float, incl: float,
 # ------------------------------------------------------------------------------
 
 
-def target (rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
-            vtgt: np.ndarray, dm: str, kind: str, dtsec: float, ndot: float,
-            nddot: float):
+def target(rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
+           vtgt: np.ndarray, dm: str, kind: str, dtsec: float, ndot: float,
+           nddot: float):
     """this function accomplishes the targeting problem using kepler/pkepler &
     lambert.
 
@@ -10217,6 +10284,7 @@ def shadow(reci: np.ndarray, rsun: np.ndarray, angumb: float = angumbearth,
         sun ijk position vector: km
 
     Umbra and penumbra angle default uses mean sun-earth distance
+
     angumb : float, optional
         unbra angle: rad
     angpen : float, optional
@@ -10347,7 +10415,7 @@ def predict(reci:np.ndarray, veci:np.ndarray, jdepoch:float, jdend:float,
     lod : float, optional
         excess length of day: sec
     terms : int, optional
-        # of terms for ast calculation: 0 or 2
+        number of terms for ast calculation: 0 or 2
    timezone : int, optional
         offset to utc from local site: 0 to 23 hr
 
@@ -10609,9 +10677,9 @@ def repeatgt(krev2rep : float, kday2rep: float, ecc: float, incl: float):
     Parameters
     ----------
     krev2rep : float
-        revs to repeat (crossing points): km
+        revs to repeat \(crossing points): km
     kday2rep : float
-        days to repeat (frequency): days
+        days to repeat \(frequency): days
     ecc : float
         eccentricity
     incl : float
