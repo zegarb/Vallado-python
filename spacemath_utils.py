@@ -1078,7 +1078,7 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     Returns
     -------
     minfound: str
-        test of success: 'y' or 'n'
+        test of success: True or False
     rootf: float
         root of the function
     funrate: float
@@ -1086,7 +1086,7 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     """
     rootf = 0.0
     funrate = 0.0
-    minfound = 'n'
+    minfound = False
     # ------ set up function from C-45 --------
     #  aqit5*x**5 + aqit4*x**4 + etc
     temp = 1.0 / 24.0
@@ -1111,7 +1111,7 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
             root = np.real(rt[indx2])
 
         if ((root >= 0.0) and (root <= 1.0)):
-            minfound = 'y'
+            minfound = True
             rootf = root
             #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
             ans, funrate = recovqt(p1, p2, p3, p4, p5, p6, root)
