@@ -6,37 +6,37 @@ import orbit_utils as obu
 import spacemath_utils as smu
 
 
-def azse_quadcheck(az, sez_array):
-    S = -0.0
-    E = -0.0
+# def azse_quadcheck(az, sez_array):
+#     S = -0.0
+#     E = -0.0
 
-    if az < 0.0:
-        az + 2 * math.pi
+#     if az < 0.0:
+#         az + 2 * math.pi
 
-    if az == 0.0 or az == 2*math.pi:
-        S = -1
-        E = 0
-    elif az == math.pi/2:
-        S = 0
-        E = 1
-    elif az == math.pi:
-        S = 1
-        E = 0
-    elif az == 3*math.pi/2:
-        S = 0
-        E = -1
-    elif az > 0.0 and az < math.pi/2:
-        S = -1
-        E = 1
-    elif az > math.pi/2 and az < math.pi:
-        S = 1
-        E = 1
-    elif az > math.pi and az < 3*math.pi/2:
-        S = 1
-        E = -1
-    elif az >  3*math.pi/2 and az < 2*math.pi:
-        S = -1
-        E = -1
+#     if az == 0.0 or az == 2*math.pi:
+#         S = -1
+#         E = 0
+#     elif az == math.pi/2:
+#         S = 0
+#         E = 1
+#     elif az == math.pi:
+#         S = 1
+#         E = 0
+#     elif az == 3*math.pi/2:
+#         S = 0
+#         E = -1
+#     elif az > 0.0 and az < math.pi/2:
+#         S = -1
+#         E = 1
+#     elif az > math.pi/2 and az < math.pi:
+#         S = 1
+#         E = 1
+#     elif az > math.pi and az < 3*math.pi/2:
+#         S = 1
+#         E = -1
+#     elif az >  3*math.pi/2 and az < 2*math.pi:
+#         S = -1
+#         E = -1
 
 
 
@@ -50,19 +50,11 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
     timezone = 0
     eqeterms  = 2
 
-    rsite_ecef, _ = obu.site(latgd,lon,hellp)
-
     year, mon, day, hr, minute, sec = stu.invjday(jd)
 
-    sinlat = math.sin(latgd)
-    coslat = math.cos(latgd)
-    sinlon = math.sin(lon)
-    coslon = math.cos(lon)
-    ecef2sez = np.array([[sinlat*coslon, sinlat*sinlon, -coslat],
-                         [-sinlon, coslon, 0],
-                         [coslat*coslon, coslat*sinlon, sinlat]])
+    rsite_ecef, vsite_ecef = obu.site(latgd,lon,hellp)
 
-    rsite_sez = ecef2sez @ rsite_ecef
+    rhosite_sez, _ = sc.ecef2sez(rsite_ecef, vsite_ecef, latgd, lon)
 
     # Size: 1440 min in a day / 3 min (180sec) intervals
     size = int(1440/3) + 5
@@ -88,8 +80,7 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
         rhosat_ecef = rsat_ecef_new - rsite_ecef
         drhosat_ecef = vsat_ecef_new
 
-        rhosat_sez_array[i] = ecef2sez @ rhosat_ecef
-        drhosat_sez_array[i] = ecef2sez @ drhosat_ecef
+        rhosat_sez_array[i], drhosat_sez_array[i] = sc.ecef2sez(rhosat_ecef, drhosat_ecef, latgd, lon)
 
         rho, az, el, _, _, _ = sc.sez2razel(rhosat_sez_array[i], drhosat_sez_array[i])
 
@@ -131,37 +122,37 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
     combined_root = -0.0
     minfound = False
     for i in range(0,480):
-
-        print(i)
-        minfound1, rootf1, funrate1  = smu.quartbln(frange[i],frange[i+1],frange[i+2],frange[i+3],frange[i+4],frange[i+5])
+        minfound1, rootf1, funrate1 = smu.quartbln(frange[i],frange[i+1],frange[i+2],frange[i+3],frange[i+4],frange[i+5])
+        minfound2, rootf2, funrate2 = smu.quartbln(faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
+        minfound3, rootf3, funrate3 = smu.quartbln(faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
+        minfound4, rootf4, funrate4 = smu.quartbln(fel_high[i],fel_high[i+1],fel_high[i+2],fel_high[i+3],fel_high[i+4],fel_high[i+5])
+        minfound5, rootf5, funrate5 = smu.quartbln(fel_low[i],fel_low[i+1],fel_low[i+2],fel_low[i+3],fel_low[i+4],fel_low[i+5])
         if minfound1 == True:
             minfound = True
             combined_root = rootf1
             print('root 1: ', rootf1)
             # print('fundrate 1: ', funrate1)
-        minfound2, rootf2, funrate2 = smu.quartbln(faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
+       
         if minfound2 == True:
             print('faz_high: ',faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
-            print(funrate2)
             minfound = True
             combined_root = rootf2
             print('root 2: ', rootf2)
             # print('fundrate 2: ', funrate2)
-        minfound3, rootf3, funrate3 = smu.quartbln(faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
+       
         if minfound3 == True:
             print('faz_low: ',faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
-            print(funrate3)
             minfound = True
             combined_root = rootf3
             print('root 3: ', rootf3)
             # print('fundrate 3: ', funrate3)
-        minfound4, rootf4, funrate4 = smu.quartbln(fel_high[i],fel_high[i+1],fel_high[i+2],fel_high[i+3],fel_high[i+4],fel_high[i+5])
+        
         if minfound4 == True:
             minfound = True
             combined_root = rootf4
             print('root 4: ', rootf4)
             # print('fundrate 4: ', funrate4)
-        minfound5, rootf5, funrate5 = smu.quartbln(fel_low[i],fel_low[i+1],fel_low[i+2],fel_low[i+3],fel_low[i+4],fel_low[i+5])
+        
         if minfound5 == True:
             minfound = True
             combined_root = rootf5

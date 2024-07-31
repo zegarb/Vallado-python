@@ -3840,17 +3840,7 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     # drhosez = smu.rot2(tempvec, halfpi-latgd)
 
 
-    # alternate (faster?) sez conversion
-    sinlat = math.sin(latgd)
-    coslat = math.cos(latgd)
-    sinlon = math.sin(lon)
-    coslon = math.cos(lon)
-    ecef2sez = np.array([[sinlat*coslon, sinlat*sinlon, -coslat],
-                         [-sinlon, coslon, 0],
-                         [coslat*coslon, coslat*sinlon, sinlat]])
-    rhosez = ecef2sez @ rhoecef
-    drhosez = ecef2sez @ drhoecef
-
+    rhosez, drhosez = ecef2sez(rhoecef, drhoecef, latgd, lon)
 
     # ------------- calculate azimuth and elevation ---------------
     temp = math.sqrt(rhosez[0]*rhosez[0] + rhosez[1]*rhosez[1])
@@ -3995,17 +3985,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
     # tempvec = smu.rot2(drhosez, latgd - halfpi)
     # drhoecef = smu.rot3(tempvec, -lon)
 
-    # alternate sez to ecef transformation; faster?
-    sinlat = math.sin(latgd)
-    coslat = math.cos(latgd)
-    sinlon = math.sin(lon)
-    coslon = math.cos(lon)
-    sez2ecef = np.array([[sinlat*coslon, -sinlon, coslat*coslon],
-                         [sinlat*sinlon, coslon, coslat*sinlon],
-                         [-coslat, 0, sinlat]])
-    rhoecef = sez2ecef @ rhosez
-    drhoecef = sez2ecef @ drhosez
-
+    rhoecef, drhoecef = sez2ecef(rhosez, drhosez, latgd, lon)
 
     # ----------  find ecef range and velocity vectors -------------
     rs, _ = obu.site(latgd, lon, alt)
@@ -5025,6 +5005,73 @@ def ecef2llb(r):
     #latgc = gd2gc(latgd)  # surface of the Earth locations
     return latgc, latgd, lon, hellp
 
+def ecef2sez(recef: np.ndarray, vecef: np.ndarray, latgd: float, lon: float):
+    """this function transforms position and velocity vectors from an earth-centered, 
+    earth-fixed (ecef) frame to a sez (south/east/zenith) frame using lat/lon of site.
+
+    Parameters
+    ----------
+    recef : ndarray
+        position vector earth fixed: km
+    vecef : ndarray
+        velocity vector earth fixed: km/s
+    latgd : float
+        geodetic latitude of observation site: rad
+    lon : float
+        longitude of observation site: rad
+
+    Returns
+    -------
+    rhosez : ndarray
+        sez satellite range vector: km
+    drhosez : ndarray
+        sez satellite velocity vector: km/s
+    """
+
+    sinlat, coslat, sinlon, coslon = smu.getsincos(latgd, lon)
+    ecef2sez = np.array([[sinlat*coslon, sinlat*sinlon, -coslat],
+                         [-sinlon, coslon, 0],
+                         [coslat*coslon, coslat*sinlon, sinlat]])
+    
+    rhosez = ecef2sez @ recef
+    drhosez = ecef2sez @ vecef
+
+    return rhosez, drhosez
+
+def sez2ecef(rhosez, drhosez, latgd, lon):
+    """this function transforms position and velocity vectors from sez (south/east/zenith)
+    to earth-centered, earth-fixed (ecef) frame using lat/lon of site.
+
+    Parameters
+    ----------
+    rhosez : ndarray
+        sez satellite range vector: km
+    drhosez : ndarray
+        sez satellite velocity vector: km/s
+    latgd : float
+        geodetic latitude of observation site: rad
+    lon : float
+        longitude of observation site: rad
+
+    Returns
+    -------
+    recef : ndarray
+        position vector earth fixed: km
+    vecef : ndarray
+        velocity vector earth fixed: km/s
+    """
+
+
+    sinlat, coslat, sinlon, coslon = smu.getsincos(latgd, lon)
+
+    sez2ecef = np.array([[sinlat*coslon, -sinlon, coslat*coslon],
+                         [sinlat*sinlon, coslon, coslat*sinlon],
+                         [-coslat, 0, sinlat]])
+    
+    recef = sez2ecef @ rhosez
+    vecef = sez2ecef @ drhosez
+
+    return recef, vecef
 
 
 # ----------------------------------------------------------------------------
@@ -5076,6 +5123,8 @@ def ecef2llb(r):
 #
 # [rmod, vmod, amod] = ecef2mod (recef, vecef, aecef, ttt, jdut1, lod, xp, yp, eqeterms, ddpsi, ddeps)
 # ----------------------------------------------------------------------------
+
+
 
 
 def ecef2mod(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
@@ -7106,12 +7155,12 @@ def tradec2rv(rho: float, trtasc: float, tdecl: float, drho: float,
         topocentric right angle of ascension rate: rad/s
     dtdecl : float
         topocentric declination rate: rad/s
-    gdlat : float
-        geodetic latitude of observation site
+    latgd : float
+        geodetic latitude of observation site: rad
     lon : float
-        longitude of observation site
+        longitude of observation site: rad
     alt : float
-        altitude of observation site
+        altitude of observation site: km
     ttt : float
         centuries of tt: centuries
     jdut1 : float
@@ -7561,6 +7610,7 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
     reci = reci.T
     veci = veci.T
     return reci, veci
+    
 
 # ------------------------------------------------------------------------------
 #
