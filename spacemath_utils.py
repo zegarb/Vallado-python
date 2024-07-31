@@ -9,6 +9,229 @@ import orbit_utils as obu
 #some debug stuff
 from space_constants import sethelp as sh
 
+# ----------------------------------------------------------------------------
+#
+#                           function printdiff
+#
+#  this function prints a covariance matrix difference
+#
+#  author        : david vallado                  719-573-2600   23 may 2003
+#
+#  revisions
+#
+#  inputs          description                    range / units
+#    strin       - title
+#    mat1        - 6x6 input matrix
+#    mat2        - 6x6 input matrix
+#
+#  outputs       :
+#
+#  locals        :
+#
+#  references    :
+#    none
+#
+#  printdiff(strin, cov1, cov2)
+# ----------------------------------------------------------------------------
+
+def printdiff(strin: str, mat1: np.ndarray, mat2: np.ndarray):
+    """this function prints a covariance matrix difference
+
+    Parameters
+    ----------
+    strin : str
+        title string
+    mat1 : np.ndarray
+        6x6 input matrix
+    mat2 : np.ndarray
+        6x6 input matrix
+    """
+
+    small = smalle18
+    print('\ndiff %s' % (strin))
+    print(mat1.T - mat2.T)
+    print('\npctdiff %s pct over 1e-18  \n' % (strin))
+    #    fprintf(1, '#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f \n', 100.0*((mat1' - mat2')/mat1'))
+    #    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
+    #    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
+    tm1 = mat1.T
+    tm2 = mat2.T
+    diffmm = np.zeros((6, 6))
+    for i in range(6):
+        for j in range(6):
+            if (abs(tm1[i, j] - tm2[i, j]) < small) or (abs(tm1[i, j]) < small):
+                diffmm[i, j] = 0.0
+            else:
+                diffmm[i, j] = 100.0 * ((tm1[i, j] - tm2[i, j]) / tm1[i, j])
+
+    print('diffmm:\n', (diffmm))
+
+# ------------------------------------------------------------------------------
+#
+#                                  rot1
+#
+#  this function performs a rotation about the 1st axis.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - input vector
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outvec      - vector result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#    temp        - temporary extended value
+#
+#  coupling      :
+#    none.
+#
+# [outvec] = rot1 (vec, xval)
+# ----------------------------------------------------------------------------- }
+
+def rot1 (vec: np.ndarray, xval: float):
+    """this function performs a rotation about the 1st axis.
+
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outvec: ndarray
+        result vector
+    """
+    temp = vec[2]
+    c = math.cos(xval)
+    s = math.sin(xval)
+
+    outvec = np.zeros(3)
+    outvec[2] = c*vec[2] - s*vec[1]
+    outvec[1] = c*vec[1] + s*temp
+    outvec[0] = vec[0]
+    return outvec
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                            function rot2
+#
+#  this function performs a rotation about the 2nd axis.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - input vector
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outvec      - vector result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#    temp        - temporary extended value
+#
+#  coupling      :
+#    none.
+#
+# [outvec] = rot2 (vec, xval)
+# ----------------------------------------------------------------------------- }
+
+def rot2(vec, xval):
+    """this function performs a rotation about the 2nd axis.
+
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outvec: ndarray
+        result vector
+    """
+    temp = vec[2]
+    c = math.cos(xval)
+    s = math.sin(xval)
+
+    outvec = np.zeros(3)
+    outvec[2] = c*vec[2] + s*vec[0]
+    outvec[0] = c*vec[0] - s*temp
+    outvec[1] = vec[1]
+    return outvec
+
+# ------------------------------------------------------------------------------
+#
+#                            function rot3
+#
+#  this function performs a rotation about the 3rd axis.
+#
+#  author        : david vallado                  719-573-2600   27 may 2002
+#
+#  revisions
+#                -
+#
+#  inputs          description                    range / units
+#    vec         - input vector
+#    xval        - angle of rotation              rad
+#
+#  outputs       :
+#    outvec      - vector result
+#
+#  locals        :
+#    c           - cosine of the angle xval
+#    s           - sine of the angle xval
+#    temp        - temporary extended value
+#
+#  coupling      :
+#    none.
+#
+# [outvec] = rot3 (vec, xval)
+# ----------------------------------------------------------------------------- }
+
+def rot3 (vec, xval):
+    """this function performs a rotation about the 3rd axis.
+
+    Parameters
+    ----------
+    vec : ndarray
+        input vector
+    xval : float
+        angle of rotation: rad
+
+    Returns
+    -------
+    outvec: ndarray
+        result vector
+    """
+
+    temp = vec[1]
+    c = math.cos(xval)
+    s = math.sin(xval)
+
+    outvec = np.zeros(3)
+    outvec[1] = c*vec[1] - s*vec[0]
+    outvec[0] = c*vec[0] + s*temp
+    outvec[2] = vec[2]
+    return outvec
+
+
 # ------------------------------------------------------------------------------
 #
 #                                  rot1mat
@@ -188,6 +411,178 @@ def rot3mat(xval: float):
     return outmat
 
 
+# ------- two recursion algorithms needed by the lambertbattin routine
+def seebatt(v: float):
+    """a recursion algorithm used in the lambertbattin routine
+
+    Parameters
+    ----------
+    v : float
+        the value
+
+    Returns
+    -------
+    seebat: float
+        algorithm result
+    """
+    c = np.zeros(21)
+    c[0] = 0.2
+    c[1] = 9.0 / 35.0
+    c[2] = 16.0 / 63.0
+    c[3] = 25.0 / 99.0
+    c[4] = 36.0 / 143.0
+    c[5] = 49.0 / 195.0
+    c[6] = 64.0 / 255.0
+    c[7] = 81.0 / 323.0
+    c[8] = 100.0 / 399.0
+    c[9] = 121.0 / 483.0
+    c[10] = 144.0 / 575.0
+    c[11] = 169.0 / 675.0
+    c[12] = 196.0 / 783.0
+    c[13] = 225.0 / 899.0
+    c[14] = 256.0 / 1023.0
+    c[15] = 289.0 / 1155.0
+    c[16] = 324.0 / 1295.0
+    c[17] = 361.0 / 1443.0
+    c[18] = 400.0 / 1599.0
+    c[19] = 441.0 / 1763.0
+    c[20] = 484.0 / 1935.0
+    sqrtopv = np.sqrt(1.0 + v)
+    eta = v / (1.0 + sqrtopv) ** 2
+    # ------------------- process forwards ----------------------
+    delold = 1.0
+    termold = c[0]
+
+    sum1 = termold
+    i = 1
+    while ((i <= 20) and (np.abs(termold) > 1e-08)):
+
+        del_ = 1.0 / (1.0 + c[i] * eta * delold)
+        term = termold * (del_ - 1.0)
+        sum1 = sum1 + term
+        i = i + 1
+        delold = del_
+        termold = term
+
+
+    seebatt = 1.0 / ((1.0 / (8.0 * (1.0 + sqrtopv)))
+                     * (3.0 + sum1 / (1.0 + eta * sum1)))
+    c[0] = 9.0 / 7.0
+    c[1] = 16.0 / 63.0
+    c[2] = 25.0 / 99.0
+    c[3] = 36.0 / 143.0
+    c[4] = 49.0 / 195.0
+    c[5] = 64.0 / 255.0
+    c[6] = 81.0 / 323.0
+    c[7] = 100.0 / 399.0
+    c[8] = 121.0 / 483.0
+    c[9] = 144.0 / 575.0
+    c[10] = 169.0 / 675.0
+    c[11] = 196.0 / 783.0
+    c[12] = 225.0 / 899.0
+    c[13] = 256.0 / 1023.0
+    c[14] = 289.0 / 1155.0
+    c[15] = 324.0 / 1295.0
+    c[16] = 361.0 / 1443.0
+    c[17] = 400.0 / 1599.0
+    c[18] = 441.0 / 1763.0
+    c[19] = 484.0 / 1935.0
+    ktr = 20
+    sum2 = 0.0
+    term2 = 1.0 + c[ktr-1] * eta
+    for i in range(ktr - 3):
+        sum2 = c[ktr - i] * eta / term2
+        term2 = 1.0 + sum2
+
+    seebatt = (8.0 * (1.0 + sqrtopv)
+               / (3.0 + (1.0 / (5.0 + eta + ((9.0 / 7.0) * eta / term2)))))
+    return seebatt
+
+# ------- two recursion algorithms needed by the lambertbattin routine
+def kbat(v: float):
+    """a recursion algorithm used by the lamertbattin routine
+
+    Parameters
+    ----------
+    v : float
+        value
+
+    Returns
+    -------
+    kbatt : float
+        the resulting continued fraction
+    """
+    d = np.zeros(21)
+    d[0] = 1.0 / 3.0
+    d[1] = 4.0 / 27.0
+    d[2] = 8.0 / 27.0
+    d[3] = 2.0 / 9.0
+    d[4] = 22.0 / 81.0
+    d[5] = 208.0 / 891.0
+    d[6] = 340.0 / 1287.0
+    d[7] = 418.0 / 1755.0
+    d[8] = 598.0 / 2295.0
+    d[9] = 700.0 / 2907.0
+    d[10] = 928.0 / 3591.0
+    d[11] = 1054.0 / 4347.0
+    d[12] = 1330.0 / 5175.0
+    d[13] = 1480.0 / 6075.0
+    d[14] = 1804.0 / 7047.0
+    d[15] = 1978.0 / 8091.0
+    d[16] = 2350.0 / 9207.0
+    d[17] = 2548.0 / 10395.0
+    d[18] = 2968.0 / 11655.0
+    d[19] = 3190.0 / 12987.0
+    d[20] = 3658.0 / 14391.0
+
+    # test constants against book algorithms -zeg
+    # e = np.zeros(21)
+    # for n in range(0, 10):
+    #     e[2*n] = (2 * (3*n + 1) * (6*n - 1)) / (9 * (4*n - 1) * (4*n + 1))
+    #     e[2*n + 1] = (2 * (3*n + 2) * (6*n + 1)) / (9 * (4*n + 1) * (4*n + 3))
+    # n = 10
+    # e[20] = (2 * (3*n + 1) * (6*n - 1)) / (9 * (4*n - 1) * (4*n + 1))
+    # print(d)
+    # print(e)
+
+    # ----------------- process forwards ------------------------
+    sum1 = d[0]
+    delold = 1.0
+    termold = d[0]
+    i = 1
+    ktr = 20
+    while ((i <= ktr) and (np.abs(termold) > 1e-08)):
+
+        del_ = 1.0 / (1.0 + d[i] * v * delold)
+        term = termold * (del_ - 1.0)
+        sum1 = sum1 + term
+        i = i + 1
+        delold = del_
+        termold = term
+
+    return sum1
+
+#     sum2 = 0.0
+#     term2 = 1.0 + d[ktr] * v
+#     for i in range(ktr - 1):
+#         sum2 = d[ktr - i] * v / term2
+#         term2 = 1.0 + sum2
+
+#     kbatt = d[0] / term2
+#     #            test = d[0] / ...
+# #                   (1 + (d[1]*v / ...
+# #                         (1 + (d(3)*v / ...
+# #                               (1 + (d(4)*v / ...
+# #                                     (1 + (d(5)*v / ...
+# #                                           (1 + (d(6)*v / ...
+# #                                                 (1 + (d(7)*v / ...
+# #                                                       (1 + (d(8)*v / ...
+# #                                                             (1 + (d(9)*v / ...
+# #                                                                  (1 + (d(10)*v / ...
+# #                                                                        (1 + (d(11)*v)))))))) ...
+# #                                                                       ))))))))))))
+# #kbatt = test
+#     return kbatt
 
 
 # ------------------------------------------------------------------------------
@@ -444,7 +839,9 @@ def recovqt(p1: float, p2: float, p3: float, p4: float, p5: float, p6: float,
     # ----- recover the variable value
     funvalue = (aqit5 * root ** 5 + aqit4 * root ** 4 + aqit3 * root ** 3
                 + aqit2 * root ** 2 + aqit1 * root + aqit0)
-    return funvalue
+    funrate = (5.0 * aqit5 * root ** 4 + 4.0 * aqit4 * root ** 3 +
+               3.0 * aqit3 * root ** 2 + 2.0 * aqit2 * root + aqit1)
+    return funvalue, funrate
 
 # ------------------------------------------------------------------------------
 #
@@ -591,7 +988,6 @@ def recovpar(p1: float, p2: float, p3: float, p4: float, root: float):
 # [minfound, rootf, funrate] = parabbln(p1, p2, p3)
 # ------------------------------------------------------------------------------
 
-### definitely not finished; minfound never changed from 'n' -zeg
 def parabbln(p1: float, p2: float, p3: float):
     """this function performs parabolic blending of an input zero crossing
     function in order to find event times.
@@ -604,7 +1000,7 @@ def parabbln(p1: float, p2: float, p3: float):
     Returns
     -------
     minfound : str
-        test of success: always 'n'?
+        test of success: 'y' or 'n'
     rootf : float
         root of the function
     funrate : float
@@ -622,7 +1018,7 @@ def parabbln(p1: float, p2: float, p3: float):
     opt = 'U'
     r1r, r1i, r2r, r2i = quadric(aqd2, aqd1, aqd0, opt)
     # ---------- search through roots to locate answers --------
-    for indx2 in range(3):
+    for indx2 in range(2):
         if (indx2 == 0):
             root = r1r
         if (indx2 == 1):
@@ -632,6 +1028,8 @@ def parabbln(p1: float, p2: float, p3: float):
             ans = recovqd(p1, p2, p3, root)
             # ----- recover the function value derivative
             funrate = 2.0 * aqd2 * root + aqd1
+            rootf = root
+            minfound = 'y'
 
     return minfound, rootf, funrate
 
@@ -667,7 +1065,6 @@ def parabbln(p1: float, p2: float, p3: float):
 # [minfound, rootf, funrate] = quartbln (p1, p2, p3, p4, p5, p6)
 # ------------------------------------------------------------------------------
 
-### np.roots is old, switch to numpy Polynomial class instead? -zeg
 def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
              p6: float):
     """this function performs quartic blending of an input zero crossing
@@ -681,7 +1078,7 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     Returns
     -------
     minfound: str
-        test of success: 'y' or 'n'
+        test of success: True or False
     rootf: float
         root of the function
     funrate: float
@@ -689,9 +1086,9 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     """
     rootf = 0.0
     funrate = 0.0
-    minfound = 'n'
+    minfound = False
     # ------ set up function from C-45 --------
-#  aqit5*x**5 + aqit4*x**4 + etc
+    #  aqit5*x**5 + aqit4*x**4 + etc
     temp = 1.0 / 24.0
     aqi0 = p3
     aqi1 = (2 * p1 - 16 * p2 + 16 * p4 - 2 * p5) * temp
@@ -701,8 +1098,8 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     aqi5 = (- 5 * p1 + 25 * p2 - 50 * p3 + 50 * p4 - 25 * p5 + 5 * p6) * temp
     # --------------- solve roots of this function -------------
     opt = 'U'
-    #       [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = ...
-#                   quintic(aqi5, aqi4, aqi3, aqi2, aqi1, aqi0, opt)
+    # [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = ...
+    # quintic(aqi5, aqi4, aqi3, aqi2, aqi1, aqi0, opt)
 
     # rt = np.roots(np.array([aqi5, aqi4, aqi3, aqi2, aqi1, aqi0]))
     rt = Polynomial([aqi0, aqi1, aqi2, aqi3, aqi4, aqi5]).roots()
@@ -710,27 +1107,19 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     # ---------- search through roots to locate answers --------
     for indx2 in range(5):
         root = 99999.9
-        if (indx2 == 0):
-            root = rt[indx2]
-        if (indx2 == 1):
-            root = rt[indx2]
-        if (indx2 == 2):
-            root = rt[indx2]
-        if (indx2 == 3):
-            root = rt[indx2]
-        if (indx2 == 4):
-            root = rt[indx2]
+        if (np.isreal(rt[indx2])):
+            root = np.real(rt[indx2])
+
         if ((root >= 0.0) and (root <= 1.0)):
-            minfound = 'y'
+            minfound = True
             rootf = root
             #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
-            ans = recovqt(p1, p2, p3, p4, p5, p6, root)
-            print("recovqt:". ans)
+            ans, funrate = recovqt(p1, p2, p3, p4, p5, p6, root)
             # ----- recover the function value derivative
-            funrate = (5.0 * aqi5 * root ** 4
-                       + 4.0 * aqi4 * root ** 3
-                       + 3.0 * aqi3 * root ** 2
-                       + 2.0 * aqi2 * root + aqi1)
+            # funrate = (5.0 * aqi5 * root ** 4
+            #            + 4.0 * aqi4 * root ** 3
+            #            + 3.0 * aqi3 * root ** 2
+            #            + 2.0 * aqi2 * root + aqi1)
 
     return minfound, rootf, funrate
 
@@ -796,10 +1185,7 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
 # [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i] = quartic(a, b, c, d, e, opt)
 # ------------------------------------------------------------------------------
 
-### all of the polynomial functions could just be replaced with
-### numpy's polynomial class... -zeg
 def quartic(a=None, b=None, c=None, d=None, e=None, opt=None):
-    # --------------------  implementation   ----------------------
     onethird = 1.0 / 3.0
     small = 1e-08
     r1r = 0.0
@@ -995,7 +1381,6 @@ def quartic(a=None, b=None, c=None, d=None, e=None, opt=None):
 # ------------------------------------------------------------------------------
 
 def quintic(a=None, b=None, c=None, d=None, e=None, f=None, opt=None):
-    # --------------------  implementation   ----------------------
     opt = 'U'
     onethird = 1.0 / 3.0
     small = 1e-08
@@ -1106,239 +1491,6 @@ def quintic(a=None, b=None, c=None, d=None, e=None, f=None, opt=None):
     print(' warning: no convergence in quintic ' % ())
     return r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i
 
-
-# ----------------------------------------------------------------------------
-#
-#                           function printdiff
-#
-#  this function prints a covariance matrix difference
-#
-#  author        : david vallado                  719-573-2600   23 may 2003
-#
-#  revisions
-#
-#  inputs          description                    range / units
-#    strin       - title
-#    mat1        - 6x6 input matrix
-#    mat2        - 6x6 input matrix
-#
-#  outputs       :
-#
-#  locals        :
-#
-#  references    :
-#    none
-#
-#  printdiff(strin, cov1, cov2)
-# ----------------------------------------------------------------------------
-
-def printdiff(strin: str, mat1: np.ndarray, mat2: np.ndarray):
-    """this function prints a covariance matrix difference
-
-    Parameters
-    ----------
-    strin : str
-        title string
-    mat1 : np.ndarray
-        6x6 input matrix
-    mat2 : np.ndarray
-        6x6 input matrix
-    """
-
-    small = smalle18
-    print('\ndiff %s' % (strin))
-    print(mat1.T - mat2.T)
-    print('\npctdiff %s pct over 1e-18  \n' % (strin))
-    #    fprintf(1, '#14.4f#14.4f#14.4f#14.4f#14.4f#14.4f \n', 100.0*((mat1' - mat2')/mat1'))
-    #    fprintf(1, 'Check consistency of both approaches tmct2cl-inv(tmcl2ct) diff pct over 1e-18 \n')
-    #    fprintf(1, '-------- accuracy of tm comparing ct2cl and cl2ct --------- \n')
-    tm1 = mat1.T
-    tm2 = mat2.T
-    diffmm = np.zeros((6, 6))
-    for i in range(6):
-        for j in range(6):
-            if (abs(tm1[i, j] - tm2[i, j]) < small) or (abs(tm1[i, j]) < small):
-                diffmm[i, j] = 0.0
-            else:
-                diffmm[i, j] = 100.0 * ((tm1[i, j] - tm2[i, j]) / tm1[i, j])
-
-    print('diffmm:\n', (diffmm))
-
-# ------- two recursion algorithms needed by the lambertbattin routine
-def seebatt(v: float):
-    """a recursion algorithm used in the lambertbattin routine
-
-    Parameters
-    ----------
-    v : float
-        the value
-
-    Returns
-    -------
-    seebat: float
-        algorithm result
-    """
-    c = np.zeros(21)
-    c[0] = 0.2
-    c[1] = 9.0 / 35.0
-    c[2] = 16.0 / 63.0
-    c[3] = 25.0 / 99.0
-    c[4] = 36.0 / 143.0
-    c[5] = 49.0 / 195.0
-    c[6] = 64.0 / 255.0
-    c[7] = 81.0 / 323.0
-    c[8] = 100.0 / 399.0
-    c[9] = 121.0 / 483.0
-    c[10] = 144.0 / 575.0
-    c[11] = 169.0 / 675.0
-    c[12] = 196.0 / 783.0
-    c[13] = 225.0 / 899.0
-    c[14] = 256.0 / 1023.0
-    c[15] = 289.0 / 1155.0
-    c[16] = 324.0 / 1295.0
-    c[17] = 361.0 / 1443.0
-    c[18] = 400.0 / 1599.0
-    c[19] = 441.0 / 1763.0
-    c[20] = 484.0 / 1935.0
-    sqrtopv = np.sqrt(1.0 + v)
-    eta = v / (1.0 + sqrtopv) ** 2
-    # ------------------- process forwards ----------------------
-    delold = 1.0
-    termold = c[0]
-
-    sum1 = termold
-    i = 1
-    while ((i <= 20) and (np.abs(termold) > 1e-08)):
-
-        del_ = 1.0 / (1.0 + c[i] * eta * delold)
-        term = termold * (del_ - 1.0)
-        sum1 = sum1 + term
-        i = i + 1
-        delold = del_
-        termold = term
-
-
-    seebatt = 1.0 / ((1.0 / (8.0 * (1.0 + sqrtopv)))
-                     * (3.0 + sum1 / (1.0 + eta * sum1)))
-    c[0] = 9.0 / 7.0
-    c[1] = 16.0 / 63.0
-    c[2] = 25.0 / 99.0
-    c[3] = 36.0 / 143.0
-    c[4] = 49.0 / 195.0
-    c[5] = 64.0 / 255.0
-    c[6] = 81.0 / 323.0
-    c[7] = 100.0 / 399.0
-    c[8] = 121.0 / 483.0
-    c[9] = 144.0 / 575.0
-    c[10] = 169.0 / 675.0
-    c[11] = 196.0 / 783.0
-    c[12] = 225.0 / 899.0
-    c[13] = 256.0 / 1023.0
-    c[14] = 289.0 / 1155.0
-    c[15] = 324.0 / 1295.0
-    c[16] = 361.0 / 1443.0
-    c[17] = 400.0 / 1599.0
-    c[18] = 441.0 / 1763.0
-    c[19] = 484.0 / 1935.0
-    ktr = 20
-    sum2 = 0.0
-    term2 = 1.0 + c[ktr-1] * eta
-    for i in range(ktr - 3):
-        sum2 = c[ktr - i] * eta / term2
-        term2 = 1.0 + sum2
-
-    seebatt = (8.0 * (1.0 + sqrtopv)
-               / (3.0 + (1.0 / (5.0 + eta + ((9.0 / 7.0) * eta / term2)))))
-    return seebatt
-
-# ------- two recursion algorithms needed by the lambertbattin routine
-def kbat(v: float):
-    """a recursion algorithm used by the lamertbattin routine
-
-    Parameters
-    ----------
-    v : float
-        value
-    """
-    d = np.zeros(21)
-    d[0] = 1.0 / 3.0
-    d[1] = 4.0 / 27.0
-    d[2] = 8.0 / 27.0
-    d[3] = 2.0 / 9.0
-    d[4] = 22.0 / 81.0
-    d[5] = 208.0 / 891.0
-    d[6] = 340.0 / 1287.0
-    d[7] = 418.0 / 1755.0
-    d[8] = 598.0 / 2295.0
-    d[9] = 700.0 / 2907.0
-    d[10] = 928.0 / 3591.0
-    d[11] = 1054.0 / 4347.0
-    d[12] = 1330.0 / 5175.0
-    d[13] = 1480.0 / 6075.0
-    d[14] = 1804.0 / 7047.0
-    d[15] = 1978.0 / 8091.0
-    d[16] = 2350.0 / 9207.0
-    d[17] = 2548.0 / 10395.0
-    d[18] = 2968.0 / 11655.0
-    d[19] = 3190.0 / 12987.0
-    d[20] = 3658.0 / 14391.0
-
-    # test computations -zeg
-    # d = np.zeros(21)
-    # for n in range(0, 21):
-    #     i = n
-    #     if n % 2 == 0:
-    #         d[n] = (2 * (3*i + 1) * (6*i - 1)) / (9 * (4*i - 1) * (4*i + 1))
-    #         num = 2 * (3*i + 1) * (6*i - 1)
-    #         den = 9 * (4*i - 1) * (4*i + 1)
-    #         print(num, den)
-    #     else:
-    #         d[n] = (2 * (3*i + 2) * (6*i + 1)) / (9 * (4*i + 1) * (4*i + 3))
-    #         num = 2 * (3*i + 2) * (6*i + 1)
-    #         den = 9 * (4*i + 1) * (4*i + 3)
-    #         print(num, den)
-    # ----------------- process forwards ------------------------
-    sum1 = d[0]
-    delold = 1.0
-    termold = d[0]
-    i = 2
-    ktr = 21
-    while ((i < ktr) and (np.abs(termold) > 1e-08)):
-
-        del_ = 1.0 / (1.0 + d[i] * v * delold)
-        term = termold * (del_ - 1.0)
-        sum1 = sum1 + term
-        i = i + 1
-        delold = del_
-        termold = term
-
-    # value = d[20] * v
-    # for i in range(19, -1, -1):
-    #     value = d[i] / (1 + value * v)
-
-
-    sum2 = 0.0
-    term2 = 1.0 + d[ktr-1] * v
-    for i in range(ktr - 3):
-        sum2 = d[ktr - i - 1] * v / term2
-        term2 = 1.0 + sum2
-
-    kbatt = d[0] / term2
-    #            test = d[0] / ...
-#                   (1 + (d[1]*v / ...
-#                         (1 + (d(3)*v / ...
-#                               (1 + (d(4)*v / ...
-#                                     (1 + (d(5)*v / ...
-#                                           (1 + (d(6)*v / ...
-#                                                 (1 + (d(7)*v / ...
-#                                                       (1 + (d(8)*v / ...
-#                                                             (1 + (d(9)*v / ...
-#                                                                  (1 + (d(10)*v / ...
-#                                                                        (1 + (d(11)*v)))))))) ...
-#                                                                       ))))))))))))
-#kbatt = test
-    return kbatt
-
 # ------------------------------------------------------------------------------
 #
 #                           function cubicspl1
@@ -1425,21 +1577,18 @@ def cubicspl1(p1: float, p2: float, p3: float, p4: float):
             funrate = 3.0 * acu3 * root ** 2 + 2.0 * acu2 * root + acu1
 
     # fprintf(1, ' roots #11.7f  #11.7f  #11.7f \n', r1r, r2r, r3r)
-# rt = roots([acu3 acu2 acu1 acu0])
+    # rt = roots([acu3 acu2 acu1 acu0])
 
     # ---- check for true condition on last two points
-#       if (sign(p3) ~= sign(p4))
-#           [evt1ctr, evt1, evt2ctr, evt2] = cubicbln (ev1n, ev2n, timearr, funarr, indx)
-#           event1ctr = event1ctr + evt1ctr
-#           event1 = [event1;evt1]
-#           event2ctr = event2ctr + evt2ctr
-#           event2 = [event2;evt2]
-#         end
+    #     if (sign(p3) ~= sign(p4))
+    #         [evt1ctr, evt1, evt2ctr, evt2] = cubicbln (ev1n, ev2n, timearr, funarr, indx)
+    #         event1ctr = event1ctr + evt1ctr
+    #         event1 = [event1;evt1]
+    #         event2ctr = event2ctr + evt2ctr
+    #         event2 = [event2;evt2]
 
     return minfound, rootf, funrate
 
-
-#
 # ------------------------------------------------------------------------------
 #
 #                           function cubicspl
@@ -1485,12 +1634,12 @@ def cubicspl(p1: float, p2: float, p3: float, p4: float):
         splined polynomial coefficients
     """
     # ------ set up function from C-41 --------
-#       det = t1^3*t2^2 + t1^2*t2 + t1*t2^3 - t1^3*t2 - t1^2*t2^3 - t1*t2^2
+    # det = t1^3*t2^2 + t1^2*t2 + t1*t2^3 - t1^3*t2 - t1^2*t2^3 - t1*t2^2
 
-    #       acu0 = p1
-#       acu1 = ((t2^3-t2^2)*(p2-p1) + (t1^2-t1^3)*(p3-p1) + (t1^3*t2^2-t1^2*t2^3)*(p4-p1)) / det
-#       acu2 = ((t2-t2^3)*(p2-p1) + (t1^3-t1)*(p3-p1) + (t1*t2^3-t1^3*t2)*(p4-p1)) / det
-#       acu3 = ((t2^2-t2)*(p2-p1) + (t1-t1^2)*(p3-p1) + (t1^2*t2-t1*t2^2)*(p4-p1)) / det
+    # acu0 = p1
+    # acu1 = ((t2^3-t2^2)*(p2-p1) + (t1^2-t1^3)*(p3-p1) + (t1^3*t2^2-t1^2*t2^3)*(p4-p1)) / det
+    # acu2 = ((t2-t2^3)*(p2-p1) + (t1^3-t1)*(p3-p1) + (t1*t2^3-t1^3*t2)*(p4-p1)) / det
+    # acu3 = ((t2^2-t2)*(p2-p1) + (t1-t1^2)*(p3-p1) + (t1^2*t2-t1*t2^2)*(p4-p1)) / det
 
     acu0 = p2
     acu1 = -p1 / 3.0 - 0.5 * p2 + p3 - p4 / 6.0
@@ -1556,6 +1705,197 @@ def cubicinterp(p1a: float, p1b: float, p1c: float, p1d: float, p2a: float,
     # cubicinterp
     return answer
 
+
+# ------------------------------------------------------------------------------
+#
+#                           function cubic
+#
+#  this function solves for the three roots of a cubic equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax3 + bx2 + cx + d0.  note
+#    that r1i will always be zero since there is always at least one real root.
+#
+#  author        : david vallado                  719-573-2600    1 mar 2001
+#
+#  revisions
+#    vallado     - convert to matlab              719-573-2600   18 dec 2002
+#
+#  inputs          description                    range / units
+#    a3          - coefficient of x cubed term
+#    b2          - coefficient of x squared term
+#    c1          - coefficient of x term
+#    d0          - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#    r3r         - real portion of root 3
+#    r3i         - imaginary portion of root 3
+#
+#  locals        :
+#    temp1       - temporary value
+#    temp2       - temporary value
+#    p           - coefficient of x squared term where x cubed term is 1.0
+#    q           - coefficient of x term where x cubed term is 1.0
+#    r           - coefficient of constant term where x cubed term is 1.0
+#    delta       - discriminator for use with cardans formula
+#    e0          - angle holder for trigonometric solution
+#    phi         - angle used in trigonometric solution
+#    cosphi      - cosine of phi
+#    sinphi      - sine of phi
+#
+#  coupling      :
+#    quadric     - roots of second order polynomial
+#
+#  references    :
+#    vallado       2007, 975
+#
+# [r1r, r1i, r2r, r2i, r3r, r3i] = cubic (a3, b2, c1, d0, opt)
+# ------------------------------------------------------------------------------
+
+def cubic(a3, b2, c1, d0, opt):
+    onethird = 1.0 / 3.0
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
+    r3r = 0.0
+    r3i = 0.0
+
+    if (abs(a3) > small):
+        # ----------- force coefficients into std form ----------------
+        p = b2/a3
+        q = c1/a3
+        r = d0/a3
+
+        a3 = onethird*(3.0 *q - p*p)
+        b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
+
+        delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
+
+        # ------------------ use cardans formula ----------------------
+        if (delta > small):
+            temp1 = (-b2*0.5)+math.sqrt(delta)
+            temp2 = (-b2*0.5)-math.sqrt(delta)
+            temp1 = np.sign(temp1)*abs(temp1)**onethird
+            temp2 = np.sign(temp2)*abs(temp2)**onethird
+            r1r = temp1 + temp2 - p*onethird
+
+            if (opt =='I'):
+                r2r = -0.5 *(temp1 + temp2) - p*onethird
+                r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
+                r3r = -0.5 *(temp1 + temp2) - p*onethird
+                r3i = -r2i
+            else:
+                r2r = 99999.9
+                r3r = 99999.9
+        else:
+            # --------------- evaluate zero point ---------------------
+            if (abs(delta) < small):
+                r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                # if (opt =='U')
+                    # r3r = 99999.9
+                # else
+                r3r = r2r
+
+            else:
+                # ------------ use trigonometric identities -----------
+                e0 = 2.0 *math.sqrt(-a3*onethird)
+                cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
+                sinphi = math.sqrt(1.0 -cosphi*cosphi)
+                phi = math.atan2(sinphi, cosphi)
+                if (phi < 0.0):
+                    phi = phi + 2.0*math.pi
+                r1r = e0*math.cos(phi*onethird) - p*onethird
+                r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
+                r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
+    else:
+        r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
+        r3r = 99999.9
+        r3i = 99999.9
+    return r1r, r1i, r2r, r2i, r3r, r3i
+
+
+
+
+# ------------------------------------------------------------------------------
+#
+#                           function quadric
+#
+#  this function solves for the two roots of a quadric equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax2 + bx + c.
+#
+#  author        : david vallado                  719-573-2600    1 mar 2001
+#
+#  revisions
+#    vallado     - convert to matlab              719-573-2600    3 dec 2002
+#
+#  inputs          description                    range / units
+#    a           - coefficient of x squared term
+#    b           - coefficient of x term
+#    c           - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#
+#  locals        :
+#    discrim     - discriminate b2 - 4ac
+#
+#  coupling      :
+#    none.
+#
+#  references    :
+#    vallado       2007, 974
+#
+# [r1r, r1i, r2r, r2i] = quadric   (a, b, c, opt)
+# ------------------------------------------------------------------------------
+
+def quadric(a, b, c, opt):
+
+    small = 0.00000001
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
+
+    discrim = b*b - 4.0 *a*c
+    # ---------------------  real roots  --------------------------
+    if (abs(discrim) < small):
+        r1r = -b / (2.0 *a)
+        r2r = r1r
+        # if (opt =='U')
+            # r2r = 99999.9
+
+    elif abs(a) < small:
+        r1r = -c/b
+    elif (discrim > 0.0):
+        r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
+        r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
+    else:
+        # ------------------ complex roots --------------------
+        if (opt =='I'):
+            r1r = -b / (2.0 *a)
+            r2r = r1r
+            r1i = math.sqrt(-discrim) / (2.0 *a)
+            r2i = -math.sqrt(-discrim) / (2.0 *a)
+        else:
+            r1r = 99999.9
+            r2r = 99999.9
+    return r1r, r1i, r2r, r2i
+
 # ------------------------------------------------------------------------------
 #
 #                           function unit
@@ -1582,7 +1922,6 @@ def cubicinterp(p1a: float, p1b: float, p1c: float, p1d: float, p2a: float,
 #
 # [outvec] = norm (vec)
 # ------------------------------------------------------------------------------
-
 
 def unit(vec: np.ndarray):
     """this function calculates a unit vector given the original vector.  if a
@@ -1806,9 +2145,6 @@ def findc2c3(znew: float):
         c3new = 1.0 /6.0
     return c2new, c3new
 
-
-
-
 # ------------------------------------------------------------------------------
 #
 #                           function newtonm
@@ -1853,8 +2189,7 @@ def findc2c3(znew: float):
 # [e0, nu] = newtonm (ecc, m)
 # ------------------------------------------------------------------------------
 
-
-def newtonm (ecc: float, m: float):
+def newtonm(ecc: float, m: float):
     """this function performs the newton rhapson iteration to find the
     eccentric anomaly given the mean anomaly. the true anomaly is also
     calculated.
@@ -1941,201 +2276,6 @@ def newtonm (ecc: float, m: float):
 
     return e0 , nu
 
-
-
-
-# ------------------------------------------------------------------------------
-#
-#                           function cubic
-#
-#  this function solves for the three roots of a cubic equation.  there are
-#    no restrictions on the coefficients, and imaginary results are passed
-#    out as separate values.  the general form is y = ax3 + bx2 + cx + d0.  note
-#    that r1i will always be zero since there is always at least one real root.
-#
-#  author        : david vallado                  719-573-2600    1 mar 2001
-#
-#  revisions
-#    vallado     - convert to matlab              719-573-2600   18 dec 2002
-#
-#  inputs          description                    range / units
-#    a3          - coefficient of x cubed term
-#    b2          - coefficient of x squared term
-#    c1          - coefficient of x term
-#    d0          - constant
-#    opt         - option for output              I all roots including imaginary
-#                                                 R only real roots
-#                                                 U only unique real roots (no repeated)
-#
-#  outputs       :
-#    r1r         - real portion of root 1
-#    r1i         - imaginary portion of root 1
-#    r2r         - real portion of root 2
-#    r2i         - imaginary portion of root 2
-#    r3r         - real portion of root 3
-#    r3i         - imaginary portion of root 3
-#
-#  locals        :
-#    temp1       - temporary value
-#    temp2       - temporary value
-#    p           - coefficient of x squared term where x cubed term is 1.0
-#    q           - coefficient of x term where x cubed term is 1.0
-#    r           - coefficient of constant term where x cubed term is 1.0
-#    delta       - discriminator for use with cardans formula
-#    e0          - angle holder for trigonometric solution
-#    phi         - angle used in trigonometric solution
-#    cosphi      - cosine of phi
-#    sinphi      - sine of phi
-#
-#  coupling      :
-#    quadric     - roots of second order polynomial
-#
-#  references    :
-#    vallado       2007, 975
-#
-# [r1r, r1i, r2r, r2i, r3r, r3i] = cubic (a3, b2, c1, d0, opt)
-# ------------------------------------------------------------------------------
-
-def cubic (a3, b2, c1, d0, opt):
-    onethird = 1.0 / 3.0
-    r1r = 0.0
-    r1i = 0.0
-    r2r = 0.0
-    r2i = 0.0
-    r3r = 0.0
-    r3i = 0.0
-
-    if (abs(a3) > small):
-        # ----------- force coefficients into std form ----------------
-        p = b2/a3
-        q = c1/a3
-        r = d0/a3
-
-        a3 = onethird*(3.0 *q - p*p)
-        b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
-
-        delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
-
-        # ------------------ use cardans formula ----------------------
-        if (delta > small):
-            temp1 = (-b2*0.5)+math.sqrt(delta)
-            temp2 = (-b2*0.5)-math.sqrt(delta)
-            temp1 = np.sign(temp1)*abs(temp1)**onethird
-            temp2 = np.sign(temp2)*abs(temp2)**onethird
-            r1r = temp1 + temp2 - p*onethird
-
-            if (opt =='I'):
-                r2r = -0.5 *(temp1 + temp2) - p*onethird
-                r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
-                r3r = -0.5 *(temp1 + temp2) - p*onethird
-                r3i = -r2i
-            else:
-                r2r = 99999.9
-                r3r = 99999.9
-        else:
-            # --------------- evaluate zero point ---------------------
-            if (abs(delta) < small):
-                r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
-                r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
-                # if (opt =='U')
-                    # r3r = 99999.9
-                # else
-                r3r = r2r
-
-            else:
-                # ------------ use trigonometric identities -----------
-                e0 = 2.0 *math.sqrt(-a3*onethird)
-                cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
-                sinphi = math.sqrt(1.0 -cosphi*cosphi)
-                phi = math.atan2(sinphi, cosphi)
-                if (phi < 0.0):
-                    phi = phi + 2.0*math.pi
-                r1r = e0*math.cos(phi*onethird) - p*onethird
-                r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
-                r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
-    else:
-        r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
-        r3r = 99999.9
-        r3i = 99999.9
-    return r1r, r1i, r2r, r2i, r3r, r3i
-
-
-
-
-# ------------------------------------------------------------------------------
-#
-#                           function quadric
-#
-#  this function solves for the two roots of a quadric equation.  there are
-#    no restrictions on the coefficients, and imaginary results are passed
-#    out as separate values.  the general form is y = ax2 + bx + c.
-#
-#  author        : david vallado                  719-573-2600    1 mar 2001
-#
-#  revisions
-#    vallado     - convert to matlab              719-573-2600    3 dec 2002
-#
-#  inputs          description                    range / units
-#    a           - coefficient of x squared term
-#    b           - coefficient of x term
-#    c           - constant
-#    opt         - option for output              I all roots including imaginary
-#                                                 R only real roots
-#                                                 U only unique real roots (no repeated)
-#
-#  outputs       :
-#    r1r         - real portion of root 1
-#    r1i         - imaginary portion of root 1
-#    r2r         - real portion of root 2
-#    r2i         - imaginary portion of root 2
-#
-#  locals        :
-#    discrim     - discriminate b2 - 4ac
-#
-#  coupling      :
-#    none.
-#
-#  references    :
-#    vallado       2007, 974
-#
-# [r1r, r1i, r2r, r2i] = quadric   (a, b, c, opt)
-# ------------------------------------------------------------------------------
-
-
-def quadric(a, b, c, opt):
-
-    small = 0.00000001
-    r1r = 0.0
-    r1i = 0.0
-    r2r = 0.0
-    r2i = 0.0
-
-    discrim = b*b - 4.0 *a*c
-    # ---------------------  real roots  --------------------------
-    if (abs(discrim) < small):
-        r1r = -b / (2.0 *a)
-        r2r = r1r
-        # if (opt =='U')
-            # r2r = 99999.9
-
-    elif abs(a) < small:
-        r1r = -c/b
-    elif (discrim > 0.0):
-        r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
-        r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
-    else:
-        # ------------------ complex roots --------------------
-        if (opt =='I'):
-            r1r = -b / (2.0 *a)
-            r2r = r1r
-            r1i = math.sqrt(-discrim) / (2.0 *a)
-            r2i = -math.sqrt(-discrim) / (2.0 *a)
-        else:
-            r1r = 99999.9
-            r2r = 99999.9
-    return r1r, r1i, r2r, r2i
-
-
 # ------------------------------------------------------------------------------
 #
 #                           function newtonnu
@@ -2175,7 +2315,7 @@ def quadric(a, b, c, opt):
 # ------------------------------------------------------------------------------
 
 
-def newtonnu (ecc: float, nu: float):
+def newtonnu(ecc: float, nu: float):
     """this function solves keplers equation when the true anomaly is known.
     the mean and eccentric, parabolic, or hyperbolic anomaly is also found.
     the parabolic limit at 168 is arbitrary. the hyperbolic anomaly is also
@@ -2280,7 +2420,7 @@ def newtonnu (ecc: float, nu: float):
 # ------------------------------------------------------------------------------
 
 
-def newtone (ecc: float, e0: float):
+def newtone(ecc: float, e0: float):
     """this function solves keplers equation when the eccentric, paraboic, or
     hyperbolic anomalies are known. the mean anomaly and true anomaly are
     calculated.
@@ -2391,171 +2531,6 @@ def angl(vec1: np.ndarray, vec2: np.ndarray):
 
 # ------------------------------------------------------------------------------
 #
-#                                  rot1
-#
-#  this function performs a rotation about the 1st axis.
-#
-#  author        : david vallado                  719-573-2600   27 may 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    vec         - input vector
-#    xval        - angle of rotation              rad
-#
-#  outputs       :
-#    outvec      - vector result
-#
-#  locals        :
-#    c           - cosine of the angle xval
-#    s           - sine of the angle xval
-#    temp        - temporary extended value
-#
-#  coupling      :
-#    none.
-#
-# [outvec] = rot1 (vec, xval)
-# ----------------------------------------------------------------------------- }
-
-def rot1 (vec: np.ndarray, xval: float):
-    """this function performs a rotation about the 1st axis.
-
-    Parameters
-    ----------
-    vec : ndarray
-        input vector
-    xval : float
-        angle of rotation: rad
-
-    Returns
-    -------
-    outvec: ndarray
-        result vector
-    """
-    temp = vec[2]
-    c = math.cos(xval)
-    s = math.sin(xval)
-
-    outvec = np.zeros(3)
-    outvec[2] = c*vec[2] - s*vec[1]
-    outvec[1] = c*vec[1] + s*temp
-    outvec[0] = vec[0]
-    return outvec
-
-
-
-# ------------------------------------------------------------------------------
-#
-#                            function rot2
-#
-#  this function performs a rotation about the 2nd axis.
-#
-#  author        : david vallado                  719-573-2600   27 may 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    vec         - input vector
-#    xval        - angle of rotation              rad
-#
-#  outputs       :
-#    outvec      - vector result
-#
-#  locals        :
-#    c           - cosine of the angle xval
-#    s           - sine of the angle xval
-#    temp        - temporary extended value
-#
-#  coupling      :
-#    none.
-#
-# [outvec] = rot2 (vec, xval)
-# ----------------------------------------------------------------------------- }
-
-def rot2(vec, xval):
-    """this function performs a rotation about the 2nd axis.
-
-    Parameters
-    ----------
-    vec : ndarray
-        input vector
-    xval : float
-        angle of rotation: rad
-
-    Returns
-    -------
-    outvec: ndarray
-        result vector
-    """
-    temp = vec[2]
-    c = math.cos(xval)
-    s = math.sin(xval)
-
-    outvec = np.zeros(3)
-    outvec[2] = c*vec[2] + s*vec[0]
-    outvec[0] = c*vec[0] - s*temp
-    outvec[1] = vec[1]
-    return outvec
-
-# ------------------------------------------------------------------------------
-#
-#                            function rot3
-#
-#  this function performs a rotation about the 3rd axis.
-#
-#  author        : david vallado                  719-573-2600   27 may 2002
-#
-#  revisions
-#                -
-#
-#  inputs          description                    range / units
-#    vec         - input vector
-#    xval        - angle of rotation              rad
-#
-#  outputs       :
-#    outvec      - vector result
-#
-#  locals        :
-#    c           - cosine of the angle xval
-#    s           - sine of the angle xval
-#    temp        - temporary extended value
-#
-#  coupling      :
-#    none.
-#
-# [outvec] = rot3 (vec, xval)
-# ----------------------------------------------------------------------------- }
-
-def rot3 (vec, xval):
-    """this function performs a rotation about the 3rd axis.
-
-    Parameters
-    ----------
-    vec : ndarray
-        input vector
-    xval : float
-        angle of rotation: rad
-
-    Returns
-    -------
-    outvec: ndarray
-        result vector
-    """
-
-    temp = vec[1]
-    c = math.cos(xval)
-    s = math.sin(xval)
-
-    outvec = np.zeros(3)
-    outvec[1] = c*vec[1] - s*vec[0]
-    outvec[0] = c*vec[0] + s*temp
-    outvec[2] = vec[2]
-    return outvec
-
-# ------------------------------------------------------------------------------
-#
 #                            function mag
 #
 #  this function finds the magnitude of a vector.  the tolerance is set to
@@ -2580,9 +2555,6 @@ def rot3 (vec, xval):
 #
 # mag = (vec)
 # ----------------------------------------------------------------------------- }
-
-# Note: numpy has a "norm" function to take the magnitude of a vector
-# mag = np.linalg.norm(x)
 
 def mag(vec: np.ndarray):
     """this function finds the magnitude of a vector. the tolerance is set to
@@ -2773,16 +2745,8 @@ def fundarg(ttt: float, opt: str):
 
     Returns
     -------
-    l : float
-        delauney element
-    l1 : float
-        delauney element
-    f : float
-        delauney element
-    d : float
-        delauney element
-    omega : float
-        delauney element
+    l, l1, f, d, omega : float
+        delauney elements
     lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep : float
         planetary longitudes
     precrate : float
@@ -3021,7 +2985,7 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
 
 
     # chk if perturbing amt is too small. if so, up the percentchg and try again
-# this will execute 5 times, but leaves percentchg the same after each run
+    # this will execute 5 times, but leaves percentchg the same after each run
     jj = 1
     deltaamt = 0.0
     xnomp = np.copy(xnom)
@@ -3031,7 +2995,7 @@ def finitediff(pertelem: int, percentchg: float, deltaamtchg: float,
             print('too large\n')
         deltaamt = xnom[pertelem] * percentchg
         xnomp[pertelem, 0] = xnom[pertelem, 0] + deltaamt
-        #          state2satrec(xnom, scalef, statetype, statesize, eTo, satrec)
+        # state2satrec(xnom, scalef, statetype, statesize, eTo, satrec)
         if (np.abs(deltaamt) < deltaamtchg):
             percentchg = percentchg * 1.4
             print(' %i percentchg chgd %11.8f \n' % (jj, percentchg))
@@ -3185,10 +3149,10 @@ def elliptic12(u: np.ndarray, m: np.ndarray, tol: float = None):
         while (abs(c[i, :]) > tol).any(): # Arithmetic-Geometric Mean of A, B and C
 
             i = i + 1
-            if i > a.shape[0]:
-                np.append(a, np.zeros((1, mumax)), axis=0)
-                np.append(b, np.zeros((1, mumax)), axis=0)
-                np.append(c, np.zeros((1, mumax)), axis=0)
+            if i > a.shape[0] - 1:
+                a = np.concatenate((a, np.zeros((1, mumax))), axis=0)
+                b = np.concatenate((b, np.zeros((1, mumax))), axis=0)
+                c = np.concatenate((c, np.zeros((1, mumax))), axis=0)
 
             a[i, :] = 0.5 * (a[i - 1, :] + b[i - 1, :])
             b[i, :] = np.sqrt(a[i - 1, :] * b[i - 1, :])

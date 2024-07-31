@@ -1933,7 +1933,7 @@ def makeorbitrv(jd: float, kind: 'str', reci: np.ndarray, veci: np.ndarray):
     Parameters
     ----------
     jd : float
-        julian date
+        julian date: days from 4713 bc
     kind : str
         type of propogator: 'k', 'p', 'j'
     reci : ndarray
@@ -2311,7 +2311,7 @@ def pathm(llat: float, llon: float, range_: float, az: float):
         start geocentric latitude: rad
     llon : float
         start gepocentric longitude: rad
-    range_ : float
+    range\_ : float
         range between points: rad
     az : float
         azimuth: rad
@@ -2440,7 +2440,7 @@ def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
         maximum distance of satellite look : km
     rhomin : float
         minimum distance of satellite look : km
-    lambda_ : float
+    lambda\_ : float
         difference in ground range angles : rad
     """
 
@@ -2555,9 +2555,48 @@ def satfov(incl: float, az: float, slatgd: float, slon: float, salt: float,
 # ------------------------------------------------------------------------------
 
 
-def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
+def lambertu(r1: np.ndarray, v1: np.ndarray, r2: np.ndarray, dm: str, de: str,
+             nrev: int, dtsec: float, tbi: np.ndarray, outfile = None):
+    """this function solves the lambert problem for orbit determination and returns
+    the velocity vectors at each of two given position vectors.  the solution
+    uses universal variables for calculation and a bissection technique
+    updating psi.
 
-    numiter = 20
+    Parameters
+    ----------
+    r1 : ndarray
+        position vector 1: km
+    v1 : ndarray
+        velocity vector 1: km/s,
+        only used for 180 degree transfers, can ignore otherwise
+    r2 : ndarray
+        position vector 2: km
+    dm : str
+        direction of motion: 's' short, 'l' long
+    de : str
+        direction of energy: 'l' low, 'h' high,
+        only needed for multi-rev cases
+    nrev : int
+        number of revolutions
+    dtsec : float
+        time between r1 and r2
+    tbi : ndarray
+        time of the bottom interval - only needed for multi-rev cases.
+        this is a two-dimension array of psi and tof
+    outfile : TextIOWrapper, optional
+        optional error output file
+
+    Returns
+    -------
+    v1 : ndarray
+        velocity vector at position 1: km/s
+    v2 : ndarray
+        velocity vector at position 2: km/s
+    error: str
+        error message
+    """
+
+    numiter = 40
     errorl = 'ok'
     v1dv = np.zeros((3))
     v2dv = np.zeros((3))
@@ -2584,9 +2623,6 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
     else:
         vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
 
-    # setup variables for speed
-    oomu = 1.0 / math.sqrt(mu)
-
     # --------- set up initial bounds for the bissection ----------
     if (nrev == 0):
         lower = -16.0 * math.pi * math.pi  # allow hyperbolic and parabolic solutions
@@ -2598,7 +2634,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
         # adjust based on long or short way if dm == 'l'
         #if ((dm == 'l') and (df == 'd')) or ((dm == 's') and (df == 'r'))
         #if ((df == 'r') and (dm == 's')) or ((df == 'd') and (dm == 'l'))
-        if (de == 'H'): #  and (dm == 'L')) or ((de == 'L') and (dm == 'L'))
+        if (de.casefold() == 'h'): #  and (dm == 'L')) or ((de == 'L') and (dm == 'L'))
             upper = tbi[nrev, 0]
         else:
             lower = tbi[nrev, 0]
@@ -2651,14 +2687,17 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
     oosqrtmu = 1.0 / math.sqrt(mu)
 
     # find initial dtold from psiold
-    print(magr1, magr2, vara, psiold, c3new)
-    print(1.0 - psiold * c3new)
-    print(vara * (1.0 - psiold * c3new))
+    if sh.show:
+        print(magr1, magr2, vara, psiold, c3new)
+        print(1.0 - psiold * c3new)
+        print(vara * (1.0 - psiold * c3new))
     if (abs(c2new) > small):
         y = magr1 + magr2 - (vara * (1.0 - psiold * c3new) / math.sqrt(c2new))
     else:
         y = magr1 + magr2
-    print(y, c2new)
+
+    if sh.show:
+        print(y, c2new)
 
     # ----------- check for negative values of y ----------
     if ((vara > 0.0) and (y < 0.0)):  # (vara > 0.0) &
@@ -2668,16 +2707,17 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                                         *math.sqrt(c2new)/vara)
             # -------- find c2 and c3 functions -----------
             c2new, c3new = smu.findc2c3(psinew)
+            # lower = psiold
             psiold = psinew
-            lower = psiold
             if (abs(c2new) > small):
                 y = magr1 + magr2 - (vara*(1.0-psiold*c3new)
                                     / math.sqrt(c2new))
             else:
                 y = magr1 + magr2
             # outfile
-            print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
-                    % (y, lower, c2new, psinew, ynegktr))
+            if sh.show:
+                print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
+                        % (y, lower, c2new, psinew, ynegktr))
             ynegktr = ynegktr + 1
 
     if (abs(c2new) > small):
@@ -2693,7 +2733,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
         ynegktr = 1  # y neg ktr
         dtnew = -10.0
 
-        while ((abs(dtnew-dtsec) >= small)
+        while ((abs(dtnew-dtsec) >= smalle8)
                and (loops < numiter) and (ynegktr <= 10)):
             # print('%3i  dtnew-dtsec %11.7f yneg %3i \n', loops, dtnew-dtsec, ynegktr)
             if (abs(c2new) > small):
@@ -2709,20 +2749,19 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                                                     * math.sqrt(c2new) / vara)
                     # -------- find c2 and c3 functions -----------
                     c2new, c3new = smu.findc2c3(psinew)
+                    # lower = psiold
                     psiold = psinew
-                    lower = psiold
                     if (abs(c2new) > small):
                         y = magr1 + magr2 - (vara*(1.0-psiold*c3new)
                                             / math.sqrt(c2new))
                     else:
                         y = magr1 + magr2
                     # outfile
-                    print('yneg %3i  y %11.7f lower %11.7f c2 %11.7f psinew '
-                          '%11.7f yneg %3i \n'
-                          % (loops, y, lower, c2new, psinew, ynegktr))
+                    if sh.show:
+                        print('yneg %3i  y %11.7f lower %11.7f c2 %11.7f psinew '
+                            '%11.7f yneg %3i \n'
+                            % (loops, y, lower, c2new, psinew, ynegktr))
                     ynegktr = ynegktr + 1
-                #end # while
-            #end  # if  y neg
 
             loops = loops + 1
 
@@ -2732,7 +2771,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                 else:
                     xold = 0.0
                 xcubed = xold**3
-                dtnew = (xcubed * c3new + vara*math.sqrt(y)) * oomu
+                dtnew = (xcubed * c3new + vara*math.sqrt(y)) * oosqrtmu
 
                 # try newton rhapson iteration to update psi
                 if (abs(psiold) > 1e-5):
@@ -2751,20 +2790,20 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                              - 5.0 * psiold**4 / math.factorial(13))
                 dtdpsi = (xcubed * (c3dot - 3.0 * c3new * c2dot / (2.0 * c2new))
                           + 0.125*vara
-                          * (3.0*c3new*math.sqrt(y)/c2new + vara/xold)) * oomu
+                          * (3.0*c3new*math.sqrt(y)/c2new + vara/xold)) * oosqrtmu
                 # Newton iteration test to see if it keeps within the bounds
                 psinew = psiold - (dtnew - dtsec)/dtdpsi
 
                 # check if newton guess for psi is outside bounds (too steep a slope)
                 if ((psinew > upper) or (psinew < lower)):
                     # --------  readjust upper and lower bounds -------
-                    if ((de == 'L') or (nrev == 0)):
-                        if (dtold < dtsec):
+                    if ((de.casefold() == 'l') or (nrev == 0)):
+                        if (dtold <= dtsec):
                             lower = psiold
                         else:
                             upper = psiold
                     else:
-                        if (dtold < dtsec):
+                        if (dtold <= dtsec):
                             upper = psiold
                         else:
                             lower = psiold
@@ -2774,10 +2813,11 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
                 # ------------- find c2 and c3 functions ----------
                 c2new, c3new = smu.findc2c3(psinew)
                 #if nrev > 0
-                print('%3i  y %11.7f x %11.7f %11.7f dtnew %11.7f %11.7f '
-                      '%11.7f psinew %11.7f %11.7f \n' %
-                    (loops, y, xold, dtsec, dtnew, lower, upper, psinew,
-                     dtdpsi)) #(dtnew - dtsec)/dtdpsi)( # c2dot, c3dot
+                if sh.show:
+                    print('%3i  y %11.7f x %11.7f %11.7f dtnew %11.7f %11.7f '
+                        '%11.7f psinew %11.7f %11.7f \n' %
+                        (loops, y, xold, dtsec, dtnew, lower, upper, psinew,
+                        dtdpsi)) #(dtnew - dtsec)/dtdpsi)( # c2dot, c3dot
                 psilast = psiold  # keep previous iteration
                 psiold = psinew
                 dtold = dtnew
@@ -2791,7 +2831,6 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
             #              print('%3i  y %11.7f x %11.7f dtnew %11.7f psinew %11.7f \n', loops, y/re, x/math.sqrt(re), dtnew/tusec, psinew)
             #              print('%3i  y %11.7f x %11.7f dtnew %11.7f psinew %11.7f \n', loops, y/re, x/math.sqrt(re), dtnew/60.0, psinew)
             ynegktr = 1
-        #end # while loop
 
         if ((loops >= numiter) or (ynegktr >= 10)):
             errorl = 'g not conv ' + str(abs(dtnew - dtsec))
@@ -2852,22 +2891,24 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
     # end  # if  var a > 0.0
 
     if (errorl != 'ok'):
-        print("\n\n-----Error found in lambertu: ", errorl)
-        print("\n\n")
-        p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
-         = sc.rv2coe(r1, v1dv)
-        print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f '
-              '%11.7f %11.7f %11.7f case %11.7f %11.7f %11.7f %11.7f %11.7f '
-              % (errorl, loops, nrev, dm, de, dtnew, y, xold, v1dv[0], v1dv[1],
-                 v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew,
-                 dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
+        print("\n-----Error found in lambertu: ", errorl)
+        if outfile:
+            outfile.write(f'Error found in lambertu: {errorl}\n')
+        # p, a, ecc, incl, omega, argp, nu, m, arglat, truelon, lonper \
+        #  = sc.rv2coe(r1, v1dv)
+        # print('%10s %3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f '
+        #       '%11.7f %11.7f %11.7f case %11.7f %11.7f %11.7f %11.7f %11.7f '
+        #       % (errorl, loops, nrev, dm, de, dtnew, y, xold, v1dv[0], v1dv[1],
+        #          v1dv[2], v2dv[0], v2dv[1], v2dv[2], lower, upper, psinew,
+        #          dtdpsi, ecc)) #(dtnew - dtsec)/dtdpsi, ecc))  # c2dot, c3dot
         print('C%3i %3i %2s %2s %11.7f %11.7f %11.7f %11.7f %11.7f %11.7f  '
-              '%11.7f dnu %11.7f \n'
+              '%11.7f dnu %11.7f\n'
               % (loops, nrev, dm, de, dtnew, magr1, magr2, vara, y, xold,
                  psinew, math.acos(cosdeltanu) * 180.0 / math.pi))
     else:
         #fprintf(outfile, '#s \n', errorl)
-        print('#s \n', errorl)
+        if sh.show:
+            print('#s \n', errorl)
 
     return v1dv, v2dv, errorl
 
@@ -2892,7 +2933,7 @@ def lambertu(r1, v1, r2, dm: str, de: str, nrev, dtwait, dtsec, tbi, outfile):
 #    de          - dir of energy (high, low) 'h', 'l'
 #                  this is the inclination discriminator
 #    nrev        - number of revs to complete     0, 1, ...
-#    dtsec       - time between r1 and r2         s
+#    dtsec       - time between r1 and r2         sec
 #
 #  outputs       :
 #    v1t         - ijk velocity vector            km / s
@@ -3039,7 +3080,7 @@ def lambertb(r1: np.ndarray, v1: np.ndarray, r2: np.ndarray, dm: str, de: str,
             print('high v1t %16.8f %16.8f %16.8f \n' % (v1dv))
     else:
         # standard processing
-        # note that the dr nrev =0 case is not represented
+        # note that the dr nrev = 0 case is not represented
          # initial guess
         if (nrev > 0):
             xn = 1.0 + 4.0 * L
@@ -3133,11 +3174,11 @@ def lambertmin(r1: np.ndarray, r2:np.ndarray, dm: str, nrev: int):
     Returns
     -------
     v : ndarray
-        velocity vector : km/s
+        velocity vector: km/s
     aminenergy : float
-        semimajor axis min energy : km/s
+        semimajor axis min energy: km/s
     tminenergy : float
-        time min energy : km/s
+        time min energy: km/s
     tminabs : float
         time min energy - parabolic: km/s
     """
@@ -3216,7 +3257,8 @@ def lambertmin(r1: np.ndarray, r2:np.ndarray, dm: str, nrev: int):
 #    prussing      JAS 2000
 #-----------------------------------------------------------------------------
 
-def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
+def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int,
+                  outfile = None):
     """this procedure solves lambert's problem and finds the miniumum time for
     multi-revolution cases.
 
@@ -3227,7 +3269,7 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
     r2 : ndarray
         ijk position vector 2: km
     dm : str
-        direction of motion : 'S': short, 'L': long
+        direction of motion: 'S'-short, 'L'-long
     nrev : int
         number of revolutions
 
@@ -3236,11 +3278,11 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
     tmin : float
         minimum time of flight: sec
     tminp : float
-        minimum parabolic tof : sec
+        minimum parabolic tof: sec
     tminenergy
-        minimum energy tof : sec
+        minimum energy tof: sec
     v : ndarray
-        velocity vector : km/s
+        velocity vector: km/s
     """
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
@@ -3310,23 +3352,35 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
 
         a = an
         alp = 1.0 / a
-        alpha = 2.0 * math.asin(math.sqrt(0.5 * s * alp))
-        if (dm.casefold() == 'S'):
-            beta = 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
+
+        atemp = math.sqrt(0.5 * s * alp)
+        if abs(atemp) > 1.0:
+            if outfile:
+                outfile.write(f'{atemp = }, greater than 1\n')
+            atemp = 1.0 * np.sign(atemp)
+        alpha = 2.0 * math.asin(atemp)
+
+        btemp = math.sqrt(0.5 * (s - chord) * alp)
+        if abs(btemp) > 1.0:
+            if outfile:
+                outfile.write(f'{btemp = }, greater than 1\n')
+            btemp = 1.0 * np.sign(btemp)
+        if (dm.casefold() == 's'):
+            beta = 2.0 * math.asin(btemp)
         else:
-            beta = - 2.0 * math.asin(math.sqrt(0.5 * (s - chord) * alp))
+            beta = -2.0 * math.asin(btemp)
+
         xi = alpha - beta
         eta = math.sin(alpha) - math.sin(beta)
-        fa = ((6.0 * nrev * math.pi + 3.0 * xi - eta) * (math.sin(xi) + eta)
-              - 8.0 * (1.0 - math.cos(xi)))
-        fadot = (((6.0 * nrev * math.pi + 3.0 * xi - eta)
-                  * (math.cos(xi) + math.cos(alpha)) + (3.0 - math.cos(alpha))
-                  * (math.sin(xi) + eta) - 8.0 * math.sin(xi))
-                 * (- alp * math.tan(0.5 * alpha))
-                 + ((6.0 * nrev * math.pi + 3.0 * xi - eta)
-                    * (-math.cos(xi) - math.cos(beta)) + (-3.0 - math.cos(beta))
-                    * (math.sin(xi) + eta) + 8.0 * math.sin(xi))
-                 * (- alp * math.tan(0.5 * beta)))
+        temp1 = 6 * nrev * math.pi + 3 * xi - eta
+        temp2 = math.sin(xi) + eta
+        fa = (temp1 * temp2 - 8.0 * (1.0 - math.cos(xi)))
+        fadot = ((temp1 * (math.cos(xi) + math.cos(alpha))
+                  + (3.0 - math.cos(alpha)) * temp2 - 8.0 * math.sin(xi))
+                 * (-alp * math.tan(0.5 * alpha))
+                 + (temp1 * (-math.cos(xi) - math.cos(beta))
+                    + (-3.0 + math.cos(beta)) * temp2 + 8.0 * math.sin(xi))
+                 * (-alp * math.tan(0.5 * beta)))
         del_ = fa / fadot
         an = a - del_
         #        fprintf(1, '#2i #8.4f #11.5f #11.5f  #11.5f  #11.5f  #11.5f  #11.5f  #11.5f \n', i, dnu * rad2deg, alpha * rad2deg, beta * rad2deg, xi, eta, fa, fadot, an)
@@ -3340,12 +3394,19 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
     emin = math.sqrt(1 - (4 * ((s - magr1) * (s - magr2)) / chord**2)
                      * math.sin((alpha + beta) / 2)**2)
     pmin = an * (1 - emin**2)
-    v = ((math.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu))
-         * (r2 - (1 - (magr2 / pmin) * (1 - cosdeltanu)) * r1))
-    if sh.show:
-        print('%c  %c %i  %f  %f  %f  \n'
-            % (dm, nrev, tmin, tminp, tminenergy))
-        print(v)
+
+
+    if pmin == 0:
+        v = np.zeros(3)
+        if outfile:
+            outfile.write('v could not be computed\n')
+    else:
+        v = ((math.sqrt(mu * pmin) / (magr1 * magr2 * sindeltanu))
+            * (r2 - (1 - (magr2 / pmin) * (1 - cosdeltanu)) * r1))
+        if sh.show:
+            print('%c  %c %i  %f  %f  %f  \n'
+                % (dm, nrev, tmin, tminp, tminenergy))
+            print(v)
     return tmin, tminp, tminenergy, v
 
 # -------------------------------------------------------------------------
@@ -3366,7 +3427,7 @@ def lambertmintof(r1: np.ndarray, r2: np.ndarray, dm: str, nrev: int):
 
 def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
     """find the minimum psi values for the universal variable lambert problem
-       for multi-rev cases
+    for multi-rev cases
 
     Parameters
     ----------
@@ -3378,6 +3439,13 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
         max # of revolutions: 0, 1, 2 ...
     dm : str
         direction of motion: 'L', 'S'
+
+    Returns
+    -------
+    psib : float
+        minimum psi value
+    tof : float
+        time of flight: sec
     """
     small = 1e-08
 
@@ -3390,7 +3458,7 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
     magr1 = smu.mag(r1)
     magr2 = smu.mag(r2)
     cosdeltanu = np.dot(r1, r2) / (magr1 * magr2)
-    if (dm == 'L'):
+    if (dm.casefold() == 'l'):
         vara = - math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
     else:
         vara = math.sqrt(magr1 * magr2 * (1.0 + cosdeltanu))
@@ -3433,8 +3501,9 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
                 else:
                     y = magr1 + magr2
                 # outfile
-                print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
-                        % (y, lower, c2, psinew, ynegktr))
+                if sh.show:
+                    print('y %11.7f lower %11.7f c2 %11.7f psinew %11.7f yneg %3i \n'
+                            % (y, lower, c2, psinew, ynegktr))
                 ynegktr = ynegktr + 1
 
         if (abs(c2) > small):
@@ -3494,9 +3563,10 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
     dtnew = (x ** 3 * c3 + vara * sqrty) * oomu
     tof = dtnew
     psib = psinew
-    print(' %3i %12.4f %12.4f %12.4f %12.4f %11.4f %12.4f %12.4f %11.4f %11.4f\n'
-          % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi,
-             dtdpsi2, lower, upper))
+    if sh.show:
+        print(' %3i %12.4f %12.4f %12.4f %12.4f %11.4f %12.4f %12.4f %11.4f %11.4f\n'
+            % (loops, y, dtdpsi, psiold, psinew, psinew - psiold, dtdpsi,
+                dtdpsi2, lower, upper))
     #       fprintf(1, ' nrev #3i  dtnew #12.5f psi #12.5f  lower #10.3f upper #10.3f #10.6f #10.6f \n', nrev, dtnew, psiold, lower, upper, c2, c3)
     #   end # for checking multi rev cases
 
@@ -3508,17 +3578,34 @@ def lambertumins(r1: np.ndarray, r2: np.ndarray, nrev: int, dm: str):
 #
 # [tbiu, tbilu] = lambgettbiu(r1, r2, 3)
 
-def lambgettbiu(r1=None, r2=None, order=None):
-    tbi = np.zeros((order, 2))
+def lambgettbiu(r1: np.ndarray, r2: np.ndarray, nrev: int):
+    """a function that forms the minimum time and universal variable matrix for
+    the lambert universal variables function.
+
+    Parameters
+    ----------
+    r1 : ndarray
+        position vector 1: km
+    r2 : ndarray
+        position vector 2: km
+    nrev : int
+        number of revolutions. needs to be bigger than nrevs used in lambertu
+
+    Returns
+    -------
+    tbi, tbil : ndarray
+        minimum psi, tof at each nrev for short and long directions of motion
+    """
+    tbi = np.zeros((nrev + 1, 2))
     #tbi = [0 0 0 0 0 0 0 0 0 0]
-    for i in range(order):
-        psib, tof = lambertumins(r1, r2, i, 'S')
+    for i in range(nrev + 1):
+        psib, tof = lambertumins(r1, r2, i, 's')
         tbi[i, 0] = psib
         tbi[i, 1] = tof
 
-    tbil = np.zeros((order, 2))
-    for i in range(order):
-        psib, tof = lambertumins(r1, r2, i, 'L')
+    tbil = np.zeros((nrev + 1, 2))
+    for i in range(nrev + 1):
+        psib, tof = lambertumins(r1, r2, i, 'l')
         tbil[i, 0] = psib
         tbil[i, 1] = tof
 
@@ -3681,7 +3768,7 @@ def keplercoe(ro: np.ndarray, vo: np.ndarray, dtseco: float, mu:float = mu):
     vo : ndarray
         ijk velocity vector - initial: km/s
     dtseco : float
-        _length of time to propagate: s
+        length of time to propagate: sec
     mu : float, optional
         gravitional constant , by default mu of earth: km3/s2
 
@@ -4118,7 +4205,8 @@ def pkepler(ro: np.ndarray, vo: np.ndarray, dtsec: float, ndot: float,
     #Ex 11_6 test
     #print(f'raan is {raan}')
     #print(f'argp is {argp}')
-    print(f'nu is {nu}')
+    if sh.show:
+        print(f'nu is {nu}')
     r, v = sc.coe2rv(p, ecc, incl, raan, argp, nu, arglat, truelon, lonper)
     r = r.T
     v = v.T
@@ -5077,7 +5165,7 @@ def anglesl(decl1: float, decl2: float, decl3: float, rtasc1: float,
     rtasc1, rtasc2, rtasc3 : float
         right ascension of sightings: rad
     jd1, jdf1, jd2, jdf2, jd3, jdf3 : float
-        julian dates of sightings: days from 4713 bc
+        julian dates + fractions of sightings: days from 4713 bc
     rs1 : ndarray
         position vector of site: km
 
@@ -7070,6 +7158,21 @@ def iau06pna(ttt: float):
     ttt : float
         julian centuries of tt: centuries
 
+    Returns
+    -------
+    deltapsi : float
+        change in longitude: rad
+    pnb : ndarray
+        combiined precession-nutation matrix
+    prec : ndarray
+        transformation matrix for precession
+    nut : ndarray
+        transformation matrix for nutation
+    l, l1, f, d, omega : float
+        delauney elements
+    lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep: float
+        planetary longitudes
+    precrate
     """
     ttt2 = ttt * ttt
     ttt3 = ttt2 * ttt
@@ -7083,7 +7186,7 @@ def iau06pna(ttt: float):
     #        [axs0, a0xi, ays0, a0yi, ass0, a0si, apn, apni, ape, apei, agst, agsti] = iau06in
     pnsum = 0.0
     ensum = 0.0
-    for i in range(677, -1, -1):
+    for i in range(677):
         tempval = (apni[i, 0] * l + apni[i, 1] * l1 + apni[i, 2]
                    * f + apni[i, 3] * d + apni[i, 4] * omega)
         tempval = np.mod(tempval, 2 * math.pi)
@@ -7111,7 +7214,6 @@ def iau06pna(ttt: float):
 
     #  add planetary and luni-solar components.
     deltapsi = pnsum + pplnsum
-
     deltaeps = ensum + eplnsum
     if sh.iauhelp:
         print('dpsi %11.7f deltaeps %11.7f \n' % (deltapsi * rad2arcsec, deltaeps * rad2arcsec))
@@ -7291,21 +7393,13 @@ def iau06pnb(ttt: float):
     deltapsi : float
         change in longitude: rad
     pnb : ndarray
-        matrix
+        combiined precession-nutation matrix
     prec : ndarray
-        matrix
+        transformation matrix for precession
     nut : ndarray
-        transformation matrix for ire-grcf
-    l : float
-        delauney element
-    l1 : float
-        delauney element
-    f : float
-        delauney element
-    d : float
-        delauney element
-    omega : float
-        delauney element
+        transformation matrix for nutation
+    l, l1, f, d, omega : float
+        delauney elements
     lonmer, lonven, lonear, lonmar, lonjup, lonsat, lonurn, lonnep: float
         planetary longitudes
     precrate
@@ -7327,7 +7421,7 @@ def iau06pnb(ttt: float):
 
     pnsum = 0.0
     ensum = 0.0
-    for i in range(76, -1, -1):
+    for i in range(76):
         tempval = (apni[i, 0] * l + apni[i, 1] * l1 + apni[i, 2] * f
                    + apni[i, 3] * d + apni[i, 4] * omega)
         pnsum = (pnsum + (apn[i, 0] + apn[i, 1] * ttt) * math.sin(tempval)
@@ -8295,10 +8389,10 @@ def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
 #  revisions
 #    vallado     - fix velocity vector                           23 jul 2002
 #
-#  inputs          description                    range / units
-#    latgd       - geodetic latitude              -pi/2 to pi/2 rad
-#    lon         - longitude of site              -2pi to 2pi rad
-#    alt         - altitude                       km
+#  inputs          description                          range / units
+#    latgd       - geodetic latitude                    -pi/2 to pi/2 rad
+#    lon         - longitude of site                    -2pi to 2pi rad
+#    hellp       - height above the ellipsoid (alt)     - km
 #
 #  outputs       :
 #    rs          - ecef site position vector      km
@@ -8317,11 +8411,11 @@ def sight(r1: np.ndarray, r2: np.ndarray, whichkind: str = 'e'):
 #  references    :
 #    vallado       2001, 404-407, alg 47, ex 7-1
 #
-# [rs, vs] = site (latgd, lon, alt)
+# [rs, vs] = site (latgd, lon, hellp)
 # -----------------------------------------------------------------------------
 
 
-def site(latgd: float, lon: float, alt: float):
+def site(latgd: float, lon: float, hellp: float):
     """this function finds the position and velocity vectors for a site.  the
     answer is returned in the geocentric equatorial (ecef) coordinate system.
     note that the velocity is zero because the coordinate system is fixed to
@@ -8333,7 +8427,7 @@ def site(latgd: float, lon: float, alt: float):
         geodetic latitude: -pi/2 to pi/2 rad
     lon : float
         longitude: -2pi to 2pi rad
-    alt : float
+    hellp : float
         altitude: km
 
     Returns
@@ -8343,12 +8437,12 @@ def site(latgd: float, lon: float, alt: float):
     vs : ndarray
         ecef site velocity vector: km/s
     """
-    sinlat = math.sin(latgd)
+    sinlat, coslat = smu.getsincos(latgd)
 
     # ------  find rdel and rk components of site vector  ---------
     cearth = re / math.sqrt(1.0 - (eccearthsqrd * sinlat * sinlat))
-    rdel = (cearth + alt) * math.cos(latgd)
-    rk = ((1.0-eccearthsqrd) * cearth + alt) * sinlat
+    rdel = (cearth + hellp) * coslat
+    rk = ((1.0-eccearthsqrd) * cearth + hellp) * sinlat
 
     # ---------------  find site position vector  -----------------
     rs = np.zeros((3))
@@ -8930,7 +9024,7 @@ def sunill(jd: float, lat: float, lon: float):
 # [lit] = light (r, jd, whichkind)
 # ------------------------------------------------------------------------------
 
-def light (r: np.ndarray, jd: float, whichkind: str = 'e'):
+def light(r: np.ndarray, jd: float, whichkind: str = 'e'):
     """this function determines if a spacecraft is sunlit or in the dark at a
     particular time.  an oblate earth and cylindrical shadow is assumed.
 
@@ -9590,7 +9684,7 @@ def ShadowEntryExit(RSun: np.ndarray, a: float, ecc: float, incl: float,
     raan : float
         longitude of the ascending node : rad
     argp : float
-        _argument of periapsis: rad
+        argument of periapsis: rad
     rp : float, optional
         radius of the planet (by default re): km
 
@@ -9751,9 +9845,9 @@ def ShadowEntryExit(RSun: np.ndarray, a: float, ecc: float, incl: float,
 # ------------------------------------------------------------------------------
 
 
-def target (rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
-            vtgt: np.ndarray, dm: str, kind: str, dtsec: float, ndot: float,
-            nddot: float):
+def target(rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
+           vtgt: np.ndarray, dm: str, kind: str, dtsec: float, ndot: float,
+           nddot: float):
     """this function accomplishes the targeting problem using kepler/pkepler &
     lambert.
 
@@ -9890,7 +9984,7 @@ def target (rint: np.ndarray, vint: np.ndarray, rtgt: np.ndarray,
 
 def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                  statesize: int, percentchg: float, deltaamtchg: float,
-                 xnom: np.ndarray):
+                 xnom: np.ndarray, jdepoch: float):
     """this procedure finds the a and b matrices for the differential correction
     problem.  remember that it isn't critical for the propagations to use
     the highest fidelity techniques because we're only trying to find the
@@ -9914,6 +10008,8 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         tolerance for small value in finite differencing
     xnom : ndarray
         state vector
+    jdepoch : float
+        julian date of epoch: days from 4713 bc
 
     Returns
     -------
@@ -9950,7 +10046,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
     atwbacc = np.array([[0], [0], [0], [0], [0], [0]])
     # ------------- reset these since they will accumulate ---------
-# zero out matrices
+    # zero out matrices
     atwa = np.zeros((statesize, statesize))
     atwb = np.zeros((statesize, 1))
     rnom = np.zeros(3)
@@ -9968,11 +10064,11 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # rs(2) = currobsrec['rsecef'](2)
         # rs(3) = currobsrec['rsecef'](3)
         # temporary sensor for now
-#  getsensorparams(currobsrec.sennum, currsenrec)
+        #  getsensorparams(currobsrec.sennum, currsenrec)
         # --------- propagate the nominal vector to the epoch time -----------
         # sgp4 (whichconst, satrec,  currobsrec.dtmin, rteme, vteme)
         dtsec = (currobsrec['time'] + currobsrec['timef'] -
-                 obsrecarr[0]['time'] - obsrecarr[0]['timef']) * 86400.0
+                 jdepoch) * 86400.0
         rnom[0] = xnom[0, 0]
         rnom[1] = xnom[1, 0]
         rnom[2] = xnom[2, 0]
@@ -9984,13 +10080,13 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # ------------------------- find b matrix ----------------------------
         if currobsrec['obstype'] != 3:
             rngnom, aznom, elnom, drngnom, daznom, delnom = \
-            sc.rv2razel(reci1.T, veci1.T, currobsrec['latgd'],
+            sc.rv2razel(reci1, veci1, currobsrec['latgd'],
                         currobsrec['lon'], currobsrec['alt'],
                         currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                         currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
         else:
             rngnom, trtascnom, tdeclnom, drngnom, dtrtascnom, dtdeclnom = \
-            sc.rv2tradec(reci1.T, veci1.T, currobsrec['latgd'],
+            sc.rv2tradec(reci1, veci1, currobsrec['latgd'],
                         currobsrec['lon'], currobsrec['alt'],
                         currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                         currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -10015,8 +10111,8 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
             if (abs(b[0, 0]) > math.pi):
                 b[0, 0] = b[0, 0] - np.sign(b[0, 0]) * 2.0 * math.pi
             b[1, 0] = currobsrec['tdecl'] - tdeclnom
-        #printf("rnom #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f #8.3f \n",
-            #  rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
+            # printf("rnom #11.5f #11.5f #11.5f #8.3f #8.3f #8.3f #8.3f \n",
+            # rteme[0], rteme[1], rteme[2], rngnom, aznom * rad2deg, elnom * rad2deg, currobsrec['rng'])  # ritrf
         # ------------------------ find a matrix -----------------------------
         # ------------- reset the perturbed vector to the nominal ------------
         #  satrecp = satrec
@@ -10026,7 +10122,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
         # ----- perturb each element in the state (elements or vectors) ------
         for j in range(statesize):
             deltaamt, xnomp = smu.finitediff(j, percentchg, deltaamtchg, xnom)
-            #   sgp4 (whichconst, satrecp,  currobsrec['dtmin'], r3, v3)
+            # sgp4 (whichconst, satrecp,  currobsrec['dtmin'], r3, v3)
             dtsec = (currobsrec['time'] + currobsrec['timef']
                      - obsrecarr[0]['time'] - obsrecarr[0]['timef']) * 86400
             rnomp[0] = xnomp[0, 0]
@@ -10035,21 +10131,21 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
             vnomp[0] = xnomp[3, 0]
             vnomp[1] = xnomp[4, 0]
             vnomp[2] = xnomp[5, 0]
-            #  [reci3, veci3] = kepler (rnomp, vnomp, dtsec)
+            # [reci3, veci3] = kepler (rnomp, vnomp, dtsec)
             reci3, veci3 = pkepler(rnomp, vnomp, dtsec, 0, 0)
             # teme to itrf if observation type
-            #  if (currobsrec['obstype'] ~= 4)
-            #      mfme = currobsrec['hr'](j) * 60 + currobsrec['min'](j) + currobsrec['sec'](j)/60.0
-            #      findeopparam (currobsrec['jd'], mfme, interp, eoparr, jdeopstart,
-            #                     dut1, dat, lod, xp, yp, ddpsi, ddeps,
-            #                     iaudx, dy, icrsx, y, s, deltapsi, deltaeps)
-            #      [ut1, tut1, jdut1, utc, tai, tt, ttt, jdtt, tdb, ttdb, jdtdb ] ...
-            #       = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
-            #      iau76fk5_itrf_teme(ritrf, vitrf, aitrf, eFrom, r3, v3, ateme, ttt, xp, yp, jdut1, lod, trans)
-            #  end # if obstype
+            # if (currobsrec['obstype'] ~= 4)
+            #     mfme = currobsrec['hr'](j) * 60 + currobsrec['min'](j) + currobsrec['sec'](j)/60.0
+            #     findeopparam (currobsrec['jd'], mfme, interp, eoparr, jdeopstart,
+            #                   dut1, dat, lod, xp, yp, ddpsi, ddeps,
+            #                   iaudx, dy, icrsx, y, s, deltapsi, deltaeps)
+            #     [ut1, tut1, jdut1, utc, tai, tt, ttt, jdtt, tdb, ttdb, jdtdb ] ...
+            #     = convtime (year, mon, day, hr, min, sec, timezone, dut1, dat)
+            #     iau76fk5_itrf_teme(ritrf, vitrf, aitrf, eFrom, r3, v3, ateme, ttt, xp, yp, jdut1, lod, trans)
+
             if (currobsrec['obstype'] == 3):
                 trrpert, trtascpert, tdeclpert, tdrrpert, tdrtascpert, tddeclpert =\
-                      sc.rv2tradec(reci3.T, veci3.T, currobsrec['latgd'],
+                      sc.rv2tradec(reci3, veci3, currobsrec['latgd'],
                                   currobsrec['lon'], currobsrec['alt'],
                                   currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                                   currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -10057,7 +10153,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
                 bstarpert = currobsrec['bstar'] * (1.0 + percentchg)
             else:
                 rngpert, azpert, elpert, drhopert, dazpert, delpert =\
-                    sc.rv2razel(reci3.T, veci3.T, currobsrec['latgd'],
+                    sc.rv2razel(reci3, veci3, currobsrec['latgd'],
                                 currobsrec['lon'], currobsrec['alt'],
                                 currobsrec['ttt'], currobsrec['jdut1'], 0.0,
                                 currobsrec['xp'], currobsrec['yp'], 2, 0.0, 0.0)
@@ -10188,6 +10284,7 @@ def shadow(reci: np.ndarray, rsun: np.ndarray, angumb: float = angumbearth,
         sun ijk position vector: km
 
     Umbra and penumbra angle default uses mean sun-earth distance
+
     angumb : float, optional
         unbra angle: rad
     angpen : float, optional
@@ -10318,7 +10415,7 @@ def predict(reci:np.ndarray, veci:np.ndarray, jdepoch:float, jdend:float,
     lod : float, optional
         excess length of day: sec
     terms : int, optional
-        # of terms for ast calculation: 0 or 2
+        number of terms for ast calculation: 0 or 2
    timezone : int, optional
         offset to utc from local site: 0 to 23 hr
 
@@ -10580,9 +10677,9 @@ def repeatgt(krev2rep : float, kday2rep: float, ecc: float, incl: float):
     Parameters
     ----------
     krev2rep : float
-        revs to repeat (crossing points): km
+        revs to repeat \(crossing points): km
     kday2rep : float
-        days to repeat (frequency): days
+        days to repeat \(frequency): days
     ecc : float
         eccentricity
     incl : float
@@ -10594,7 +10691,7 @@ def repeatgt(krev2rep : float, kday2rep: float, ecc: float, incl: float):
         semimajor axis: rad
     """
     revpday = krev2rep / kday2rep
-    n = revpday * 2 * math.pi / 86400.0
+    n = revpday * revday2radsec
     a = (mu * (1 / n) ** 2) ** 0.33333
     lonshiftrev = (2 * math.pi * kday2rep) / krev2rep
 
@@ -10804,7 +10901,7 @@ def mincomb(rinit: float, rfinal: float, einit: float, efinal: float,
 # vectormethod: 'h' for hgibbs,  'g' for gibbs,
 # 'a' for angles only (not implemented)
 def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
-                 velmethod: str):
+                 jdepoch: float, velmethod: str):
     """this function take a number of observations of a satellite and returns a
     nominal state vector.
 
@@ -10821,18 +10918,20 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
         elevation: 'el', year: 'year', month: 'mon', day: 'day', hour: 'hr',
         minutes: 'min', seconds: 'sec',
         polar motion coefficients: 'xp' and 'yp'
+    jdepoch : float
+        julian date of epoch: days from 4713 bc
     velmethod : str
-        method used to get velocities: 'h' for hgibbs, 'g' for gibbs,
+        method used to get velocities: 'h' for hgibbs, 'g' for gibbs
 
     Returns
     -------
     xnom : ndarray
-        the nominal state vector for the observations.
+        the nominal state vector for the observations at the epoch, ECI
     """
     reciarr = []
     timearr = []
     for obs in obsarr:
-        _, _, jdut1, jdut1frac, _, _, _, ttt, _, _, _, _, _, _, _ = \
+        _, _, jdut1, jdut1frac, _, _, _, ttt, _, _, _, _, _, _ = \
             stu.convtime(obs['year'], obs['mon'], obs['day'], obs['hr'],
                            obs['min'], obs['sec'], 0, obs['dut1'], obs['dat'])
         reci, _ = sc.razel2rv(obs['rng'], obs['az'], obs['el'], 0, 0, 0, latgd,
@@ -10845,7 +10944,6 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
     vaverage = np.zeros(3)
 
     for i in range(1, len(reciarr) - 1):
-        jd1 = obsarr[i-1]['']
         if velmethod.casefold() == 'h':
             veci, _, _, _, _ = hgibbs(reciarr[i-1], reciarr[i], reciarr[i+1], timearr[i-1],
                           timearr[i], timearr[i+1])
@@ -10853,11 +10951,51 @@ def nominalstate(latgd: float, lon: float, alt: float, obsarr: list[dict],
             veci, _, _ = gibbs(reciarr[i-1], reciarr[i], reciarr[i+1])
 
         # book recommends a 'more accurace scheme' than pkepler -zeg
-        r, v = pkepler(reciarr[i], veci, timearr[-1] - timearr[i], 0, 0)
+        r, v = pkepler(reciarr[i], veci, (jdepoch - timearr[i]) * 86400,
+                       0, 0)
         raverage = raverage + r
         vaverage = vaverage + v
-    average = np.concat((raverage, vaverage), axis=1)
+    average = np.concatenate([raverage, vaverage])
     xnom = average / (len(reciarr) - 2)
+    return xnom
+
+def diffcorrect(firstobs: int, lastobs: int, obsrecarr: list[dict],
+                           xnom: np.ndarray, jdepoch: float, percentchg: float,
+                           deltaamtchg: float, tol: float):
+    """this function takes a set of observations and a nominal state vector
+    and returns a more accurate vector.
+
+    Parameters
+    ----------
+    firstobs : int
+        first observation to use in the list
+    lastobs : int
+        last observation to use in the list
+    obsrecarr : list[dict]
+        array of observations
+    xnom : ndarray
+        nominal state vector of first observation
+    jdepoch : float
+        julian date of epoch / nominal state vector: days from 4713 bc
+    percentchg : float
+        amount to modify vectors by in finite differencing
+    deltaamtchg : float
+        tolerance for small matching in finite differencing
+    tol : float
+        tolerance for convergence
+
+    Returns
+    -------
+    xnom : ndarray
+        updated state vector, ECI
+    """
+    deltax = np.full((6, 1), 10)
+    while (deltax > tol).any():
+        atwa, atwb, _, _, _, _, _ = \
+            findatwaatwb(firstobs, lastobs, obsrecarr, 6,
+                         percentchg, deltaamtchg, xnom, jdepoch)
+        deltax = np.linalg.inv(atwa) @ atwb
+        xnom = xnom + deltax
     return xnom
 
 

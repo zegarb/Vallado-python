@@ -34,7 +34,7 @@ mu = gravc['mu']
 re = gravc['re']
 
 rate = (360.0 / 365.2421897) * deg2rad / 86164.0989036973
-print(f'{rate=}')
+print(f'{rate = }')
 # intermediate conversions
 print(360.0 / 365.2421897)
 print((360.0 / 365.2421897) * deg2rad)
@@ -60,4 +60,4 @@ incl * rad2deg
 a = 7179.82095
 incl = 98.627 * deg2rad
 ecc = np.sqrt(1.0 - np.sqrt(- 3.0 * re ** 2 * j2 * np.sqrt(mu) * np.cos(incl) / (2.0 * a ** 3.5 * rate)))
-print(f'{ecc=}')
+print(f'{ecc = }')

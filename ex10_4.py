@@ -26,13 +26,13 @@
 import numpy as np
 from space_constants import *
 from spacetime_utils import jday, convtime
-from orbit_utils import kepler, hgibbs, findatwaatwb, site
+from orbit_utils import kepler, hgibbs, findatwaatwb, site, nominalstate, pkepler, diffcorrect
 from space_conversions import razel2rv, rv2coe
 from spacemath_utils import mag
 import os
 
 print('example 10-4 -------------------------\n')
-np.set_printoptions(precision=8, floatmode='fixed')
+np.set_printoptions(precision=8, floatmode='fixed', suppress= True)
 
 # read in GEOS data
 fn = os.path.join(os.path.dirname(__file__), "data", "geos6a.dat")
@@ -61,7 +61,7 @@ dat = 29
 dut1 = 0.3261068
 
 lod = 0.0
-xp = - 0.11554 * arcsec2rad
+xp = -0.11554 * arcsec2rad
 
 yp = 0.48187 * arcsec2rad
 rs, vs = site(latgd, lon, alt)
@@ -86,9 +86,20 @@ for j in range(numobs):
     obsrec['noiseel'] = 0.0139 * deg2rad
     obsrec['obstype'] = 2
     obsrec['rsecef'] = rs
-    obsrec['rng'] = rngarr[j] #- 0.08
-    obsrec['az'] = azarr[j] #- 0.0081 * deg2rad
-    obsrec['el'] = elarr[j] #- 0.0045 * deg2rad
+    obsrec['rng'] = rngarr[j] - 0.08 # table 4-4 bias values
+    obsrec['az'] = azarr[j] - 0.0081 * deg2rad # table 4-4 bias values
+    obsrec['el'] = elarr[j] - 0.0045 * deg2rad # table 4-4 bias values
+
+    # adding in extra data for nominalstate() test
+    obsrec['year'] = yeararr[j]
+    obsrec['mon'] = monarr[j]
+    obsrec['day'] = dayarr[j]
+    obsrec['hr'] = hrarr[j]
+    obsrec['min'] = minarr[j]
+    obsrec['sec'] = secarr[j]
+    obsrec['dut1'] = dut1
+    obsrec['dat'] = dat
+
     obsrecarr.append(obsrec)
 
 firstobs = 0
@@ -97,7 +108,7 @@ lastobs = 9
 # simply average each vector moved back to the nominal time
 reci = np.array([0, 0, 0])
 veci = np.array([0, 0, 0])
-for obsktr in range(firstobs + 1, lastobs - 1):
+for obsktr in range(firstobs + 1, lastobs):
     currobsrec = obsrecarr[obsktr - 1]
     re1, ve1 = razel2rv(currobsrec['rng'], currobsrec['az'], currobsrec['el'], 0.0, 0.0, 0.0,
                        currobsrec['latgd'], currobsrec['lon'], currobsrec['alt'],
@@ -114,8 +125,8 @@ for obsktr in range(firstobs + 1, lastobs - 1):
                        currobsrec['ttt'], currobsrec['jdut1'], 0.0, currobsrec['xp'],
                        currobsrec['yp'], 2, 0.0, 0.0)
     # far apart vectors
-# [ve2, theta, theta1, copa, error] = gibbs( re1, re2, re3);
-# closely spaced vectors
+    # [ve2, theta, theta1, copa, error] = gibbs( re1, re2, re3);
+    # closely spaced vectors
     ve2, theta, theta1, copa, error = hgibbs(re1, re2, re3,
                                          obsrecarr[obsktr - 1]['jdut1'],
                                          obsrecarr[obsktr]['jdut1'],
@@ -134,7 +145,12 @@ reci = reci / (lastobs - firstobs - 1)
 veci = veci / (lastobs - firstobs - 1)
 print(f'rnom {reci} km ')
 print(f'vnom {veci} \n')
+
 jdepoch = obsrecarr[0]['time'] + obsrecarr[0]['timef']
+#add in a nominalstate() test -zeg
+xnomtest = nominalstate(latgd, lon, alt, obsrecarr[0:10], jdepoch, 'h')
+print(f'{xnomtest = }')
+
 # use a vector that's farther off to see iterations take effect
 reci = np.array([5975.2904, 2568.64, 3120.5845])
 veci = np.array([3.983846, -2.071159, -5.917095])
@@ -148,10 +164,15 @@ xnom[2, 0] = reci[2]
 xnom[3, 0] = veci[0]
 xnom[4, 0] = veci[1]
 xnom[5, 0] = veci[2]
+
 # set parameters for finite differencing
 percentchg = 0.01
-
 deltaamtchg = 0.01
+
+# diffcorrect test -zeg
+difftest = diffcorrect(firstobs, lastobs, obsrecarr, xnom, jdepoch, percentchg,
+                       deltaamtchg, 1e-6)
+print(f'{difftest = }')
 
 r1 = np.zeros(3)
 v1 = np.zeros(3)
@@ -159,7 +180,7 @@ for j in range(5):
     # ---- accumulate obs and assemble matrices
     atwa, atwb, atw, b, drng2, daz2, del2 = \
         findatwaatwb(firstobs, lastobs, obsrecarr, 6, percentchg, deltaamtchg,
-                     xnom)
+                     xnom, jdepoch)
     if j == 0:
         np.set_printoptions(precision=1)
         print('atwa = \n')

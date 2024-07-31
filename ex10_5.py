@@ -152,7 +152,8 @@ for j in range(5):
     percentchg = 0.01
     deltaamtchg = 0.01
     atwa, atwb, atw, b, drng2, daz2, del2 = \
-        findatwaatwb(firstobs, lastobs, obsrecarr, 6, percentchg, deltaamtchg, xnom)
+        findatwaatwb(firstobs, lastobs, obsrecarr, 6, percentchg, deltaamtchg,
+                     xnom, jdepoch)
     if j == 0:
         print('atwa = \n')
         print(f'{atwa}')
@@ -268,7 +269,9 @@ for j in range(3):
     # ---- accumulate obs and assemble matrices
     percentchg = 0.01
     deltaamtchg = 0.01
-    atwa, atwb, atw, b, drng2, daz2, del2 = findatwaatwb(firstobs, lastobs, obsrecarr, 6, percentchg, deltaamtchg, xnom)
+    atwa, atwb, atw, b, drng2, daz2, del2 = \
+        findatwaatwb(firstobs, lastobs, obsrecarr, 6, percentchg, deltaamtchg,
+                     xnom, jdepoch)
     if j == 1:
         print('atwa = \n')
         print(f'{atwa}\n')

@@ -31,15 +31,15 @@ import space_conversions as sc
 
 # ---- site
 print('\n-------- site test \n')
+alt = 2.187 #km
 latgd = 39.007 * deg2rad
 lon = -104.883 * deg2rad
+alt = 2.187 #km
 rs, vs = obu.site(latgd, lon, alt)
 print('site %14.7f%14.7f%14.7f%14.7f%14.7f%14.7f\n'
       % (rs[0], rs[1], rs[2], vs[0], vs[1], vs[2]))
 print('--------------- razel tests ----------------------------\n')
-alt = 2.187 #km
 rho = 604.68 #km
-
 az = 205.6 * deg2rad
 el = 30.7 * deg2rad
 drho = 2.08 #km/s

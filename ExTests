@@ -57,17 +57,15 @@ NameError: name 'lowthrust' is not defined
 NameError: name 'lowthrust' is not defined
 6_14:Y
 6_15:Y
-7_1: values slightly off from book, but book uses old constats
+7_1: values slightly off from book, but book uses old constants
 7_2: Y (anglesl is a divergent solution)
 
-7_5: lambertb giving the wrong values
+7_5: Y
 
 7_34: Y
 10_1: Y
-
-10_2: Extra code at the bottom with no assignments/print statements
-
-10_3: Matlab example output is full of errors. Think the code is right.
+10_2: Y
+10_3: Y
 
 10_4: findatwaatwb() returned atwa and atwb values slightly off from book
 10_5: Same as 10_4

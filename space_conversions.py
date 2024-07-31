@@ -36,7 +36,7 @@ from space_constants import sethelp as sh
 # ------------------------------------------------------------------------------
 
 def ap2kp(apin: float):
-    """this function converts ap to kp using cubic splines
+    """this function converts ap to kp using cubic splines.
 
     Parameters
     ----------
@@ -127,7 +127,7 @@ def ap2kp(apin: float):
 # ------------------------------------------------------------------------------
 
 def kp2ap(kpin: float):
-    """this function converts kp to ap using cubic splines
+    """this function converts kp to ap using cubic splines.
 
     Parameters
     ----------
@@ -555,7 +555,7 @@ def setcov(reci: np.ndarray, veci: np.ndarray, ttt: float,
 # [eqcov, tm] = covct2eq (cartcov, cartstate, anom, fr)
 # ----------------------------------------------------------------------------
 
-def covct2eq (cartcov: np.ndarray, cartstate: np.ndarray, anom: str, fr: int):
+def covct2eq(cartcov: np.ndarray, cartstate: np.ndarray, anom: str, fr: int):
     """this function transforms a six by six covariance matrix expressed in
     cartesian vectors into one expressed in equinoctial elements.
 
@@ -1037,7 +1037,7 @@ def covct2fl(cartcov: np.ndarray, cartstate: np.ndarray, anom: str, ttt: float,
 # [eqcov, tm] = covcl2eq (classcov, classstate, anom, fr)
 # ----------------------------------------------------------------------------
 
-def covcl2eq (classcov: np.ndarray, classstate: np.ndarray, anom: str, fr: int):
+def covcl2eq(classcov: np.ndarray, classstate: np.ndarray, anom: str, fr: int):
     """this function transforms a six by six covariance matrix expressed in
     classical elements into one expressed in equinoctial elements.
 
@@ -2910,8 +2910,8 @@ def covrsw2ct(cartcov, cartstate):
 # ----------------------------------------------------------------------------
 
 def rv2eq(reci: np.ndarray, veci: np.ndarray):
-    """this function transforms a position and velocity vector into the equinoctial
-    coordinate system.
+    """this function transforms a position and velocity vector into the
+    equinoctial coordinate system.
 
     Parameters
     ----------
@@ -3012,12 +3012,12 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
         ww = p0 * fr * (1.0 - chi ** 2 - psi ** 2)
         wvec1 = np.array([we, wq, ww])
         # alt formulation - same as other, EXCEPT for retrograde (fr-1) so
-# do not use!!
-#         fe = 1.0 - we**2/(1.0 + ww)
-#         fq = -we*wq / (1.0 + ww)
-#         fw = -we
-#         fvec = [fe, fq, fw]
-#         gvec = np.cross(wvec, fvec)
+        # do not use!!
+        #         fe = 1.0 - we**2/(1.0 + ww)
+        #         fq = -we*wq / (1.0 + ww)
+        #         fw = -we
+        #         fvec = [fe, fq, fw]
+        #         gvec = np.cross(wvec, fvec)
         evec = -reci / magr + np.cross(veci, np.cross(reci, veci)) / mu
         ag = np.dot(evec, gvec)
         af = np.dot(evec, fvec)
@@ -3030,7 +3030,7 @@ def rv2eq(reci: np.ndarray, veci: np.ndarray):
                      / (a * np.sqrt(1.0 - ag ** 2 - af ** 2)))
         F = math.atan2(sinF, cosF)
         #        print('rv2eq fe #11.7f #11.7f #11.7f ge #11.7f  #11.7f #11.7f \n X #11.7f Y #11.7f b #11.7f sF #11.7f cF #11.7f \n', fe, fq, fw, ge, gq, gw, X, Y, b, sinF, cosF)
-#        print('F = 316.20515  L = 13.61834  M = 288.88793 \n')
+        #        print('F = 316.20515  L = 13.61834  M = 288.88793 \n')
         sinZeta = ag / np.sqrt(af ** 2 + ag ** 2)
         cosZeta = af / np.sqrt(af ** 2 + ag ** 2)
         zeta = math.atan2(sinZeta, cosZeta)
@@ -3805,7 +3805,7 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
         range rate: km/s
     daz
         azimuth rate: rad/s
-    del_
+    del\_
         elevation rate: rad/s
     """
 
@@ -3817,7 +3817,6 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
     a = np.array([[0],[0],[0]])
     recef, vecef, _ = eci2ecef(reci, veci, a, ttt, jdut1, lod, xp, yp, terms,
                                  ddpsi, ddeps)
-
     #print('sat recef    %14.7f %14.7f %14.7f \n', recef)
     # simplified - just use sidereal time rotation
     # thetasa = earthrot * (1.0  - 0.0/86400.0)
@@ -3927,7 +3926,7 @@ def rv2razel(reci: np.ndarray, veci: np.ndarray, latgd: float, lon: float,
 #    tempvec     - temporary vector
 #
 #  coupling      :
-#    raz2sez     - find r and v from site in topocentric horizon (sez) system
+#    razel2sez     - find r and v from site in topocentric horizon (sez) system
 #
 #  references    :
 #    vallado       2001, 250-255, alg 27
@@ -3954,7 +3953,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
         range rate: km/s
     daz : float
         azimuth rate: rad/s
-    del_ : float
+    del\_ : float
         elevation rate: rad/s
     latgd : float
         geodetic latitude of site: -pi/2 to pi2 rad
@@ -3973,7 +3972,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
     yp : float
         polar motion coefficient: rad
     terms : int
-        # of terms for ast calculation: 0,2
+        number of terms for ast calculation: 0,2
     ddpsi : float
         delta psi correction to gcrf: rad
     ddeps : float
@@ -3989,7 +3988,7 @@ def razel2rv(rho: float, az: float, el: float, drho: float, daz: float,
 
     # -------------------------  implementation   -----------------
     # -----------  find sez range and velocity vectors ------------
-    rhosez, drhosez = raz2sez(rho, az, el, drho, daz, del_)
+    rhosez, drhosez = razel2sez(rho, az, el, drho, daz, del_)
     # -----------  perform sez to ijk (ecef) transformation -------
     # tempvec = smu.rot2(rhosez, latgd - halfpi)
     # rhoecef = smu.rot3(tempvec, -lon)
@@ -4727,8 +4726,8 @@ def ecef2eci(recef: np.ndarray, vecef: np.ndarray, aecef: np.ndarray,
 
 def ecef2lle(r, jd):
     """this subroutine convert a geocentric equatorial (ijk) position vector into
-  latitude and longitude.  geodetic and geocentric latitude are found.
-  this method is from Escobal, "Methods of Orbit Detemination" ([1965] 1985:398–399)
+    latitude and longitude.  geodetic and geocentric latitude are found.
+    this method is from Escobal, "Methods of Orbit Detemination" ([1965] 1985:398–399)
 
     Parameters
     ----------
@@ -4739,13 +4738,13 @@ def ecef2lle(r, jd):
 
     Returns
     -------
-    latgc: float
+    latgc : float
         geocentric latitude: -pi/2 to pi/2 rad
-    latgd: float
+    latgd : float
         geodetic latitude: -pi/2 to pi/2 rad
-    lon: float
+    lon : float
         longitude (west-): -2pi to 2pi rad
-    hellp: float
+    hellp : float
         height above the ellipsoid: km
     """
 
@@ -4851,9 +4850,9 @@ def ecef2lle(r, jd):
 
 def ecef2ll(r : np.ndarray):
     """this subroutine convert a geocentric equatorial position vector into
-  latitude and longitude.  geodetic and geocentric latitude are found. the
-  inputs must be ecef.  this particular algorithm is from Seidelmann's
-  "Astronomical Alamanac (1992)"
+    latitude and longitude.  geodetic and geocentric latitude are found. the
+    inputs must be ecef.  this particular algorithm is from Seidelmann's
+    "Astronomical Alamanac (1992)"
 
     Parameters
     ----------
@@ -4862,13 +4861,13 @@ def ecef2ll(r : np.ndarray):
 
     Returns
     -------
-    latgc: float
+    latgc : float
         geocentric latitude: -pi/2 to pi/2 rad
-    latgd: float
+    latgd : float
         geodetic latitude: -pi/2 to pi/2 rad
-    lon: float
+    lon : float
         longitude (west-): -2pi to 2pi rad
-    hellp: float
+    hellp : float
         height above the ellipsoid: km
     """
     magr = smu.mag(r)
@@ -4964,9 +4963,9 @@ def ecef2ll(r : np.ndarray):
 #this function breaks at math.atan when given [100000, 200000, 0.0]
 def ecef2llb(r):
     """this subroutine convert a geocentric equatorial (ijk) position vector into
-  latitude and longitude.  geodetic and geocentric latitude are found.
-  this particular algorithm is from Borkowski's "Accurate Algorithms to
-  Transform Geocentric to Geodetic Coordinates" (1989)
+    latitude and longitude.  geodetic and geocentric latitude are found.
+    this particular algorithm is from Borkowski's "Accurate Algorithms to
+    Transform Geocentric to Geodetic Coordinates" (1989)
 
     Parameters
     ----------
@@ -4975,13 +4974,13 @@ def ecef2llb(r):
 
     Returns
     -------
-    latgc: float
+    latgc : float
         geocentric latitude: -pi/2 to pi/2 rad
-    latgd: float
+    latgd : float
         geodetic latitude: -pi/2 to pi/2 rad
-    lon: float
-        longitude (west-): -2pi to 2pi rad
-    hellp: float
+    lon : float
+        longitude \(west-): -2pi to 2pi rad
+    hellp : float
         height above the ellipsoid: km
     """
     magr = smu.mag(r)
@@ -6170,7 +6169,7 @@ def eci2pef(reci: np.ndarray, veci: np.ndarray, aeci: np.ndarray,
     lod : float
         excess length of day: sec
     terms : int
-        # of terms for ast calculation: 0, 2
+        number of terms for ast calculation: 0, 2
     ddpsi : float
         delta psi correction to gcrf: rad
     ddeps : float
@@ -7180,7 +7179,7 @@ def tradec2rv(rho: float, trtasc: float, tdecl: float, drho: float,
 # [rr, ecllon, ecllat, drr, decllon, decllat] = rv2ell (rijk, vijk)
 
 
-def rv2ell (rijk: np.ndarray, vijk: np.ndarray):
+def rv2ell(rijk: np.ndarray, vijk: np.ndarray):
     """this function takes position and velocity vectors and turns them into
     ecliptic latitude and longitude
 
@@ -7508,7 +7507,7 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
     yp : float
         polar motion coefficient: rad
     terms : int
-        # of terms for ast calculation: 0, 2
+        number of terms for ast calculation: 0, 2
     ddpsi : float
         delta psi corrections for fk5 to gcrf
     ddeps : float
@@ -7565,11 +7564,11 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
 
 # ------------------------------------------------------------------------------
 #
-#                           function sez2raz
+#                           function sez2razel
 #
-#  this function converts range, azimuth, and elevation values with slant
-#    range and velocity vectors for a satellite from a radar site in the
-#    topocentric horizon (sez) system.
+#  this function converts coordinates in the topocentric horizon (sez) system to
+#  range, azimuth, and elevation values with slant range and velocity vectors
+#  for a satellite from a radar site.
 #
 #  author        : david vallado                  719-573-2600   22 jun 2002
 #
@@ -7602,13 +7601,13 @@ def flt2rv(magr: float, magv: float, latgc: float, lon:float, fpa: float,
 #  references    :
 #    vallado       2001, 250-251, eq 4-4, eq 4-5
 #
-# [rho, az, el, drho, daz, del] = sez2raz (rhosez, drhosez)
+# [rho, az, el, drho, daz, del] = sez2razel (rhosez, drhosez)
 # ------------------------------------------------------------------------------
 
-def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
-    """this function converts range, azimuth, and elevation values with slant
-    range and velocity vectors for a satellite from a radar site in the
-    topocentric horizon (sez) system.
+def sez2razel(rhosez: np.ndarray, drhosez: np.ndarray):
+    """this function converts coordinates in the topocentric horizon (sez) system to
+    range, azimuth, and elevation values with slant range and velocity vectors
+    for a satellite from a radar site.
 
     Parameters
     ----------
@@ -7619,7 +7618,6 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 
     Returns
     -------
-
     rho : float
         satellite range from site: km
     az : float
@@ -7627,11 +7625,11 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
     el : float
         elevation: -pi/2 to pi/2 rad
     drho : float
-        range rate: km / s
+        range rate: km/s
     daz : float
-        azimuth rate: rad / s
-    del_ : float
-        elevation rate: rad / s
+        azimuth rate: rad/s
+    del\_ : float
+        elevation rate: rad/s
     """
 
     small = 1e-08
@@ -7671,11 +7669,11 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 
 # ------------------------------------------------------------------------------
 #
-#                           function raz2sez
+#                           function razel2sez
 #
 #  this function converts range, azimuth, and elevation values with slant
-#    range and velocity vectors for a satellite from a radar site in the
-#    topocentric horizon (sez) system.
+#    range and velocity vectors for a satellite from a radar site to
+#    coordinates in the topocentric horizon (sez) system.
 #
 #  author        : david vallado                  719-573-2600   10 jun 2002
 #
@@ -7708,14 +7706,14 @@ def sez2raz(rhosez: np.ndarray, drhosez: np.ndarray):
 #  references    :
 #    vallado       2001, 250-251, eq 4-4, eq 4-5
 #
-# [rhosez, drhosez] = raz2sez (rho, az, el, drho, daz, del)
+# [rhosez, drhosez] = razel2sez (rho, az, el, drho, daz, del)
 # ------------------------------------------------------------------------------
 
-def raz2sez(rho: float, az: float, el: float, drho: float, daz: float,
+def razel2sez(rho: float, az: float, el: float, drho: float, daz: float,
             del_: float):
     """this function converts range, azimuth, and elevation values with slant
-    range and velocity vectors for a satellite from a radar site in the
-    topocentric horizon (sez) system.
+    range and velocity vectors for a satellite from a radar site to coordinates
+    in the topocentric horizon (sez) system.
 
     Parameters
     ----------
@@ -7729,7 +7727,7 @@ def raz2sez(rho: float, az: float, el: float, drho: float, daz: float,
         range rate: km/s
     daz : float
         azimuth rate: km/s
-    del_ : float
+    del\_ : float
         elevation rate: km/s
 
     Returns
@@ -8915,15 +8913,32 @@ def tle2satrec(longstr1: str, longstr2: str, typerun: str,
     typerun : character for mode of SGP4 execution
         'c' = catalog mode (propagates at 20 min timesteps from
             one day before epoch to one day after)
+
         'v' = verification mode (propagates according to start,
             stop, and timestep specified in longstr2)
+
         'u' = user input, whatever
+
+        'm' = manual input
     typeinput : type of manual input
-        used for commented out 'm' typerun - currently unused
+        type of manual input for typerun 'm'
+
+        'e' = year, month, day, hr, min, seconds
+
+        'd' = year, day (and fraction of day)
+
+        'm' = julian date
     opsmode : str
         satrec opsmode
     whichconst : str
         which set of constants to use: wgs721, wgs72, wgs84, egm08
+
+    Returns
+    -------
+    startmfe, stopmfe, deltamin : float
+        start, stop, and delta times used in testsgp4
+    satrec : list[dict]
+        list of satellite records from the TLE data
     """
 
     # sgp4fix no longer needed, put in satrec
@@ -9403,9 +9418,9 @@ def fk4(rb1950: np.ndarray = np.array([]), vb1950: np.ndarray = np.array([]),
 
     Parameters
     ----------
-    rb1950 : np.ndarray, optional
+    rb1950 : ndarray, optional
         b1950 eci position vector, by default np.array([]): er, km, etc
-    vb1950 : np.ndarray, optional
+    vb1950 : ndarray, optional
         b1950 eci velocity vector, by default np.array([]): er/s, km/s, etc
     option : str, optional
         transformation approach (systems tool kit, original, or 6 dimension),
@@ -9416,11 +9431,11 @@ def fk4(rb1950: np.ndarray = np.array([]), vb1950: np.ndarray = np.array([]),
 
     Returns
     -------
-    rj2000: np.ndarray
+    rj2000: ndarray
         j2000 eci position vector: er, km, etc
-    vj2000: np.ndarray
+    vj2000: ndarray
         j2000 eci velocity vector: er/s, km/s, etc
-    fk4m: np.ndarray
+    fk4m: ndarray
         conversion matrix for provided option
     """
 
@@ -9569,9 +9584,9 @@ def fk4i(rj2000i: np.ndarray = np.array([]), vj2000i: np.ndarray = np.array([]),
 
     Parameters
     ----------
-    rj2000i : np.ndarray, optional
+    rj2000i : ndarray, optional
         j2000 eci position vector, by default np.array([]): er, km, etc
-    vj2000i : np.ndarray, optional
+    vj2000i : ndarray, optional
         j2000 eci velocity vector, by default np.array([]): er/s, km/s, etc
     option : str, optional
         transformation approach (systems tool kit, original, or 6 dimension),
@@ -9582,11 +9597,11 @@ def fk4i(rj2000i: np.ndarray = np.array([]), vj2000i: np.ndarray = np.array([]),
 
     Returns
     -------
-    rb1950i: np.ndarray
+    rb1950i: ndarray
         b1950 eci position vector: er, km, etc
-    vb1950i: np.ndarray
+    vb1950i: ndarray
         b1950 eci velocity vector: er/s, km/s, etc
-    fk4mi: np.ndarray
+    fk4mi: ndarray
         conversion matrix for provided option
     """
     # Default Empty Outputs

@@ -43,6 +43,9 @@ uarcsec2rad = 1e-06 * arcsec2rad
 # Redundant with eccearthsqrd?
 # eesqrd = 0.006694385000     # eccentricity of earth sqrd
 
+#rev/solar day to rad/s
+revday2radsec = (2 * math.pi) / 86400
+
 
 
 #--------------------------------------------------------------

@@ -575,13 +575,13 @@ print('ell2rv:')
 print(rijk)
 print(vijk)
 
-rhosez, drhosez = raz2sez(rho, az, el, drho, daz, del_)
-print('raz2sez:')
+rhosez, drhosez = razel2sez(rho, az, el, drho, daz, del_)
+print('razel2sez:')
 print(rhosez)
 print(drhosez)
 
-rho, az, el, drho, daz, del_ = sez2raz(rhosez, drhosez)
-print('sez2raz:')
+rho, az, el, drho, daz, del_ = sez2razel(rhosez, drhosez)
+print('sez2razel:')
 print('rho %f, az %f, el %f, drho %f, daz %f, del_ %f' %\
         (rho, az, el, drho, daz, del_))
 

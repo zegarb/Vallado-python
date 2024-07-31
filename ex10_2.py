@@ -117,31 +117,31 @@ print('sum res 2 %11.7f  rms %11.7f  sum res /7 %11.7f \n'
 print('adjusted cov %11.7f  %11.7f \n'
       % (np.sqrt(atwai[0, 0]), np.sqrt(atwai[1, 1])))
 
-# example
-xo = np.array([1, 2, 3, 4, 5, 6, 7, 8])
-yo = np.array([[1, 1, 2, 3, 3, 4, 4, 6]]).T
-i = np.array([1, 1, 1, 1, 1, 1, 1, 1])
-a = np.array([i, xo]).T
-b = np.array(yo)
-w1 = 1.0 / 0.1
+# # example
+# xo = np.array([1, 2, 3, 4, 5, 6, 7, 8])
+# yo = np.array([[1, 1, 2, 3, 3, 4, 4, 6]]).T
+# i = np.array([1, 1, 1, 1, 1, 1, 1, 1])
+# a = np.array([i, xo]).T
+# b = np.array(yo)
+# w1 = 1.0 / 0.1
 
-w2 = 1.0 / 0.02
+# w2 = 1.0 / 0.02
 
-#  w1 = 1.0;
-#  w2 = 1.0;
+# #  w1 = 1.0;
+# #  w2 = 1.0;
 
-w[0, 0] = w1
-w[1, 1] = w2
-w[2, 2] = w1
-w[3, 3] = w2
-w[4, 4] = w1
-w[5, 5] = w2
-w[6, 6] = w1
-w[7, 7] = w2
-a.T @ w @ a
-covinv = np.linalg.inv(a.T @ w @ a)
-a.T @ b
-np.linalg.inv(a.T @ w @ a)
-np.linalg.inv(a.T @ w @ a) @ a.T @ b
-np.sqrt(covinv[0, 0])
-np.sqrt(covinv[1, 1])
+# w[0, 0] = w1
+# w[1, 1] = w2
+# w[2, 2] = w1
+# w[3, 3] = w2
+# w[4, 4] = w1
+# w[5, 5] = w2
+# w[6, 6] = w1
+# w[7, 7] = w2
+# a.T @ w @ a
+# covinv = np.linalg.inv(a.T @ w @ a)
+# a.T @ b
+# np.linalg.inv(a.T @ w @ a)
+# np.linalg.inv(a.T @ w @ a) @ a.T @ b
+# np.sqrt(covinv[0, 0])
+# np.sqrt(covinv[1, 1])
