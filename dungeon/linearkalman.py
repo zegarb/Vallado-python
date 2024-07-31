@@ -93,7 +93,7 @@ def linearkalman(xnom: np.ndarray, pnom: np.ndarray,
                                 xp, yp, 0, ddpsi, ddeps)
         b.append(z - H[i] @ np.array([xrho, xaz, xel]))
         # Pretty sure H is 3x3 and pbar is 6x6. -zeg
-        K.append(pbar[i] @ H[i].T @ (H[i] @ pbar[i] @ H[i].T + R)**-1)
+        K.append(pbar[i] @ H[i].T @ np.linalg.inv(H[i] @ pbar[i] @ H[i].T + R))
         dxhat.append(dxbar[i] + K[i] @ (b[i] - H[i] @ dxbar[i]))
         phat.append(pbar[i] - K[i] @ H[i] @ pbar[i])
         xhat.append(xbar[i] + dxhat[i])
