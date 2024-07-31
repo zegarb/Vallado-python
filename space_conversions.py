@@ -4342,7 +4342,7 @@ def coe2rv(p: float, ecc: float, incl: float, omega: float, argp: float,
     omega : float
         longitude of ascending node: 0.0  to 2pi rad
     argp : float
-        argument of pedigree: 0.0  to 2pi rad
+        argument of perigee: 0.0  to 2pi rad
     nu : float
         true anomaly: 0.0  to 2pi rad
     arglat : float
