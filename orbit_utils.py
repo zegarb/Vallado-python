@@ -10009,7 +10009,7 @@ def findatwaatwb(firstobs: int, lastobs: int, obsrecarr,
     xnom : ndarray
         state vector
     jdepoch : float
-        julian date of epoch: days from 4713 bc
+        julian date of epoch/state vector : days from 4713 bc
 
     Returns
     -------

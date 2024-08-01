@@ -958,170 +958,190 @@ def recovpar(p1: float, p2: float, p3: float, p4: float, root: float):
 
 # ------------------------------------------------------------------------------
 #
-#                           function parabbln
+#                           function quadric
 #
-#  this function performs parabolic blending of an input zero crossing
-#  function in order to find event times.
+#  this function solves for the two roots of a quadric equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax2 + bx + c.
 #
-#  author        : david vallado                  719-573-2600    18 dec 2002
-#
-#  revisions
-#                - fix eqt ref                                     3 jan 2003
-#                - misc fixes                                      2 feb 2004
-#
-#  inputs          description                    range / units
-#    p1, p2, p3    - function values used for blending
-#
-#  outputs       :
-#    minfound    - test of success
-#    rootf       - root for the function
-#    funrate     - function rate
-#
-#  locals        :
-#
-#  coupling      :
-#    quadric     - find roots of a quadric
-#
-#  references    :
-#    vallado       2007, 979
-#
-# [minfound, rootf, funrate] = parabbln(p1, p2, p3)
-# ------------------------------------------------------------------------------
-
-def parabbln(p1: float, p2: float, p3: float):
-    """this function performs parabolic blending of an input zero crossing
-    function in order to find event times.
-
-    Parameters
-    ----------
-    p1, p2, p3: float
-        function values used for blending
-
-    Returns
-    -------
-    minfound : str
-        test of success: 'y' or 'n'
-    rootf : float
-        root of the function
-    funrate : float
-        function rate
-    """
-
-    rootf = 0.0
-    funrate = 0.0
-    minfound = 'n'
-    # ------ set up function from C-37 --------
-    aqd0 = p1
-    aqd1 = (- 3.0 * p1 + 4.0 * p2 - p3) * 0.5
-    aqd2 = (p1 - 2.0 * p2 + p3) * 0.5
-    # --------------- solve roots of this function -------------
-    opt = 'U'
-    r1r, r1i, r2r, r2i = quadric(aqd2, aqd1, aqd0, opt)
-    # ---------- search through roots to locate answers --------
-    for indx2 in range(2):
-        if (indx2 == 0):
-            root = r1r
-        if (indx2 == 1):
-            root = r2r
-        if ((root >= 0.0) and (root <= 2.0)):
-            # [time] = recovqd(t1, t2, t3, root) # should be 0.0!!!!!!
-            ans = recovqd(p1, p2, p3, root)
-            # ----- recover the function value derivative
-            funrate = 2.0 * aqd2 * root + aqd1
-            rootf = root
-            minfound = 'y'
-
-    return minfound, rootf, funrate
-
-# ------------------------------------------------------------------------------
-#
-#                           function quartbln
-#
-#  this function performs quartic blending of an input zero crossing
-#  function in order to find event times.
-#
-#  author        : david vallado                  719-573-2600   18 dec 2002
+#  author        : david vallado                  719-573-2600    1 mar 2001
 #
 #  revisions
-#                - misc fixes                                      2 feb 2004
+#    vallado     - convert to matlab              719-573-2600    3 dec 2002
 #
 #  inputs          description                    range / units
-#    p1, p2, p3, p4, p5, p6
-#                - function values used for blending
+#    a           - coefficient of x squared term
+#    b           - coefficient of x term
+#    c           - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
 #
 #  outputs       :
-#    minfound    - test of success
-#    rootf       - root for the function
-#    funrate     - function rate
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
 #
 #  locals        :
+#    discrim     - discriminate b2 - 4ac
 #
 #  coupling      :
-#    quintic     - find roots of a quintic
+#    none.
 #
 #  references    :
-#    vallado       2001, 899-901
+#    vallado       2007, 974
 #
-# [minfound, rootf, funrate] = quartbln (p1, p2, p3, p4, p5, p6)
+# [r1r, r1i, r2r, r2i] = quadric   (a, b, c, opt)
 # ------------------------------------------------------------------------------
 
-def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
-             p6: float):
-    """this function performs quartic blending of an input zero crossing
-    function in order to find event times.
+def quadric(a, b, c, opt):
 
-    Parameters
-    ----------
-    p1, p2, p3, p4, p5, p6: float
-        function values used for blending
+    small = 0.00000001
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
 
-    Returns
-    -------
-    minfound: str
-        test of success: True or False
-    rootf: float
-        root of the function
-    funrate: float
-        function rate
-    """
-    rootf = float('nan')
-    funrate = float('nan')
-    minfound = False
-    # ------ set up function from C-45 --------
-    #  aqit5*x**5 + aqit4*x**4 + etc
-    temp = 1.0 / 24.0
-    aqi0 = p3
-    aqi1 = (2 * p1 - 16 * p2 + 16 * p4 - 2 * p5) * temp
-    aqi2 = (- 1 * p1 + 16 * p2 - 30 * p3 + 16 * p4 - p5) * temp
-    aqi3 = (- 9 * p1 + 39 * p2 - 70 * p3 + 66 * p4 - 33 * p5 + 7 * p6) * temp
-    aqi4 = (13 * p1 - 64 * p2 + 126 * p3 - 124 * p4 + 61 * p5 - 12 * p6) * temp
-    aqi5 = (- 5 * p1 + 25 * p2 - 50 * p3 + 50 * p4 - 25 * p5 + 5 * p6) * temp
-    # --------------- solve roots of this function -------------
-    opt = 'U'
-    # [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = ...
-    # quintic(aqi5, aqi4, aqi3, aqi2, aqi1, aqi0, opt)
+    discrim = b*b - 4.0 *a*c
+    # ---------------------  real roots  --------------------------
+    if (abs(discrim) < small):
+        r1r = -b / (2.0 *a)
+        r2r = r1r
+        # if (opt =='U')
+            # r2r = 99999.9
 
-    # rt = np.roots(np.array([aqi5, aqi4, aqi3, aqi2, aqi1, aqi0]))
-    rt = Polynomial([aqi0, aqi1, aqi2, aqi3, aqi4, aqi5]).roots()
+    elif abs(a) < small:
+        r1r = -c/b
+    elif (discrim > 0.0):
+        r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
+        r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
+    else:
+        # ------------------ complex roots --------------------
+        if (opt =='I'):
+            r1r = -b / (2.0 *a)
+            r2r = r1r
+            r1i = math.sqrt(-discrim) / (2.0 *a)
+            r2i = -math.sqrt(-discrim) / (2.0 *a)
+        else:
+            r1r = 99999.9
+            r2r = 99999.9
+    return r1r, r1i, r2r, r2i
 
-    # ---------- search through roots to locate answers --------
-    for indx2 in range(5):
-        root = 99999.9
-        if (np.isreal(rt[indx2])):
-            root = np.real(rt[indx2])
+# ------------------------------------------------------------------------------
+#
+#                           function cubic
+#
+#  this function solves for the three roots of a cubic equation.  there are
+#    no restrictions on the coefficients, and imaginary results are passed
+#    out as separate values.  the general form is y = ax3 + bx2 + cx + d0.  note
+#    that r1i will always be zero since there is always at least one real root.
+#
+#  author        : david vallado                  719-573-2600    1 mar 2001
+#
+#  revisions
+#    vallado     - convert to matlab              719-573-2600   18 dec 2002
+#
+#  inputs          description                    range / units
+#    a3          - coefficient of x cubed term
+#    b2          - coefficient of x squared term
+#    c1          - coefficient of x term
+#    d0          - constant
+#    opt         - option for output              I all roots including imaginary
+#                                                 R only real roots
+#                                                 U only unique real roots (no repeated)
+#
+#  outputs       :
+#    r1r         - real portion of root 1
+#    r1i         - imaginary portion of root 1
+#    r2r         - real portion of root 2
+#    r2i         - imaginary portion of root 2
+#    r3r         - real portion of root 3
+#    r3i         - imaginary portion of root 3
+#
+#  locals        :
+#    temp1       - temporary value
+#    temp2       - temporary value
+#    p           - coefficient of x squared term where x cubed term is 1.0
+#    q           - coefficient of x term where x cubed term is 1.0
+#    r           - coefficient of constant term where x cubed term is 1.0
+#    delta       - discriminator for use with cardans formula
+#    e0          - angle holder for trigonometric solution
+#    phi         - angle used in trigonometric solution
+#    cosphi      - cosine of phi
+#    sinphi      - sine of phi
+#
+#  coupling      :
+#    quadric     - roots of second order polynomial
+#
+#  references    :
+#    vallado       2007, 975
+#
+# [r1r, r1i, r2r, r2i, r3r, r3i] = cubic (a3, b2, c1, d0, opt)
+# ------------------------------------------------------------------------------
 
-        if ((root >= 0.0) and (root <= 1.0)):
-            minfound = True
-            rootf = root
-            #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
-            ans, funrate = recovqt(p1, p2, p3, p4, p5, p6, root)
-            # ----- recover the function value derivative
-            # funrate = (5.0 * aqi5 * root ** 4
-            #            + 4.0 * aqi4 * root ** 3
-            #            + 3.0 * aqi3 * root ** 2
-            #            + 2.0 * aqi2 * root + aqi1)
+def cubic(a3, b2, c1, d0, opt):
+    onethird = 1.0 / 3.0
+    r1r = 0.0
+    r1i = 0.0
+    r2r = 0.0
+    r2i = 0.0
+    r3r = 0.0
+    r3i = 0.0
 
-    return minfound, rootf, funrate
+    if (abs(a3) > small):
+        # ----------- force coefficients into std form ----------------
+        p = b2/a3
+        q = c1/a3
+        r = d0/a3
+
+        a3 = onethird*(3.0 *q - p*p)
+        b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
+
+        delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
+
+        # ------------------ use cardans formula ----------------------
+        if (delta > small):
+            temp1 = (-b2*0.5)+math.sqrt(delta)
+            temp2 = (-b2*0.5)-math.sqrt(delta)
+            temp1 = np.sign(temp1)*abs(temp1)**onethird
+            temp2 = np.sign(temp2)*abs(temp2)**onethird
+            r1r = temp1 + temp2 - p*onethird
+
+            if (opt =='I'):
+                r2r = -0.5 *(temp1 + temp2) - p*onethird
+                r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
+                r3r = -0.5 *(temp1 + temp2) - p*onethird
+                r3i = -r2i
+            else:
+                r2r = 99999.9
+                r3r = 99999.9
+        else:
+            # --------------- evaluate zero point ---------------------
+            if (abs(delta) < small):
+                r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
+                # if (opt =='U')
+                    # r3r = 99999.9
+                # else
+                r3r = r2r
+
+            else:
+                # ------------ use trigonometric identities -----------
+                e0 = 2.0 *math.sqrt(-a3*onethird)
+                cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
+                sinphi = math.sqrt(1.0 -cosphi*cosphi)
+                phi = math.atan2(sinphi, cosphi)
+                if (phi < 0.0):
+                    phi = phi + 2.0*math.pi
+                r1r = e0*math.cos(phi*onethird) - p*onethird
+                r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
+                r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
+    else:
+        r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
+        r3r = 99999.9
+        r3i = 99999.9
+    return r1r, r1i, r2r, r2i, r3r, r3i
 
 # ------------------------------------------------------------------------------
 #
@@ -1647,7 +1667,6 @@ def cubicspl(p1: float, p2: float, p3: float, p4: float):
     acu3 = -p1 / 6.0 + 0.5 * p2 - 0.5 * p3 + p4 / 6.0
     return acu0, acu1, acu2, acu3
 
-
 # -----------------------------------------------------------------------------
 #
 #                           function cubicinterp
@@ -1672,8 +1691,7 @@ def cubicspl(p1: float, p2: float, p3: float, p4: float):
 #
 #  references    :
 #    vallado       2013, 1027
-# --------------------------------------------------------------------------- */
-
+# ---------------------------------------------------------------------------
 
 def cubicinterp(p1a: float, p1b: float, p1c: float, p1d: float, p2a: float,
                 p2b: float, p2c: float, p2d: float, valuein: float):
@@ -1708,193 +1726,170 @@ def cubicinterp(p1a: float, p1b: float, p1c: float, p1d: float, p2a: float,
 
 # ------------------------------------------------------------------------------
 #
-#                           function cubic
+#                           function parabbln
 #
-#  this function solves for the three roots of a cubic equation.  there are
-#    no restrictions on the coefficients, and imaginary results are passed
-#    out as separate values.  the general form is y = ax3 + bx2 + cx + d0.  note
-#    that r1i will always be zero since there is always at least one real root.
+#  this function performs parabolic blending of an input zero crossing
+#  function in order to find event times.
 #
-#  author        : david vallado                  719-573-2600    1 mar 2001
+#  author        : david vallado                  719-573-2600    18 dec 2002
 #
 #  revisions
-#    vallado     - convert to matlab              719-573-2600   18 dec 2002
+#                - fix eqt ref                                     3 jan 2003
+#                - misc fixes                                      2 feb 2004
 #
 #  inputs          description                    range / units
-#    a3          - coefficient of x cubed term
-#    b2          - coefficient of x squared term
-#    c1          - coefficient of x term
-#    d0          - constant
-#    opt         - option for output              I all roots including imaginary
-#                                                 R only real roots
-#                                                 U only unique real roots (no repeated)
+#    p1, p2, p3    - function values used for blending
 #
 #  outputs       :
-#    r1r         - real portion of root 1
-#    r1i         - imaginary portion of root 1
-#    r2r         - real portion of root 2
-#    r2i         - imaginary portion of root 2
-#    r3r         - real portion of root 3
-#    r3i         - imaginary portion of root 3
+#    minfound    - test of success
+#    rootf       - root for the function
+#    funrate     - function rate
 #
 #  locals        :
-#    temp1       - temporary value
-#    temp2       - temporary value
-#    p           - coefficient of x squared term where x cubed term is 1.0
-#    q           - coefficient of x term where x cubed term is 1.0
-#    r           - coefficient of constant term where x cubed term is 1.0
-#    delta       - discriminator for use with cardans formula
-#    e0          - angle holder for trigonometric solution
-#    phi         - angle used in trigonometric solution
-#    cosphi      - cosine of phi
-#    sinphi      - sine of phi
 #
 #  coupling      :
-#    quadric     - roots of second order polynomial
+#    quadric     - find roots of a quadric
 #
 #  references    :
-#    vallado       2007, 975
+#    vallado       2007, 979
 #
-# [r1r, r1i, r2r, r2i, r3r, r3i] = cubic (a3, b2, c1, d0, opt)
+# [minfound, rootf, funrate] = parabbln(p1, p2, p3)
 # ------------------------------------------------------------------------------
 
-def cubic(a3, b2, c1, d0, opt):
-    onethird = 1.0 / 3.0
-    r1r = 0.0
-    r1i = 0.0
-    r2r = 0.0
-    r2i = 0.0
-    r3r = 0.0
-    r3i = 0.0
+def parabbln(p1: float, p2: float, p3: float):
+    """this function performs parabolic blending of an input zero crossing
+    function in order to find event times.
 
-    if (abs(a3) > small):
-        # ----------- force coefficients into std form ----------------
-        p = b2/a3
-        q = c1/a3
-        r = d0/a3
+    Parameters
+    ----------
+    p1, p2, p3: float
+        function values used for blending
 
-        a3 = onethird*(3.0 *q - p*p)
-        b2 = (1.0 /27.0)*(2.0 *p*p*p - 9.0 *p*q + 27.0 *r)
+    Returns
+    -------
+    minfound : str
+        test of success: 'y' or 'n'
+    rootf : float
+        root of the function
+    funrate : float
+        function rate
+    """
 
-        delta = (a3*a3*a3/27.0) + (b2*b2*0.25)
+    rootf = 0.0
+    funrate = 0.0
+    minfound = 'n'
+    # ------ set up function from C-37 --------
+    aqd0 = p1
+    aqd1 = (- 3.0 * p1 + 4.0 * p2 - p3) * 0.5
+    aqd2 = (p1 - 2.0 * p2 + p3) * 0.5
+    # --------------- solve roots of this function -------------
+    opt = 'U'
+    r1r, r1i, r2r, r2i = quadric(aqd2, aqd1, aqd0, opt)
+    # ---------- search through roots to locate answers --------
+    for indx2 in range(2):
+        if (indx2 == 0):
+            root = r1r
+        if (indx2 == 1):
+            root = r2r
+        if ((root >= 0.0) and (root <= 2.0)):
+            # [time] = recovqd(t1, t2, t3, root) # should be 0.0!!!!!!
+            ans = recovqd(p1, p2, p3, root)
+            # ----- recover the function value derivative
+            funrate = 2.0 * aqd2 * root + aqd1
+            rootf = root
+            minfound = 'y'
 
-        # ------------------ use cardans formula ----------------------
-        if (delta > small):
-            temp1 = (-b2*0.5)+math.sqrt(delta)
-            temp2 = (-b2*0.5)-math.sqrt(delta)
-            temp1 = np.sign(temp1)*abs(temp1)**onethird
-            temp2 = np.sign(temp2)*abs(temp2)**onethird
-            r1r = temp1 + temp2 - p*onethird
-
-            if (opt =='I'):
-                r2r = -0.5 *(temp1 + temp2) - p*onethird
-                r2i = -0.5 *math.sqrt(3.0)*(temp1 - temp2)
-                r3r = -0.5 *(temp1 + temp2) - p*onethird
-                r3i = -r2i
-            else:
-                r2r = 99999.9
-                r3r = 99999.9
-        else:
-            # --------------- evaluate zero point ---------------------
-            if (abs(delta) < small):
-                r1r = -2.0*np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
-                r2r = np.sign(b2)*abs(b2*0.5)**onethird - p*onethird
-                # if (opt =='U')
-                    # r3r = 99999.9
-                # else
-                r3r = r2r
-
-            else:
-                # ------------ use trigonometric identities -----------
-                e0 = 2.0 *math.sqrt(-a3*onethird)
-                cosphi = (-b2/(2.0 *math.sqrt(-a3*a3*a3/27.0)))
-                sinphi = math.sqrt(1.0 -cosphi*cosphi)
-                phi = math.atan2(sinphi, cosphi)
-                if (phi < 0.0):
-                    phi = phi + 2.0*math.pi
-                r1r = e0*math.cos(phi*onethird) - p*onethird
-                r2r = e0*math.cos(phi*onethird + 120.0 * deg2rad) - p*onethird
-                r3r = e0*math.cos(phi*onethird + 240.0 * deg2rad) - p*onethird
-    else:
-        r1r, r1i, r2r, r2i = quadric(b2, c1, d0, opt)
-        r3r = 99999.9
-        r3i = 99999.9
-    return r1r, r1i, r2r, r2i, r3r, r3i
-
-
-
+    return minfound, rootf, funrate
 
 # ------------------------------------------------------------------------------
 #
-#                           function quadric
+#                           function quartbln
 #
-#  this function solves for the two roots of a quadric equation.  there are
-#    no restrictions on the coefficients, and imaginary results are passed
-#    out as separate values.  the general form is y = ax2 + bx + c.
+#  this function performs quartic blending of an input zero crossing
+#  function in order to find event times.
 #
-#  author        : david vallado                  719-573-2600    1 mar 2001
+#  author        : david vallado                  719-573-2600   18 dec 2002
 #
 #  revisions
-#    vallado     - convert to matlab              719-573-2600    3 dec 2002
+#                - misc fixes                                      2 feb 2004
 #
 #  inputs          description                    range / units
-#    a           - coefficient of x squared term
-#    b           - coefficient of x term
-#    c           - constant
-#    opt         - option for output              I all roots including imaginary
-#                                                 R only real roots
-#                                                 U only unique real roots (no repeated)
+#    p1, p2, p3, p4, p5, p6
+#                - function values used for blending
 #
 #  outputs       :
-#    r1r         - real portion of root 1
-#    r1i         - imaginary portion of root 1
-#    r2r         - real portion of root 2
-#    r2i         - imaginary portion of root 2
+#    minfound    - test of success
+#    rootf       - root for the function
+#    funrate     - function rate
 #
 #  locals        :
-#    discrim     - discriminate b2 - 4ac
 #
 #  coupling      :
-#    none.
+#    quintic     - find roots of a quintic
 #
 #  references    :
-#    vallado       2007, 974
+#    vallado       2001, 899-901
 #
-# [r1r, r1i, r2r, r2i] = quadric   (a, b, c, opt)
+# [minfound, rootf, funrate] = quartbln (p1, p2, p3, p4, p5, p6)
 # ------------------------------------------------------------------------------
 
-def quadric(a, b, c, opt):
+def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
+             p6: float):
+    """this function performs quartic blending of an input zero crossing
+    function in order to find event times.
 
-    small = 0.00000001
-    r1r = 0.0
-    r1i = 0.0
-    r2r = 0.0
-    r2i = 0.0
+    Parameters
+    ----------
+    p1, p2, p3, p4, p5, p6: float
+        function values used for blending
 
-    discrim = b*b - 4.0 *a*c
-    # ---------------------  real roots  --------------------------
-    if (abs(discrim) < small):
-        r1r = -b / (2.0 *a)
-        r2r = r1r
-        # if (opt =='U')
-            # r2r = 99999.9
+    Returns
+    -------
+    minfound: str
+        test of success: True or False
+    rootf: float
+        root of the function
+    funrate: float
+        function rate
+    """
+    rootf = float('nan')
+    funrate = float('nan')
+    minfound = False
+    # ------ set up function from C-45 --------
+    #  aqit5*x**5 + aqit4*x**4 + etc
+    temp = 1.0 / 24.0
+    aqi0 = p3
+    aqi1 = (2 * p1 - 16 * p2 + 16 * p4 - 2 * p5) * temp
+    aqi2 = (- 1 * p1 + 16 * p2 - 30 * p3 + 16 * p4 - p5) * temp
+    aqi3 = (- 9 * p1 + 39 * p2 - 70 * p3 + 66 * p4 - 33 * p5 + 7 * p6) * temp
+    aqi4 = (13 * p1 - 64 * p2 + 126 * p3 - 124 * p4 + 61 * p5 - 12 * p6) * temp
+    aqi5 = (- 5 * p1 + 25 * p2 - 50 * p3 + 50 * p4 - 25 * p5 + 5 * p6) * temp
+    # --------------- solve roots of this function -------------
+    opt = 'U'
+    # [r1r, r1i, r2r, r2i, r3r, r3i, r4r, r4i, r5r, r5i] = ...
+    # quintic(aqi5, aqi4, aqi3, aqi2, aqi1, aqi0, opt)
 
-    elif abs(a) < small:
-        r1r = -c/b
-    elif (discrim > 0.0):
-        r1r = (-b + math.sqrt(discrim)) / (2.0 *a)
-        r2r = (-b - math.sqrt(discrim)) / (2.0 *a)
-    else:
-        # ------------------ complex roots --------------------
-        if (opt =='I'):
-            r1r = -b / (2.0 *a)
-            r2r = r1r
-            r1i = math.sqrt(-discrim) / (2.0 *a)
-            r2i = -math.sqrt(-discrim) / (2.0 *a)
-        else:
-            r1r = 99999.9
-            r2r = 99999.9
-    return r1r, r1i, r2r, r2i
+    # rt = np.roots(np.array([aqi5, aqi4, aqi3, aqi2, aqi1, aqi0]))
+    rt = Polynomial([aqi0, aqi1, aqi2, aqi3, aqi4, aqi5]).roots()
+
+    # ---------- search through roots to locate answers --------
+    for indx2 in range(5):
+        root = 99999.9
+        if (np.isreal(rt[indx2])):
+            root = np.real(rt[indx2])
+
+        if ((root >= 0.0) and (root <= 1.0)):
+            minfound = True
+            rootf = root
+            #               [time] = recovqt(t1, t2, t3, t4, t5, t6, root)
+            ans, funrate = recovqt(p1, p2, p3, p4, p5, p6, root)
+            # ----- recover the function value derivative
+            # funrate = (5.0 * aqi5 * root ** 4
+            #            + 4.0 * aqi4 * root ** 3
+            #            + 3.0 * aqi3 * root ** 2
+            #            + 2.0 * aqi2 * root + aqi1)
+
+    return minfound, rootf, funrate
 
 # ------------------------------------------------------------------------------
 #
