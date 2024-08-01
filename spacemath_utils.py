@@ -1084,8 +1084,8 @@ def quartbln(p1: float, p2: float, p3: float, p4: float, p5: float,
     funrate: float
         function rate
     """
-    rootf = 0.0
-    funrate = 0.0
+    rootf = float('nan')
+    funrate = float('nan')
     minfound = False
     # ------ set up function from C-45 --------
     #  aqit5*x**5 + aqit4*x**4 + etc

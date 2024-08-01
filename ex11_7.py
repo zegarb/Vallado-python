@@ -6,42 +6,73 @@ import orbit_utils as obu
 import spacemath_utils as smu
 
 
-# def azse_quadcheck(az, sez_array):
-#     S = -0.0
-#     E = -0.0
+def azse_signcheck(azlim_low, azlim_high, sez_array, highlow):
+    az_southsign = -0.0
+    az_eastsign = -0.0
+    azlim = -0.0
+    valid_root = False
+    sez_sign = np.sign(sez_array)
 
-#     if az < 0.0:
-#         az + 2 * math.pi
 
-#     if az == 0.0 or az == 2*math.pi:
-#         S = -1
-#         E = 0
-#     elif az == math.pi/2:
-#         S = 0
-#         E = 1
-#     elif az == math.pi:
-#         S = 1
-#         E = 0
-#     elif az == 3*math.pi/2:
-#         S = 0
-#         E = -1
-#     elif az > 0.0 and az < math.pi/2:
-#         S = -1
-#         E = 1
-#     elif az > math.pi/2 and az < math.pi:
-#         S = 1
-#         E = 1
-#     elif az > math.pi and az < 3*math.pi/2:
-#         S = 1
-#         E = -1
-#     elif az >  3*math.pi/2 and az < 2*math.pi:
-#         S = -1
-#         E = -1
+    if azlim_high < 0.0:
+        azlim_high + 2 * math.pi
+    if azlim_low < 0.0:
+        azlim_low + 2 * math.pi
 
+    if highlow == 'h':
+        azlim = azlim_high
+    elif highlow == 'l':
+        azlim = azlim_low
+    else:
+        print('INVALID OPTION')
+        return None
+    
+    # 180 degree seperation between azimuth 
+    # high and low will always produce valid roots
+    if (math.pi - np.abs(azlim_high - azlim_low)) < small:
+        valid_root = True
+    else:
+        # North Axis
+        if (0.0 - azlim) < small or (2*math.pi - azlim) < small:
+            az_southsign = -1
+            az_eastsign = 0
+        # East Axis
+        elif (math.pi/2 - azlim) < small:
+            az_southsign = 0
+            az_eastsign = 1
+        # South Axis
+        elif (math.pi - azlim) < small:
+            az_southsign = 1
+            az_eastsign = 0
+        # West Axis
+        elif (3*math.pi/2 - azlim) < small:
+            az_southsign = 0
+            az_eastsign = -1
+        # Quadrant 1
+        elif azlim > 0.0 and azlim < math.pi/2:
+            az_southsign = -1
+            az_eastsign = 1
+        # Quadrant 2
+        elif azlim > math.pi/2 and azlim < math.pi:
+            az_southsign = 1
+            az_eastsign = 1
+        # Quadrant 3
+        elif azlim > math.pi and azlim < 3*math.pi/2:
+            az_southsign = 1
+            az_eastsign = -1
+        # Quadrant 4
+        elif azlim >  3*math.pi/2 and azlim < 2*math.pi:
+            az_southsign = -1
+            az_eastsign = -1
+
+        if (sez_sign[0] + az_southsign) != 0 and (sez_sign[1] + az_eastsign) != 0:
+            valid_root = True
+
+    return valid_root
 
 
 # Make sure time is in UTC
-def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, lod, xp, yp, ddpsi, ddeps, rholim, azlim, ellim):
+def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, lod, xp, yp, ddpsi, ddeps, rholim, azlim_low, azlim_high, ellim_low, ellim_high):
 
     riset_time = []
     riset_az = []
@@ -85,12 +116,12 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
         rho, az, el, _, _, _ = sc.sez2razel(rhosat_sez_array[i], drhosat_sez_array[i])
 
         frange[i] = rho - rholim
-        faz_high[i] = rhosat_sez_array[i][1] + rhosat_sez_array[i][0] * math.tan(max(azlim))
-        faz_low[i] = rhosat_sez_array[i][1] + rhosat_sez_array[i][0] * math.tan(min(azlim))
+        faz_high[i] = rhosat_sez_array[i][1] + rhosat_sez_array[i][0] * math.tan(azlim_high)
+        faz_low[i] = rhosat_sez_array[i][1] + rhosat_sez_array[i][0] * math.tan(azlim_low)
 
         rsatmag = smu.mag(rsat_ecef_new)
-        fel_high[i] = (np.arccos(np.cos(el)/rsatmag) - el) - (np.arccos(np.cos(max(ellim))/rsatmag) - max(ellim))
-        fel_low[i] = (np.arccos(np.cos(el)/rsatmag) - el) - (np.arccos(np.cos(min(ellim))/rsatmag) - min(ellim))
+        fel_high[i] = (np.arccos(np.cos(el)/rsatmag) - el) - (np.arccos(np.cos(ellim_high)/rsatmag) - ellim_high)
+        fel_low[i] = (np.arccos(np.cos(el)/rsatmag) - el) - (np.arccos(np.cos(ellim_low)/rsatmag) - ellim_low)
 
     rho, az, el, drho, daz, del_ = sc.sez2razel(rhosat_sez_array[0], drhosat_sez_array[0])
     if rho <= rholim:
@@ -98,12 +129,12 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
     else:
         range_inview = False
 
-    if az >= min(azlim) and az <= max(azlim):
+    if az >= azlim_high and az <= azlim_low:
         az_inview = True
     else:
         az_inview = False
 
-    if el >= min(ellim) and el <= max(ellim):
+    if el >= ellim_low and el <= ellim_high:
         el_inview = True
     else:
         el_inview = False
@@ -121,119 +152,149 @@ def riset(rsat_eci_initial, vsat_eci_initial, latgd, lon, hellp, jd, dut1, dat, 
     # print('range view: ', range_inview)
     combined_root = -0.0
     minfound = False
+    full_az = False
+    full_el = False
+    
+    #full 360 degree view check
+    if (0.0 - azlim_low) < small and (2*math.pi - azlim_high) < small:
+        full_az = True
+    
+    if (-math.pi - ellim_low) < small and (math.pi - ellim_high) < small:
+        full_el = True
+
     for i in range(0,480):
+        # print(i)
+        az_rootvalid = True
+        minfound = False
+        minfound1 = False
+        minfound2 = False
+        minfound3 = False
+        minfound4 =  False
+        minfound5 = False
+
         minfound1, rootf1, funrate1 = smu.quartbln(frange[i],frange[i+1],frange[i+2],frange[i+3],frange[i+4],frange[i+5])
-        minfound2, rootf2, funrate2 = smu.quartbln(faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
-        minfound3, rootf3, funrate3 = smu.quartbln(faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
-        minfound4, rootf4, funrate4 = smu.quartbln(fel_high[i],fel_high[i+1],fel_high[i+2],fel_high[i+3],fel_high[i+4],fel_high[i+5])
-        minfound5, rootf5, funrate5 = smu.quartbln(fel_low[i],fel_low[i+1],fel_low[i+2],fel_low[i+3],fel_low[i+4],fel_low[i+5])
-        if minfound1 == True:
+        if not(full_az):
+            minfound2, rootf2, funrate2 = smu.quartbln(faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
+            minfound3, rootf3, funrate3 = smu.quartbln(faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
+        if not(full_el):
+            minfound4, rootf4, funrate4 = smu.quartbln(fel_high[i],fel_high[i+1],fel_high[i+2],fel_high[i+3],fel_high[i+4],fel_high[i+5])
+            minfound5, rootf5, funrate5 = smu.quartbln(fel_low[i],fel_low[i+1],fel_low[i+2],fel_low[i+3],fel_low[i+4],fel_low[i+5])
+
+        if minfound1:
             minfound = True
             combined_root = rootf1
             print('root 1: ', rootf1)
             # print('fundrate 1: ', funrate1)
-       
-        if minfound2 == True:
+        if minfound2:
             print('faz_high: ',faz_high[i],faz_high[i+1],faz_high[i+2],faz_high[i+3],faz_high[i+4],faz_high[i+5])
             minfound = True
             combined_root = rootf2
             print('root 2: ', rootf2)
             # print('fundrate 2: ', funrate2)
-       
-        if minfound3 == True:
+        if minfound3:
             print('faz_low: ',faz_low[i],faz_low[i+1],faz_low[i+2],faz_low[i+3],faz_low[i+4],faz_low[i+5])
             minfound = True
             combined_root = rootf3
             print('root 3: ', rootf3)
             # print('fundrate 3: ', funrate3)
-        
-        if minfound4 == True:
+        if minfound4:
             minfound = True
             combined_root = rootf4
             print('root 4: ', rootf4)
             # print('fundrate 4: ', funrate4)
-        
-        if minfound5 == True:
+        if minfound5:
             minfound = True
             combined_root = rootf5
             print('root 5: ', rootf5)
             # print('fundrate 5: ', funrate5)
 
-        if minfound == True:
-
+        if minfound:
+            print(i)
             view_time, _ = smu.recovqt(i*180, (i+1)*180, (i+2)*180, (i+3)*180, (i+4)*180, (i+5)*180, combined_root)
             rhosat_s, drhosat_s = smu.recovqt(rhosat_sez_array[i][0], rhosat_sez_array[i+1][0], rhosat_sez_array[i+2][0], rhosat_sez_array[i+3][0], rhosat_sez_array[i+4][0], rhosat_sez_array[i+5][0], combined_root)
             rhosat_e, drhosat_e = smu.recovqt(rhosat_sez_array[i][1], rhosat_sez_array[i+1][1], rhosat_sez_array[i+2][1], rhosat_sez_array[i+3][1], rhosat_sez_array[i+4][1], rhosat_sez_array[i+5][1], combined_root)
             rhosat_z, drhosat_z = smu.recovqt(rhosat_sez_array[i][2], rhosat_sez_array[i+1][2], rhosat_sez_array[i+2][2], rhosat_sez_array[i+3][2], rhosat_sez_array[i+4][2], rhosat_sez_array[i+5][2], combined_root)
-
             rhosat_sez = np.array([rhosat_s,rhosat_e,rhosat_z])
             drhosat_sez = np.array([drhosat_s,drhosat_e,drhosat_z])
-            rho,az,el, drho, daz,del_ = sc.sez2razel(rhosat_sez,drhosat_sez)
 
-            # if az < 0.0:
-            #     az = 2 * math.pi + az
+            if minfound2:
+                az_rootvalid = azse_signcheck(azlim_low, azlim_high, rhosat_sez, 'h')
+            elif minfound3:
+                az_rootvalid = azse_signcheck(azlim_low, azlim_high, rhosat_sez, 'l')
+
+            if az_rootvalid:
+                rho,az,el, drho, daz,del_ = sc.sez2razel(rhosat_sez,drhosat_sez)
+
+                if az < 0.0:
+                    az = 2 * math.pi + az
+
+                if minfound1 and drho < 0.0:
+                    range_inview = True
+                elif not(minfound1) and rho < rholim:
+                    range_inview = True
+                else:
+                    range_inview = False
+
+                if minfound2 and daz < 0:
+                    az_inview = True
+                elif minfound3 and daz > 0:
+                    az_inview = True
+                elif not(minfound2 or minfound3) and (az >= azlim_low and az <= azlim_high):
+                    az_inview = True
+                elif full_az:
+                    az_inview = True
+                else:
+                    az_inview = False
+
+                if minfound4 and del_ < 0.0:
+                    el_inview= True
+                elif minfound5 and del_ > 0.0:
+                    el_inview = True
+                elif not(minfound4 or minfound5) and (el >= ellim_low and el <= ellim_high):
+                    el_inview = True
+                elif full_el:
+                    el_inview = False
+                else:
+                    el_inview = False
 
 
-            if minfound1 and drho < 0.0:
-                range_inview = True
-            elif not(minfound1) and rho < rholim:
-                range_inview = True
+                newview = range_inview and az_inview and el_inview
+
+                print('az view: ', az_inview)
+                print('el view: ', el_inview)
+                print('range view: ', range_inview)
+                print('az: ', az)
+                # print('el: ', el)
+                # print('range: ', rho)
+
+                if newview == True and newview != oldview:
+                    print('in view at (s): ', view_time)
+                    riset_time.append([view_time, None])
+                    riset_az.append([az, None])
+                    riset_el.append([el, None])
+                elif newview == False and newview != oldview:
+                    print('out of view at (s): ', view_time)
+                    time_temp = riset_time.pop()
+                    time_temp[1] = view_time
+                    riset_time.append(time_temp)
+
+                    az_temp = riset_az.pop()
+                    az_temp[1] = az
+                    riset_az.append(az_temp)
+
+                    el_temp = riset_el.pop()
+                    el_temp[1] = el
+                    riset_el.append(el_temp)
+                oldview = newview
+
             else:
-                range_inview = False
-
-            #full 360 degree view check
-            if min(azlim) == 0.0 and round(max(azlim),4) == round(2*math.pi,4):
-                az_inview = True
-            elif minfound2 and daz < 0:
-                az_inview = True
-            elif minfound3 and daz > 0:
-                az_inview = True
-            elif not(minfound2 or minfound3) and (az > min(azlim) and az < max(azlim)):
-                az_inview = True
-            else:
-                az_inview = False
-
-            if minfound4 and del_ < 0.0:
-                el_inview= True
-            elif minfound5 and del_ > 0.0:
-                el_inview = True
-            elif not(minfound4 or minfound5) and (el > min(ellim) and el < min(ellim)):
-                el_inview = True
-            else:
-                el_inview = False
-
-
-            newview = range_inview and az_inview and el_inview
-
-            print('az view: ', az_inview)
-            print('el view: ', el_inview)
-            print('range view: ', range_inview)
-            print('az: ', az)
-            print('el: ', el)
-            print('del;', del_)
-            print('range: ', rho)
-
-            if newview == True and newview != oldview:
-                print('in view at (s): ', view_time)
-                riset_time.append([view_time, None])
-                riset_az.append([az, None])
-                riset_el.append([el, None])
-            elif newview == False and newview != oldview:
-                print('out of view at (s): ', view_time)
-                time_temp = riset_time.pop()
-                time_temp[1] = view_time
-                riset_time.append(time_temp)
-
-                az_temp = riset_az.pop()
-                az_temp[1] = az
-                riset_az.append(az_temp)
-
-                el_temp = riset_el.pop()
-                el_temp[1] = el
-                riset_el.append(el_temp)
+                rho,az,el, drho, daz,del_ = sc.sez2razel(rhosat_sez,drhosat_sez)
+                if az < 0.0:
+                    az = 2 * math.pi + az
+                print('az: ', az)
+                print('Invalid Azimuth Root\n')
 
             minfound = False
-            oldview = newview
 
     return riset_time, riset_az, riset_el
 
@@ -266,9 +327,11 @@ if __name__ == '__main__':
     lon = -104.883 * deg2rad
     hellp = 2.918
     rholim = 100000 #km
-    # Superimposed circle over actual
-    azlim = (10*deg2rad,350*deg2rad)
-    ellim = (30*deg2rad, 90*deg2rad)
+    # Superimposed circle over actual azimuth/elevation limits
+    azlim_low = 0*deg2rad
+    azlim_high = 180*deg2rad
+    ellim_low = 30*deg2rad
+    ellim_high = 90*deg2rad
 
     # Sat Object 8 data
     n = 12.41552416 * revday2radsec
@@ -283,7 +346,7 @@ if __name__ == '__main__':
 
     rsat_eci, vsat_eci = sc.coe2rv(p, ecc, incl, omega, argp, nu, 0.0, 0.0, 0.0)
 
-    riset_time, riset_az, riset_el = riset(rsat_eci, vsat_eci, latgd, lon, hellp, jdut1 + jdut1frac, dut1, dat, lod, xp, yp, ddpsi, ddeps, rholim, azlim, ellim)
+    riset_time, riset_az, riset_el = riset(rsat_eci, vsat_eci, latgd, lon, hellp, jdut1 + jdut1frac, dut1, dat, lod, xp, yp, ddpsi, ddeps, rholim, azlim_low, azlim_high, ellim_low, ellim_high)
 
 
     for i in range(len(riset_time)):
