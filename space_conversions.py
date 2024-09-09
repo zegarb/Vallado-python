@@ -4857,7 +4857,7 @@ def ecef2ll(r : np.ndarray):
     if (abs(temp) < small):
         rtasc = np.sign(r[2])*math.pi*0.5
     else:
-        rtasc = math.atan2(r1[1], r[0])
+        rtasc = math.atan2(r[1], r[0])
     lon = rtasc
     if (abs(lon) >= math.pi):   # mod it ?
         if (lon < 0.0):
