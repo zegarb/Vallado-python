@@ -5281,7 +5281,7 @@ def anglesl(decl1: float, decl2: float, decl3: float, rtasc1: float,
     # if ((smu.mag(temp) > small) & (smu.mag(temp1) > small))
     # fix this test here
 
-    if not (rs2 and rs3):
+    if (rs2.any() and rs3.any()):
         # ------------ all sightings from one site -----------------
         rs2dot = np.cross(earthrate, rs1)
         rs2ddot = np.cross(earthrate, rs2dot)
