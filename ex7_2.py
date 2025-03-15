@@ -181,8 +181,7 @@ rsite3, _, _ = sc.ecef2eci(rs3, vs3, a, ttt, jdut1 + jdut1frac, lod, xp,
 # ---- anglesl test ----
 if typerun == 'l' or typerun == 'a':
     r2, v2 = obu.anglesl(decl1, decl2, decl3, rtasc1, rtasc2, rtasc3, jd1,
-                         jdf1, jd2, jdf2, jd3, jdf3, rsite1)
-    #                          rtasc3, jd1, jd2, jd3, rs1, rs2, rs3, re, mu, tu );
+                           jdf1, jd2, jdf2, jd3, jdf3, rsite1, rsite2, rsite3);
     processtype = 'anglesl'
     # -------------- write out answer --------------
     print('\n\ninputs: \n\n' % ())
@@ -282,8 +281,7 @@ if typerun == 'g' or typerun == 'a':
 # ---- anglesdr test ----
 if typerun == 'd' or typerun == 'a':
     r2, v2 = obu.anglesdr(decl1, decl2, decl3, rtasc1, rtasc2, rtasc3, jd1,
-                          jdf1, jd2, jdf2, jd3, jdf3, rsite1, rsite2, rsite3,
-                          re, mu)
+                          jdf1, jd2, jdf2, jd3, jdf3, rsite1, rsite2, rsite3)
     processtype = 'anglesdr'
 
     # -------------- write out answer --------------
